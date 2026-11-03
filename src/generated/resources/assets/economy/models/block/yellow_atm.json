@@ -1,6 +1,0 @@
-{
-  "parent": "economy:block/atm",
-  "textures": {
-    "trim": "economy:block/terminal_trim_yellow"
-  }
-}

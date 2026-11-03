@@ -1,0 +1,99 @@
+package dev.emily.economy.foundation;
+
+import dev.emily.economy.storage.StorageException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
+/** Formats detached diagnostics without accessing storage or exposing arbitrary diagnostic text. */
+public final class DiagnosticsReport {
+    private static final long STALL_AGE_NANOS = 5_000_000_000L;
+
+    public record StorageDetails(UUID worldId, int schemaVersion, long lastCommittedSequence, String health) {}
+
+    private DiagnosticsReport() {}
+
+    public static List<String> render(boolean privileged, boolean detailed, ServerServices.State state,
+                                      SchedulingMetrics metrics, StorageDetails storage, String failureCode,
+                                      UUID correlation, Double intervalsPerSecond) {
+        String phase = recoveryPhase(metrics.recovery().phase());
+        String availability = switch (state) {
+            case INITIALIZING -> "Economy is starting (" + phase + ").";
+            case READY -> metrics.economy().ready() ? "Economy is available."
+                    : "Economy is catching up (" + metrics.economy().outstandingIntervals() + " intervals pending).";
+            case UNAVAILABLE -> "Economy is unavailable.";
+            case STOPPING -> "Economy is stopping.";
+            case STOPPED -> "Economy is stopped.";
+        };
+        if (!privileged) return List.of(availability);
+
+        List<String> lines = new ArrayList<>();
+        lines.add(availability + " Lifecycle " + state.name().toLowerCase(Locale.ROOT) + ".");
+        if (storage == null) {
+            lines.add("Storage details unavailable.");
+        } else {
+            lines.add("Storage " + health(storage.health()) + ", world " + storage.worldId()
+                    + ", schema " + storage.schemaVersion() + ", last committed sequence "
+                    + storage.lastCommittedSequence() + ".");
+        }
+        long target = metrics.recovery().target();
+        lines.add("Recovery stage " + phase + ", checkpoint " + metrics.recovery().completed()
+                + (isClockRecovery(phase) ? ", backlog " : ", target ")
+                + (target < 0 ? "unknown" : Long.toString(target)) + ".");
+        var economy = metrics.economy();
+        String rate = intervalsPerSecond != null && Double.isFinite(intervalsPerSecond) && intervalsPerSecond >= 0
+                ? String.format(Locale.ROOT, "%.2f intervals/s", intervalsPerSecond) : "unavailable";
+        lines.add("Economic frontier " + economy.completedSequence() + ", backlog " + economy.outstandingIntervals()
+                + ", observed rate " + rate + (economy.waitingForWall() ? ", waiting for wall clock" : "") + ".");
+        lines.add(queue("Storage", metrics.storage()));
+        lines.add(queue("Calculation", metrics.calculation()));
+        lines.add(queue("Publication", metrics.publication()));
+        if (detailed) lines.add("Economic step in flight " + metrics.economicStepInFlight() + ".");
+        lines.add("Unresolved at shutdown " + metrics.unresolvedAtShutdown() + ".");
+        lines.add(failureCode == null ? "Last failure none recorded." : "Last failure " + failure(failureCode)
+                + (correlation == null ? "" : ", correlation " + correlation) + ".");
+        return List.copyOf(lines);
+    }
+
+    private static String queue(String name, SchedulingMetrics.Queue queue) {
+        String stall = Math.max(queue.oldestAgeNanos(), queue.oldestActiveAgeNanos()) >= STALL_AGE_NANOS
+                ? ", possible stall" : "";
+        return name + " queue " + queue.depth() + "/" + queue.capacity() + ", oldest wait "
+                + queue.oldestAgeNanos() / 1_000_000 + " ms, oldest active "
+                + queue.oldestActiveAgeNanos() / 1_000_000 + " ms" + stall + ".";
+    }
+
+    private static boolean isClockRecovery(String phase) {
+        return phase.equals("catch-up") || phase.equals("waiting-for-wall-clock");
+    }
+
+    public static String recoveryPhase(String phase) {
+        if (phase == null) return "unknown";
+        if (phase.startsWith("projection:")) return "projection rebuild";
+        return switch (phase) {
+            case "storage", "storage-ready", "journal-validation", "ready", "catch-up", "waiting-for-wall-clock", "projection-final-validation" -> phase;
+            default -> "unknown";
+        };
+    }
+
+    private static String health(String value) {
+        return switch (value) {
+            case "healthy", "degraded", "unavailable", "initializing", "closed" -> value;
+            case null, default -> "unknown";
+        };
+    }
+
+    private static String failure(String value) {
+        for (var kind : StorageException.Kind.values()) {
+            if (value.equals("STORAGE_" + kind.name())) return value;
+        }
+        for (var event : OperationDiagnostics.Event.values()) {
+            if (value.equals(event.name())) return value;
+        }
+        return switch (value) {
+            case "LIFECYCLE_FAILURE", "CONFIGURATION_INVALID", "DRAIN_TIMEOUT", "POST_SAVE_FAILURE" -> value;
+            default -> "unknown";
+        };
+    }
+}

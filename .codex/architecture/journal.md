@@ -1,0 +1,125 @@
+# Durable operations and immutable journal
+
+## Contracts and ownership
+
+Journal.java contains immutable Intent, CanonicalRequest, Outcome, Envelope, Record templates,
+positioned Entry values and versioned Result contracts. JournalEngine is storage-worker-only;
+JournalService provides server-thread admission and postcommit publication. ServerServices.journal
+binds a trusted registration set/policy/publisher to this server's existing FoundationStore and
+bounded worker. Recovery consumes JournalEngine.readAfter on that worker for recovery; it is a
+privileged internal reader, not an actor-facing network endpoint. No gameplay handlers register
+in production yet. Generic counter projections and operations exist only under src/test.
+
+Trusted server handlers derive actor identity from authenticated Minecraft context and construct
+intents; clients never supply journal records, SQL, projection callbacks, or authorization policy.
+AccessPolicy must use detached immutable/server-authorized data safe for the worker, never access
+Minecraft off-thread. Registration maps are immutable; each operation kind declares its exact
+supported canonical version. Handler preparation has a SELECT-only read view and returns either
+Commit(records,result,projection callback) or Reject(result). Throwing is an infrastructure or
+programming failure, not a durable business rejection; business rules must return Reject.
+
+## Identity, canonicalization and retention
+
+Operation IDs are scoped to the financial-world UUID. Existing outcomes bind the typed actor,
+originating service, operation type, canonical version and full canonical representation. The
+representation is persisted as Base64 of length-prefixed UTF-8 fields, NOT just a hash. Fields
+sort by Java String ordering; malformed UTF-16 rejects rather than collapsing to replacement
+bytes. No Unicode/numeric/domain normalization is inferred: each trusted service owns semantic
+normalization before construction and must preserve its versioned meaning across releases.
+
+Canonical bytes include economic update ID and correction reference when present. They exclude
+request ID, transaction ID, audit instant and journal sequence. A retry uses the original
+operation ID with equivalent canonical data and may have a new request ID. Submission carries
+the current attemptRequestId; the durable outcome/envelope retain the original request ID.
+
+Equivalent duplicate returns the original result, transaction ID, sequence and original request
+identity without invoking the handler or projection again, including after restart. Changed
+canonical payload/version, service or type conflicts without overwriting the original. Different
+actors cannot obtain the outcome; lookup scopes by policy, actor, service and type. A denied
+lookup returns empty; it is NOT proof of absence for a privileged internal resolver. Internal
+uncertainty resolution separately checks authorization and actual world/operation existence.
+
+Committed identities and terminal rejection identities/results remain for the world lifetime.
+No purge or archival is implemented; any later archival must preserve deduplication permanently.
+
+## State meanings
+
+- ACCEPTED_PENDING: admitted to the in-memory bounded queue; no success/durability promise.
+  Queued entries need not survive process exit. Canceling a returned wait does not cancel work.
+- COMMITTED: the SQLite transaction and connection cleanup succeeded, or recovery confirmed the
+  original durable outcome. Record envelope, projection effects, canonical identity and result
+  committed together. Acknowledgment is delivered after this boundary, on a server tick.
+- DURABLY_REJECTED: terminal handler rejection persisted with canonical identity and stable result;
+  no projection callback or journal transaction runs. Retry returns it; a new intent needs a new ID.
+- NOT_ACCEPTED: unavailable/overloaded/early unsupported/invalid request, conflict or access denial;
+  no new identity consumed. After uncertain commit, ABSENT_RETRY_SAME_ID specifically means a
+  recovered connection definitively found no original operation; caller may retry the SAME ID.
+- UNKNOWN: accepted work has no established/disclosable outcome. Lookup/retry the original ID
+  after safe recovery; never generate a new ID to work around uncertainty. Policy denial after
+  recovery reports OUTCOME_UNDISCLOSED, never a false definitive-absence claim.
+
+## Atomic schema and append-only enforcement
+
+Schema V3 introduced the durable journal; current overall schema is V4 (minimum V1). V3 adds operation_outcomes, journal_transactions and
+journal_records; only test code creates fixture_projection. Supported older-schema upgrades still need
+A1-02's validated complete-world stopped-state backup before startup migrations. All pending DDL,
+version changes and history entries remain one transaction; no existing facts are rewritten.
+
+journal_transactions.sequence is database-assigned INTEGER PRIMARY KEY AUTOINCREMENT. It orders
+committed transactions independently of UTC audit instants and economic ordering. Committed
+sequences increase but callers must not require gap-free numbering. Each transaction has a UUID,
+world/operation link, envelope format version 1, UTC Instant, optional economic update UUID and
+optional correction reference. Records have explicit zero-based position, type, version and
+immutable UTF-8 payload. The envelope joins immutable actor/service/type/request/result metadata.
+
+Insertion order is transaction envelope, ordered records, same-store projections, then the final
+operation outcome seal. Deferred cross-table foreign keys require a matching durable outcome;
+seal triggers check complete record count/order range and matching envelope identity/timestamp.
+Terminal rejections cannot acquire a journal transaction before or after their seal.
+
+Triggers reject UPDATE, DELETE and replacement of existing facts, including INSERT OR REPLACE's
+implicit-delete behavior. Sealed transactions reject late records; projection callbacks cannot
+edit those facts through the normal transaction interface. Corrections append a new operation
+and transaction referencing an existing transaction, never mutate it. Startup/recovery validate
+journal protection trigger definitions and SQLite foreign-key integrity; missing/altered triggers
+make storage unavailable. These are application/database protections, not cryptographic tamper
+proofing against a privileged administrator who can replace the entire database/software.
+Future migrations must preserve original meaning and record versions, not drop protections to
+rewrite history. New domain interpretation belongs in new versions/correction records.
+
+## Failure and publication boundaries
+
+SqliteStorage.transaction distinguishes precommit failure, uncertain commit and unsafe cleanup.
+A rollback failure disables the connection. It never re-enables autocommit after failed rollback,
+which could accidentally commit partial work. Any exception from commit is UNKNOWN_COMMIT;
+a cleanup failure after a successful commit is also resolved without relabeling it as rejection.
+
+JournalEngine stops using that connection, closes it, and reopens the SAME existing DB with
+mode=rw while retaining world ownership. It validates UUID/schema/history/integrity/pragmas and
+protections before querying the original ID. It never replays the projection automatically.
+Found outcome returns unchanged; confirmed absence permits a later same-ID retry. Recovery or
+close failure disables writes and propagates UNSAFE_CONNECTION; JournalService returns UNKNOWN
+and ServerServices transitions to UNAVAILABLE. Further queued storage work is blocked by the
+poisoned connection even before the server-thread state callback is delivered.
+
+An unconfirmed JDBC close retains/quarantines the ownership resource rather than opening another
+connection or releasing ownership early. Shutdown retries disposal; persistent failure requires
+process exit/administrative diagnosis. The quarantine exists only for failed disposal and is
+removed on confirmed close/recovery; a normal stopped server retains no storage state.
+
+Only after commit does JournalService invalidate caches and call the server-thread Publisher.
+Publication/cache/callback failure is logged separately; immutable durable outcome remains
+COMMITTED or DURABLY_REJECTED, with DeliveryStatus.FAILED. It never resubmits the write. Consumers
+must not treat this cache/result publisher as an exactly-once item/external-effect dispatcher.
+A5 owns cash/shop/item protocols; database idempotency alone does not make external delivery safe.
+
+## Bounds
+
+Existing queue/worker limits remain unchanged. Canonical request: 64 fields, 16KiB total encoded
+bytes before Base64, versions 1–1024. Namespace keys: 128 ASCII characters. Per-record payload:
+16KiB; per-transaction: 1–64 records / 128KiB payload; result: 16KiB, code up to 64 ASCII characters.
+Record/result format versions are positive and bounded at 1,000,000. Request construction
+rejects malformed/oversize values before admission and consumes no ID. FoundationStore's SQL,
+parameter and immutable row limits remain active. readAfter pages at most 64 whole envelopes,
+with at most 1MiB aggregate returned envelope data; it never splits a transaction. Continue from
+the last returned sequence. It performs reads only: no item delivery, publication or replay effects.

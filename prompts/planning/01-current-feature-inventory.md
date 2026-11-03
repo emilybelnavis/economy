@@ -1,0 +1,35 @@
+# Current feature inventory — source review, 2026-11-03
+
+Implemented means present in source, not freshly verified. No builds, tests or game runs were performed. This inventory neither approves the existing design nor marks redesign phases complete.
+
+| ID | Existing feature and behavior | Evidence relative to project root |
+| --- | --- | --- |
+| F01 | Minecraft 1.21.1, NeoForge 21.1.252, Java 21; client/server runs register economy; SQLite bundled and on development runtime; separate GameTest source set | build.gradle; META-INF/neoforge.mods.toml |
+| F02 | Per-world economy/economy.sqlite; one FIFO JDBC executor; WAL/FULL/FK/busy timeout; atomic SQL money/share writes; postcommit cache invalidation; bounded owner caches | storage/FinanceDatabase.java; FinanceService.java |
+| F03 | Legacy SavedData balances/history import once, with opening/gap reconciliation; originals retained; additive SQL schema upgrades | banking/BankData.java; banking/Ledger.java; storage/FinanceDatabase.java |
+| F04 | Ten currency definitions; checked integer money; JPY whole yen; localized symbols/code formatting | FinanceDefinitions.java; BankingConfig.java; Money.java; finance/currencies.json |
+| F05 | Configured CAD-anchor FX, cross conversions, FLOOR deposit conversion by source currency, CEILING cash debit, no spread/fee; daily UTC recording; paged pair-rate history | BankingConfig.java; FinanceService.java; FinanceDatabase.java; docs/exchange-rates.md |
+| F06 | First-player world-currency chooser, replacement selector on disconnect; explicit actor-bound double-confirmed admin rebase; foreign accounts preserved, target collisions merged; original historical currencies retained with frozen display projections | WorldCurrencies.java; WorldCurrencyMenu.java; CurrencyChangeConfirmation.java; FinanceDatabase.java |
+| F07 | UUID ownership; permanent primary; maximum three distinct-currency BANK accounts; one TRADING account; teller opening/closure; funded closure converts into selected owned bank account; protected primary/world account | FinanceDatabase.java; BankingMenu.java |
+| F08 | Async credit/debit, player-primary payments, owned-account FX transfer, trading funding/unfunding; checked arithmetic and rollback | FinanceDatabase.java; EconomyApi.java; TradingMenu.java |
+| F09 | Append-only delta/balance ledger with SQL anti-edit/delete triggers, shared transaction UUIDs, timestamps/memos/currency and cursor pages; not a complete double-entry ledger or persistent idempotency service | FinanceDatabase.java; HistoryPresentation.java |
+| F10 | 118 cash collectibles and eight cards; ten currency tabs, blocks tab and cards tab; CAD vertical/horizontal bill art; generic cards enable banking but provide no borrowing; cards stack to one; cash/card collections currently have no crafting recipes | CollectibleItems.java; CashCatalog.java; tools/collectibles.json; README.md |
+| F11 | ATM/teller deposit grid with 24 slots, counts/subtotals/conversion previews; bills only at ATM, bills/coins at teller; reservations, ordinary refunds and close/page-return behavior | BankingMenu.java; BankingScreen.java |
+| F12 | Amount-first exact withdrawal planning; enabled denominations; ATM exact bills and smallest-bill multiple; teller maximum bill coverage/minimum bill count then automatic coins; feasible bill edits, bounded DP and stale-quote revalidation | WithdrawalPlanner.java; BankingMenu.java |
+| F13 | Terminal placement owner/op configuration, deposit/withdraw/both modes, accepted currencies and output denomination whitelist; separate SavedData keyed by dimension/anchor | TerminalSettings.java; BankingMenu.java |
+| F14 | Owner-configured register product template/batch and price; exact item-component matching; inventory below supplies stock; primary-account seller payment; stock reservation, rollback and delivery/drop fallbacks; no claim protection | RegisterEntity.java; TerminalBlock.java; EconomyCommands.java |
+| F15 | 100 stock catalog records with Minecraft names, real-company/ticker/source metadata and 2025-12-31 historical seed prices; USD source converted to CAD baseline; offline runtime; importer/provenance files | finance/stocks.json; FinanceDefinitions.java; tools/import_stock_prices.py; docs/stock-data.md |
+| F16 | Whole-share holdings; immediate whole-order buy/sell at stored price; SQL atomically records cash, holding, order and trade; no finite market liquidity or share counterparty accounting | FinanceDatabase.java; TradingMenu.java |
+| F17 | Explicit price-update API; in-game daily price records; chart up to 14 days, carrying forward previously recorded values; no autonomous price evolution or OHLCV | FinanceDatabase.java; FinanceService.java; TradingScreen.java |
+| F18 | Banking/history/account/setup screens; searchable stock list, holding and chart view, buy/sell/funding controls, current/historical FX page; flat dark/teal controls and clipped text | client/BankingScreen.java; client/TradingScreen.java; FinanceButton.java; FinanceEditBox.java |
+| F19 | Menu-ID scoped bounded request/snapshot payloads; server validation of owner/reach/state/quantities; busy and stale-response guards; client-only screen registration | FinanceAction.java; FinanceSnapshot.java; Economy.java; client/EconomyClient.java |
+| F20 | Commands: /economy, balance, history, pay, shop price, worldcurrency; future-based API balance/transfer/credit/debit/history; callbacks return Minecraft work to server thread | EconomyCommands.java; api/EconomyApi.java; FinanceService.java |
+| F21 | 17 ATM variants, 17 register variants, teller and trading computer; ATM/workstations 2w×2h×1d/four cells, support checks, anchor cleanup, rotation and single-drop rules; registers single-block; recipes/recoloring/tags/loot | TerminalVariants.java; WideMachineBlock.java; WideMachineLayout.java; MachineShapes.java; resources |
+| F22 | Original cash/card/machine art and localization; source models and generators for collectible art, color variants, wide machines, shapes and centered inventory models | tools/; src/main/resources; src/generated/resources |
+| F23 | Standalone money, legacy persistence, database/FX/migration/concurrency, withdrawal, confirmation and geometry checks; banking/machine GameTests; development-only fixtures | src/ledgerChecks; src/machineGameTests; .codex/VERIFICATION.md |
+
+## Known boundaries
+
+Database transactions do not share a crash boundary with Minecraft items/world saves. The existing ledger is not universal balanced accounting. Daily FX records are configured rates, not simulated rates. Credit cards are not credit. Stocks are a flat 100-record catalog, not a global exchange registry. Immediate trading has no finite liquidity, custody counterparties, limit orders or partial fills. Loans, autonomous monetary policy, arbitrage, margin, shorts, securities lending, corporate actions and indices are not substantively implemented.
+
+Legacy removed coins/banknotes and removed minting recipe are historical removals, not current features to restore. Existing machine footprint upgrades required replacement; redesign compatibility remains an open decision.

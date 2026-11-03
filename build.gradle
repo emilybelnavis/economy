@@ -2,116 +2,71 @@ plugins {
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.148'
 }
-version = '0.1.0-alpha'
-group = 'ca.emilybelnavis.mcmods.economy'
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-java.withSourcesJar()
+group = 'dev.emily'
+version = '0.1.0'
+java { toolchain { languageVersion = JavaLanguageVersion.of(21) }; withSourcesJar() }
+repositories { mavenCentral() }
 neoForge {
     version = '21.1.252'
     runs {
-        client { client(); gameDirectory = project.file('run') }
-        server { server(); gameDirectory = project.file('run-server'); programArgument '--nogui' }
+        client { client(); gameDirectory = file(providers.gradleProperty('economyRunRoot').getOrElse('run') + '/client') }
+        server { server(); gameDirectory = file(providers.gradleProperty('economyRunRoot').getOrElse('run') + '/server'); programArgument '--nogui' }
     }
     mods { economy { sourceSet sourceSets.main } }
+    // Command permission tests exercise the real Minecraft command source and dispatcher.
+    addModdingDependenciesTo(sourceSets.test)
 }
-tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
-sourceSets {
-    ledgerChecks {
-        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+dependencies {
+    implementation('org.xerial:sqlite-jdbc:3.53.4.0') { transitive = false }
+    jarJar('org.xerial:sqlite-jdbc:3.53.4.0') {
+        transitive = false
+        version { strictly '[3.53.4.0]'; prefer '3.53.4.0' }
+    }
+    additionalRuntimeClasspath('org.xerial:sqlite-jdbc:3.53.4.0') { transitive = false }
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+configurations {
+    processProbeRuntime {
+        canBeConsumed = false
+        extendsFrom implementation
     }
 }
-tasks.register('ledgerTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.banking.LedgerTest'
-    enableAssertions = true
+test {
+    useJUnitPlatform()
+    // Standalone storage probes use stdout as a protocol and do not load Minecraft.
+    systemProperty 'economy.test.classpath',
+            files(sourceSets.test.output, sourceSets.main.output, configurations.processProbeRuntime).asPath
 }
-tasks.named('check') { dependsOn 'ledgerTest' }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+// Forward the development console so the server can be stopped with its `stop` command.
+tasks.named('runServer', JavaExec) { standardInput = System.in }
 
-tasks.register('persistenceTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.banking.BankPersistenceTest'
-    enableAssertions = true
-}
-tasks.named('check') { dependsOn 'persistenceTest' }
-// Repository instructions are not game resources or published source assets.
-tasks.named('processResources') { exclude '**/AGENTS.md' }
-tasks.named('sourcesJar') { exclude '**/AGENTS.md' }
-
-// Original collectible art is reproducible with tools/generate_collectibles.py.
-sourceSets.main.resources.srcDir('src/generated/resources')
-
-// Collision shapes are generated from the same source cuboids as the machine models.
-sourceSets.main.java.srcDir('src/generated/java')
-tasks.register('machineLayoutTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.WideMachineLayoutChecks'
-}
-tasks.register('machineShapeTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.MachineShapeChecks'
-    workingDir = projectDir
-}
-tasks.named('check') { dependsOn 'machineLayoutTest', 'machineShapeTest' }
-
-// Dedicated headless test world; test classes/resources are excluded from the release JAR.
-sourceSets { machineGameTests {
-    compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-    runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-} }
-neoForge {
-    mods { economy { sourceSet sourceSets.machineGameTests } }
-    runs { gameTestServer {
-        type = 'gameTestServer'
-        gameDirectory = project.file('run-gametest')
-        systemProperty 'neoforge.enabledGameTestNamespaces', 'economy'
-    } }
+// Run only against a stopped world; this task never starts Minecraft.
+tasks.register('prepareEconomyUpgrade', JavaExec) {
+    group = 'economy maintenance'
+    description = 'Prepare a validated offline complete-world backup before a schema upgrade.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.emily.economy.storage.UpgradeBackup'
+    if (providers.gradleProperty('economyWorld').isPresent()) {
+        args providers.gradleProperty('economyWorld').get()
+    }
 }
 
-// SQLite is bundled in the release JAR and on every development runtime classpath.
-repositories { mavenCentral() }
-dependencies {
-    implementation 'org.xerial:sqlite-jdbc:3.46.1.0'
-    additionalRuntimeClasspath 'org.xerial:sqlite-jdbc:3.46.1.0'
-    jarJar 'org.xerial:sqlite-jdbc:3.46.1.0'
+tasks.register('backupEconomyWorld', JavaExec) {
+    group = 'economy maintenance'
+    description = 'Back up a cleanly stopped complete world.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.emily.economy.storage.WorldBackup'
+    if (providers.gradleProperty('economyWorld').isPresent()) args 'backup', providers.gradleProperty('economyWorld').get()
 }
-tasks.register('financeDatabaseTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.storage.FinanceDatabaseChecks'
-    enableAssertions = true
+tasks.register('restoreEconomyWorld', JavaExec) {
+    group = 'economy maintenance'
+    description = 'Validate and restore a complete backup into a new separate destination.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.emily.economy.storage.WorldBackup'
+    if (providers.gradleProperty('economyBackup').isPresent() && providers.gradleProperty('economyRestoreDestination').isPresent()) {
+        args 'restore', providers.gradleProperty('economyBackup').get(), providers.gradleProperty('economyRestoreDestination').get()
+    }
 }
-tasks.named('check') { dependsOn 'financeDatabaseTest' }
-
-tasks.register('withdrawalPlannerTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.WithdrawalPlannerChecks'
-    enableAssertions = true
-}
-tasks.named('check') { dependsOn 'withdrawalPlannerTest' }
-
-tasks.register('moneyPresentationTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.MoneyPresentationChecks'
-}
-tasks.named('check') { dependsOn 'moneyPresentationTest' }
-
-tasks.register('currencyConfirmationTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.CurrencyConfirmationChecks'
-}
-tasks.named('check') { dependsOn 'currencyConfirmationTest' }
-
-tasks.register('exchangeHistoryTest', JavaExec) {
-    dependsOn ledgerChecksClasses
-    classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'ca.emilybelnavis.mcmods.economy.storage.ExchangeHistoryChecks'
-}
-tasks.named('check') { dependsOn 'exchangeHistoryTest' }
