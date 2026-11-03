@@ -17,33 +17,41 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
     private String signature = "", cashCurrency = "CAD", openCurrency = "CAD", destination = "", amountText = "";
     private String draftMode = "BOTH";
     private final Set<String> accepted = new HashSet<>(), dispensed = new HashSet<>();
-    private final Map<String,Integer> quantities = new HashMap<>();
-    private int denominationPage, detailPage, configPage;
+    private Button prepareButton, withdrawButton;
+    private int denominationPage, detailPage, configPage, historyOffset;
     private boolean configLoaded, currencyInitialized;
     private EditBox amount;
     public BankingScreen(BankingMenu menu, Inventory inv, Component title) {
         super(menu, inv, title); imageWidth=316; imageHeight=236; inventoryLabelX=77; inventoryLabelY=143;
     }
     static String tr(String key,Object... args){return Component.translatable("finance.economy."+key,args).getString();}
-    static String date(long timestamp){return java.time.format.DateTimeFormatter.ofLocalizedDateTime(java.time.format.FormatStyle.MEDIUM).withLocale(Locale.getDefault()).withZone(java.time.ZoneId.systemDefault()).format(java.time.Instant.ofEpochMilli(timestamp));}
+    static String date(long timestamp){return HistoryPresentation.utcDate(timestamp);}
+    private static String displayMemo(JsonObject entry){
+        if(entry.has("displayMemo"))return str(entry,"displayMemo","");
+        String memo=str(entry,"memo","");
+        String operation=str(entry,"operation","");
+        if(operation.equals("CASH_DEPOSIT"))return "Cash Deposit";
+        if(operation.equals("CASH_WITHDRAWAL"))return "Cash Withdrawal";
+        return memo.isBlank()?switch(operation){case "TRANSFER"->"Account Transfer";case "PAYMENT"->"Payment";case "TRADE"->"Stock Trade";default->"Account Transaction";}:memo;
+    }
     static List<Component> historyTooltip(JsonObject entry,String currency){return List.of(
         Component.literal(date(number(entry,"timestamp"))),
-        Component.literal(tr("entry.operation",str(entry,"operation",""))),
-        Component.literal(tr("entry.amount",money(number(entry,"delta"),currency))),
+        Component.literal(number(entry,"delta")<0?"Debit":"Credit"),
+        Component.literal(money(Math.abs(number(entry,"delta")),currency)),
         Component.literal(tr("balance",money(number(entry,"balance"),currency))),
-        Component.literal(tr("entry.memo",str(entry,"memo",""))));}
+        Component.literal(displayMemo(entry).replace('\n',' ')));}
     static String str(JsonObject o,String key,String fallback) { return o.has(key)&&!o.get(key).isJsonNull()?o.get(key).getAsString():fallback; }
     static long number(JsonObject o,String key) { try{return o.has(key)?o.get(key).getAsLong():0;}catch(RuntimeException e){return 0;} }
     static boolean flag(JsonObject o,String key) { return o.has(key)&&o.get(key).getAsBoolean(); }
     static JsonArray array(JsonObject o,String key) { return o.has(key)&&o.get(key).isJsonArray()?o.getAsJsonArray(key):new JsonArray(); }
     static JsonObject object(JsonObject o,String key) { return o.has(key)&&o.get(key).isJsonObject()?o.getAsJsonObject(key):new JsonObject(); }
     static int scale(String code) { return code.equals("JPY")?1:100; }
-    static String money(long value,String code) { return code+" "+BigDecimal.valueOf(value).divide(BigDecimal.valueOf(scale(code))).setScale(code.equals("JPY")?0:2).toPlainString(); }
+    static String money(long value,String code) { return Money.format(value,code); }
     static String next(String current) { return CURRENCIES[(Arrays.asList(CURRENCIES).indexOf(current)+1)%CURRENCIES.length]; }
     private void send(String action,JsonObject args) { PacketDistributor.sendToServer(new FinanceAction(menu.containerId,action,args.toString())); }
     private void send(String action,String key,String value) { var args=new JsonObject();args.addProperty(key,value);send(action,args); }
     private Button button(String label,int x,int y,int w,int h,Runnable action,boolean sensitive) {
-        Button b=addRenderableWidget(Button.builder(Component.literal(label),ignored->action.run()).bounds(leftPos+x,topPos+y,w,h).build());
+        Button b=addRenderableWidget(new FinanceButton(leftPos+x,topPos+y,w,h,Component.literal(label),ignored->action.run()));
         b.active=!sensitive||!flag(menu.view,"busy");return b;
     }
     private void page(BankingMenu.Page page) { send("page","page",page.name()); }
@@ -66,8 +74,9 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
         }
         String page=str(menu.view,"page",menu.page.name());
         try{menu.page=BankingMenu.Page.valueOf(page);}catch(IllegalArgumentException ignored){}
-        String current=page+str(menu.view,"selected","")+array(menu.view,"accounts").toString()+flag(menu.view,"busy")+flag(menu.view,"canConfigure")+array(menu.view,"denominations").size();
+        String current=page+str(menu.view,"selected","")+array(menu.view,"accounts").toString()+flag(menu.view,"busy")+flag(menu.view,"canConfigure")+array(menu.view,"denominations").size()+object(menu.view,"withdrawBills").toString()+object(menu.view,"withdrawCoins").toString()+object(menu.view,"withdrawAdjustments").toString()+flag(menu.view,"withdrawPrepared")+number(menu.view,"withdrawAmount")+number(menu.view,"withdrawCost")+str(menu.view,"withdrawCurrency","");
         if(!current.equals(signature)){signature=current;rebuildWidgets();}
+        updateWithdrawalButtons();
     }
     private void build() {
         button(tr("home"),8,32,42,15,()->page(BankingMenu.Page.HOME),true);
@@ -90,8 +99,8 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
             }
             case WITHDRAW -> buildWithdrawal();
             case HISTORY -> {
-                button(tr("newest"),165,126,66,15,()->{var a=new JsonObject();a.addProperty("before",0);send("history",a);},true);
-                button(tr("older"),235,126,71,15,()->{var entries=array(menu.view,"history");if(entries.isEmpty())return;var a=new JsonObject();a.addProperty("before",number(entries.get(entries.size()-1).getAsJsonObject(),"sequence"));send("history",a);},true);
+                button(tr("newest"),165,126,66,15,()->{var a=new JsonObject();a.addProperty("before",0);historyOffset=0;send("history",a);},true);
+                button(tr("older"),235,126,71,15,()->{var entries=array(menu.view,"history");if(entries.isEmpty())return;var a=new JsonObject();a.addProperty("before",number(entries.get(entries.size()-1).getAsJsonObject(),"sequence"));historyOffset=0;send("history",a);},true);
             }
             case ACCOUNTS -> buildAccounts();
             case CONFIG -> buildConfig();
@@ -108,29 +117,50 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
         }return result;
     }
     private static boolean contains(JsonArray array,String value){for(var e:array)if(e.getAsString().equals(value))return true;return false;}
-    private void currencyCycle(){cashCurrency=next(cashCurrency);denominationPage=0;configPage=0;quantities.clear();rebuildWidgets();}
-    private void buildWithdrawal(){
-        button(tr("cash_selector",cashCurrency),10,51,125,15,this::currencyCycle,true);
-        button("<",258,51,22,15,()->{denominationPage=Math.max(0,denominationPage-1);rebuildWidgets();},false);
-        button(">",283,51,22,15,()->{denominationPage=Math.min(Math.max(0,(denominations(false).size()-1)/4),denominationPage+1);rebuildWidgets();},false);
-        var list=denominations(false);
-        for(int row=0;row<4&&denominationPage*4+row<list.size();row++){
-            var d=list.get(denominationPage*4+row);String id=str(d,"id","");int y=69+row*13;
-            EditBox count=new EditBox(font,leftPos+258,topPos+y,24,12,Component.literal(tr("denomination_quantity",money(number(d,"minor"),cashCurrency))));
-            count.setMaxLength(4);count.setFilter(value->value.isEmpty()||value.matches("[0-9]{1,4}")&&Integer.parseInt(value)<=2304);count.setValue(Integer.toString(quantities.getOrDefault(id,0)));
-            count.setResponder(value->{try{int n=Integer.parseInt(value);if(n>=0&&n<=2304)quantities.put(id,n);}catch(NumberFormatException ignored){if(value.isEmpty())quantities.put(id,0);}});
-            count.setEditable(!flag(menu.view,"busy"));addRenderableWidget(count);
-            button("-",234,y,20,12,()->{int n=quantities.compute(id,(k,v)->Math.max(0,(v==null?0:v)-1));count.setValue(Integer.toString(n));},true);
-            button("+",285,y,20,12,()->{int n=quantities.compute(id,(k,v)->Math.min(2304,(v==null?0:v)+1));count.setValue(Integer.toString(n));},true);
-        }
-        amount=new EditBox(font,leftPos+10,topPos+126,79,14,Component.literal(tr("account_amount")));amount.setHint(Component.literal(tr("amount_currency",str(menu.view,"accountCurrency","CAD"))));amount.setMaxLength(24);amount.setValue(amountText);amount.setResponder(v->amountText=v);addRenderableWidget(amount);
-        button(tr("use_total"),94,126,112,15,()->{try{amountText=BigDecimal.valueOf(cost()).divide(BigDecimal.valueOf(scale(str(menu.view,"accountCurrency","CAD")))) .toPlainString();amount.setValue(amountText);}catch(RuntimeException ignored){}},true);
-        button(tr("withdraw"),211,126,94,15,()->{
-            try{var args=new JsonObject();args.addProperty("amount",new BigDecimal(amountText).multiply(BigDecimal.valueOf(scale(str(menu.view,"accountCurrency","CAD")))).longValueExact());var items=new JsonObject();quantities.forEach(items::addProperty);args.add("items",items);send("withdraw",args);}catch(RuntimeException ignored){amount.setValue(tr("invalid_amount"));}
-        },true);
+    private void currencyCycle(){cashCurrency=next(cashCurrency);denominationPage=0;configPage=0;rebuildWidgets();}
+    private long requestedCash(){return new BigDecimal(amountText).multiply(BigDecimal.valueOf(scale(cashCurrency))).longValueExact();}
+    private boolean prepared(){
+        try{return flag(menu.view,"withdrawPrepared")&&str(menu.view,"withdrawCurrency","").equals(cashCurrency)&&number(menu.view,"withdrawAmount")==requestedCash();}
+        catch(RuntimeException error){return false;}
     }
-    private long cashTotal(){long sum=0;for(var e:denominations(false))sum=Math.addExact(sum,Math.multiplyExact(number(e,"minor"),quantities.getOrDefault(str(e,"id",""),0)));return sum;}
-    private long cost(){return convert(cashTotal(),cashCurrency,str(menu.view,"accountCurrency","CAD"),RoundingMode.CEILING);}
+    private void updateWithdrawalButtons(){
+        if(menu.page!=BankingMenu.Page.WITHDRAW)return;
+        boolean valid=false;try{valid=requestedCash()>0;}catch(RuntimeException ignored){}
+        if(prepareButton!=null)prepareButton.active=valid&&!flag(menu.view,"busy");
+        if(withdrawButton!=null)withdrawButton.active=prepared()&&!flag(menu.view,"busy");
+    }
+    private List<JsonObject> bills(){return denominations(false).stream().filter(d->!flag(d,"coin")).toList();}
+    private void buildWithdrawal(){
+        button(tr("cash_selector",cashCurrency),10,51,87,15,this::currencyCycle,true);
+        amount=new FinanceEditBox(font,leftPos+101,topPos+51,98,15,Component.literal(tr("cash_amount")));
+        amount.setHint(Component.literal(tr("amount_currency",cashCurrency)));amount.setMaxLength(24);amount.setValue(amountText);
+        amount.setResponder(v->{amountText=v;updateWithdrawalButtons();});addRenderableWidget(amount);
+        prepareButton=button(tr("prepare_cash"),203,51,102,15,()->{
+            try{var args=new JsonObject();args.addProperty("amount",requestedCash());args.addProperty("currency",cashCurrency);send("prepare_withdraw",args);}catch(RuntimeException ignored){}
+        },true);
+        var list=bills();denominationPage=Math.min(denominationPage,Math.max(0,(list.size()-1)/3));
+        for(int row=0;row<3&&denominationPage*3+row<list.size();row++){
+            var d=list.get(denominationPage*3+row);String id=str(d,"id","");int y=82+row*13;
+            var permissions=object(object(menu.view,"withdrawAdjustments"),id);
+            for(int delta:new int[]{-1,1}){
+                var control=button(delta<0?"−":"+",delta<0?234:284,y,21,12,()->{
+                    var args=new JsonObject();args.addProperty("id",id);args.addProperty("delta",delta);send("adjust_withdraw",args);
+                },true);
+                control.active=prepared()&&!flag(menu.view,"busy")&&flag(permissions,delta<0?"minus":"plus");
+            }
+        }
+        button("<",10,126,20,15,()->{denominationPage=Math.max(0,denominationPage-1);rebuildWidgets();},false);
+        button(">",33,126,20,15,()->{denominationPage=Math.min(Math.max(0,(bills().size()-1)/3),denominationPage+1);rebuildWidgets();},false);
+        withdrawButton=button(tr("withdraw"),211,126,94,15,()->send("withdraw",new JsonObject()),true);
+        updateWithdrawalButtons();
+    }
+    private String coinSummary(){
+        var values=new ArrayList<String>();for(var entry:object(menu.view,"withdrawCoins").entrySet()){
+            long quantity=entry.getValue().getAsLong();if(quantity<=0)continue;
+            for(var e:denominations(false))if(str(e,"id","").equals(entry.getKey()))values.add(quantity+" × "+money(number(e,"minor"),cashCurrency));
+        }
+        return values.isEmpty()?tr("auto_coins_none"):tr("auto_coins",String.join(", ",values));
+    }
     private long convert(long value,String from,String to,RoundingMode rounding){
         var rates=object(menu.view,"rates");return BigDecimal.valueOf(value).multiply(new BigDecimal(str(rates,from,"1"))).multiply(BigDecimal.valueOf(scale(to)))
             .divide(BigDecimal.valueOf(scale(from)).multiply(new BigDecimal(str(rates,to,"1"))),0,rounding).longValueExact();
@@ -158,10 +188,10 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
         button(tr("save"),250,126,55,15,()->{var args=new JsonObject();args.addProperty("mode",draftMode);var a=new JsonArray();accepted.stream().sorted().forEach(a::add);args.add("accepted",a);var d=new JsonArray();dispensed.stream().sorted().forEach(d::add);args.add("dispensed",d);send("configure",args);},true);
     }
     private String nativeSummary(){var values=new ArrayList<String>();for(var entry:object(menu.view,"subtotals").entrySet())values.add(money(entry.getValue().getAsLong(),entry.getKey()));return String.join(" + ",values);}
-    private void line(GuiGraphics g,String text,int x,int y,int width){g.drawString(font,font.plainSubstrByWidth(text,width),x,y,0x183b3a,false);}
+    private void line(GuiGraphics g,String text,int x,int y,int width){g.drawString(font,font.plainSubstrByWidth(text,width),x,y,0xd5e8e3,false);}
     @Override protected void renderBg(GuiGraphics g,float partial,int x,int y){
-        g.fill(leftPos,topPos,leftPos+316,topPos+236,0xff142326);g.fill(leftPos+4,topPos+4,leftPos+312,topPos+232,0xffe2e9e6);g.fill(leftPos+8,topPos+8,leftPos+308,topPos+29,0xff197d7a);
-        for(var slot:menu.slots)if(slot.isActive()){g.fill(leftPos+slot.x-1,topPos+slot.y-1,leftPos+slot.x+17,topPos+slot.y+17,0xff647572);g.fill(leftPos+slot.x,topPos+slot.y,leftPos+slot.x+16,topPos+slot.y+16,0xffbecac6);}
+        g.fill(leftPos,topPos,leftPos+316,topPos+236,0xff142326);g.fill(leftPos+4,topPos+4,leftPos+312,topPos+232,0xff101e23);g.fill(leftPos+8,topPos+8,leftPos+308,topPos+29,0xff125752);
+        for(var slot:menu.slots)if(slot.isActive()){g.fill(leftPos+slot.x-1,topPos+slot.y-1,leftPos+slot.x+17,topPos+slot.y+17,0xff335b5a);g.fill(leftPos+slot.x,topPos+slot.y,leftPos+slot.x+16,topPos+slot.y+16,0xff192c31);}
     }
     @Override protected void renderLabels(GuiGraphics g,int x,int y){
         g.drawString(font,font.plainSubstrByWidth(title.getString(),170),13,14,0xffffff,false);
@@ -169,19 +199,44 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
         switch(menu.page){
             case HOME->{line(g,tr("balance",money(balance,currency)),12,56,292);line(g,tr("help_navigation"),12,74,292);line(g,menu.teller?tr("help_teller"):tr("help_atm"),12,91,292);line(g,tr("mode_label",tr("mode."+str(menu.view,"mode","BOTH").toLowerCase(Locale.ROOT))),12,108,292);line(g,str(menu.view,"status",""),12,127,292);}
             case DEPOSIT->{var details=array(menu.view,"detail");detailPage=Math.min(detailPage,Math.max(0,(details.size()-1)/6));for(int row=0;row<6&&detailPage*6+row<details.size();row++)line(g,details.get(detailPage*6+row).getAsString(),128,53+row*9,177);line(g,tr("subtotal",nativeSummary()),10,128,296);line(g,tr("deposit_total",money(number(menu.view,"depositTotal"),currency)),10,138,296);}
-            case WITHDRAW->{var list=denominations(false);for(int row=0;row<4&&denominationPage*4+row<list.size();row++){var d=list.get(denominationPage*4+row);line(g,money(number(d,"minor"),cashCurrency)+" "+denominationName(d),10,71+row*13,218);}try{line(g,tr("cost",money(cost(),currency)),140,54,112);}catch(RuntimeException ignored){} }
-            case HISTORY->{int row=0;for(var e:array(menu.view,"history")){var t=e.getAsJsonObject();line(g,str(t,"operation","")+" "+money(number(t,"delta"),currency)+" | "+str(t,"memo",""),10,53+row++*12,295);}if(row==0)line(g,tr("no_entries"),10,57,295);}
+            case WITHDRAW->{
+                line(g,prepared()?tr("cost",money(number(menu.view,"withdrawCost"),currency)):tr("prepare_hint"),10,70,295);
+                var list=bills();for(int row=0;row<3&&denominationPage*3+row<list.size();row++){
+                    var d=list.get(denominationPage*3+row);String id=str(d,"id","");
+                    line(g,money(number(d,"minor"),cashCurrency)+" "+denominationName(d),10,84+row*13,219);
+                    g.drawCenteredString(font,prepared()?Long.toString(number(object(menu.view,"withdrawBills"),id)):"—",269,84+row*13,0xd5e8e3);
+                }
+                line(g,prepared()?coinSummary():tr("prepare_first"),58,130,149);
+            }
+            case HISTORY->{
+                var entries=array(menu.view,"history");historyOffset=Math.min(historyOffset,Math.max(0,entries.size()-6));
+                for(int row=0;row<6&&historyOffset+row<entries.size();row++){
+                    var t=entries.get(historyOffset+row).getAsJsonObject();
+                    line(g,(number(t,"delta")<0?"− ":"+ ")+money(Math.abs(number(t,"delta")),currency)+" | "+displayMemo(t),10,53+row*12,286);
+                }
+                if(entries.isEmpty())line(g,tr("no_entries"),10,57,286);
+                if(entries.size()>6){g.fill(300,53,303,125,0xff253e42);int thumb=72*6/entries.size();int thumbY=53+(72-thumb)*historyOffset/Math.max(1,entries.size()-6);g.fill(300,thumbY,303,thumbY+thumb,0xff55c8b9);}
+                line(g,tr("history_scroll",entries.size()),10,130,150);
+            }
             case ACCOUNTS->{line(g,tr("selected_balance",money(balance,currency)),10,105,295);try{for(var a:otherAccounts())if(str(a,"id","").equals(destination))line(g,tr("close_preview",money(convert(balance,currency,str(a,"currency","CAD"),RoundingMode.DOWN),str(a,"currency","CAD"))),10,118,295);}catch(RuntimeException ignored){}line(g,str(menu.view,"status",""),10,132,295);}
             case CONFIG->{}
         }
-        g.drawString(font,Component.translatable("container.inventory"),245,154,0x142326,false);
+        g.drawString(font,Component.translatable("container.inventory"),245,154,0x91aaa7,false);
         String status=str(menu.view,"status","");
-        if(!status.isBlank()){var lines=font.split(Component.literal(status),60);for(int i=0;i<Math.min(7,lines.size());i++)g.drawString(font,lines.get(i),10,154+i*9,0x183b3a,false);}
+        if(!status.isBlank()){var lines=font.split(Component.literal(status),60);for(int i=0;i<Math.min(7,lines.size());i++)g.drawString(font,lines.get(i),10,154+i*9,0xd5e8e3,false);}
         if(flag(menu.view,"busy"))line(g,tr("processing"),10,234-9,62);
     }
     @Override public void render(GuiGraphics g,int x,int y,float partial){super.render(g,x,y,partial);renderTooltip(g,x,y);
         if(x>=leftPos+8&&x<leftPos+308&&y>=topPos+125&&y<topPos+143){var lines=new ArrayList<Component>();String status=str(menu.view,"status","");if(!status.isBlank())lines.add(Component.literal(status));if(menu.page==BankingMenu.Page.DEPOSIT){for(var e:object(menu.view,"subtotals").entrySet())lines.add(Component.literal(money(e.getValue().getAsLong(),e.getKey())+" → "+money(convert(e.getValue().getAsLong(),e.getKey(),str(menu.view,"accountCurrency","CAD"),RoundingMode.DOWN),str(menu.view,"accountCurrency","CAD"))));lines.add(Component.literal(tr("deposit_total",money(number(menu.view,"depositTotal"),str(menu.view,"accountCurrency","CAD")))));}if(!lines.isEmpty())g.renderComponentTooltip(font,lines,x,y);}
         if(menu.page==BankingMenu.Page.DEPOSIT&&x>=leftPos+128&&x<leftPos+306&&y>=topPos+53&&y<topPos+107){int row=(y-topPos-53)/9;var details=array(menu.view,"detail");int index=detailPage*6+row;if(index<details.size())g.renderComponentTooltip(font,List.of(Component.literal(details.get(index).getAsString())),x,y);}
-        if(menu.page==BankingMenu.Page.HISTORY&&x>=leftPos+10&&x<leftPos+306&&y>=topPos+53&&y<topPos+125){int row=(y-topPos-53)/12;var entries=array(menu.view,"history");if(row<entries.size())g.renderComponentTooltip(font,historyTooltip(entries.get(row).getAsJsonObject(),str(menu.view,"accountCurrency","CAD")),x,y);}
+        if(menu.page==BankingMenu.Page.WITHDRAW&&prepared()&&x>=leftPos+58&&x<leftPos+207&&y>=topPos+126&&y<topPos+143)g.renderComponentTooltip(font,List.of(Component.literal(coinSummary())),x,y);
+        if(menu.page==BankingMenu.Page.HISTORY&&x>=leftPos+10&&x<leftPos+298&&y>=topPos+53&&y<topPos+125){int row=historyOffset+(y-topPos-53)/12;var entries=array(menu.view,"history");if(row<entries.size())g.renderComponentTooltip(font,historyTooltip(entries.get(row).getAsJsonObject(),str(menu.view,"accountCurrency","CAD")),x,y);}
     }
+    @Override public boolean mouseScrolled(double x,double y,double dx,double dy){
+        if(menu.page==BankingMenu.Page.HISTORY&&x>=leftPos+8&&x<leftPos+308&&y>=topPos+53&&y<topPos+125){
+            historyOffset=Math.max(0,Math.min(Math.max(0,array(menu.view,"history").size()-6),historyOffset-(int)Math.signum(dy)));return true;
+        }
+        return super.mouseScrolled(x,y,dx,dy);
+    }
+
 }

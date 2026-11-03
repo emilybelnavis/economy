@@ -27,4 +27,4 @@ For every pair A to B, one major unit of A buys `CAD_rate[A] / CAD_rate[B]` majo
 For example, USD 20 deposits CAD 27.92. JPY 1,000 deposits CAD 8.87.
 Conversion uses integer minor-unit amounts and BigDecimal rates, rounding down only at the
 final account unit. Accounts use 100 minor units per major unit except JPY, which uses 1.
-No exchange fee is charged. Withdrawals dispense the account currency without conversion.
+No exchange fee is charged. Withdrawals use an enabled chosen cash currency; source-account cost converts with CEILING rounding.

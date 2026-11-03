@@ -8,10 +8,10 @@ Install the JAR on both the server and clients. No additional mods are required.
 ## Banking and terminal screens
 
 Carry any bank or credit card to use your own accounts. Cards do not provide borrowing or overdrafts.
-Every new player starts with one permanent bank account in the server's configured currency.
+Every new player starts with one permanent bank account in the world's selected currency.
 At a **bank teller**, open up to two additional accounts in other currencies: three bank accounts
 maximum, with no duplicate currencies. Only tellers can open or close accounts. The original
-primary account and the configured-currency account cannot be closed. Closing a funded secondary
+primary account and the world-currency account cannot be closed. Closing a funded secondary
 account requires another owned bank account; debit, conversion, credit and ledger records commit
 in one SQLite transaction. Amounts too small to survive conversion are rejected intact.
 
@@ -22,25 +22,59 @@ Right-click an ATM or teller and choose a page:
   Shift-click cash from your inventory or drag it into the grid. ATMs reject coins; tellers accept
   bills and coins. The accepted-currency whitelist also applies. Cash still in the grid is returned
   when leaving the deposit page or closing the screen.
-- **Withdraw:** choose the source account, cash currency, bill/coin quantities, and account amount.
-  Type quantities directly or use +/−. **Use selected total** fills the amount with the calculated
-  source-account cost. Confirming requires an exact match, sufficient funds, enough inventory
-  space, and denominations enabled at this terminal. ATMs dispense bills only.
-- **History:** six records per page, newest first, with stable sequence cursors; hover for date,
-  amount, resulting balance and audit details. History is read from SQLite, not retained in RAM.
+- **Withdraw:** choose the source account and cash currency, enter the cash amount, then prepare
+  a combination. The server finds the fewest enabled bills for the bill-covered amount. Adjust
+  bill counts using only feasible exact combinations; the displayed account debit includes FX.
+  ATMs require a multiple of their smallest enabled bill, and an exact bill-only combination.
+  Teller coin change is calculated automatically with the fewest enabled coins; coin quantities
+  cannot be edited. Sufficient funds, inventory space and current terminal settings are rechecked
+  before the prepared plan commits.
+- **History:** 15 records per page, newest first, in a scrollable log with stable sequence cursors.
+  Tooltips show UTC `YYYY-MM-DD, HH:mm:ss`, Credit/Debit, transaction amount, resulting balance,
+  and a short memo. Cash deposits show `Cash Deposit` and any source currency/exchange rate.
+  The full financial audit remains in SQLite; human tooltips omit database implementation text.
 - **Accounts:** teller-only opening and closure, destination selection and conversion preview.
 
 An empty-hand right-click opens **Setup** for the terminal's placer or a server operator.
 Other players cannot configure it. Set deposit-only, withdrawal-only or both; choose accepted
 currencies; and enable individual dispensed denominations in any supported currencies. New
-machines dispense the config currency by default and accept all supported currencies. Old
+machines dispense the selected world currency by default and accept all supported currencies. Old
 machines without recorded ownership can be configured only by operators. Settings apply from
 all four machine sections and persist by dimension and anchor position.
 
-The server creates `config/economy/banking.toml`. CAD is the default; supported currencies are
-CAD, EUR, GBP, AUD, NZD, USD, HKD, JPY, CNY and DKK. Amounts are integer minor units:
-100 cents/pence/etc. per major unit, except JPY which uses whole yen. New players use the current
-configured default; migrated accounts keep their saved currency and numeric balance.
+### Selecting and changing world currency
+
+For a new economy world, the **first player to join** receives a currency-selection screen.
+The choice applies to that world and persists in SQLite. Other players cannot race the elected
+player's selection. If that player leaves before choosing, another online player takes over.
+Existing worlds with financial data retain their previous denomination when upgrading.
+
+Changing this choice later is strongly discouraged. Back up the world, then an operator
+(permission level 2, or singleplayer cheats) must run the **same command twice within 60 seconds**:
+
+```text
+/economy worldcurrency USD
+/economy worldcurrency USD
+```
+
+The first invocation only warns; the second confirms. Confirmation is tied to the actor, target
+and current world currency. Conversion is one SQLite transaction: world-currency bank accounts,
+trading balances and market prices convert using the current FX snapshot with checked arithmetic.
+Optional foreign accounts keep their currencies. A secondary account already using the target
+currency merges into the permanent primary to preserve the no-duplicate rule. Stock share
+quantities remain unchanged. Overflow or any failed operation rolls back the conversion.
+
+Raw historical ledger/order/trade records retain their original currency for audit. Frozen
+account-currency display projections and daily stock chart values convert transactionally;
+later exchange-rate changes do not rewrite the displayed old history. Historical revaluation
+uses bounded batches. Startup never silently rebases existing balances or prices. An older
+world with an independently denominated market can use the twice-confirmed command, including
+the current world code, to align its market explicitly.
+
+`config/economy/banking.toml` now contains **exchange rates only**, with no world-currency setting.
+Supported choices: CAD, EUR, GBP, AUD, NZD, USD, HKD, JPY, CNY and DKK. Accounts use integer minor
+units (100 per major unit except whole yen). Dollar currencies display `$123.45 CAD` (or their own
+code); GBP `£123.45`, EUR `€123.45`, DKK `123.45 kr`, CNY `CN¥123.45`, JPY `JP¥123`.
 
 Foreign deposits group cash by currency before conversion and round down once per source
 currency to destination minor units. Withdrawals round the required account debit **up**, so
@@ -57,22 +91,39 @@ Commands operate on the primary bank account using minor units:
 
 ## Stock exchange
 
-Right-click the **Stock Trading Computer**. Each player has exactly one separate CAD trading
-account, which does not consume a bank-account slot. Select a bank account and use **Fund**;
-foreign funds convert before reaching the trading balance. **Unfund** returns CAD trading cash
+Right-click the **Stock Trading Computer**. Each player has exactly one separate trading
+account in the selected world currency, which does not consume a bank-account slot. Select a bank account and use **Fund**;
+foreign funds convert before reaching the trading balance. **Unfund** returns trading cash
 to the selected bank account, converting when needed.
 
-Search/select a company, enter a positive whole share quantity and buy or sell. Purchases require
+Scroll or search the company list, select a company, then use its buy/sell controls and chart.
+The chart shows up to the last 14 in-game days of recorded market values, including only history
+available since recording began. Daily snapshots and their original denomination persist in SQLite.
+Enter a positive whole share quantity and buy or sell. Purchases require
 available trading cash; sales require owned shares. The single database writer deterministically
 sequences market orders. Cash, ownership, order/trade history and append-only ledger entries
 settle atomically. Orders execute immediately against the quoted simulated market price.
 
 The market includes 100 original Minecraft-style company names based on the first 100 companies
 in the linked US500 list. Initial CAD prices use the December 31, 2025 USD close × 1.3706 USD/CAD,
-rounded to cents. All 100 prices were obtained; none were invented. Quotes start at these fixed
-historical baselines. There is no live brokerage connection or automatic price simulation;
+rounded to cents. All 100 prices were obtained; none were invented. Those CAD baselines convert when the initial world currency is selected; subsequent world
+currency changes also revalue active market prices. Quotes start at these historical baselines. There is no live brokerage connection or automatic price simulation;
 `FinanceDatabase.updateStockPrice` supports explicit server-side price changes.
 See [stock data and reproduction](docs/stock-data.md).
+
+### Exchange-rate history
+
+The stock exchange terminal has **Stocks** and **Exchange Rates** tabs. On Exchange Rates,
+choose source and destination currencies to see the current configured cross rate and recorded
+historical rates. Scroll through each 15-date page, then use **Older** or **Newest**. Hover a
+row for the full rate. Values mean destination units per one major source-currency unit.
+History uses only matching recorded dates; unavailable dates are not filled with today's rate.
+CAD remains the fixed reference of1, including partial daily updates. Rate history is read from
+SQLite asynchronously and is not cached; current rates use the existing cache. These are the
+server's recorded configured rates, rather than a live external FX feed.
+
+Stock and funding controls now have separate bounds. Input hints, suggestions, carets and button
+labels are clipped inside their controls, including the short **Amount** funding hint.
 
 ## Persistence and migration
 

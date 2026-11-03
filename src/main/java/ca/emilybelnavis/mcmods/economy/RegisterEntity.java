@@ -41,7 +41,7 @@ public final class RegisterEntity extends BlockEntity {
         if (busy || BUYERS.contains(buyer.getUUID())) throw new IllegalStateException("A purchase is still being processed.");
         if (owner == null || product.isEmpty() || price <= 0) throw new IllegalStateException("Shop is not configured. Owner: sneak-use with the product, then /economy shop price <units>.");
         if (buyer.getUUID().equals(owner)) {
-            buyer.sendSystemMessage(Component.translatable("message.economy.your_shop", product.getCount(), product.getHoverName(), price)); return;
+            buyer.sendSystemMessage(Component.translatable("message.economy.your_shop", product.getCount(), product.getHoverName(), displayPrice(buyer,price))); return;
         }
         if (!(level.getBlockEntity(worldPosition.below()) instanceof Container stock)) throw new IllegalStateException("No stock container below the register.");
         // Validate capacity and reserve stock on the main thread before queuing payment.
@@ -95,7 +95,7 @@ public final class RegisterEntity extends BlockEntity {
                         if (!delivery.isEmpty()) connected.drop(delivery, false);
                         connected.getInventory().setChanged();
                         connected.containerMenu.broadcastChanges();
-                        connected.sendSystemMessage(Component.translatable("message.economy.bought", purchased.getCount(), purchased.getHoverName(), purchasePrice));
+                        connected.sendSystemMessage(Component.translatable("message.economy.bought", purchased.getCount(), purchased.getHoverName(), displayPrice(connected,purchasePrice)));
                     } else drop(purchased.copy());
                 } finally {
                     busy = false;
@@ -108,6 +108,10 @@ public final class RegisterEntity extends BlockEntity {
             BUYERS.remove(buyer.getUUID());
             throw error;
         }
+    }
+    private static String displayPrice(ServerPlayer player,long value) {
+        var currency=FinanceService.get(player.server).currency();
+        return currency==null?"—":Money.format(value,currency.name());
     }
     private static boolean sameContents(Container container, List<ItemStack> expected) {
         if (container.getContainerSize() != expected.size()) return false;

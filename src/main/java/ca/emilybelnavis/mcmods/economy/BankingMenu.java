@@ -33,6 +33,16 @@ public final class BankingMenu extends AbstractContainerMenu {
     private long beforeSequence;
     private int ticks;
     private int revision;
+    private int withdrawalRevision;
+    private WithdrawalPlanner.Plan withdrawalPlan;
+    private Currency withdrawalCurrency;
+    private String withdrawalAccount="";
+    private long withdrawalCost;
+    private TerminalSettings.Settings withdrawalSettings;
+    private Map<String,Map<String,Boolean>> withdrawalAdjustments=Map.of();
+    private record PlannedWithdrawal(WithdrawalPlanner.Plan plan,Map<String,Map<String,Boolean>> adjustments) {}
+    private record QuotedWithdrawal(PlannedWithdrawal planned,long cost) {}
+
 
     public BankingMenu(int id,Inventory inv,RegistryFriendlyByteBuf b){this(id,inv,b.readBlockPos(),b.readBoolean(),b.readBoolean());}
     public BankingMenu(int id,Inventory inv,BlockPos pos,boolean teller,boolean configure){
@@ -69,7 +79,7 @@ public final class BankingMenu extends AbstractContainerMenu {
     }
     @Override public void clicked(int slot,int button,ClickType type,Player p){if(!busy&&stillValid(p))super.clicked(slot,button,type,p);}
     public void receive(FinanceAction action){
-        if(!(owner instanceof ServerPlayer p)||action.menuId()!=containerId||busy||!stillValid(p))return;
+        if(!(owner instanceof ServerPlayer p)||action.menuId()!=containerId||busy||!stillValid(p)||FinanceService.get(p.server).changingCurrency())return;
         try{
             JsonObject args=JsonParser.parseString(action.json()).getAsJsonObject();
             if(action.action().equals("page")){
@@ -78,16 +88,18 @@ public final class BankingMenu extends AbstractContainerMenu {
                 if(next!=Page.CONFIG&&!CashCatalog.hasCard(p))throw new IllegalArgumentException("A bank or credit card is required.");
                 if(next==Page.ACCOUNTS&&!teller)throw new IllegalArgumentException("Visit a bank teller to manage accounts.");
                 if(page==Page.DEPOSIT&&next!=page)clearContainer(p,deposit);
-                page=next;beforeSequence=0;revision++;refresh();return;
+                invalidateWithdrawal();page=next;beforeSequence=0;revision++;refresh();return;
             }
             if(action.action().equals("select")){
                 String id=args.get("account").getAsString();if(accounts.stream().noneMatch(a->a.id().equals(id)&&a.kind().equals("BANK")))throw new IllegalArgumentException("Choose your bank account.");
-                selected=id;beforeSequence=0;revision++;refresh();return;
+                invalidateWithdrawal();selected=id;beforeSequence=0;revision++;refresh();return;
             }
             if(action.action().equals("configure")){configure(p,args);return;}
             if(!CashCatalog.hasCard(p))throw new IllegalArgumentException("A bank or credit card is required.");
             switch(action.action()){
                 case "deposit"->deposit(p);
+                case "prepare_withdraw"->prepareWithdrawal(p,args);
+                case "adjust_withdraw"->adjustWithdrawal(p,args);
                 case "withdraw"->withdraw(p,args);
                 case "open"->{if(!teller)throw new IllegalArgumentException("Visit a bank teller.");run(p,db->db.openAccount(p.getUUID(),args.get("currency").getAsString()),"Account opened.");}
                 case "close"->{if(!teller)throw new IllegalArgumentException("Visit a bank teller.");String destination=args.has("destination")?args.get("destination").getAsString():null;run(p,db->db.closeAccount(p.getUUID(),selected,destination),"Account closed; remaining funds transferred.");}
@@ -102,7 +114,7 @@ public final class BankingMenu extends AbstractContainerMenu {
         var accepted=EnumSet.noneOf(Currency.class);for(var e:args.getAsJsonArray("accepted"))accepted.add(Currency.valueOf(e.getAsString()));
         var dispensed=new HashSet<String>();for(var e:args.getAsJsonArray("dispensed"))dispensed.add(e.getAsString());
         if(!TerminalSettings.configure(p,pos,new TerminalSettings.Settings(settings().owner(),TerminalSettings.Mode.valueOf(args.get("mode").getAsString()),accepted,dispensed)))throw new IllegalArgumentException("Configuration permission denied.");
-        status="Terminal configuration saved.";refresh();
+        invalidateWithdrawal();status="Terminal configuration saved.";refresh();
     }
     private FinanceDatabase.Account selectedAccount(){return accounts.stream().filter(a->a.id().equals(selected)&&a.kind().equals("BANK")).findFirst().orElseThrow(()->new IllegalArgumentException("Choose an account."));}
     private Map<String,Long> totals(){
@@ -129,27 +141,99 @@ public final class BankingMenu extends AbstractContainerMenu {
             refresh();
         }));
     }
-    private void withdraw(ServerPlayer p,JsonObject args){
+    /** Parent page/account/configuration changes must invalidate any previously quoted cash plan. */
+    private void invalidateWithdrawal(){
+        withdrawalRevision++;
+        withdrawalPlan=null;withdrawalCurrency=null;withdrawalAccount="";withdrawalCost=0;
+        withdrawalSettings=null;withdrawalAdjustments=Map.of();
+    }
+    /** Adds only immutable server-authoritative withdrawal state to a normal finance snapshot. */
+    private void appendWithdrawalView(JsonObject result){
+        result.addProperty("withdrawPrepared",withdrawalPlan!=null);
+        result.addProperty("withdrawAmount",withdrawalPlan==null?0:withdrawalPlan.amount());
+        result.addProperty("withdrawCurrency",withdrawalCurrency==null?"":withdrawalCurrency.name());
+        result.addProperty("withdrawCost",withdrawalCost);
+        result.add("withdrawBills",JSON.toJsonTree(withdrawalPlan==null?Map.of():withdrawalPlan.bills()));
+        result.add("withdrawCoins",JSON.toJsonTree(withdrawalPlan==null?Map.of():withdrawalPlan.coins()));
+        result.add("withdrawAdjustments",JSON.toJsonTree(withdrawalAdjustments));
+    }
+    private List<WithdrawalPlanner.Denomination> withdrawalDenominations(Currency currency,TerminalSettings.Settings setting){
+        return CashCatalog.all().stream().filter(cash->cash.currency()==currency&&(teller||!cash.coin())&&setting.dispenses(cash))
+            .map(cash->new WithdrawalPlanner.Denomination(BuiltInRegistries.ITEM.getKey(cash.item()).toString(),cash.minor(),cash.coin())).toList();
+    }
+    private static PlannedWithdrawal withAdjustments(WithdrawalPlanner.Plan plan,List<WithdrawalPlanner.Denomination> denominations,boolean teller){
+        var adjustments=new TreeMap<String,Map<String,Boolean>>();
+        for(var denomination:denominations)if(!denomination.coin()){
+            boolean plus=false,minus=false;
+            if(denomination.minor()<=plan.amount())try{WithdrawalPlanner.adjust(plan.amount(),denominations,plan,denomination.id(),1,teller);plus=true;}catch(IllegalArgumentException ignored){}
+            if(plan.bills().getOrDefault(denomination.id(),0)>0)try{WithdrawalPlanner.adjust(plan.amount(),denominations,plan,denomination.id(),-1,teller);minus=true;}catch(IllegalArgumentException ignored){}
+            adjustments.put(denomination.id(),Map.of("plus",plus,"minus",minus));
+        }
+        return new PlannedWithdrawal(plan,Map.copyOf(adjustments));
+    }
+    private void requireWithdrawal(){
         if(page!=Page.WITHDRAW||!settings().permitsWithdraw())throw new IllegalArgumentException("Withdrawals are disabled here.");
-        var account=selectedAccount();var choice=args.getAsJsonObject("items");if(choice.size()>118)throw new IllegalArgumentException("Too many denominations.");
-        var outputs=new ArrayList<ItemStack>();long cashTotal=0;Currency currency=null;int count=0;
-        for(var e:choice.entrySet()){
-            int quantity=e.getValue().getAsBigDecimal().intValueExact();if(quantity<0||quantity>2304)throw new IllegalArgumentException("Invalid cash quantity.");if(quantity==0)continue;
-            var id=net.minecraft.resources.ResourceLocation.parse(e.getKey());var item=BuiltInRegistries.ITEM.get(id);var cash=CashCatalog.find(new ItemStack(item));
-            if(cash==null||(!teller&&cash.coin())||!settings().dispenses(cash))throw new IllegalArgumentException("This denomination is not dispensed here.");
-            if(currency!=null&&currency!=cash.currency())throw new IllegalArgumentException("Choose one cash currency per withdrawal.");currency=cash.currency();
-            count=Math.addExact(count,quantity);if(count>2304)throw new IllegalArgumentException("Too much cash for one withdrawal.");
-            cashTotal=Math.addExact(cashTotal,Math.multiplyExact(cash.minor(),quantity));
+    }
+    private void prepareWithdrawal(ServerPlayer p,JsonObject args){
+        requireWithdrawal();
+        long amount=args.get("amount").getAsBigDecimal().longValueExact();Currency currency=Currency.valueOf(args.get("currency").getAsString());
+        var account=selectedAccount();var setting=settings();var denominations=withdrawalDenominations(currency,setting);
+        invalidateWithdrawal();
+        quoteWithdrawal(p,currency,account,setting,CompletableFuture.supplyAsync(()->withAdjustments(WithdrawalPlanner.plan(amount,denominations,teller),denominations,teller)));
+    }
+    private void adjustWithdrawal(ServerPlayer p,JsonObject args){
+        requireWithdrawal();validatePreparedWithdrawal();
+        var current=withdrawalPlan;var currency=withdrawalCurrency;var account=selectedAccount();var setting=settings();
+        var denominations=withdrawalDenominations(currency,setting);String id=args.get("id").getAsString();
+        Integer exact=args.has("quantity")?args.get("quantity").getAsBigDecimal().intValueExact():null;
+        int direction=exact==null?args.get("delta").getAsBigDecimal().intValueExact():0;
+        quoteWithdrawal(p,currency,account,setting,CompletableFuture.supplyAsync(()->{
+            var adjusted=exact==null?WithdrawalPlanner.adjust(current.amount(),denominations,current,id,direction,teller)
+                :WithdrawalPlanner.planWithBills(current.amount(),denominations,Map.of(id,exact),teller);
+            return withAdjustments(adjusted,denominations,teller);
+        }));
+    }
+    private void quoteWithdrawal(ServerPlayer p,Currency currency,FinanceDatabase.Account account,TerminalSettings.Settings setting,CompletableFuture<PlannedWithdrawal> planning){
+        int requestRevision=withdrawalRevision;
+        busy=true;sendBusy();var service=FinanceService.get(p.server);
+        planning.thenCombine(service.ready(),(planned,ignored)->planned)
+            .thenCompose(planned->service.database.quoteWithdrawal(planned.plan().amount(),currency.name(),account.currency()).thenApply(cost->new QuotedWithdrawal(planned,cost)))
+            .whenComplete((quoted,error)->p.server.execute(()->{
+                busy=false;
+                if(error!=null){status=message(error);}
+                else if(requestRevision==withdrawalRevision&&!closed&&near(p)&&selected.equals(account.id())&&settings().equals(setting)){
+                    withdrawalPlan=quoted.planned().plan();withdrawalCurrency=currency;withdrawalAccount=account.id();
+                    withdrawalSettings=setting;withdrawalCost=quoted.cost();withdrawalAdjustments=quoted.planned().adjustments();
+                    status="Cash combination prepared. Review the account debit before withdrawing.";
+                }else invalidateWithdrawal();
+                appendWithdrawalView(view);sendBusy();refresh();
+            }));
+    }
+    private void validatePreparedWithdrawal(){
+        if(withdrawalPlan==null||!selected.equals(withdrawalAccount)||!settings().equals(withdrawalSettings)){
+            invalidateWithdrawal();throw new IllegalArgumentException("Enter an amount and prepare a cash combination first.");
+        }
+    }
+    private void withdraw(ServerPlayer p,JsonObject args){
+        requireWithdrawal();validatePreparedWithdrawal();
+        // The client cannot choose coin quantities, bypass the smallest-bill rule, or change the quoted debit.
+        var account=selectedAccount();var plan=withdrawalPlan;String currency=withdrawalCurrency.name();long expected=withdrawalCost;
+        var outputs=new ArrayList<ItemStack>();var counts=new TreeMap<String,Integer>(plan.bills());counts.putAll(plan.coins());
+        for(var entry:counts.entrySet()){
+            var item=BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.parse(entry.getKey()));int quantity=entry.getValue();
+            var cash=CashCatalog.find(new ItemStack(item));
+            if(cash==null||!settings().dispenses(cash)||(!teller&&cash.coin())){invalidateWithdrawal();throw new IllegalArgumentException("The terminal cash configuration changed. Prepare a new combination.");}
             while(quantity>0){int n=Math.min(quantity,item.getDefaultMaxStackSize());outputs.add(new ItemStack(item,n));quantity-=n;}
         }
-        if(cashTotal<=0)throw new IllegalArgumentException("Choose cash denominations and quantities.");
         if(!fits(p,outputs))throw new IllegalArgumentException("Make room in your inventory first.");
-        long requested=args.get("amount").getAsBigDecimal().longValueExact();if(requested<=0)throw new IllegalArgumentException("Enter a positive withdrawal amount.");
-        long amount=cashTotal;String code=currency.name();busy=true;sendBusy();var service=FinanceService.get(p.server);
-        service.ready().thenCompose(v->service.database.quoteWithdrawal(amount,code,account.currency())).thenCompose(cost->{
-            if(cost!=requested)return CompletableFuture.failedFuture(new IllegalArgumentException("Selected denominations must match the withdrawal amount (including conversion)."));
-            return service.database.withdrawCash(p.getUUID(),account.id(),amount,code,"Terminal cash withdrawal",requested);
-        }).whenComplete((result,error)->p.server.execute(()->{busy=false;if(error==null){outputs.forEach(stack->deliver(p,stack));status="Withdrawal committed.";}else status=message(error);refresh();}));
+        busy=true;sendBusy();var service=FinanceService.get(p.server);
+        service.ready().thenCompose(v->service.database.withdrawCash(p.getUUID(),account.id(),plan.amount(),currency,"Terminal cash withdrawal",expected))
+            .whenComplete((result,error)->p.server.execute(()->{
+                busy=false;
+                if(error==null){invalidateWithdrawal();outputs.forEach(stack->deliver(p,stack));status="Withdrawal committed.";}
+                else status=message(error);
+                appendWithdrawalView(view);sendBusy();refresh();
+            }));
     }
     private static boolean fits(Player p,List<ItemStack> items){
         var planned=new ArrayList<ItemStack>();for(int i=0;i<36;i++)planned.add(p.getInventory().getItem(i).copy());
@@ -174,8 +258,10 @@ public final class BankingMenu extends AbstractContainerMenu {
             var bank=list.stream().filter(a->a.kind().equals("BANK")).toList();
             String id=bank.stream().anyMatch(a->a.id().equals(selectedAtStart))?selectedAtStart:bank.stream().filter(FinanceDatabase.Account::primary).findFirst().orElseThrow().id();
             var chosen=bank.stream().filter(a->a.id().equals(id)).findFirst().orElseThrow();
-            return service.database.history(p.getUUID(),id,cursor,6).thenCombine(service.database.exchangeRates(),(history,rates)->{
-                var result=new JsonObject();result.add("accounts",JSON.toJsonTree(bank));result.addProperty("selected",id);result.add("history",JSON.toJsonTree(history));result.add("rates",JSON.toJsonTree(rates));
+            return service.database.displayHistory(p.getUUID(),id,cursor,15).thenCombine(service.database.exchangeRates(),(history,rates)->{
+                var result=new JsonObject();result.add("accounts",JSON.toJsonTree(bank));result.addProperty("selected",id);var entries=new JsonArray();
+                for(var entry:history){var row=JSON.toJsonTree(entry).getAsJsonObject();row.addProperty("displayMemo",HistoryPresentation.memo(entry,chosen.currency()));entries.add(row);}
+                result.add("history",entries);result.add("rates",JSON.toJsonTree(rates));
                 result.addProperty("accountCurrency",chosen.currency());return result;
             }).thenCombine((amounts.isEmpty()?CompletableFuture.completedFuture(0L):service.database.quoteDeposit(amounts,chosen.currency())),(result,total)->{result.addProperty("depositTotal",total);return result;});
         }).whenComplete((result,error)->p.server.execute(()->{
@@ -187,7 +273,7 @@ public final class BankingMenu extends AbstractContainerMenu {
             result.add("detail",JSON.toJsonTree(detail));result.add("subtotals",JSON.toJsonTree(amounts));
             var denoms=new JsonArray();for(var cash:CashCatalog.all())if((teller||!cash.coin())){
                 var d=new JsonObject();d.addProperty("id",BuiltInRegistries.ITEM.getKey(cash.item()).toString());d.addProperty("currency",cash.currency().name());d.addProperty("minor",cash.minor());d.addProperty("coin",cash.coin());denoms.add(d);
-            }result.add("denominations",denoms);view=result;send();
+            }result.add("denominations",denoms);appendWithdrawalView(result);view=result;send();
         }));
     }
     @Override public void broadcastChanges(){super.broadcastChanges();if(++ticks%20==1)refresh();}

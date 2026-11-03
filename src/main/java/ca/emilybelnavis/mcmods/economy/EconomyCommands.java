@@ -20,9 +20,14 @@ public final class EconomyCommands {
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(literal("economy")
             .executes(ctx -> execute(ctx, EconomyCommands::showAtm))
+            .then(literal("worldcurrency").requires(source -> source.hasPermission(2))
+                .then(argument("currency", StringArgumentType.word()).suggests((context,builder) -> {
+                    for (var code : BankingConfig.Currency.values()) builder.suggest(code.name());
+                    return builder.buildFuture();
+                }).executes(ctx -> WorldCurrencies.change(ctx.getSource(),StringArgumentType.getString(ctx,"currency")))))
             .then(literal("balance").executes(ctx -> execute(ctx,p -> FinanceService.complete(p, EconomyApi.get(p.server).balance(p.getUUID()), (balance, error) -> {
                 if (error != null) { failure(p, error); return; }
-                p.sendSystemMessage(Component.translatable("message.economy.balance", balance));
+                p.sendSystemMessage(Component.translatable("message.economy.balance", Money.format(balance,FinanceService.get(p.server).currency().name())));
             }))))
             .then(literal("history").executes(ctx -> execute(ctx,p -> {
                 FinanceService.complete(p, EconomyApi.get(p.server).history(p.getUUID(), 0, 10), (history, error) -> {
@@ -35,8 +40,8 @@ public final class EconomyCommands {
                 var target=EntityArgument.getPlayer(ctx,"player"); long amount=LongArgumentType.getLong(ctx,"amount");
                 FinanceService.complete(p, EconomyApi.get(p.server).transfer(p.getUUID(),target.getUUID(),amount,"Player transfer"), (ignored, error) -> {
                     if (error != null) { failure(p, error); return; }
-                    p.sendSystemMessage(Component.translatable("message.economy.paid", amount, target.getScoreboardName()));
-                    target.sendSystemMessage(Component.translatable("message.economy.received", amount, p.getScoreboardName()));
+                    p.sendSystemMessage(Component.translatable("message.economy.paid", Money.format(amount,FinanceService.get(p.server).currency().name()), target.getScoreboardName()));
+                    target.sendSystemMessage(Component.translatable("message.economy.received", Money.format(amount,FinanceService.get(p.server).currency().name()), p.getScoreboardName()));
                 });
             })))))
             .then(literal("shop").then(literal("price").then(argument("amount",LongArgumentType.longArg(1)).executes(ctx -> execute(ctx,p -> {
@@ -52,7 +57,7 @@ public final class EconomyCommands {
     public static void showAtm(ServerPlayer p) {
         FinanceService.complete(p, EconomyApi.get(p.server).balance(p.getUUID()), (balance, error) -> {
             if (error != null) failure(p, error);
-            else p.sendSystemMessage(Component.translatable("message.economy.heading", balance));
+            else p.sendSystemMessage(Component.translatable("message.economy.heading", Money.format(balance,FinanceService.get(p.server).currency().name())));
         });
         for (String[] link : new String[][]{{"[Balance]","/economy balance"},{"[History]","/economy history"}})
             p.sendSystemMessage(Messages.error(link[0]).withStyle(s->s.withColor(net.minecraft.ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,link[1]))));

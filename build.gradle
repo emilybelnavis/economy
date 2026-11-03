@@ -86,3 +86,32 @@ tasks.register('financeDatabaseTest', JavaExec) {
     enableAssertions = true
 }
 tasks.named('check') { dependsOn 'financeDatabaseTest' }
+
+tasks.register('withdrawalPlannerTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'ca.emilybelnavis.mcmods.economy.WithdrawalPlannerChecks'
+    enableAssertions = true
+}
+tasks.named('check') { dependsOn 'withdrawalPlannerTest' }
+
+tasks.register('moneyPresentationTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'ca.emilybelnavis.mcmods.economy.MoneyPresentationChecks'
+}
+tasks.named('check') { dependsOn 'moneyPresentationTest' }
+
+tasks.register('currencyConfirmationTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'ca.emilybelnavis.mcmods.economy.CurrencyConfirmationChecks'
+}
+tasks.named('check') { dependsOn 'currencyConfirmationTest' }
+
+tasks.register('exchangeHistoryTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'ca.emilybelnavis.mcmods.economy.storage.ExchangeHistoryChecks'
+}
+tasks.named('check') { dependsOn 'exchangeHistoryTest' }

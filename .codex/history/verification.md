@@ -173,3 +173,62 @@ changed. Development library on runtime; release nested SQLite validated separat
 Operational limits: base stock prices stay fixed until server API updates; daily FX batches use
 configured offline rates. Financial database settlement is atomic; physical item reservations
 remain outside SQLite crash atomicity and have no durable inventory outbox.
+
+## 2026-11-03 — World currency, terminal presentation and exact cash plans
+
+World currency removed from ModConfigSpec/TOML and moved to first-player GUI selection plus
+persisted SQLite metadata. First join election occurs before async callbacks. Existing-world
+startup preserves financial values; only the explicit same-actor twice-confirmed operator/
+cheat command requests a rebase. Default-world bank and trading balances, market prices and
+frozen display projections convert atomically; optional foreign accounts remain. Target/oldworld
+secondary collisions merge into primary. Immutable raw ledger/order/trade currency retained.
+
+An initial broad source rewrite was rejected by automatic approval review for financial-data
+risk. No files or databases were changed by that rejected call. Migration implementation was
+then staged in workspace, compiled and verified solely against fresh temporary JDBC fixtures,
+reviewed by exact patch/hash, and applied as two reversible source/test files without database
+execution. No existing user world or database was opened or rebased during this revision.
+Additional staged fixtures tested 2105 ledger entries/2002 day prices across 1000-row keyset
+batches. Legacy USD primary +CADworld secondary +EURforeign fixture yieldsGBP112 primary,
+EUR100 unchanged, CADsecondary retired andGBP trading; current source already had correct guard.
+
+Final Java21 `build` passed: financeDatabaseTest, currencyConfirmationTest, moneyPresentationTest,
+withdrawalPlannerTest, legacy ledger/persistence,166layout and108shape checks. Coverage includes
+selection-once/persistence, old-schema inference without balance conversion, transactional
+rollback across accounts/ledger/metadata/market/chart/cache, foreign preservation, collision
+merge, frozen history across FX updates, last14game days, UTC seconds, all10money formats,
+confirmation actor isolation/expiry/source-target changes, exact noncanonical bill planning,
+smallest ATM bill step, impossible selections, automatic minimal teller coins and bounds.
+
+Actual GameTestServer used a new disposable /tmp world via Gradle init-script override. All10
+required tests passed, including new amount-first/20+50bill constraints/invalid edits/teller
+automatic coins. Standard run-gametest/world and existing player worlds remained untouched.
+`help --task runClient` and normal `runClient --dry-run` verified. Actual runClient used new
+disposable terrain with no financial database or legacy balances. Integrated server joined;
+chat logged “World currency set to CAD.” after GUI selection. Read-only fixture inspection
+confirmed selected metadata,2default accounts,100daily stock records and no currency TOML key.
+Client exited successfully. GUI selector runtime confirmed; history/exchange layouts inspected
+in source and compiled, not independently captured as new screenshots in this session. The
+provided screenshot was inspected and shows old banking history tooltip rather than stock UI.
+
+Shared dark/teal widgets replace vanilla controls. History15/page in scroll viewport with five
+logical tooltip lines; full raw financial audit remains in SQL. Scrollable stock list + separate
+trade/chart pane. Charts only use recorded history; market simulation remains fixed baseline
+until explicit price updates. Physical inventory/SQLite crash boundary from prior release remains.
+
+## 2026-11-03 — Exchange page and overlap repair
+
+Inspected attached screenshot and native Minecraft EditBox source. Native unbordered hints and
+suggestions were drawn without width clipping, explaining the funding hint crossing into Fund.
+Shared input now has true inner width for native cursor scrolling, pose-only inset and scissor;
+button labels also clipped. Added short Amount hint and separated tab/search/list/chart/trade/
+funding rectangles. Stock list remains scrollable; rates get a dedicated pair/history page.
+
+Java21 build and exchangeHistoryTest passed, alongside all existing finance, confirmation,
+planner, money, persistence and machine checks. Historical fixtures verify bounded15-date
+pages, exclusive cursors, cross/inverse/identity rates, partial CAD reference, missing date
+omission, invalid inputs and separation from current rates. Actual GameTestServer in new
+/tmp world passed all11tests; new test covers currency pair, history cursor, return to stocks
+and remote rejection. Existing player worlds/databases were not opened or modified. runClient
+help and dry-run verified. GUI code compiled and bounds reviewed; no new in-game screenshot
+was captured for this revision. PNG artwork unchanged; git diff --check passed.

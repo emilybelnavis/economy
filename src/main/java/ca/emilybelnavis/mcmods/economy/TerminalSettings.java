@@ -50,10 +50,11 @@ public final class TerminalSettings extends SavedData {
     private static Key key(ServerLevel level, BlockPos anchor) {
         return new Key(level.dimension().location().toString(), anchor.asLong());
     }
-    private static Settings defaults(UUID owner, boolean teller) {
+    private static Settings defaults(UUID owner, boolean teller, ServerLevel level) {
         Set<String> items = new HashSet<>();
         // All art variants remain selectable; ATMs can dispense bills only.
-        for (var item : CollectibleItems.SERIES.get(BankingConfig.CURRENCY.get().name().toLowerCase(Locale.ROOT))) {
+        var selected = FinanceService.get(level.getServer()).currency();
+        if (selected != null) for (var item : CollectibleItems.SERIES.get(selected.name().toLowerCase(Locale.ROOT))) {
             var cash = CashCatalog.find(new net.minecraft.world.item.ItemStack(item.get()));
             if (cash != null && (teller || !cash.coin())) items.add(BuiltInRegistries.ITEM.getKey(cash.item()).toString());
         }
@@ -66,7 +67,7 @@ public final class TerminalSettings extends SavedData {
         Key key = key(level, root);
         Settings settings = data.terminals.get(key);
         if (settings == null) {
-            settings = defaults(null, state.getBlock() instanceof WorkstationBlock);
+            settings = defaults(null, state.getBlock() instanceof WorkstationBlock, level);
             data.terminals.put(key, settings);
             data.setDirty();
         }
@@ -101,7 +102,7 @@ public final class TerminalSettings extends SavedData {
         BlockState state = level.getBlockState(pos);
         if (!terminal(state)) return;
         TerminalSettings data = data(level);
-        data.terminals.put(key(level, WideMachineBlock.anchor(pos, state)), defaults(owner, state.getBlock() instanceof WorkstationBlock));
+        data.terminals.put(key(level, WideMachineBlock.anchor(pos, state)), defaults(owner, state.getBlock() instanceof WorkstationBlock, level));
         data.setDirty();
     }
     static void removed(ServerLevel level, BlockPos anchor) {

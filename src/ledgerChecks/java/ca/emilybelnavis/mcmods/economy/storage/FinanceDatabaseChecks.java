@@ -40,6 +40,8 @@ public final class FinanceDatabaseChecks {
         try(var c=DriverManager.getConnection("jdbc:sqlite:"+file);var s=c.createStatement()){expectFailure(()->{try{s.executeUpdate("DELETE FROM ledger");}catch(Exception e){throw new RuntimeException(e);}});}
         accountLifecycleCheck();
         yenPrecisionCheck();
+        legacyWorldUpgradeCheck();
+        worldCurrencyChecks();
         legacyCurrencyCheck();
         cleanupFailureCheck();
         concurrentPaymentCheck();
@@ -78,6 +80,105 @@ public final class FinanceDatabaseChecks {
             expectFailure(()->db.depositCash(user,primary.id(),Map.of("JPY",1L),"tiny").join());
             check(db.account(user,primary.id()).join().balance()==0,"zero-value deposit rejected atomically");
         }
+    }
+    private static void legacyWorldUpgradeCheck() throws Exception {
+        // This is a brand-new synthetic pre-feature database, never a world database.
+        var file=Files.createTempDirectory("economy-old-schema-new-fixture").resolve("fixture.sqlite");
+        Class.forName("org.sqlite.JDBC");
+        UUID owner=UUID.randomUUID();String primary=UUID.randomUUID().toString(),trading=UUID.randomUUID().toString();
+        try(var connection=DriverManager.getConnection("jdbc:sqlite:"+file);var statement=connection.createStatement()) {
+            statement.execute("CREATE TABLE accounts(id TEXT PRIMARY KEY,owner TEXT NOT NULL,currency TEXT NOT NULL,kind TEXT NOT NULL,is_primary INTEGER NOT NULL,balance INTEGER NOT NULL)");
+            statement.execute("CREATE TABLE stocks(id TEXT PRIMARY KEY,name TEXT NOT NULL)");
+            statement.execute("CREATE TABLE stock_prices(stock TEXT PRIMARY KEY REFERENCES stocks(id),price INTEGER NOT NULL)");
+            statement.execute("INSERT INTO stocks VALUES('TEST','Test')");
+            statement.execute("INSERT INTO stock_prices VALUES('TEST',100)");
+            statement.execute("CREATE TABLE ledger(sequence INTEGER PRIMARY KEY AUTOINCREMENT,operation TEXT NOT NULL,account TEXT NOT NULL REFERENCES accounts(id),timestamp INTEGER NOT NULL,delta INTEGER NOT NULL,balance INTEGER NOT NULL,memo TEXT NOT NULL)");
+            try(var insert=connection.prepareStatement("INSERT INTO accounts VALUES(?,?,?,?,?,?)")) {
+                insert.setString(1,primary);insert.setString(2,owner.toString());insert.setString(3,"USD");insert.setString(4,"BANK");insert.setInt(5,1);insert.setLong(6,100);insert.executeUpdate();
+                insert.setString(1,trading);insert.setString(3,"CAD");insert.setString(4,"TRADING");insert.setInt(5,0);insert.setLong(6,125);insert.executeUpdate();
+            }
+            try(var insert=connection.prepareStatement("INSERT INTO ledger(operation,account,timestamp,delta,balance,memo) VALUES('CREDIT',?,1,100,100,'old')")) {insert.setString(1,primary);insert.executeUpdate();}
+        }
+        try(var db=new FinanceDatabase(file,null,Map.of("CAD",2,"USD",2),Map.of("CAD","1","USD","1.25"),List.of(new FinanceDatabase.StockDefinition("TEST","Test",100)))) {
+            check(db.worldCurrency().join().equals("USD"),"older world infers actual primary denomination");
+            check(db.marketCurrency().join().equals("CAD"),"older market retains its independent CAD denomination");
+            check(db.account(owner,trading).join().balance()==125&&db.account(owner,trading).join().currency().equals("CAD"),"startup preserves older trading funds");
+            check(db.quotes().join().getFirst().price()==100,"startup preserves CAD market price");
+            db.changeWorldCurrency("USD",false).join();
+            check(db.marketCurrency().join().equals("USD")&&db.account(owner,trading).join().balance()==100,"explicit same-world-currency command repairs legacy market");
+            check(db.quotes().join().getFirst().price()==80,"explicit command revalues market");
+            db.changeWorldCurrency("CAD",false).join();
+            var original=db.history(owner,primary,0,100).join().stream().filter(e->e.operation().equals("CREDIT")).findFirst().orElseThrow();
+            check(original.currency().equals("USD")&&original.delta()==100,"pre-column immutable ledger retains source currency after later rebase");
+        }
+    }
+    private static void worldCurrencyChecks() throws Exception {
+        var file=Files.createTempDirectory("economy-world-currency-new-fixture").resolve("fixture.sqlite");
+        var scales=Map.of("CAD",2,"USD",2,"EUR",2);
+        var rates=Map.of("CAD","1","USD","1.25","EUR","2");
+        var stocks=List.of(new FinanceDatabase.StockDefinition("TEST","Test",100));
+        UUID owner=UUID.randomUUID();String primaryId,tradingId,foreignId;
+        try(var db=new FinanceDatabase(file,null,scales,rates,stocks)) {
+            check(db.worldCurrency().join()==null,"fresh world waits for explicit selection");
+            expectFailure(()->db.accounts(owner).join());
+            db.selectWorldCurrency("CAD").join();
+            expectFailure(()->db.selectWorldCurrency("USD").join());
+            var accounts=db.accounts(owner).join();
+            primaryId=accounts.stream().filter(FinanceDatabase.Account::primary).findFirst().orElseThrow().id();
+            tradingId=accounts.stream().filter(a->a.kind().equals("TRADING")).findFirst().orElseThrow().id();
+            db.credit(owner,primaryId,125,"seed","CREDIT").join();
+            db.credit(owner,tradingId,125,"seed","CREDIT").join();
+            var foreign=db.openAccount(owner,"EUR").join();foreignId=foreign.id();db.credit(owner,foreignId,10,"foreign","CREDIT").join();
+            var collision=db.openAccount(owner,"USD").join();db.credit(owner,collision.id(),7,"collision","CREDIT").join();
+            check(db.stockHistory("TEST",2).join().isEmpty(),"no invented history before recording");
+            db.recordMarketDay(2).join();db.updateStockPrice("TEST",200).join();db.recordMarketDay(2).join();
+            db.recordMarketDay(4).join();
+            check(db.stockHistory("TEST",4).join().equals(List.of(new FinanceDatabase.DailyPrice(2,100),new FinanceDatabase.DailyPrice(3,100),new FinanceDatabase.DailyPrice(4,200))),"daily records idempotent and gaps carry forward");
+            db.changeWorldCurrency("USD",false).join();
+            check(db.worldCurrency().join().equals("USD"),"world metadata rebased");
+            check(db.account(owner,primaryId).join().balance()==107,"primary converted and existing target currency merged");
+            check(db.account(owner,tradingId).join().balance()==100&&db.account(owner,tradingId).join().currency().equals("USD"),"trading balance and denomination rebase");
+            check(db.account(owner,foreignId).join().balance()==10&&db.account(owner,foreignId).join().currency().equals("EUR"),"optional foreign bank preserved");
+            expectFailure(()->db.account(owner,collision.id()).join());
+            check(db.accounts(owner).join().size()==3,"collision retired without duplicate bank currency");
+            check(db.quotes().join().getFirst().price()==160,"market price revalued");
+            check(db.history(owner,primaryId,0,100).join().stream().anyMatch(e->e.operation().equals("CREDIT")&&e.currency().equals("CAD")&&e.delta()==125),"historical ledger retains original amount and currency");
+            check(db.stockHistory("TEST",4).join().getFirst().price()==80,"historical chart display revalued");
+            var displayCredit=db.displayHistory(owner,primaryId,0,100).join().stream().filter(e->e.operation().equals("CREDIT")).findFirst().orElseThrow();
+            check(displayCredit.delta()==100&&displayCredit.balance()==100&&displayCredit.currency().equals("USD"),"history projection converted into account denomination");
+            db.updateRates(Map.of("USD","2.5"),"later").join();
+            check(db.displayHistory(owner,primaryId,0,100).join().stream().filter(e->e.operation().equals("CREDIT")).findFirst().orElseThrow().equals(displayCredit),"daily FX updates leave projected historical amounts frozen");
+            check(db.stockHistory("TEST",4).join().getFirst().price()==80,"later FX changes do not mutate rebased historical display");
+            db.recordMarketDay(20).join();var history=db.stockHistory("TEST",20).join();
+            check(history.size()==14&&history.getFirst().day()==7&&history.getLast().day()==20,"chart last fourteen in-game days");
+            db.trade(owner,"TEST",true,1).handle((v,e)->null).join();
+        }
+        try(var db=new FinanceDatabase(file,"CAD",scales,rates,stocks)) {
+            check(db.worldCurrency().join().equals("USD"),"persisted world currency overrides changed configuration");
+            check(db.account(owner,foreignId).join().currency().equals("EUR"),"foreign currency survives reopen");
+            db.changeWorldCurrency("CAD",true).join();
+            var projected=db.displayHistory(owner,primaryId,0,100).join().stream().filter(e->e.operation().equals("CREDIT")).findFirst().orElseThrow();
+            check(projected.delta()==250&&projected.currency().equals("CAD"),"second rebase projects from prior frozen amount rather than raw original");
+            check(db.accounts(owner).join().stream().filter(a->a.kind().equals("BANK")).count()==1,"merge-all retires foreign optional bank");
+        }
+        // Overflow after account mutations must roll back balances, ledger, metadata, market and caches.
+        var overflow=Files.createTempDirectory("economy-world-overflow-fixture").resolve("fixture.sqlite");
+        try(var db=new FinanceDatabase(overflow,"CAD",scales,rates,stocks)) {
+            var primary=db.accounts(owner).join().stream().filter(FinanceDatabase.Account::primary).findFirst().orElseThrow();
+            db.credit(owner,primary.id(),125,"seed","CREDIT").join();
+            db.recordMarketDay(1).join();db.updateStockPrice("TEST",Long.MAX_VALUE).join();
+            db.updateRates(Map.of("USD","0.5"),"overflow").join();
+            var before=db.accounts(owner).join();var ledgerBefore=db.history(owner,primary.id(),0,100).join();var chartBefore=db.stockHistory("TEST",1).join();var displayBefore=db.displayHistory(owner,primary.id(),0,100).join();
+            expectFailure(()->db.changeWorldCurrency("USD",false).join());
+            check(db.worldCurrency().join().equals("CAD"),"failed rebase retains metadata");
+            check(db.accounts(owner).join().equals(before)&&db.account(owner,primary.id()).join().equals(primaryWithBalance(primary,125)),"failed rebase restores persisted and cached accounts");
+            check(db.history(owner,primary.id(),0,100).join().equals(ledgerBefore),"failed rebase has no partial ledger");
+            check(db.displayHistory(owner,primary.id(),0,100).join().equals(displayBefore),"failed rebase restores frozen history projection");
+            check(db.quotes().join().getFirst().price()==Long.MAX_VALUE&&db.stockHistory("TEST",1).join().equals(chartBefore),"failed rebase restores current and historical chart prices");
+        }
+    }
+    private static FinanceDatabase.Account primaryWithBalance(FinanceDatabase.Account account,long balance) {
+        return new FinanceDatabase.Account(account.id(),account.owner(),account.currency(),account.kind(),account.primary(),balance);
     }
     private static void legacyCurrencyCheck() throws Exception {
         var file=Files.createTempDirectory("economy-legacy-currency").resolve("finance.sqlite");

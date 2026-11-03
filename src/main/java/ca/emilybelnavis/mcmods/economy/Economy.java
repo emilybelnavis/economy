@@ -70,13 +70,15 @@ public final class Economy {
         MENUS.register("banking", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(BankingMenu::new));
     public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<TradingMenu>> TRADING_MENU =
         MENUS.register("trading", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(TradingMenu::new));
+    public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<WorldCurrencyMenu>> WORLD_CURRENCY_MENU =
+        MENUS.register("world_currency", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(WorldCurrencyMenu::new));
 
     public Economy(IEventBus bus, ModContainer container) {
         container.registerConfig(net.neoforged.fml.config.ModConfig.Type.COMMON, BankingConfig.SPEC, "economy/banking.toml");
         MENUS.register(bus);
         FinanceDefinitions.initialize();
         bus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) ->
-            event.registrar("2").playToClient(FinanceSnapshot.TYPE, FinanceSnapshot.CODEC, (payload, context) -> {
+            event.registrar("3").playToClient(FinanceSnapshot.TYPE, FinanceSnapshot.CODEC, (payload, context) -> {
                 var menu = context.player().containerMenu;
                 if (menu.containerId != payload.menuId()) return;
                 var view = com.google.gson.JsonParser.parseString(payload.json()).getAsJsonObject();
@@ -84,11 +86,16 @@ public final class Economy {
                     bank.view = view;
                     if (view.has("page")) bank.page = BankingMenu.Page.valueOf(view.get("page").getAsString());
                 } else if (menu instanceof TradingMenu trading) trading.view = view;
+                else if (menu instanceof WorldCurrencyMenu setup) {
+                    setup.busy = view.has("busy") && view.get("busy").getAsBoolean();
+                    setup.error = view.has("error") ? view.get("error").getAsString() : "";
+                }
             }).playToServer(FinanceAction.TYPE, FinanceAction.CODEC, (payload, context) -> {
                 var menu = context.player().containerMenu;
                 if (menu.containerId != payload.menuId()) return;
                 if (menu instanceof BankingMenu bank) bank.receive(payload);
                 else if (menu instanceof TradingMenu trading) trading.receive(payload);
+                else if (menu instanceof WorldCurrencyMenu setup) setup.receive(payload);
             }));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerStartedEvent event) -> FinanceService.onStarted(event.getServer()));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerStoppedEvent event) -> FinanceService.onStopped(event.getServer()));
@@ -98,8 +105,7 @@ public final class Economy {
         });
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) -> {
             if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer p) {
-                var service = FinanceService.get(p.server);
-                service.ready().thenCompose(v -> service.database.accounts(p.getUUID()));
+                WorldCurrencies.joined(p);
             }
         });
         CollectibleItems.initAll();

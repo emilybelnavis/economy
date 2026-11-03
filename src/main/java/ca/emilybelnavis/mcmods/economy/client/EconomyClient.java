@@ -11,5 +11,6 @@ public final class EconomyClient {
     @SubscribeEvent public static void screens(RegisterMenuScreensEvent event) {
         event.register(Economy.BANKING_MENU.get(), BankingScreen::new);
         event.register(Economy.TRADING_MENU.get(), TradingScreen::new);
+        event.register(Economy.WORLD_CURRENCY_MENU.get(), WorldCurrencyScreen::new);
     }
 }

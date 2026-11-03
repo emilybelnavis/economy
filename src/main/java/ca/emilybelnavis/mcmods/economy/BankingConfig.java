@@ -10,12 +10,9 @@ public final class BankingConfig {
         public int scale() { return this == JPY ? 1 : 100; }
     }
     public static final ModConfigSpec SPEC;
-    public static final ModConfigSpec.EnumValue<Currency> CURRENCY;
     private static final Map<Currency, ModConfigSpec.ConfigValue<String>> RATES = new EnumMap<>(Currency.class);
     static {
         var b = new ModConfigSpec.Builder();
-        CURRENCY = b.comment("Default currency for new permanent bank accounts and terminal cash. Existing primary accounts retain their currencies.")
-            .defineEnum("currency", Currency.CAD);
         b.comment("CAD per major currency unit. Snapshot: 2026-10-30. Bank of Canada daily averages; DKK = 100/478.89 from Danmarks Nationalbank.",
             "Cross rate A to B = rate[A] / rate[B]. Restart server after editing. Deposits round down once per source currency group to account minor units.")
             .push("exchange_rates");
@@ -44,8 +41,6 @@ public final class BankingConfig {
         return BigDecimal.valueOf(minor).multiply(fromRate).multiply(BigDecimal.valueOf(toScale))
             .divide(toRate.multiply(BigDecimal.valueOf(fromScale)), 0, RoundingMode.DOWN).longValueExact();
     }
-    public static String format(long minor, Currency c) {
-        return c.name() + " " + BigDecimal.valueOf(minor).divide(BigDecimal.valueOf(c.scale())).setScale(c == Currency.JPY ? 0 : 2).toPlainString();
-    }
+    public static String format(long minor, Currency c) { return Money.format(minor,c.name()); }
     private BankingConfig() {}
 }

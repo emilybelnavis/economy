@@ -18,6 +18,26 @@ public final class FinanceService implements EconomyApi {
     private static final Map<MinecraftServer, FinanceService> SERVICES = new IdentityHashMap<>();
     public final FinanceDatabase database;
     private final CompletableFuture<Void> ready;
+    private volatile BankingConfig.Currency currency;
+    private volatile String marketCurrency;
+    private volatile boolean changingCurrency;
+    private long marketDay = Long.MIN_VALUE;
+    private boolean marketDayPending;
+    public BankingConfig.Currency currency() { return currency; }
+    public String marketCurrency() { return marketCurrency; }
+    void currencyCommitted(BankingConfig.Currency selected) {
+        currency = selected;
+        marketCurrency = selected.name();
+    }
+    public boolean changingCurrency() { return changingCurrency; }
+    public void setChangingCurrency(boolean changing) { changingCurrency = changing; }
+    public CompletableFuture<Void> refreshCurrency() {
+        return database.worldCurrency().thenCombine(database.marketCurrency(), (world, market) -> {
+            currency = world == null ? null : BankingConfig.Currency.valueOf(world);
+            marketCurrency = market;
+            return (Void)null;
+        });
+    }
     private String rateDate;
     private boolean rateUpdatePending;
     private long retryRateAt;
@@ -30,11 +50,15 @@ public final class FinanceService implements EconomyApi {
             new FinanceDatabase.LegacyEntry(t.id().toString(), t.timestampMillis(), t.type().name(), t.amount(), t.balance(), t.memo())).toList()));
         Map<String, String> configuredRates = FinanceDefinitions.rates();
         database = new FinanceDatabase(server.getWorldPath(LevelResource.ROOT).resolve("economy/economy.sqlite"),
-            BankingConfig.CURRENCY.get().name(), FinanceDefinitions.scales(), configuredRates, FinanceDefinitions.stocks());
+            null, FinanceDefinitions.scales(), configuredRates, FinanceDefinitions.stocks());
         rateDate = LocalDate.now(ZoneOffset.UTC).toString();
         String initialDate = rateDate;
-        ready = database.ready().thenCompose(v -> database.importLegacy(balances, histories, legacyCurrency))
-            .thenCompose(v -> database.updateRates(configuredRates, initialDate));
+        ready = database.ready().thenCompose(v -> database.worldCurrency()).thenCompose(world -> {
+            if (world == null && (!balances.isEmpty() || !histories.isEmpty())) return database.selectWorldCurrency(legacyCurrency);
+            return CompletableFuture.completedFuture(null);
+        }).thenCompose(v -> database.importLegacy(balances, histories, legacyCurrency))
+            .thenCompose(v -> database.updateRates(configuredRates, initialDate))
+            .thenCompose(v -> refreshCurrency());
         ready.whenComplete((ignored, failure) -> {
             if (failure != null) org.slf4j.LoggerFactory.getLogger(FinanceService.class).error("Economy database initialization failed", failure);
         });
@@ -47,6 +71,7 @@ public final class FinanceService implements EconomyApi {
     public static void onStarted(MinecraftServer server) { get(server); }
     public static void onStopped(MinecraftServer server) {
         RegisterEntity.clearReservations();
+        WorldCurrencies.stopped(server);
         FinanceService service = SERVICES.remove(server);
         if (service != null) service.database.close();
     }
@@ -57,6 +82,16 @@ public final class FinanceService implements EconomyApi {
     public static void tick(MinecraftServer server) {
         FinanceService service = SERVICES.get(server);
         if (service == null) return;
+        if (server.getTickCount() % 20 == 0) WorldCurrencies.tick(server);
+        long day = Math.max(0, server.overworld().getDayTime() / 24000);
+        if (service.currency != null && !service.changingCurrency && !service.marketDayPending && day != service.marketDay) {
+            service.marketDayPending = true;
+            service.ready.thenCompose(v -> service.database.recordMarketDay(day)).whenComplete((ignored, error) -> server.execute(() -> {
+                service.marketDayPending = false;
+                if (error == null) service.marketDay = day;
+                else org.slf4j.LoggerFactory.getLogger(FinanceService.class).error("Could not record daily market prices",error);
+            }));
+        }
         String date = LocalDate.now(ZoneOffset.UTC).toString();
         if (!date.equals(service.rateDate) && !service.rateUpdatePending && server.getTickCount() >= service.retryRateAt) {
             service.rateUpdatePending = true;

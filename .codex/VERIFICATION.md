@@ -52,3 +52,22 @@ Check driver PRAGMA values on its writer connection; bank/market ledger reconcil
 transaction ID, no overdraft/oversell, close/open caps, FX including JPY, and postcommit caches.
 UI: 6x4 deposit grid, count/subtotal/deposit-total preview, exact denomination quantities and
 source account amount, owner/op setup, account closure FX, stock funding/search/whole-share trades.
+
+## World currency revision
+
+`moneyPresentationTest`, `withdrawalPlannerTest`, `currencyConfirmationTest` are included in build.
+FinanceDatabaseChecks additionally cover selection-once, safe old-schema inference, world rebase,
+foreign preservation, duplicate target merge, stock history14-day window, frozen projections and
+full rollback. Never test migrations against existing player worlds; stage new JDBC fixture paths.
+GameTestServer uses a disposable directory via init-script override for this revision. Original
+run-gametest/world and all existing world databases remain untouched. Verify first-join GUI in a
+fresh isolated client world, with no copied economy database or legacy balances.
+
+## Exchange history and input bounds
+
+`exchangeHistoryTest` is included in build and uses only fresh temporary SQLite fixtures.
+The exchange-history menu GameTest validates pair requests, date cursor, stock-page return and
+reach checks. Use a fresh init-script run directory when running the integration suite. Inspect
+long empty hints and focused long inputs in the client; both hints and labels must stay inside
+control borders at all GUI scales. No financial migrations or data writes are added by the
+historical reader.

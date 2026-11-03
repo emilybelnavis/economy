@@ -56,3 +56,11 @@ cached responses are intentionally reused. The cache stays outside version
 control; no copied website or full external dataset is committed. Requests cover
 only the target trading day. The source-list mapping is a reviewed fixed snapshot,
 so a later change to the website cannot silently change ranks or constituents.
+
+## Runtime denomination and chart
+
+CAD values are the immutable imported baseline. Initial world selection converts market prices
+into the selected world currency. Explicit operator world changes rebase prices and current
+chart display values atomically while preserving original records and source denominations.
+The chart records in-game daily prices, presents at most14days, and carries forward only a
+previously recorded value. New worlds have no invented pre-history.

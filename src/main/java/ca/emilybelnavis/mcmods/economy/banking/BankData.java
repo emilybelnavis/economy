@@ -26,7 +26,7 @@ public final class BankData extends SavedData {
         BankData data = server.overworld().getDataStorage().computeIfAbsent(factory, DATA_NAME);
         data.server = server;
         if (data.currency == null) {
-            data.currency = ca.emilybelnavis.mcmods.economy.BankingConfig.CURRENCY.get();
+            data.currency = ca.emilybelnavis.mcmods.economy.BankingConfig.Currency.CAD;
             data.setDirty();
         }
         return data;
