@@ -1,0 +1,440 @@
+{
+  "ids": [
+    "economy:white_atm",
+    "economy:white_cash_register",
+    "economy:orange_atm",
+    "economy:orange_cash_register",
+    "economy:magenta_atm",
+    "economy:magenta_cash_register",
+    "economy:light_blue_atm",
+    "economy:light_blue_cash_register",
+    "economy:yellow_atm",
+    "economy:yellow_cash_register",
+    "economy:lime_atm",
+    "economy:lime_cash_register",
+    "economy:pink_atm",
+    "economy:pink_cash_register",
+    "economy:gray_atm",
+    "economy:gray_cash_register",
+    "economy:light_gray_atm",
+    "economy:light_gray_cash_register",
+    "economy:cyan_atm",
+    "economy:cyan_cash_register",
+    "economy:purple_atm",
+    "economy:purple_cash_register",
+    "economy:blue_atm",
+    "economy:blue_cash_register",
+    "economy:brown_atm",
+    "economy:brown_cash_register",
+    "economy:green_atm",
+    "economy:green_cash_register",
+    "economy:red_atm",
+    "economy:red_cash_register",
+    "economy:black_atm",
+    "economy:black_cash_register",
+    "economy:bank_teller_station",
+    "economy:stock_trading_computer"
+  ],
+  "lang": {
+    "block.economy.white_atm": "White ATM",
+    "block.economy.white_cash_register": "White Cash Register",
+    "block.economy.orange_atm": "Orange ATM",
+    "block.economy.orange_cash_register": "Orange Cash Register",
+    "block.economy.magenta_atm": "Magenta ATM",
+    "block.economy.magenta_cash_register": "Magenta Cash Register",
+    "block.economy.light_blue_atm": "Light Blue ATM",
+    "block.economy.light_blue_cash_register": "Light Blue Cash Register",
+    "block.economy.yellow_atm": "Yellow ATM",
+    "block.economy.yellow_cash_register": "Yellow Cash Register",
+    "block.economy.lime_atm": "Lime ATM",
+    "block.economy.lime_cash_register": "Lime Cash Register",
+    "block.economy.pink_atm": "Pink ATM",
+    "block.economy.pink_cash_register": "Pink Cash Register",
+    "block.economy.gray_atm": "Gray ATM",
+    "block.economy.gray_cash_register": "Gray Cash Register",
+    "block.economy.light_gray_atm": "Light Gray ATM",
+    "block.economy.light_gray_cash_register": "Light Gray Cash Register",
+    "block.economy.cyan_atm": "Cyan ATM",
+    "block.economy.cyan_cash_register": "Cyan Cash Register",
+    "block.economy.purple_atm": "Purple ATM",
+    "block.economy.purple_cash_register": "Purple Cash Register",
+    "block.economy.blue_atm": "Blue ATM",
+    "block.economy.blue_cash_register": "Blue Cash Register",
+    "block.economy.brown_atm": "Brown ATM",
+    "block.economy.brown_cash_register": "Brown Cash Register",
+    "block.economy.green_atm": "Green ATM",
+    "block.economy.green_cash_register": "Green Cash Register",
+    "block.economy.red_atm": "Red ATM",
+    "block.economy.red_cash_register": "Red Cash Register",
+    "block.economy.black_atm": "Black ATM",
+    "block.economy.black_cash_register": "Black Cash Register",
+    "block.economy.bank_teller_station": "Bank Teller Station",
+    "block.economy.stock_trading_computer": "Stock Trading Computer"
+  },
+  "shapes_north": {
+    "atm": [
+      [
+        2,
+        0,
+        2,
+        30,
+        1,
+        15
+      ],
+      [
+        2,
+        1,
+        3,
+        30,
+        16,
+        15
+      ],
+      [
+        2,
+        1,
+        2.5,
+        4,
+        16,
+        3
+      ],
+      [
+        28,
+        1,
+        2.5,
+        30,
+        16,
+        3
+      ],
+      [
+        6,
+        3,
+        2.75,
+        26,
+        11,
+        3
+      ],
+      [
+        6,
+        12,
+        2,
+        26,
+        14.5,
+        3
+      ],
+      [
+        4,
+        15,
+        1.5,
+        28,
+        16,
+        4
+      ],
+      [
+        2,
+        16,
+        11,
+        30,
+        32,
+        15
+      ],
+      [
+        2,
+        16,
+        3,
+        6,
+        30,
+        11
+      ],
+      [
+        26,
+        16,
+        3,
+        30,
+        30,
+        11
+      ],
+      [
+        2,
+        30,
+        2,
+        30,
+        32,
+        11
+      ],
+      [
+        6,
+        19,
+        5.5,
+        26,
+        30,
+        6
+      ],
+      [
+        7.0,
+        21,
+        5,
+        21.0,
+        28.5,
+        5.6
+      ],
+      [
+        22,
+        24,
+        4.8,
+        25.0,
+        25,
+        5.6
+      ],
+      [
+        22.4,
+        27,
+        4.7,
+        24.8,
+        27.8,
+        5.4
+      ],
+      [
+        4,
+        16,
+        2,
+        28,
+        18,
+        11
+      ],
+      [
+        8,
+        18,
+        3,
+        20,
+        18.4,
+        8.5
+      ],
+      [
+        21.6,
+        18,
+        4,
+        24.8,
+        18.3,
+        7
+      ]
+    ],
+    "bank_teller_station": [
+      [
+        0,
+        0,
+        2,
+        32,
+        14,
+        14
+      ],
+      [
+        0,
+        14,
+        1,
+        32,
+        16,
+        15
+      ],
+      [
+        0,
+        12,
+        1,
+        32,
+        14,
+        2
+      ],
+      [
+        0,
+        16,
+        8,
+        2,
+        32,
+        9
+      ],
+      [
+        30,
+        16,
+        8,
+        32,
+        32,
+        9
+      ],
+      [
+        0,
+        30,
+        8,
+        32,
+        32,
+        9
+      ],
+      [
+        2,
+        22,
+        8.2,
+        30,
+        30,
+        8.8
+      ],
+      [
+        2,
+        16,
+        8.2,
+        10,
+        22,
+        8.8
+      ],
+      [
+        22,
+        16,
+        8.2,
+        30,
+        22,
+        8.8
+      ],
+      [
+        10,
+        16,
+        7.7,
+        22,
+        17.0,
+        10
+      ],
+      [
+        22,
+        16,
+        11,
+        28,
+        24,
+        13
+      ],
+      [
+        4,
+        16,
+        11,
+        12,
+        17.0,
+        14
+      ],
+      [
+        4,
+        16,
+        3,
+        10,
+        16.6,
+        6
+      ]
+    ],
+    "stock_trading_computer": [
+      [
+        0,
+        0,
+        2,
+        32,
+        2,
+        14
+      ],
+      [
+        2,
+        2,
+        10,
+        6,
+        14,
+        13
+      ],
+      [
+        26,
+        2,
+        10,
+        30,
+        14,
+        13
+      ],
+      [
+        0,
+        14,
+        1,
+        32,
+        16,
+        15
+      ],
+      [
+        2,
+        16,
+        11,
+        14,
+        18,
+        13
+      ],
+      [
+        6,
+        18,
+        11,
+        10,
+        20,
+        12
+      ],
+      [
+        1.0,
+        20,
+        10,
+        15.0,
+        32,
+        12
+      ],
+      [
+        17.0,
+        20,
+        10,
+        31.0,
+        32,
+        12
+      ],
+      [
+        21.0,
+        16,
+        11,
+        27.0,
+        20,
+        12
+      ],
+      [
+        4,
+        16,
+        3,
+        22,
+        17.0,
+        7
+      ],
+      [
+        24,
+        16,
+        4,
+        28,
+        17.0,
+        6
+      ],
+      [
+        22,
+        2,
+        3,
+        30,
+        13.0,
+        9
+      ],
+      [
+        23.0,
+        10,
+        2.9,
+        25.0,
+        12,
+        3
+      ]
+    ]
+  },
+  "shape_rotation": "North is identity; east rotates 90 degrees around (8,8), south 180, west 270. Bounds are x1,y1,z1,x2,y2,z2 in block pixels.",
+  "footprint": {
+    "width": 2,
+    "height": 2,
+    "depth": 1
+  }
+}

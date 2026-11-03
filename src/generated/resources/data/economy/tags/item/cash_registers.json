@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "economy:cash_register",
+    "economy:white_cash_register",
+    "economy:orange_cash_register",
+    "economy:magenta_cash_register",
+    "economy:light_blue_cash_register",
+    "economy:yellow_cash_register",
+    "economy:lime_cash_register",
+    "economy:pink_cash_register",
+    "economy:gray_cash_register",
+    "economy:light_gray_cash_register",
+    "economy:cyan_cash_register",
+    "economy:purple_cash_register",
+    "economy:blue_cash_register",
+    "economy:brown_cash_register",
+    "economy:green_cash_register",
+    "economy:red_cash_register",
+    "economy:black_cash_register"
+  ]
+}

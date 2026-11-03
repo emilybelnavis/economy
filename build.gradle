@@ -1,0 +1,73 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+version = '0.1.0-alpha'
+group = 'ca.emilybelnavis.mc-mods.economy'
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.withSourcesJar()
+neoForge {
+    version = '21.1.252'
+    runs {
+        client { client(); gameDirectory = project.file('run') }
+        server { server(); gameDirectory = project.file('run-server'); programArgument '--nogui' }
+    }
+    mods { economy { sourceSet sourceSets.main } }
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+sourceSets {
+    ledgerChecks {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+tasks.register('ledgerTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'dev.emily.economy.banking.LedgerTest'
+    enableAssertions = true
+}
+tasks.named('check') { dependsOn 'ledgerTest' }
+
+tasks.register('persistenceTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'dev.emily.economy.banking.BankPersistenceTest'
+    enableAssertions = true
+}
+tasks.named('check') { dependsOn 'persistenceTest' }
+// Repository instructions are not game resources or published source assets.
+tasks.named('processResources') { exclude '**/AGENTS.md' }
+tasks.named('sourcesJar') { exclude '**/AGENTS.md' }
+
+// Original collectible art is reproducible with tools/generate_collectibles.py.
+sourceSets.main.resources.srcDir('src/generated/resources')
+
+// Collision shapes are generated from the same source cuboids as the machine models.
+sourceSets.main.java.srcDir('src/generated/java')
+tasks.register('machineLayoutTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'dev.emily.economy.WideMachineLayoutChecks'
+}
+tasks.register('machineShapeTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'dev.emily.economy.MachineShapeChecks'
+    workingDir = projectDir
+}
+tasks.named('check') { dependsOn 'machineLayoutTest', 'machineShapeTest' }
+
+// Dedicated headless test world; test classes/resources are excluded from the release JAR.
+sourceSets { machineGameTests {
+    compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+    runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+} }
+neoForge {
+    mods { economy { sourceSet sourceSets.machineGameTests } }
+    runs { gameTestServer {
+        type = 'gameTestServer'
+        gameDirectory = project.file('run-gametest')
+        systemProperty 'neoforge.enabledGameTestNamespaces', 'economy'
+    } }
+}

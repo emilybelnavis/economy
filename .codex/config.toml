@@ -1,0 +1,10 @@
+# Project defaults for new sessions; explicit session settings may override these.
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+
+[agents]
+enabled = true
+# Researcher and Worker may run alongside the primary agent when independent work warrants it.
+max_concurrent_threads_per_session = 2
+default_subagent_model = "gpt-6.1-sol"
+default_subagent_reasoning_effort = "low"

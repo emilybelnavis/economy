@@ -1,0 +1,25 @@
+{
+  "parent": "economy:item/atm",
+  "textures": {
+    "trim": "economy:block/terminal_trim_white"
+  },
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        1.993572,
+        -1.418476,
+        -2.850116
+      ],
+      "scale": [
+        0.331687,
+        0.331687,
+        0.331687
+      ]
+    }
+  }
+}

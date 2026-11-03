@@ -1,0 +1,3 @@
+/economy balance
+/economy pay
+/economy pay @s 69000

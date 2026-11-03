@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "economy:bank_teller_station"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        },
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "economy:bank_teller_station",
+          "properties": {
+            "half": "lower",
+            "right": "false"
+          }
+        }
+      ]
+    }
+  ]
+}

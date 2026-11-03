@@ -1,0 +1,20 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+[[mods]]
+modId="economy"
+version="0.1.0"
+displayName="Economy"
+description='''Coins, banknotes, banking, ATMs, and player shops.'''
+[[dependencies.economy]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.252]"
+ordering="NONE"
+side="BOTH"
+[[dependencies.economy]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"

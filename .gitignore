@@ -1,0 +1,20 @@
+.gradle/
+build/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+run*/logs/
+run*/crash-reports/
+run*/saves/
+run*/screenshots/
+run*/downloads/
+run*/debug/
+run*/telemetry/
+*.log
+
+# Isolated GameTest runtime world
+run-gametest/world/
+run-gametest/reports/
+run-gametest/server.properties
+run-gametest/debug/
