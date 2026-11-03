@@ -8,7 +8,7 @@ import java.util.UUID;
 /** Ordered trusted SQL; the complete pending chain shares one transaction. */
 final class SchemaMigrations {
     static final int MINIMUM_SUPPORTED = 1;
-    static final int CURRENT = 5;
+    static final int CURRENT = 6;
     static final int APPLICATION_ID = 0x45434F4E;
     record Migration(int version, String name, List<String> statements) {
         Migration { statements = List.copyOf(statements); }
@@ -21,7 +21,8 @@ final class SchemaMigrations {
                     "ALTER TABLE foundation_metadata ADD COLUMN identity_protocol INTEGER NOT NULL DEFAULT 1 CHECK(identity_protocol=1)")),
             new Migration(3, "immutable journal and durable operation outcomes", JournalSchema.statements()),
             new Migration(4, "projection generations and deterministic economic checkpoints", RecoverySchema.statements()),
-            new Migration(5, "bounded FX publication and policy lookups", FxSchema.statements()));
+            new Migration(5, "bounded FX publication and policy lookups", FxSchema.statements()),
+            new Migration(6, "player account catalog and constraints", AccountSchema.statements()));
 
     static void apply(Connection connection, UUID worldId, int from, int target, List<Migration> registry) {
         int expected = 1;

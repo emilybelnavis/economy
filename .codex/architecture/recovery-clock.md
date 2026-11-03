@@ -153,7 +153,7 @@ is covered by OfflineWalTest. A live DB-only copy is NEVER a production backup p
 restoreEconomyWorld validates receipts, inventory/hashes, UUID/identity, exact supported mod/schema/
 journal versions, committed record decoders, projection/checkpoint checksums and economic versions/
 completions. Valid older projection checkpoints may rebuild after restore. Current general restore
-supports clean schema-4 and schema-5 world-backup-v1 manifests; earlier legacy-stopped upgrade receipts are
+supports clean schema-4 through schema-6 world-backup-v1 manifests; earlier legacy-stopped upgrade receipts are
 preserved but are not asserted to carry this newer clean-world proof.
 
 Restore stages in a separate sibling directory and publishes with a non-replacing move only after

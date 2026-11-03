@@ -33,6 +33,7 @@ final class OfflineInspector {
             try(var sql=c.createStatement();var rows=sql.executeQuery("PRAGMA foreign_key_check")) { if(rows.next()) throw new IOException("Broken backup references"); }
             JournalSchema.validate(c);RecoverySchema.validate(c);
             if (schema >= 5) FxSchema.validate(c);
+            if (schema >= 6) AccountSchema.validate(c);
             var validation=new JournalCompatibility(c,configuration.records(),id); while(!validation.step()) {}
             long last=Long.parseLong(scalar(c,"SELECT COALESCE(max(sequence),0) FROM journal_transactions"));
             Map<String,ProjectionManager.Definition> projections=new HashMap<>(); configuration.projections().forEach(d->projections.put(d.name(),d));

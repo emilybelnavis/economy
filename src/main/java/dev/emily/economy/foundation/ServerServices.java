@@ -1,8 +1,16 @@
 package dev.emily.economy.foundation;
 
 import java.nio.file.Path;
+import dev.emily.economy.account.AccountCatalog;
+import dev.emily.economy.account.AccountRebasePlanner;
+import dev.emily.economy.api.AccountIdentity;
+import dev.emily.economy.api.FundingEligibility;
+import dev.emily.economy.api.Money;
+import dev.emily.economy.api.PartyRef;
+import dev.emily.economy.api.Identifiers.AccountId;
 import dev.emily.economy.storage.StorageException;
 import dev.emily.economy.fx.FxDiagnostics;
+import dev.emily.economy.fx.DenominationChange;
 import dev.emily.economy.recovery.FoundationRuntime;
 import dev.emily.economy.storage.FoundationStore;
 import dev.emily.economy.journal.Journal;
@@ -12,12 +20,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import dev.emily.economy.api.Identifiers.ActorId;
+import dev.emily.economy.api.Identifiers.OperationId;
+import dev.emily.economy.api.Identifiers.PlayerId;
+import dev.emily.economy.api.Identifiers.RequestId;
+import dev.emily.economy.api.Identifiers.WorldId;
+import java.util.Optional;
 import java.time.Duration;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.MinecraftServer;
 
 /** One instance per server. Minecraft objects must never be captured in worker suppliers. */
 public final class ServerServices {
@@ -126,6 +143,189 @@ public final class ServerServices {
             throw new IllegalStateException("Journal requires persistent foundation storage");
         return new JournalService(this,
                 new JournalEngine(store, access, handlers), publisher);
+    }
+
+    WorldId partyWorld() {
+        checkOwner();
+        var details = storageDetails;
+        return state == State.READY && details != null ? new WorldId(details.worldId()) : null;
+    }
+
+    public JournalService.Submission submitOwned(PartyAuthorization.Grant grant, Journal.Kind kind,
+                                                 OperationId operationId, RequestId requestId,
+                                                 Journal.CanonicalRequest request, JournalEngine.Registration handler,
+                                                 JournalService.Publisher publisher) {
+        var operation = PartyOperation.owned(grant, kind, operationId, requestId, request, handler);
+        return partyJournal(operation, publisher).submit(operation.intent());
+    }
+
+    public CompletionStage<Optional<Journal.Outcome>> lookupOwned(
+            PartyAuthorization.Grant grant, Journal.Kind kind, OperationId operationId, RequestId requestId,
+            Journal.CanonicalRequest request, JournalEngine.Registration handler) {
+        var operation = PartyOperation.owned(grant, kind, operationId, requestId, request, handler);
+        return partyJournal(operation, null).lookup(operation.intent());
+    }
+
+    /** Invoke only after an authenticated player's first authorized banking interaction. */
+    public JournalService.Submission initializePrimary(PartyAuthorization.Grant grant, OperationId operationId,
+                                                       RequestId requestId, JournalService.Publisher publisher) {
+        var operation = accountInitialization(grant, operationId, requestId, AccountIdentity.Purpose.BANK);
+        return partyJournal(operation, publisher).submit(operation.intent());
+    }
+
+    /** Separate funding identity for a trusted trading integration. */
+    public JournalService.Submission initializeTrading(PartyAuthorization.Grant grant, OperationId operationId,
+                                                       RequestId requestId, JournalService.Publisher publisher) {
+        var operation = accountInitialization(grant, operationId, requestId, AccountIdentity.Purpose.TRADING);
+        return partyJournal(operation, publisher).submit(operation.intent());
+    }
+
+    public CompletionStage<Optional<Journal.Outcome>> lookupPrimaryOperation(
+            PartyAuthorization.Grant grant, OperationId operationId, RequestId requestId) {
+        var operation = accountInitialization(grant, operationId, requestId, AccountIdentity.Purpose.BANK);
+        return partyJournal(operation, null).lookup(operation.intent());
+    }
+
+    public CompletionStage<Optional<Journal.Outcome>> lookupTradingOperation(
+            PartyAuthorization.Grant grant, OperationId operationId, RequestId requestId) {
+        var operation = accountInitialization(grant, operationId, requestId, AccountIdentity.Purpose.TRADING);
+        return partyJournal(operation, null).lookup(operation.intent());
+    }
+
+    /** Trusted owner lookup. Missing and unauthorized IDs have the same result. */
+    public CompletionStage<Optional<AccountIdentity>> findOwnedAccount(PartyAuthorization.Grant grant, AccountId id) {
+        return readAccounts(grant, false, reads -> AccountCatalog.find(reads, grant.target(), id));
+    }
+
+    /** Resolve a fresh owner grant at admission for each requested page. */
+    public CompletionStage<Optional<AccountQueries.Page>> listOwnedAccounts(
+            PartyAuthorization.Grant grant, String cursor, int limit) {
+        var anchor = AccountQueries.cursor(cursor, limit);
+        return readAccounts(grant, false, reads -> AccountQueries.page(reads, grant.target(), anchor, limit));
+    }
+
+    public CompletionStage<Optional<AccountQueries.FundsStatus>> accountFunds(
+            PartyAuthorization.Grant grant, AccountId id) {
+        return readAccounts(grant, false, reads -> AccountCatalog.find(reads, grant.target(), id)
+                .map(account -> AccountQueries.FundsStatus.LEDGER_UNAVAILABLE));
+    }
+
+    public CompletionStage<Optional<FundingEligibility.Status>> evaluateFunding(
+            PartyAuthorization.Grant grant, AccountId id, long expectedRevision, Money amount) {
+        return readAccounts(grant, false, reads -> AccountCatalog.find(reads, grant.target(), id)
+                .map(account -> FundingEligibility.withoutLedger().evaluate(account, expectedRevision, amount)));
+    }
+
+    CompletionStage<Optional<AccountIdentity>> inspectAccount(
+            PartyAuthorization.Grant grant, AccountId id, BooleanSupplier live) {
+        return inspectAccounts(grant, Map.of("account", id.value().toString()), live,
+                reads -> AccountCatalog.find(reads, grant.target(), id));
+    }
+
+    CompletionStage<Optional<AccountQueries.Page>> inspectAccounts(
+            PartyAuthorization.Grant grant, String cursor, int limit, BooleanSupplier live) {
+        var anchor = AccountQueries.cursor(cursor, limit);
+        if (anchor != null && !anchor.matches(grant.target()))
+            return CompletableFuture.completedStage(Optional.empty());
+        return inspectAccounts(grant, Map.of("cursor", cursor == null ? "" : cursor, "limit", Integer.toString(limit)),
+                live, reads -> AccountQueries.page(reads, grant.target(), anchor, limit));
+    }
+
+    private <T> CompletionStage<Optional<T>> inspectAccounts(
+            PartyAuthorization.Grant grant, Map<String, String> scope, BooleanSupplier live,
+            Function<JournalEngine.ReadView, Optional<T>> query) {
+        checkOwner();
+        if (!allowsAccountRead(grant, partyWorld(), true) || !live.getAsBoolean())
+            return CompletableFuture.completedStage(Optional.empty());
+
+        var operation = PartyOperation.inspection(grant, new OperationId(UUID.randomUUID()),
+                new RequestId(UUID.randomUUID()), scope);
+        return partyJournal(operation, null).submit(operation.intent()).completion().thenCompose(delivery -> {
+            var outcome = delivery.outcome();
+            if (outcome.status() != Journal.Status.COMMITTED) {
+                String code = outcome.result().code();
+                var kind = switch (code) {
+                    case "OVERLOADED" -> StorageException.Kind.OVERLOAD;
+                    case "ECONOMIC_CATCH_UP" -> StorageException.Kind.ECONOMIC_CATCH_UP;
+                    default -> outcome.status() == Journal.Status.UNKNOWN ? StorageException.Kind.UNKNOWN_COMMIT : null;
+                };
+                return CompletableFuture.failedStage(kind == null ? new IllegalStateException(code)
+                        : new StorageException(kind, code));
+            }
+            if (!live.getAsBoolean()) return CompletableFuture.completedStage(Optional.empty());
+            return readAccounts(grant, true, query).thenApply(result -> live.getAsBoolean() ? result : Optional.empty());
+        });
+    }
+
+    private <T> CompletionStage<Optional<T>> readAccounts(
+            PartyAuthorization.Grant grant, boolean inspection, Function<JournalEngine.ReadView, Optional<T>> query) {
+        checkOwner();
+        if (!(storage instanceof FoundationStore store))
+            throw new IllegalStateException("Account lookup requires persistent foundation storage");
+        requireReady();
+        if (!allowsAccountRead(grant, partyWorld(), inspection))
+            return CompletableFuture.completedStage(Optional.empty());
+        return storage(grant.actor(), () -> store.transaction(tx ->
+                allowsAccountRead(grant, store.snapshot().worldId(), inspection) ? query.apply(tx::query) : Optional.empty()));
+    }
+
+    private boolean allowsAccountRead(PartyAuthorization.Grant grant, WorldId world, boolean inspection) {
+        return grant.target().owner() instanceof PartyRef.Player && (inspection
+                ? grant.allows(world, sessionId, grant.actor(), InspectionAudit.KIND)
+                : grant.allowsOwnership(world, sessionId));
+    }
+
+    /** Internal A4 planning entry point. The readers must be detached and use only the supplied snapshot. */
+    public CompletionStage<AccountRebasePlanner.Result> planAccountRebase(
+            CommandSourceStack source, Function<MinecraftServer, ServerServices> sessions,
+            DenominationChange.Confirmed confirmed, AccountRebasePlanner.DenominationReader denomination,
+            AccountRebasePlanner.ClaimsReader claims) {
+        checkOwner();
+        var intent = confirmed.intent();
+        var target = new PartyRef(intent.world(), new PartyRef.Player(intent.actor()));
+        var authority = PartyAuthorization.inspection(source, sessions, target);
+        var denied = new AccountRebasePlanner.Result(AccountRebasePlanner.Status.UNAUTHORIZED, null);
+        if (authority.isEmpty() || sessions.apply(source.getServer()) != this
+                || !intent.actor().equals(authority.get().actor()) || !sessionId.equals(intent.session()))
+            return CompletableFuture.completedStage(denied);
+
+        if (!(storage instanceof FoundationStore store))
+            throw new IllegalStateException("Rebase planning requires persistent foundation storage");
+        PlayerId actor = intent.actor();
+        return storage(actor, () -> store.transaction(tx -> {
+            var world = store.snapshot().worldId();
+            if (!world.equals(intent.world())) return denied;
+            JournalEngine.ReadView reads = tx::query;
+            return AccountRebasePlanner.plan(reads, world, sessionId, actor, confirmed,
+                    denomination.read(reads).orElse(null), claims);
+        })).thenApply(result -> sessions.apply(source.getServer()) == this
+                && PartyAuthorization.inspection(source, sessions, target).isPresent() ? result : denied);
+    }
+
+    private static PartyOperation accountInitialization(PartyAuthorization.Grant grant, OperationId operationId,
+                                                        RequestId requestId, AccountIdentity.Purpose purpose) {
+        var kind = purpose == AccountIdentity.Purpose.BANK
+                ? AccountCatalog.INITIALIZE_PRIMARY : AccountCatalog.INITIALIZE_TRADING;
+        return PartyOperation.owned(grant, kind, operationId, requestId, new Journal.CanonicalRequest(1, Map.of()),
+                AccountCatalog.initialization(grant.target(), purpose));
+    }
+
+    /** A3-04 must await a committed receipt and recheck the live audience before disclosing data. */
+    public JournalService.Submission auditInspection(PartyAuthorization.Grant grant, OperationId operationId,
+                                                     RequestId requestId) {
+        var operation = PartyOperation.inspection(grant, operationId, requestId);
+        return partyJournal(operation, null).submit(operation.intent());
+    }
+
+    private JournalService partyJournal(PartyOperation operation, JournalService.Publisher publisher) {
+        checkOwner();
+        if (!(storage instanceof FoundationStore store))
+            throw new IllegalStateException("Journal requires persistent foundation storage");
+        return new JournalService(this, operation.engine(store, sessionId),
+                publisher == null ? new JournalService.Publisher() {
+                    public void invalidate(Journal.Outcome committed) {}
+                    public void publish(Journal.Outcome terminal) {}
+                } : publisher);
     }
 
     public UUID sessionId() { return sessionId; }

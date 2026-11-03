@@ -22,6 +22,15 @@ public final class DenominationChange {
     public record Confirmation(UUID id, WorldId world, UUID session, PlayerId actor,
                                EconomyCurrency target, long revision, long startedNanos) {}
 
+    /** Proof of successful second confirmation, issued only by this protocol. */
+    public static final class Confirmed {
+        private final Confirmation intent;
+
+        private Confirmed(Confirmation intent) { this.intent = intent; }
+
+        public Confirmation intent() { return intent; }
+    }
+
     public Confirmation first(PlayerId actor, EconomyCurrency target, long revision, boolean authorized, long now) {
         if (!authorized || revision < 0 || target == null || actor == null) {
             throw new IllegalArgumentException("Invalid denomination confirmation");
@@ -36,13 +45,19 @@ public final class DenominationChange {
     /** Invoke at authoritative admission with live permission and the current committed revision. */
     public Confirmation second(Confirmation candidate, PlayerId actor, long currentRevision,
                                boolean authorized, long now) {
+        return confirm(candidate, actor, currentRevision, authorized, now).intent();
+    }
+
+    /** Issues a detached proof for bounded planning. Recheck live authority before each use. */
+    public Confirmed confirm(Confirmation candidate, PlayerId actor, long currentRevision,
+                             boolean authorized, long now) {
         var value = pending.get(actor);
         if (!authorized || value == null || !value.equals(candidate) || value.revision() != currentRevision
                 || expired(value, now)) {
             throw new IllegalArgumentException("Denomination confirmation unavailable");
         }
         pending.remove(actor);
-        return value;
+        return new Confirmed(value);
     }
 
     /** Disconnect or loss of authorization revokes the pending confirmation. */

@@ -39,7 +39,7 @@ class SqliteStorageTest {
         assertEquals("wal", snapshot.journalMode()); assertEquals(2, snapshot.synchronous());
         assertTrue(snapshot.foreignKeys()); assertEquals(5000, snapshot.busyTimeoutMillis());
         var rows = first.transaction(tx -> tx.query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", List.of(), 32));
-        assertEquals(List.of("economic_metadata", "economic_systems", "economic_updates", "economic_versions", "foundation_metadata", "journal_records", "journal_transactions", "migration_history", "operation_outcomes", "projection_cells", "projection_generations", "projection_heads", "runtime_state", "sqlite_sequence"), rows.stream().map(r -> r.get("name")).toList());
+        assertEquals(List.of("account_catalog", "economic_metadata", "economic_systems", "economic_updates", "economic_versions", "foundation_metadata", "journal_records", "journal_transactions", "migration_history", "operation_outcomes", "projection_cells", "projection_generations", "projection_heads", "runtime_state", "sqlite_sequence"), rows.stream().map(r -> r.get("name")).toList());
         assertThrows(UnsupportedOperationException.class, () -> rows.getFirst().put("name", "changed"));
         first.close();
         var reopened = open(one); assertEquals(snapshot.worldId(), reopened.snapshot().worldId()); reopened.close();
@@ -94,9 +94,9 @@ class SqliteStorageTest {
         assertEquals("fixture region", Files.readString(backup.resolve("world/region/test.mca")));
         var store = open(world);
         assertEquals(id, store.snapshot().worldId().value());
-        assertEquals(5, store.snapshot().schemaVersion());
+        assertEquals(6, store.snapshot().schemaVersion());
         var history = store.transaction(tx -> tx.query("SELECT version FROM migration_history ORDER BY version", List.of(), 32));
-        assertEquals(List.of("1", "2", "3", "4", "5"), history.stream().map(r -> r.get("version")).toList());
+        assertEquals(List.of("1", "2", "3", "4", "5", "6"), history.stream().map(r -> r.get("version")).toList());
         store.close();
     }
     @Test void changedBackupAndRunningWorldCannotAuthorizeUpgrade() throws Exception {
@@ -118,8 +118,9 @@ class SqliteStorageTest {
         Path world = world("rollback"); UUID id = versionOne(world);
         try (var c = DriverManager.getConnection("jdbc:sqlite:" + world.resolve("economy/economy.sqlite"))) {
             var migrations = new ArrayList<>(SchemaMigrations.REGISTRY);
-            migrations.add(new SchemaMigrations.Migration(6, "failure fixture", List.of("CREATE TABLE transient_fixture(id TEXT)", "INVALID SQL")));
-            StorageException error = assertThrows(StorageException.class, () -> SchemaMigrations.apply(c, id, 1, 6, migrations));
+            int failingVersion = SchemaMigrations.CURRENT + 1;
+            migrations.add(new SchemaMigrations.Migration(failingVersion, "failure fixture", List.of("CREATE TABLE transient_fixture(id TEXT)", "INVALID SQL")));
+            StorageException error = assertThrows(StorageException.class, () -> SchemaMigrations.apply(c, id, 1, failingVersion, migrations));
             assertEquals(StorageException.Kind.MIGRATION, error.kind());
             try (var s = c.createStatement(); var r = s.executeQuery("PRAGMA user_version")) { assertTrue(r.next()); assertEquals(1, r.getInt(1)); }
             try (var s = c.createStatement(); var r = s.executeQuery("SELECT count(*) FROM migration_history")) { assertTrue(r.next()); assertEquals(1, r.getInt(1)); }

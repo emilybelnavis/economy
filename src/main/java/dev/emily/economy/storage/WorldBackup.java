@@ -22,7 +22,7 @@ public final class WorldBackup {
         UpgradeBackup.validateBackup(backup,receipt);
         var metadata=UpgradeBackup.load(backup.resolve("foundation-manifest.properties"));
         if(!"economy-world-backup-v1".equals(metadata.getProperty("format")) || !"true".equals(metadata.getProperty("clean-shutdown"))
-                || !"0.1.0".equals(metadata.getProperty("mod-version")) || !Set.of("4", "5").contains(metadata.getProperty("schema-version", "")) || !"1".equals(metadata.getProperty("journal-version"))) throw new IOException("Incompatible or unclean backup manifest");
+                || !"0.1.0".equals(metadata.getProperty("mod-version")) || !Set.of("4", "5", "6").contains(metadata.getProperty("schema-version", "")) || !"1".equals(metadata.getProperty("journal-version"))) throw new IOException("Incompatible or unclean backup manifest");
         Instant.parse(metadata.getProperty("backup-utc"));
         OfflineInspector.validate(backup.resolve("world"),configuration);
         var actual=OfflineInspector.metadata(backup.resolve("world"));

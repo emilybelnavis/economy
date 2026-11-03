@@ -53,7 +53,7 @@ and upstream license files, and explicitly in additionalRuntimeClasspath for dev
 Effective pragmas are verified: WAL, synchronous=2 (FULL), foreign_keys=1, busy_timeout=5000ms.
 No automatic busy retry is performed beyond SQLite's finite busy timeout.
 
-application_id=0x45434F4E identifies redesigned storage. Current schema=5; minimum=1. V3 adds the [journal](journal.md); V4 adds [recovery and clock metadata](recovery-clock.md). V5 adds the [FX journal indexes and activation-scoped observation](fx.md).
+application_id=0x45434F4E identifies redesigned storage. Current schema=6; minimum=1. V3 adds the [journal](journal.md); V4 adds [recovery and clock metadata](recovery-clock.md). V5 adds the [FX journal indexes and activation-scoped observation](fx.md). V6 adds the [account catalog](accounts.md).
 V1 creates only foundation_metadata (world UUID, product, schema version) and migration_history.
 V2 adds explicit identity_protocol=1. user_version must match metadata and contiguous
 recognized migration history. Newer/older unsupported versions and legacy/foreign databases
