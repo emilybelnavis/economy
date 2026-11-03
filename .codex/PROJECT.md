@@ -1,100 +1,69 @@
 # Economy project
 
-## Identity and pins
+## Identity
 
-Mod ID `economy`; package `ca.emilybelnavis.mcmods.economy`; version 0.1.0; MIT license.
-Gradle group/project ID: `ca.emilybelnavis.mcmods.economy`.
-Maven coordinates: `ca.emilybelnavis.mcmods.economy:economy:0.1.0`.
-Minecraft 1.21.1 / NeoForge 21.1.252 / Java 21 / ModDevGradle 2.0.148 / Gradle 9.2.1.
-No extra mod dependencies. Client/server runs register `sourceSets.main`.
+Group/package `ca.emilybelnavis.mcmods.economy`; mod/resource ID `economy`.
+Minecraft1.21.1, NeoForge21.1.252, Java21, ModDevGradle2.0.148; version controlled in build.gradle.
+SQLite JDBC3.46.1.0 is implementation + jarJar + additionalRuntimeClasspath for development runs.
+All runs register main and dev-only GameTest sources. No integration mods are bundled.
 
-## Architecture index
+## Finance architecture
 
-- `Economy.java`: item/block/entity registries and twelve ordered creative tabs.
-- `CollectibleItems.java`: 126 inert items (8 cards, 61 coins, 57 bills); catalog order per series.
-- `DecorativeItem.java`: localized collectible tooltip; cards stack to one, currency to 64.
-- `api/`: server-thread public EconomyApi and immutable Transaction snapshots.
-- `banking/Ledger.java`: checked integer arithmetic, validated atomic in-process transfers.
-- `banking/BankData.java`: versioned overworld SavedData, UUID accounts, 100 history entries/account.
-- `EconomyCommands.java`: balance, online payments, history, shop pricing, ATM information.
-- `TerminalVariants.java`: 16 dye variants each for ATM/register, two decorative workstations,
-  and the complete set of 17 valid register blocks for RegisterEntity.
-- `WorkstationBlock.java`: 2×2 decorative teller/trading workstations with generated collision shapes.
-- `WideMachineBlock.java`, `WideMachineLayout.java`: four-tile 2×2 footprint, placement/support,
-  anchor ownership, whole-machine cleanup/loot, explosion routing, and unloaded-chunk guards.
-- `AtmBlock.java`: existing ATM interaction from every section.
-- `MachineShapes.java` in `src/generated/java`: shared clipped/rotated collision geometry.
-- `tools/generate_wide_machines.py`: 2×2 models/states/loot; immutable 0.1.4 sources in
-  `tools/model_sources/`; invokes `generate_machine_shapes.py` for server geometry.
-- `TerminalBlock.java`, `RegisterEntity.java`: register placement, owner/product/price persistence,
-  inventory planning and digital purchases from the single inventory directly below.
-- `Messages.java`, `src/main/resources/assets/economy/lang/en_us.json`: messages/localization.
-- `tools/collectibles.json`: visual face values, names, palettes; no economic values are assigned.
-- `tools/generate_collectibles.py`: original pixel art/models to `src/generated/resources`.
-  Run this to regenerate assets; preserve authored translations. Preview goes to `art/`.
-- `src/ledgerChecks/`: arithmetic, SavedData, machine coordinate and assembled-shape tests.
-- `src/machineGameTests/`: dev-only server-world placement/obstruction/loot/support checks.
-  `runGameTestServer` uses `run-gametest`, never the development client world.
-- `src/main/java/AGENTS.md`, `src/main/resources/AGENTS.md`: scoped guidance.
-- `.codex/VERIFICATION.md`: current checks; `history/verification.md`: historical evidence.
+- `storage/FinanceDatabase`: one FIFO executor and JDBC connection per world. All filesystem/JDBC
+  initialization and queries run on that executor. WAL/FULL/FK/busy_timeout5000. Shutdown alone
+  waits for drain. Balances/shares/order settlement/ledger updates use one transaction.
+- Tables: accounts, append-only ledger, exchange_rates, historical_rates, stocks, stock_prices,
+  stock_price_history, holdings, orders, trades, metadata. Ledger account/time and sequence indexes;
+  transaction UUID ties paired movements. SQL triggers reject ledger UPDATE/DELETE.
+- Account/holding LRU caches capped256 owners, invalidated only after commit and evicted at logout.
+  FX/current price caches; no history cache. Only active in-flight orders enter the order cache.
+- `FinanceService`: lifecycle, old SavedData export/import, ready gate, daily configured FX batches,
+  retry after failure, async primary-account API. Captures Minecraft state on server thread.
+- `api/EconomyApi`: future-based breaking alpha API, no blocking on tick thread. Raw history uses
+  sequence cursors. Existing numeric legacy balances are preserved, not rescaled.
+- `banking/BankData`, `Ledger`: legacy migration reader/test fixtures; no new live financial writes.
+  Original file `emily_economy_bank` retained. Idempotent SQL marker prevents repeat imports.
+  Legacy saved currency preserved per imported owner; new players use current configured currency.
+- `FinanceDefinitions`: immutable cached bundled JSON currency/stock catalogs. JSON scale is a
+  factor (100 or1); database scales are decimal places (2 or0), converted explicitly.
+- `CashCatalog`: cached cash values from currencies.json, 118 cash items plus8 card items.
+- `BankingConfig`: config/economy/banking.toml, default CAD and dated editable CAD-per-unit rates.
+  CAD anchor fixed1. Deposits group bycurrency FLOOR; cash source debits CEILING; all checkedlong.
+- Three BANK accounts max/owner, distinct currencies; primary/default-currency accounts protected.
+  One separate CAD TRADING account. Account creation/closure UI only at tellers. DB also enforces
+  ownership/count/duplicates/protection; closure settles FX and retires account, retaining ledger.
+- `BankingMenu`: 24 transient deposit slots and36 inventory slots, HOME/DEPOSIT/WITHDRAW/HISTORY/
+  ACCOUNTS/CONFIG pages. Card, owner, reach, terminal mode, whitelist and denomination checks.
+  Async cash reservation/refund/delivery; request lock; previews server-owned; full requests bounded.
+- `TerminalSettings`: nonfinancial SavedData owner/mode/accepted currencies/dispensed item IDs,
+  keyed dimension+wide-machine anchor. Placer/op only; legacy unowned terminals operator-only.
+- `TradingMenu`: funding/unfunding and whole-share buy/sell; FIFO immediate market settlement.
+  Historical base prices remain fixed until explicit server API price update; no live feed.
+- `FinanceAction`/`FinanceSnapshot`: menu-ID scoped bounded networking. Client never supplies
+  balances/rates/prices; server revalidates accounts/items/quantities. Dist.CLIENT screens only.
+- `RegisterEntity`: async shop payment with reserved stock and rollback, no blocking queries.
 
-## Current behavior and limits
+## Data and verification
 
-Creative tabs: Economy (36 blocks), ten `Economy - XXX Cash` tabs, and Bank & Credit Cards.
-Codes: EUR, GBP, AUD, NZD, CAD, USD, HKD, JPY, CNY, DKK.
-CAD includes original vertical bills and five additional horizontal bills with separate IDs.
-USD bills share the original $1 green palette; other original bill artwork is unchanged.
-All 126 cards/currencies are decorative, without recipes or account state. Six legacy items,
-EconomyConfig, and the copper minting recipe were removed. Old stacks are not converted.
-Cash deposits/withdrawals are unavailable until collectible currency functionality is designed.
-Existing bank balances, digital transfers, API, and register purchases remain.
+`tools/collectibles.json` remains artwork source. Runtime currency definitions are bundled at
+`data/economy/finance/currencies.json`. Stock definitions/provenance at stocks.json; importer
+`tools/import_stock_prices.py`; sources and class choices in docs/stock-data.md.100/100 historical
+closes2025-12-31, USD/CAD1.3706, HALF_UP CADcents; original Minecraft-style display names.
+Standalone FinanceDatabaseChecks cover SQL rollback/auth/cash/FX, three-account rules, cache
+publication, append-only history, migration, cursor paging, poisoned-connection handling and FIFO
+concurrent settlement. GameTests cover cash grids, ATMs/tellers, ownership, codec bounds and
+quantified withdrawals plus existing machine placement/loot tests.
 
-ATMs use chat controls; no custom screen. Shop owner alone configures product/price;
-product changes disable sales until the owner sets a new price. Stock containers keep vanilla
-access rules. No claim protection is provided. API is experimental in 0.1.x.
-All changes run on the server thread with validation before mutations, but normal Minecraft
-world saving is used; no crash-safe journal spans bank/player/container files.
-Machines from older versions should be broken/replaced to create their four-part footprint.
+Physical inventory files and SQLite do not share a crash transaction. Ordinary failures refund
+reserved items; a crash between reservation/commit/delivery needs a durable inventory outbox
+not implemented here. This limit must remain visible in release notes.
 
-## Asset preservation
+## Machines and artwork
 
-Generator/catalog edits must preserve all unrequested existing artwork. For 0.1.3,
-all 72 non-USD original collectible PNGs are byte-identical to 0.1.2. Original CAD IDs
-remain vertical; horizontal variants use `cad_bill_<value>_horizontal`.
-
-## 0.1.4 terminals, currencies, and cards
-
-Original teal ATM/register IDs and textures are preserved. ATM geometry is now wider; registers retain their size. Coloured variants
-inherit the original models and override only `trim`. `tools/generate_terminal_variants.py`
-generates variants, original workstation models, recipes, loot and block/item tags; its
-`tools/terminal_variants.json` manifest includes localization and shape recommendations.
-The original and all coloured cash registers share the existing block entity type.
-Recolouring is a crafting recipe on unplaced block items, not an in-world dye interaction.
-
-Teller station and stock trading computer are decorative; no new banking/trading behavior.
-42 additional currency items are inert. Every pre-existing bill, coin, and bank-card texture
-is byte-identical to 0.1.3. Only the four credit-card textures were restyled with original
-issuer names and artwork loosely informed by the requested payment brands.
-Tab icons follow the request; JPY uses its 1,000 bill and DKK its 20 coin because these
-collections have no 20 bill. All localizations use `Economy - XXX Cash` for currency tabs.
-
-## 0.1.5 machine footprint
-
-All 17 ATM variants, teller station, and trading computer occupy 2w×2h×1d. One item places
-four real tiles using `facing`, existing `half` and new `right` properties. All blocks keep IDs.
-Each section uses local 0..16 clipped geometry with corresponding cropped UVs; inventory models
-show the complete 32×32×16 footprint. Workstations scale x/y; ATMs scale x only.
-Loot tables require lower-left state; player loot canonicalizes any mined tile after vanilla
-harvest handling. Matched cleanup avoids adjacent machines and skips unloaded chunks.
-Periodic validation cleans orphan tiles once neighbor chunks are available; pistons are blocked.
-Model cuboids generate collision shapes for all orientations; test assembly must equal the
-whole reference silhouette. Regenerating terminal colours invokes the wide generator last.
-No currency/card textures or register models were changed in this update.
-
-## Inventory transforms
-
-`tools/center_item_models.py` resolves inherited machine geometry and computes each item's
-GUI scale/translation using Minecraft's ItemTransform order. All36 block icons have centered
-projected bounds and fit a14px square inside16px inventory/hotbar slots. Only display.gui is
-modified. World models, item elements/UVs, textures, other display contexts and collisions
-are preserved. The wide generator runs centering last, including coloured cash registers.
+17 ATMs and teller/trading workstations are 2w×2h×1d four-tile machines. `WideMachineBlock`
+handles placement/support/anchor cleanup and exact generated collision shapes. Registers remain
+single-block and support17 accent variants. Resource IDs/textures unchanged. All36 inventory
+models remain centered. Generators: generate_terminal_variants, generate_wide_machines,
+generate_machine_shapes, center_item_models; immutable model_sources preserve art geometry.
+Ten currency creative tabs plus blocks and cards. Original assets and localization remain
+separate from generated data. Read scoped Java/resources AGENTS before changes.

@@ -8,7 +8,7 @@ import java.util.Map;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 
-/** Display-only collectibles, deliberately separate from valued currency. */
+/** Original cards and cash; CashCatalog supplies their banking values without changing artwork. */
 public final class CollectibleItems {
     private static final Map<String, DeferredItem<DecorativeItem>> cards = new LinkedHashMap<>();
     private static final Map<String, List<DeferredItem<DecorativeItem>>> series = new LinkedHashMap<>();

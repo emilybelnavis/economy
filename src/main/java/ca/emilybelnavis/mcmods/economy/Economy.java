@@ -65,7 +65,43 @@ public final class Economy {
             .build());
     }
 
+    public static final DeferredRegister<net.minecraft.world.inventory.MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, ID);
+    public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<BankingMenu>> BANKING_MENU =
+        MENUS.register("banking", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(BankingMenu::new));
+    public static final DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<TradingMenu>> TRADING_MENU =
+        MENUS.register("trading", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(TradingMenu::new));
+
     public Economy(IEventBus bus, ModContainer container) {
+        container.registerConfig(net.neoforged.fml.config.ModConfig.Type.COMMON, BankingConfig.SPEC, "economy/banking.toml");
+        MENUS.register(bus);
+        FinanceDefinitions.initialize();
+        bus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) ->
+            event.registrar("2").playToClient(FinanceSnapshot.TYPE, FinanceSnapshot.CODEC, (payload, context) -> {
+                var menu = context.player().containerMenu;
+                if (menu.containerId != payload.menuId()) return;
+                var view = com.google.gson.JsonParser.parseString(payload.json()).getAsJsonObject();
+                if (menu instanceof BankingMenu bank) {
+                    bank.view = view;
+                    if (view.has("page")) bank.page = BankingMenu.Page.valueOf(view.get("page").getAsString());
+                } else if (menu instanceof TradingMenu trading) trading.view = view;
+            }).playToServer(FinanceAction.TYPE, FinanceAction.CODEC, (payload, context) -> {
+                var menu = context.player().containerMenu;
+                if (menu.containerId != payload.menuId()) return;
+                if (menu instanceof BankingMenu bank) bank.receive(payload);
+                else if (menu instanceof TradingMenu trading) trading.receive(payload);
+            }));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerStartedEvent event) -> FinanceService.onStarted(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerStoppedEvent event) -> FinanceService.onStopped(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) -> FinanceService.tick(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) -> {
+            if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer p) FinanceService.onLogout(p);
+        });
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) -> {
+            if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer p) {
+                var service = FinanceService.get(p.server);
+                service.ready().thenCompose(v -> service.database.accounts(p.getUUID()));
+            }
+        });
         CollectibleItems.initAll();
         ITEMS.register(bus); BLOCKS.register(bus); ENTITIES.register(bus); TABS.register(bus);
         NeoForge.EVENT_BUS.addListener(EconomyCommands::register);

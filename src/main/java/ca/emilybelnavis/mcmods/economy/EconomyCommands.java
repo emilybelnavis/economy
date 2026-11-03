@@ -20,17 +20,24 @@ public final class EconomyCommands {
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(literal("economy")
             .executes(ctx -> execute(ctx, EconomyCommands::showAtm))
-            .then(literal("balance").executes(ctx -> execute(ctx,p -> p.sendSystemMessage(Component.translatable("message.economy.balance", EconomyApi.get(p.server).balance(p.getUUID()))))))
+            .then(literal("balance").executes(ctx -> execute(ctx,p -> FinanceService.complete(p, EconomyApi.get(p.server).balance(p.getUUID()), (balance, error) -> {
+                if (error != null) { failure(p, error); return; }
+                p.sendSystemMessage(Component.translatable("message.economy.balance", balance));
+            }))))
             .then(literal("history").executes(ctx -> execute(ctx,p -> {
-                var history=EconomyApi.get(p.server).history(p.getUUID());
-                if(history.isEmpty()) p.sendSystemMessage(Component.translatable("message.economy.text_27"));
-                history.stream().skip(Math.max(0,history.size()-10)).forEach(t -> p.sendSystemMessage(Component.translatable("message.economy.entry", t.type(), t.amount(), t.balance(), t.memo())));
+                FinanceService.complete(p, EconomyApi.get(p.server).history(p.getUUID(), 0, 10), (history, error) -> {
+                    if (error != null) { failure(p, error); return; }
+                    if (history.isEmpty()) p.sendSystemMessage(Component.translatable("message.economy.text_27"));
+                    history.forEach(t -> p.sendSystemMessage(Component.translatable("message.economy.entry", t.operation(), t.delta(), t.balance(), t.memo())));
+                });
             })))
             .then(literal("pay").then(argument("player",EntityArgument.player()).then(argument("amount",LongArgumentType.longArg(1)).executes(ctx -> execute(ctx,p -> {
                 var target=EntityArgument.getPlayer(ctx,"player"); long amount=LongArgumentType.getLong(ctx,"amount");
-                EconomyApi.get(p.server).transfer(p.getUUID(),target.getUUID(),amount,"Player transfer");
-                p.sendSystemMessage(Component.translatable("message.economy.paid", amount, target.getScoreboardName()));
-                target.sendSystemMessage(Component.translatable("message.economy.received", amount, p.getScoreboardName()));
+                FinanceService.complete(p, EconomyApi.get(p.server).transfer(p.getUUID(),target.getUUID(),amount,"Player transfer"), (ignored, error) -> {
+                    if (error != null) { failure(p, error); return; }
+                    p.sendSystemMessage(Component.translatable("message.economy.paid", amount, target.getScoreboardName()));
+                    target.sendSystemMessage(Component.translatable("message.economy.received", amount, p.getScoreboardName()));
+                });
             })))))
             .then(literal("shop").then(literal("price").then(argument("amount",LongArgumentType.longArg(1)).executes(ctx -> execute(ctx,p -> {
                 HitResult hit=p.pick(5,0,false);
@@ -39,11 +46,17 @@ public final class EconomyCommands {
             })))))
         );
     }
+    private static void failure(ServerPlayer player, Throwable error) {
+        player.sendSystemMessage(Messages.error(error.getMessage() == null ? "Economy operation failed" : error.getMessage()));
+    }
     public static void showAtm(ServerPlayer p) {
-        p.sendSystemMessage(Component.translatable("message.economy.heading", EconomyApi.get(p.server).balance(p.getUUID())));
+        FinanceService.complete(p, EconomyApi.get(p.server).balance(p.getUUID()), (balance, error) -> {
+            if (error != null) failure(p, error);
+            else p.sendSystemMessage(Component.translatable("message.economy.heading", balance));
+        });
         for (String[] link : new String[][]{{"[Balance]","/economy balance"},{"[History]","/economy history"}})
             p.sendSystemMessage(Messages.error(link[0]).withStyle(s->s.withColor(net.minecraft.ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,link[1]))));
-        p.sendSystemMessage(Component.translatable("message.economy.cash_unavailable"));
+        p.sendSystemMessage(Component.translatable("banking.economy.help"));
         p.sendSystemMessage(Component.translatable("message.economy.text_29"));
     }
 }

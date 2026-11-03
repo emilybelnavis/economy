@@ -29,6 +29,9 @@ final class Messages {
         case "[Balance]" -> Component.translatable("message.economy.error_22");
         case "[History]" -> Component.translatable("message.economy.error_23");
         case "[Deposit carried currency]" -> Component.translatable("message.economy.error_24");
+        case "Insert cash first." -> Component.translatable("banking.economy.cash_needed");
+        case "ATMs accept bills only." -> Component.translatable("banking.economy.bills_needed");
+        case "This stack converts to less than one account unit; add more cash." -> Component.translatable("banking.economy.too_small");
         default -> Component.literal(message);
         };
     }

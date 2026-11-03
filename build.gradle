@@ -71,3 +71,18 @@ neoForge {
         systemProperty 'neoforge.enabledGameTestNamespaces', 'economy'
     } }
 }
+
+// SQLite is bundled in the release JAR and on every development runtime classpath.
+repositories { mavenCentral() }
+dependencies {
+    implementation 'org.xerial:sqlite-jdbc:3.46.1.0'
+    additionalRuntimeClasspath 'org.xerial:sqlite-jdbc:3.46.1.0'
+    jarJar 'org.xerial:sqlite-jdbc:3.46.1.0'
+}
+tasks.register('financeDatabaseTest', JavaExec) {
+    dependsOn ledgerChecksClasses
+    classpath = sourceSets.ledgerChecks.runtimeClasspath
+    mainClass = 'ca.emilybelnavis.mcmods.economy.storage.FinanceDatabaseChecks'
+    enableAssertions = true
+}
+tasks.named('check') { dependsOn 'financeDatabaseTest' }

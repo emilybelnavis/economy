@@ -1,0 +1,755 @@
+{
+  "schema": 1,
+  "currencies": [
+    {
+      "code": "EUR",
+      "scale": 100
+    },
+    {
+      "code": "GBP",
+      "scale": 100
+    },
+    {
+      "code": "AUD",
+      "scale": 100
+    },
+    {
+      "code": "NZD",
+      "scale": 100
+    },
+    {
+      "code": "CAD",
+      "scale": 100
+    },
+    {
+      "code": "USD",
+      "scale": 100
+    },
+    {
+      "code": "HKD",
+      "scale": 100
+    },
+    {
+      "code": "JPY",
+      "scale": 1
+    },
+    {
+      "code": "CNY",
+      "scale": 100
+    },
+    {
+      "code": "DKK",
+      "scale": 100
+    }
+  ],
+  "cash": [
+    {
+      "id": "economy:eur_coin_1",
+      "currency": "EUR",
+      "minor": 1,
+      "coin": true
+    },
+    {
+      "id": "economy:eur_coin_2",
+      "currency": "EUR",
+      "minor": 2,
+      "coin": true
+    },
+    {
+      "id": "economy:eur_coin_5",
+      "currency": "EUR",
+      "minor": 5,
+      "coin": true
+    },
+    {
+      "id": "economy:eur_coin_10",
+      "currency": "EUR",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:eur_coin_20",
+      "currency": "EUR",
+      "minor": 20,
+      "coin": true
+    },
+    {
+      "id": "economy:eur_coin_50",
+      "currency": "EUR",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:eur_coin_100",
+      "currency": "EUR",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:eur_coin_200",
+      "currency": "EUR",
+      "minor": 200,
+      "coin": true
+    },
+    {
+      "id": "economy:eur_bill_5",
+      "currency": "EUR",
+      "minor": 500,
+      "coin": false
+    },
+    {
+      "id": "economy:eur_bill_10",
+      "currency": "EUR",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:eur_bill_20",
+      "currency": "EUR",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:eur_bill_50",
+      "currency": "EUR",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:eur_bill_100",
+      "currency": "EUR",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:eur_bill_200",
+      "currency": "EUR",
+      "minor": 20000,
+      "coin": false
+    },
+    {
+      "id": "economy:gbp_coin_1",
+      "currency": "GBP",
+      "minor": 1,
+      "coin": true
+    },
+    {
+      "id": "economy:gbp_coin_2",
+      "currency": "GBP",
+      "minor": 2,
+      "coin": true
+    },
+    {
+      "id": "economy:gbp_coin_5",
+      "currency": "GBP",
+      "minor": 5,
+      "coin": true
+    },
+    {
+      "id": "economy:gbp_coin_10",
+      "currency": "GBP",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:gbp_coin_20",
+      "currency": "GBP",
+      "minor": 20,
+      "coin": true
+    },
+    {
+      "id": "economy:gbp_coin_50",
+      "currency": "GBP",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:gbp_coin_100",
+      "currency": "GBP",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:gbp_coin_200",
+      "currency": "GBP",
+      "minor": 200,
+      "coin": true
+    },
+    {
+      "id": "economy:gbp_bill_5",
+      "currency": "GBP",
+      "minor": 500,
+      "coin": false
+    },
+    {
+      "id": "economy:gbp_bill_10",
+      "currency": "GBP",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:gbp_bill_20",
+      "currency": "GBP",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:gbp_bill_50",
+      "currency": "GBP",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:aud_coin_5",
+      "currency": "AUD",
+      "minor": 5,
+      "coin": true
+    },
+    {
+      "id": "economy:aud_coin_10",
+      "currency": "AUD",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:aud_coin_20",
+      "currency": "AUD",
+      "minor": 20,
+      "coin": true
+    },
+    {
+      "id": "economy:aud_coin_50",
+      "currency": "AUD",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:aud_coin_100",
+      "currency": "AUD",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:aud_coin_200",
+      "currency": "AUD",
+      "minor": 200,
+      "coin": true
+    },
+    {
+      "id": "economy:aud_bill_5",
+      "currency": "AUD",
+      "minor": 500,
+      "coin": false
+    },
+    {
+      "id": "economy:aud_bill_10",
+      "currency": "AUD",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:aud_bill_20",
+      "currency": "AUD",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:aud_bill_50",
+      "currency": "AUD",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:aud_bill_100",
+      "currency": "AUD",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:nzd_coin_10",
+      "currency": "NZD",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:nzd_coin_20",
+      "currency": "NZD",
+      "minor": 20,
+      "coin": true
+    },
+    {
+      "id": "economy:nzd_coin_50",
+      "currency": "NZD",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:nzd_coin_100",
+      "currency": "NZD",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:nzd_coin_200",
+      "currency": "NZD",
+      "minor": 200,
+      "coin": true
+    },
+    {
+      "id": "economy:nzd_bill_5",
+      "currency": "NZD",
+      "minor": 500,
+      "coin": false
+    },
+    {
+      "id": "economy:nzd_bill_10",
+      "currency": "NZD",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:nzd_bill_20",
+      "currency": "NZD",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:nzd_bill_50",
+      "currency": "NZD",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:nzd_bill_100",
+      "currency": "NZD",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_coin_5",
+      "currency": "CAD",
+      "minor": 5,
+      "coin": true
+    },
+    {
+      "id": "economy:cad_coin_10",
+      "currency": "CAD",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:cad_coin_25",
+      "currency": "CAD",
+      "minor": 25,
+      "coin": true
+    },
+    {
+      "id": "economy:cad_coin_50",
+      "currency": "CAD",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:cad_coin_100",
+      "currency": "CAD",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:cad_coin_200",
+      "currency": "CAD",
+      "minor": 200,
+      "coin": true
+    },
+    {
+      "id": "economy:cad_bill_5",
+      "currency": "CAD",
+      "minor": 500,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_10",
+      "currency": "CAD",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_20",
+      "currency": "CAD",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_50",
+      "currency": "CAD",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_100",
+      "currency": "CAD",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_5_horizontal",
+      "currency": "CAD",
+      "minor": 500,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_10_horizontal",
+      "currency": "CAD",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_20_horizontal",
+      "currency": "CAD",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_50_horizontal",
+      "currency": "CAD",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:cad_bill_100_horizontal",
+      "currency": "CAD",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:usd_coin_1",
+      "currency": "USD",
+      "minor": 1,
+      "coin": true
+    },
+    {
+      "id": "economy:usd_coin_5",
+      "currency": "USD",
+      "minor": 5,
+      "coin": true
+    },
+    {
+      "id": "economy:usd_coin_10",
+      "currency": "USD",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:usd_coin_25",
+      "currency": "USD",
+      "minor": 25,
+      "coin": true
+    },
+    {
+      "id": "economy:usd_coin_50",
+      "currency": "USD",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:usd_coin_100",
+      "currency": "USD",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:usd_bill_1",
+      "currency": "USD",
+      "minor": 100,
+      "coin": false
+    },
+    {
+      "id": "economy:usd_bill_2",
+      "currency": "USD",
+      "minor": 200,
+      "coin": false
+    },
+    {
+      "id": "economy:usd_bill_5",
+      "currency": "USD",
+      "minor": 500,
+      "coin": false
+    },
+    {
+      "id": "economy:usd_bill_10",
+      "currency": "USD",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:usd_bill_20",
+      "currency": "USD",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:usd_bill_50",
+      "currency": "USD",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:usd_bill_100",
+      "currency": "USD",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:hkd_coin_10",
+      "currency": "HKD",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:hkd_coin_20",
+      "currency": "HKD",
+      "minor": 20,
+      "coin": true
+    },
+    {
+      "id": "economy:hkd_coin_50",
+      "currency": "HKD",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:hkd_coin_100",
+      "currency": "HKD",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:hkd_coin_200",
+      "currency": "HKD",
+      "minor": 200,
+      "coin": true
+    },
+    {
+      "id": "economy:hkd_coin_500",
+      "currency": "HKD",
+      "minor": 500,
+      "coin": true
+    },
+    {
+      "id": "economy:hkd_coin_1000",
+      "currency": "HKD",
+      "minor": 1000,
+      "coin": true
+    },
+    {
+      "id": "economy:hkd_bill_10",
+      "currency": "HKD",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:hkd_bill_20",
+      "currency": "HKD",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:hkd_bill_50",
+      "currency": "HKD",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:hkd_bill_100",
+      "currency": "HKD",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:hkd_bill_500",
+      "currency": "HKD",
+      "minor": 50000,
+      "coin": false
+    },
+    {
+      "id": "economy:hkd_bill_1000",
+      "currency": "HKD",
+      "minor": 100000,
+      "coin": false
+    },
+    {
+      "id": "economy:jpy_coin_1",
+      "currency": "JPY",
+      "minor": 1,
+      "coin": true
+    },
+    {
+      "id": "economy:jpy_coin_5",
+      "currency": "JPY",
+      "minor": 5,
+      "coin": true
+    },
+    {
+      "id": "economy:jpy_coin_10",
+      "currency": "JPY",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:jpy_coin_50",
+      "currency": "JPY",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:jpy_coin_100",
+      "currency": "JPY",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:jpy_coin_500",
+      "currency": "JPY",
+      "minor": 500,
+      "coin": true
+    },
+    {
+      "id": "economy:jpy_bill_1000",
+      "currency": "JPY",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:jpy_bill_2000",
+      "currency": "JPY",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:jpy_bill_5000",
+      "currency": "JPY",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:jpy_bill_10000",
+      "currency": "JPY",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:cny_coin_10",
+      "currency": "CNY",
+      "minor": 10,
+      "coin": true
+    },
+    {
+      "id": "economy:cny_coin_50",
+      "currency": "CNY",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:cny_coin_100",
+      "currency": "CNY",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:cny_bill_1",
+      "currency": "CNY",
+      "minor": 100,
+      "coin": false
+    },
+    {
+      "id": "economy:cny_bill_5",
+      "currency": "CNY",
+      "minor": 500,
+      "coin": false
+    },
+    {
+      "id": "economy:cny_bill_10",
+      "currency": "CNY",
+      "minor": 1000,
+      "coin": false
+    },
+    {
+      "id": "economy:cny_bill_20",
+      "currency": "CNY",
+      "minor": 2000,
+      "coin": false
+    },
+    {
+      "id": "economy:cny_bill_50",
+      "currency": "CNY",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:cny_bill_100",
+      "currency": "CNY",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:dkk_coin_50",
+      "currency": "DKK",
+      "minor": 50,
+      "coin": true
+    },
+    {
+      "id": "economy:dkk_coin_100",
+      "currency": "DKK",
+      "minor": 100,
+      "coin": true
+    },
+    {
+      "id": "economy:dkk_coin_200",
+      "currency": "DKK",
+      "minor": 200,
+      "coin": true
+    },
+    {
+      "id": "economy:dkk_coin_500",
+      "currency": "DKK",
+      "minor": 500,
+      "coin": true
+    },
+    {
+      "id": "economy:dkk_coin_1000",
+      "currency": "DKK",
+      "minor": 1000,
+      "coin": true
+    },
+    {
+      "id": "economy:dkk_coin_2000",
+      "currency": "DKK",
+      "minor": 2000,
+      "coin": true
+    },
+    {
+      "id": "economy:dkk_bill_50",
+      "currency": "DKK",
+      "minor": 5000,
+      "coin": false
+    },
+    {
+      "id": "economy:dkk_bill_100",
+      "currency": "DKK",
+      "minor": 10000,
+      "coin": false
+    },
+    {
+      "id": "economy:dkk_bill_200",
+      "currency": "DKK",
+      "minor": 20000,
+      "coin": false
+    },
+    {
+      "id": "economy:dkk_bill_500",
+      "currency": "DKK",
+      "minor": 50000,
+      "coin": false
+    }
+  ]
+}

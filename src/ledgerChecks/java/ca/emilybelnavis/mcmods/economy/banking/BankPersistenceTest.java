@@ -13,8 +13,11 @@ public final class BankPersistenceTest {
         BankData original=constructor.newInstance(); Ledger ledger=(Ledger)field.get(original);
         UUID a=UUID.randomUUID(), b=UUID.randomUUID();
         ledger.credit(a,1000,"deposit"); ledger.transfer(a,b,250,"purchase"); ledger.debit(b,10,"withdraw");
+        var currencyField=BankData.class.getDeclaredField("currency"); currencyField.setAccessible(true);
+        currencyField.set(original,ca.emilybelnavis.mcmods.economy.BankingConfig.Currency.JPY);
         CompoundTag saved=original.save(new CompoundTag(),null);
         BankData restored=(BankData)load.invoke(null,saved.copy(),null); Ledger roundTrip=(Ledger)field.get(restored);
+        assert currencyField.get(restored)==ca.emilybelnavis.mcmods.economy.BankingConfig.Currency.JPY;
         assert roundTrip.balance(a)==750 && roundTrip.balance(b)==240;
         assert roundTrip.history(a).equals(ledger.history(a));
         assert roundTrip.history(b).equals(ledger.history(b));

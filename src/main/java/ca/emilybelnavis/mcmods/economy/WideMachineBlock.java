@@ -69,6 +69,8 @@ public abstract class WideMachineBlock extends Block {
     }
 
     @Override public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        if (level instanceof ServerLevel serverLevel)
+            TerminalSettings.placed(serverLevel, pos, placer == null ? null : placer.getUUID());
         Direction facing = state.getValue(FACING);
         // Publish every tile before notifying adjacent blocks; updateShape also defers validation.
         for (boolean right : new boolean[]{false, true}) for (boolean upper : new boolean[]{false, true}) {
@@ -133,6 +135,10 @@ public abstract class WideMachineBlock extends Block {
         if (!level.isClientSide && !replacement.is(this)) {
             BlockPos root = anchor(pos, state);
             Direction facing = state.getValue(FACING);
+            // Only the anchor's own removal clears metadata; orphan tiles cannot clear a replacement machine.
+            if (pos.equals(root) && level instanceof ServerLevel serverLevel
+                && (this instanceof AtmBlock || this instanceof WorkstationBlock workstation && workstation.isTeller()))
+                TerminalSettings.removed(serverLevel, root);
             for (boolean right : new boolean[]{false, true}) for (boolean upper : new boolean[]{false, true}) {
                 BlockPos cell = WideMachineLayout.cell(root, facing, right, upper);
                 // Leave unloaded tiles for their persisted validation tick instead of loading chunks.

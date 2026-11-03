@@ -1,6 +1,5 @@
 package ca.emilybelnavis.mcmods.economy.banking;
 
-import ca.emilybelnavis.mcmods.economy.api.EconomyApi;
 import ca.emilybelnavis.mcmods.economy.api.Transaction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -11,10 +10,12 @@ import net.minecraft.world.level.saveddata.SavedData;
 import java.util.*;
 
 /** Persistent ledger owned by the server overworld, shared across dimensions. */
-public final class BankData extends SavedData implements EconomyApi {
+public final class BankData extends SavedData {
     private static final String DATA_NAME = "emily_economy_bank";
     private final Ledger ledger = new Ledger();
     private MinecraftServer server;
+    private ca.emilybelnavis.mcmods.economy.BankingConfig.Currency currency;
+    public ca.emilybelnavis.mcmods.economy.BankingConfig.Currency currency() { checkThread(); return currency; }
 
     private BankData() {}
 
@@ -24,20 +25,32 @@ public final class BankData extends SavedData implements EconomyApi {
         var factory = new SavedData.Factory<>(BankData::new, BankData::load, null);
         BankData data = server.overworld().getDataStorage().computeIfAbsent(factory, DATA_NAME);
         data.server = server;
+        if (data.currency == null) {
+            data.currency = ca.emilybelnavis.mcmods.economy.BankingConfig.CURRENCY.get();
+            data.setDirty();
+        }
         return data;
+    }
+    /** Immutable legacy migration snapshots, captured only on the server thread. */
+    public Map<UUID, Long> exportBalances() { checkThread(); return Map.copyOf(ledger.balances); }
+    public Map<UUID, List<Transaction>> exportHistory() {
+        checkThread();
+        Map<UUID, List<Transaction>> result = new HashMap<>();
+        ledger.histories.forEach((owner, entries) -> result.put(owner, List.copyOf(entries)));
+        return Map.copyOf(result);
     }
     private void checkThread() {
         if (server == null || !server.isSameThread()) throw new IllegalStateException("Economy access requires the server thread");
     }
-    @Override public long balance(UUID account) { checkThread(); return ledger.balance(account); }
-    @Override public List<Transaction> history(UUID account) { checkThread(); return ledger.history(account); }
-    @Override public void credit(UUID account, long amount, String memo) {
+    public long balance(UUID account) { checkThread(); return ledger.balance(account); }
+    public List<Transaction> history(UUID account) { checkThread(); return ledger.history(account); }
+    public void credit(UUID account, long amount, String memo) {
         checkThread(); ledger.credit(account, amount, memo); setDirty();
     }
-    @Override public void debit(UUID account, long amount, String memo) {
+    public void debit(UUID account, long amount, String memo) {
         checkThread(); ledger.debit(account, amount, memo); setDirty();
     }
-    @Override public void transfer(UUID from, UUID to, long amount, String memo) {
+    public void transfer(UUID from, UUID to, long amount, String memo) {
         checkThread(); ledger.transfer(from, to, amount, memo); setDirty();
     }
 
@@ -63,12 +76,14 @@ public final class BankData extends SavedData implements EconomyApi {
             accounts.add(tag);
         }
         root.putInt("Version", 1);
+        if (currency != null) root.putString("Currency", currency.name());
         root.put("Accounts", accounts);
         return root;
     }
 
     private static BankData load(CompoundTag root, HolderLookup.Provider registries) {
         BankData data = new BankData();
+        if (root.contains("Currency")) data.currency = ca.emilybelnavis.mcmods.economy.BankingConfig.Currency.valueOf(root.getString("Currency"));
         if (root.getInt("Version") != 1) throw new IllegalStateException("Unsupported economy data version");
         ListTag accounts = root.getList("Accounts", Tag.TAG_COMPOUND);
         for (int i = 0; i < accounts.size(); i++) {

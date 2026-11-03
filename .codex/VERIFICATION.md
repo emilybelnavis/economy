@@ -38,3 +38,17 @@ New decorative workstation shapes must rotate with the model and load on a dedic
 - Test classes/templates are a separate development source set, excluded from the release JAR.
 - Manually inspect chunk unloading/reloading, explosions, mirror/structure loading, border/height
   limits, and client seams. Old placed machines must be broken/replaced; no footprint migration.
+
+## SQLite/account/market overhaul
+
+Run `./gradlew financeDatabaseTest` for real SQLite integration checks; no server needed.
+`./gradlew build` includes it. `./gradlew runGameTestServer` includes async menu integration
+checks; fast GameTest ticks need a larger tick budget for real executor work. Never block a
+GameTest tick on futures. Schedule async assertions back into a helper sequence to expose failures.
+Use `additionalRuntimeClasspath` for SQLite in NeoForge1.21.1 development runs, in addition to
+implementation/jarJar. Verify actual client/server class loading as well as Gradle dependencies.
+Release JAR must contain nested SQLite driver and both finance JSON catalogs, and exclude tests.
+Check driver PRAGMA values on its writer connection; bank/market ledger reconciliation by shared
+transaction ID, no overdraft/oversell, close/open caps, FX including JPY, and postcommit caches.
+UI: 6x4 deposit grid, count/subtotal/deposit-total preview, exact denomination quantities and
+source account amount, owner/op setup, account closure FX, stock funding/search/whole-share trades.

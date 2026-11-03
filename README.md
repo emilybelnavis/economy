@@ -5,20 +5,92 @@ Version **0.1.0** · Project ID `ca.emilybelnavis.mcmods.economy`
 An early playable economy mod for **Minecraft 1.21.1**, **NeoForge 21.1.252**, and **Java 21**.
 Install the JAR on both the server and clients. No additional mods are required.
 
-## Banking
+## Banking and terminal screens
 
-Player accounts start at zero, use UUIDs, and persist with the overworld across dimensions.
-The latest 100 transactions per account are retained; `/economy history` shows the latest ten.
-Accounts and shop data follow Minecraft's normal world-save cycle. Hard crashes can lose
-unsaved changes; this version does not provide a crash-durable financial journal.
+Carry any bank or credit card to use your own accounts. Cards do not provide borrowing or overdrafts.
+Every new player starts with one permanent bank account in the server's configured currency.
+At a **bank teller**, open up to two additional accounts in other currencies: three bank accounts
+maximum, with no duplicate currencies. Only tellers can open or close accounts. The original
+primary account and the configured-currency account cannot be closed. Closing a funded secondary
+account requires another owned bank account; debit, conversion, credit and ledger records commit
+in one SQLite transaction. Amounts too small to survive conversion are rejected intact.
 
-- `/economy balance` — balance in whole units.
-- `/economy pay <online-player> <units>` — digital transfer.
-- `/economy history` — recent transactions.
+Right-click an ATM or teller and choose a page:
 
-Right-click any of the four sections of an ATM for balance/history controls. Physical currency and cards
-are decorative for now; cash deposits and withdrawals will return when currency functionality
-is implemented. Existing account balances and the integration API remain available.
+- **Deposit:** a 6×4 cash grid, destination-account selector, paged counts and totals per item,
+  native-currency **Subtotal**, and converted **Deposit total**. Hover summaries for full details.
+  Shift-click cash from your inventory or drag it into the grid. ATMs reject coins; tellers accept
+  bills and coins. The accepted-currency whitelist also applies. Cash still in the grid is returned
+  when leaving the deposit page or closing the screen.
+- **Withdraw:** choose the source account, cash currency, bill/coin quantities, and account amount.
+  Type quantities directly or use +/−. **Use selected total** fills the amount with the calculated
+  source-account cost. Confirming requires an exact match, sufficient funds, enough inventory
+  space, and denominations enabled at this terminal. ATMs dispense bills only.
+- **History:** six records per page, newest first, with stable sequence cursors; hover for date,
+  amount, resulting balance and audit details. History is read from SQLite, not retained in RAM.
+- **Accounts:** teller-only opening and closure, destination selection and conversion preview.
+
+An empty-hand right-click opens **Setup** for the terminal's placer or a server operator.
+Other players cannot configure it. Set deposit-only, withdrawal-only or both; choose accepted
+currencies; and enable individual dispensed denominations in any supported currencies. New
+machines dispense the config currency by default and accept all supported currencies. Old
+machines without recorded ownership can be configured only by operators. Settings apply from
+all four machine sections and persist by dimension and anchor position.
+
+The server creates `config/economy/banking.toml`. CAD is the default; supported currencies are
+CAD, EUR, GBP, AUD, NZD, USD, HKD, JPY, CNY and DKK. Amounts are integer minor units:
+100 cents/pence/etc. per major unit, except JPY which uses whole yen. New players use the current
+configured default; migrated accounts keep their saved currency and numeric balance.
+
+Foreign deposits group cash by currency before conversion and round down once per source
+currency to destination minor units. Withdrawals round the required account debit **up**, so
+rounding cannot create free cash. No overdrafts or zero-value cash deposits are allowed.
+Rates are stored and cached in SQLite. The TOML rates seed and configure the daily rate batch;
+they are fixed, editable defaults, not an automatic live market feed. Each daily batch writes
+current and historical rates in one transaction. See [rate sources](docs/exchange-rates.md).
+
+Commands operate on the primary bank account using minor units:
+
+- `/economy balance`
+- `/economy pay <online-player> <units>`
+- `/economy history`
+
+## Stock exchange
+
+Right-click the **Stock Trading Computer**. Each player has exactly one separate CAD trading
+account, which does not consume a bank-account slot. Select a bank account and use **Fund**;
+foreign funds convert before reaching the trading balance. **Unfund** returns CAD trading cash
+to the selected bank account, converting when needed.
+
+Search/select a company, enter a positive whole share quantity and buy or sell. Purchases require
+available trading cash; sales require owned shares. The single database writer deterministically
+sequences market orders. Cash, ownership, order/trade history and append-only ledger entries
+settle atomically. Orders execute immediately against the quoted simulated market price.
+
+The market includes 100 original Minecraft-style company names based on the first 100 companies
+in the linked US500 list. Initial CAD prices use the December 31, 2025 USD close × 1.3706 USD/CAD,
+rounded to cents. All 100 prices were obtained; none were invented. Quotes start at these fixed
+historical baselines. There is no live brokerage connection or automatic price simulation;
+`FinanceDatabase.updateStockPrice` supports explicit server-side price changes.
+See [stock data and reproduction](docs/stock-data.md).
+
+## Persistence and migration
+
+Each world stores financial data at `economy/economy.sqlite`, using WAL, FULL synchronization,
+foreign keys and a 5-second busy timeout. One dedicated executor owns one writer connection;
+no JDBC query runs on the Minecraft tick thread. Bank accounts/holdings use bounded selective
+LRU caches, current FX and stock prices are cached, and only in-flight active orders are cached.
+Transaction, trade/order and historical FX records remain database reads. The ledger is append-only
+and paired financial movements share a unique transaction ID. Caches change only after commit.
+
+Existing SavedData balances and retained transaction histories import automatically once, with
+opening/gap reconciliation entries. The original SavedData file remains available; new operations
+use SQLite. Back up a stopped world, or use a SQLite-aware backup including its WAL state.
+
+SQLite makes **database money and share settlement** atomic. Physical Minecraft inventories and
+world files have a separate save boundary: a process crash between reserving cash/stock and database
+commit or item delivery is not covered by a durable inventory recovery journal. Ordinary failed
+requests refund reservations; pending menus are locked and cannot submit a second operation.
 
 ## ATMs and cash registers
 
@@ -49,10 +121,10 @@ keep the same ATM interactions, four-section placement, and register/shop owners
 All terminals and the new workstations appear in the **Economy** blocks tab. Inventory and
 hotbar icons are centered and fitted to their slots.
 
-The **Bank Teller Station** and **Stock Trading Computer** are decorative, facing-aware
+The **Bank Teller Station** and **Stock Trading Computer** are facing-aware
 blocks, each **2 blocks wide × 2 blocks high × 1 block deep**. The teller station has a counter, divider, service opening, and teller equipment;
-the computer has twin chart displays, a keyboard, mouse, and tower. No teller GUI, stock
-market, or trading logic is implemented yet.
+the computer has twin chart displays, a keyboard, mouse, and tower. Both now provide functional
+banking/trading screens.
 
 All ATMs (teal and dyed), teller stations, and trading computers are placed with one item
 and occupy four real block cells. Placement requires clear space and solid support below
@@ -65,18 +137,20 @@ Computer recipe: `GGG / RCR / III` (C = comparator; other symbols as above).
 
 ## Integration API
 
-Use `ca.emilybelnavis.mcmods.economy.api.EconomyApi.get(server)` on the server thread. The API supports
-`balance`, `transfer`, `credit`, `debit`, and immutable `history` snapshots. Amounts are positive
-whole units; invalid amounts/overflow throw `IllegalArgumentException`, and insufficient funds
-throw `IllegalStateException`. Account IDs are UUIDs. Callers must authorize charges and money
-issuance themselves. Integration mods should declare a required dependency on `economy`.
-The API is experimental in 0.1.x. No separate integration mods are included.
+Use `ca.emilybelnavis.mcmods.economy.api.EconomyApi.get(server)` on the server thread.
+`balance`, `transfer`, `credit`, `debit` and `history` return `CompletableFuture` values.
+**Never block the tick thread with `join` or `get`.** Completion runs on the database executor;
+schedule Minecraft/player/inventory work with `server.execute`. Raw ledger history has an
+exclusive sequence cursor and a bounded page size. The primary-account API remains a convenient
+integration surface; `FinanceService.database` also offers owned-account, exchange and market operations.
+Trusted callers must authorize issuance and charges. This is an API-breaking change in the alpha.
+Integration mods must require `economy`; SQLite is bundled, so no extra dependency mod is needed.
 
-## Decorative cards and currency collections
+## Cards and currency collections
 
-The currency and card creative tabs contain **126 collectible items**. These new items
-have no account, credit, withdrawal, deposit, exchange-rate, or payment behavior yet. Their
-values are visual face values only. There are no crafting recipes for the collections yet.
+The currency and card creative tabs contain **126 items**. Cash has its displayed face value
+and can be deposited at terminals. Cards allow banking access but have no borrowing behavior.
+There are no crafting recipes for the collections yet.
 
 Credit cards: **Summit, Meridian, Aurora, Obsidian**.
 Bank cards: **Harbor, Meadow, Tide, Ember**.
@@ -115,7 +189,7 @@ Coin IDs for hundredth-based currencies use hundredths: `economy:eur_coin_100` i
 The legacy copper/silver/gold coins and small/medium/large banknotes, their denomination
 configuration, and the copper minting recipe have been removed. Existing stacks of those
 six removed items cannot be retained when old worlds are loaded; account balances are separate
-and remain saved. No automatic conversion into the decorative collections is performed.
+and remain saved. No automatic item conversion into the new cash collections is performed.
 
 ## Development
 

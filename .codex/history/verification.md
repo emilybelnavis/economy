@@ -122,3 +122,54 @@ checks passed; runClient task help and dry-run passed. Final JAR metadata verifi
 ## 2026-11-02 — Group and source package migration
 
 Set Gradle group to `ca.emilybelnavis.mcmods.economy`; migrated main, generated, ledger-check and GameTest Java packages and generator output paths. Existing version preserved. Java 21 clean build, ledger/persistence/layout/shape checks, GameTest compilation, runClient help and dry-run passed. Release JAR contains new package paths and no old `dev/emily/economy` classes.
+
+## 2026-11-02 — Card banking and cash exchange
+
+Java 21 `build` passed: ledger, SavedData with saved JPY currency, 166 layout and 108 shape checks.
+`runGameTestServer`: all six tests passed, including real server cash transactions and snapshot
+network codec round-trip. Checked foreign bills, all 118 cash catalog entries, all ten currencies,
+ATM coin rejection, teller coin deposits, missing cards, distance, insufficient funds, full
+inventory, overflow, withdrawal delivery, refunds and history mutation count. Initial test
+expectation counted five instead of four successful ledger entries; corrected fixture, reruns passed.
+`help --task runClient` and `runClient --dry-run` passed. Actual development client loaded mod,
+resources and integrated world without banking registration errors, then stopped after saving.
+GUI visuals/interactions were not manually inspected: native computer-use app lookup could not
+resolve the Java window. Server menu behavior and localized UI compilation were verified.
+Release JAR contains BankingMenu and client screen, excludes WorldTests and AGENTS.md.
+No PNG textures changed; `git diff --check` passed. Config created under runtime config/economy.
+Rates from 2026-10-30 Bank of Canada averages and Danmarks Nationalbank CAD/DKK reference;
+static editable snapshot with no live rate calls. Account currency pinned per world; old numeric
+balances retained as minor units.
+
+## 2026-11-02 — SQLite multi-account and market overhaul
+
+Java21 build passed, including real SQLite FinanceDatabaseChecks: atomic cash and FX settlement,
+protected/default account, duplicate/max3 currency rules, funded closure, cache invalidation,
+append-only trigger, migration opening/gap reconciliation and saved currency, keyset pagination,
+JPY zero-digit precision, stale withdrawal quote, connection cleanup failure after commit,
+concurrent120 payment requests yielding100 successful one-unit transfers from100 funds,
+shared transaction UUIDs with exactly paired balanced ledger records. Ledger arithmetic,
+persistence roundtrip,166 machine layout and108 shape checks also passed.
+
+Actual runGameTestServer: all8 tests passed, including 24-slot mixed-currency deposit, coin
+rejection/acceptance, card/reach, placer permissions and terminal modes, bounded codecs, exact
+multi-denomination withdrawal quantities, amount mismatch/insufficient funds/partial capacity/
+forbidden denomination/withdraw-disabled rejection, no failed-request debits. Existing machine
+placement/obstruction/loot/support tests retained. GameTest failures are asserted within helper
+sequences after async completion; fast test ticks use an executor-appropriate budget.
+
+Initial runtime failed to find SQLite despite runtimeClasspath resolution; fixed documented
+NeoForge1.21.1 additionalRuntimeClasspath requirement and verified actual server loading.
+Both help --task runClient and runClient --dry-run passed. Actual client loaded resources and
+registered finance screens without initialization errors. Screens were reviewed structurally,
+not manually operated/visually inspected through a native window in this session. Removed
+compact-layout overlaps and retained a316x236 screen fit.
+
+Stock importer fetched/validated100 of100 actual USD closes2025-12-31; CAD conversion1.3706,
+HALF_UP cents. Raw timestamps independently checked for NY date and USD currency. Exactly100
+unique original names/IDs and ranks1–100; no missing or invented fallback prices. No textures
+changed. Development library on runtime; release nested SQLite validated separately.
+
+Operational limits: base stock prices stay fixed until server API updates; daily FX batches use
+configured offline rates. Financial database settlement is atomic; physical item reservations
+remain outside SQLite crash atomicity and have no durable inventory outbox.
