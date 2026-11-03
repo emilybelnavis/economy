@@ -22,11 +22,11 @@ public final class WorldBackup {
         UpgradeBackup.validateBackup(backup,receipt);
         var metadata=UpgradeBackup.load(backup.resolve("foundation-manifest.properties"));
         if(!"economy-world-backup-v1".equals(metadata.getProperty("format")) || !"true".equals(metadata.getProperty("clean-shutdown"))
-                || !"0.1.0".equals(metadata.getProperty("mod-version")) || !"4".equals(metadata.getProperty("schema-version")) || !"1".equals(metadata.getProperty("journal-version"))) throw new IOException("Incompatible or unclean backup manifest");
+                || !"0.1.0".equals(metadata.getProperty("mod-version")) || !Set.of("4", "5").contains(metadata.getProperty("schema-version", "")) || !"1".equals(metadata.getProperty("journal-version"))) throw new IOException("Incompatible or unclean backup manifest");
         Instant.parse(metadata.getProperty("backup-utc"));
         OfflineInspector.validate(backup.resolve("world"),configuration);
         var actual=OfflineInspector.metadata(backup.resolve("world"));
-        if(!actual.databaseClean() || !actual.evidence().worldId().equals(metadata.getProperty("world-id"))
+        if(!Integer.toString(actual.evidence().schema()).equals(metadata.getProperty("schema-version")) || !actual.databaseClean() || !actual.evidence().worldId().equals(metadata.getProperty("world-id"))
                 || actual.evidence().lastJournal()!=Long.parseLong(metadata.getProperty("last-journal-sequence"))
                 || actual.evidence().economicSequence()!=Long.parseLong(metadata.getProperty("economic-checkpoint"))) throw new IOException("Backup manifest/checkpoint mismatch");
         Path reservation=destination.resolveSibling("."+destination.getFileName()+".restore.lock");StorageFiles.rejectLinks(reservation);
@@ -61,8 +61,8 @@ public final class WorldBackup {
         }
     }
     public static void main(String[] args) throws IOException {
-        if(args.length==2 && args[0].equals("backup")) System.out.println("Validated complete-world backup: "+create(Path.of(args[1]),FoundationRuntime.Configuration.core()));
-        else if(args.length==3 && args[0].equals("restore")) System.out.println("Restored separate world: "+restore(Path.of(args[1]),Path.of(args[2]),FoundationRuntime.Configuration.core()));
+        if(args.length==2 && args[0].equals("backup")) System.out.println("Validated complete-world backup: "+create(Path.of(args[1]),FoundationRuntime.Configuration.production(java.time.Clock.systemUTC())));
+        else if(args.length==3 && args[0].equals("restore")) System.out.println("Restored separate world: "+restore(Path.of(args[1]),Path.of(args[2]),FoundationRuntime.Configuration.production(java.time.Clock.systemUTC())));
         else throw new IllegalArgumentException("Use backup <stopped-world> or restore <backup-directory> <new-destination>");
     }
 }

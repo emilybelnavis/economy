@@ -26,12 +26,13 @@ final class OfflineInspector {
         try(var opened=open(world)) {
             var c=opened.connection();
             int schema=Integer.parseInt(scalar(c,"PRAGMA user_version"));
-            if(schema!=4 || !scalar(c,"PRAGMA application_id").equals(Integer.toString(SchemaMigrations.APPLICATION_ID))) throw new IOException("Unsupported backup schema/application");
+            if((schema<4 || schema>SchemaMigrations.CURRENT) || !scalar(c,"PRAGMA application_id").equals(Integer.toString(SchemaMigrations.APPLICATION_ID))) throw new IOException("Unsupported backup schema/application");
             String id=scalar(c,"SELECT world_id FROM foundation_metadata"); UUID.fromString(id);
             if(!Files.readString(world.resolve("economy/world-identity")).equals(SqliteStorage.encodeIdentity(UUID.fromString(id)))) throw new IOException("Backup world identity mismatch");
             if(!scalar(c,"PRAGMA quick_check").equals("ok")) throw new IOException("Corrupt backup database");
             try(var sql=c.createStatement();var rows=sql.executeQuery("PRAGMA foreign_key_check")) { if(rows.next()) throw new IOException("Broken backup references"); }
             JournalSchema.validate(c);RecoverySchema.validate(c);
+            if (schema >= 5) FxSchema.validate(c);
             var validation=new JournalCompatibility(c,configuration.records(),id); while(!validation.step()) {}
             long last=Long.parseLong(scalar(c,"SELECT COALESCE(max(sequence),0) FROM journal_transactions"));
             Map<String,ProjectionManager.Definition> projections=new HashMap<>(); configuration.projections().forEach(d->projections.put(d.name(),d));
@@ -56,12 +57,15 @@ final class OfflineInspector {
                 int count=0;
                 while(rows.next()) {
                     var definition=systems.get(rows.getString("system_id"));
-                    if(++count>64 || definition==null || definition.cadenceMillis()!=rows.getLong("cadence_ms") || definition.originMillis()!=rows.getLong("origin_ms")) throw new IOException("Unsupported economic system");
+                    var deferred=configuration.deferredSystems().get(rows.getString("system_id"));
+                    Long origin=definition == null ? null : Long.valueOf(definition.originMillis());
+                    if (deferred != null) origin=deferred.origin().read((query, parameters, max) -> query(c, query, parameters, max));
+                    if(++count>64 || definition==null || origin==null || definition.cadenceMillis()!=rows.getLong("cadence_ms") || origin!=rows.getLong("origin_ms")) throw new IOException("Unsupported economic system");
                     try(var versions=c.prepareStatement("SELECT * FROM economic_versions WHERE system_id=?")) {
-                        versions.setString(1,definition.id());try(var version=versions.executeQuery()) {int n=0;while(version.next()){var handler=definition.versions().get(version.getInt("version"));if(++n>16||handler==null||!dev.emily.economy.clock.EconomicClock.signature(definition,handler).equals(version.getString("implementation_id")))throw new IOException("Unsupported historical simulator");}}
+                        versions.setString(1,definition.id());try(var version=versions.executeQuery()) {int n=0;while(version.next()){var handler=definition.versions().get(version.getInt("version"));if(++n>16||handler==null||!dev.emily.economy.clock.EconomicClock.signature(definition,handler,origin).equals(version.getString("implementation_id")))throw new IOException("Unsupported historical simulator");}}
                     }
                     try(var latest=c.prepareStatement("SELECT * FROM economic_updates WHERE system_id=? ORDER BY economic_sequence DESC LIMIT 1")) {
-                        latest.setString(1,definition.id());try(var row=latest.executeQuery()) {if(row.next()){if(row.getLong("interval_end_ms")!=rows.getLong("frontier_ms")||row.getLong("economic_sequence")!=rows.getLong("last_sequence"))throw new IOException("Economic checkpoint mismatch");}else if(rows.getLong("frontier_ms")!=definition.originMillis()||rows.getLong("last_sequence")!=0)throw new IOException("Initial checkpoint mismatch");}
+                        latest.setString(1,definition.id());try(var row=latest.executeQuery()) {if(row.next()){if(row.getLong("interval_end_ms")!=rows.getLong("frontier_ms")||row.getLong("economic_sequence")!=rows.getLong("last_sequence"))throw new IOException("Economic checkpoint mismatch");}else if(rows.getLong("frontier_ms")!=origin||rows.getLong("last_sequence")!=0)throw new IOException("Initial checkpoint mismatch");}
                     }
                 }
             }
@@ -72,6 +76,25 @@ final class OfflineInspector {
             }
         } catch(SQLException|RuntimeException e) { throw new IOException("Backup compatibility validation failed",e); }
     }
+    private static List<Map<String,String>> query(Connection connection, String sql, List<String> parameters, int maximumRows) {
+        try (var statement = connection.prepareStatement(sql)) {
+            for (int i = 0; i < parameters.size(); i++) statement.setString(i + 1, parameters.get(i));
+            try (var rows = statement.executeQuery()) {
+                var result = new ArrayList<Map<String,String>>();
+                while (rows.next()) {
+                    if (result.size() == maximumRows) throw new IllegalArgumentException("Offline query row limit");
+                    var row = new HashMap<String,String>();
+                    var columns = rows.getMetaData();
+                    for (int i = 1; i <= columns.getColumnCount(); i++) row.put(columns.getColumnLabel(i), rows.getString(i));
+                    result.add(Collections.unmodifiableMap(row));
+                }
+                return List.copyOf(result);
+            }
+        } catch (SQLException error) {
+            throw StorageException.sql(error);
+        }
+    }
+
     private record Inspection(Connection connection,Path scratch) implements AutoCloseable {
         public void close() throws SQLException,IOException {
             try { connection.close(); } finally { if(scratch!=null) removeScratch(scratch); }

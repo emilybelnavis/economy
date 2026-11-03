@@ -40,8 +40,8 @@ non-Minecraft fixtures/maintenance. Production uses beginInitialization/advanceI
 Uncertain-commit reconnection retains A1-03's ownership/fail-closed rules and revalidates journal
 compatibility in interruptible pages before original-ID lookup. No empty fallback is introduced.
 
-RecordCatalog maps exact type/version keys to historical validators; core knows only the version-1
-foundation:economic-update record. Trusted integrations must explicitly register their historical
+RecordCatalog maps exact type/version keys to historical validators; core knows the version-1
+foundation:economic-update record and the [FX journal facts](fx.md). Trusted integrations must explicitly register their historical
 decoders. Unknown committed types/versions or invalid payloads fail closed, including before an
 upgrade. JournalEngine also checks the catalog before committing newly constructed records.
 Tests register fixture decoders only in test sources. No legacy implicit record acceptance.
@@ -73,8 +73,8 @@ store. There is no financial/account projection or full snapshot framework in th
 ## UTC and reproducible update identity
 
 EconomicClock accepts an explicit Clock (production UTC), definitions with explicit origin/cadence,
-a dependency DAG and versioned pure simulations. There are NO registered gameplay systems in the
-production core configuration. These primitives do not implement inflation, FX, interest or markets.
+a dependency DAG and versioned pure simulations. The production configuration registers [FX](fx.md) with an origin supplied by
+its committed opening publication. The fixture core has no active systems.
 Max 64 systems, 16 retained effective-version boundaries per system and 16 updates per worker step.
 
 Persisted seed is generated once in schema initialization. Each update gets a stable UUID from
@@ -153,7 +153,7 @@ is covered by OfflineWalTest. A live DB-only copy is NEVER a production backup p
 restoreEconomyWorld validates receipts, inventory/hashes, UUID/identity, exact supported mod/schema/
 journal versions, committed record decoders, projection/checkpoint checksums and economic versions/
 completions. Valid older projection checkpoints may rebuild after restore. Current general restore
-supports clean schema-4 world-backup-v1 manifests; earlier legacy-stopped upgrade receipts are
+supports clean schema-4 and schema-5 world-backup-v1 manifests; earlier legacy-stopped upgrade receipts are
 preserved but are not asserted to carry this newer clean-world proof.
 
 Restore stages in a separate sibling directory and publishes with a non-replacing move only after
@@ -165,7 +165,7 @@ Normal UTC catch-up resumes from restored seed/version/checkpoint; post-backup p
 
 Commands: prepareEconomyUpgrade (existing supported-schema upgrade prerequisite), backupEconomyWorld,
 restoreEconomyWorld. README documents arguments. The Java APIs accept explicit integration registries;
-CLI defaults to core, so unrecognized integration records/systems fail safely rather than being lost.
+CLI defaults to the production registry, so unrecognized integration records/systems fail safely rather than being lost.
 Online backup is an extension boundary only, not implemented.
 
 ## A5 cash/shop crash boundary (contracts only)

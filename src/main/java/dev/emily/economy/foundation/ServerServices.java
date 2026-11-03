@@ -2,6 +2,8 @@ package dev.emily.economy.foundation;
 
 import java.nio.file.Path;
 import dev.emily.economy.storage.StorageException;
+import dev.emily.economy.fx.FxDiagnostics;
+import dev.emily.economy.recovery.FoundationRuntime;
 import dev.emily.economy.storage.FoundationStore;
 import dev.emily.economy.journal.Journal;
 import dev.emily.economy.journal.JournalEngine;
@@ -48,6 +50,9 @@ public final class ServerServices {
     private final Map<Thread, Long> activeStorage = new ConcurrentHashMap<>();
     private final Map<Thread, Long> activeCalculations = new ConcurrentHashMap<>();
     private volatile DiagnosticsReport.StorageDetails storageDetails;
+    private record FxSample(FxDiagnostics snapshot, String readFailure) {}
+    private volatile FxSample fxSample = new FxSample(null, null);
+    private String economicRetry;
     private long nextDiagnosticsSample;
     private long rateSampleTime;
     private long rateSampleSequence;
@@ -146,7 +151,13 @@ public final class ServerServices {
             details = new DiagnosticsReport.StorageDetails(details.worldId(), details.schemaVersion(),
                     details.lastCommittedSequence(), health);
         }
-        return DiagnosticsReport.render(privileged, detailed, state, metrics(), details, code, correlation, observedRate);
+        var lines = DiagnosticsReport.render(privileged, detailed, state, metrics(), details, code, correlation, observedRate);
+        if (!privileged || !detailed || !(storage instanceof FoundationRuntime)) return lines;
+        var sample = fxSample;
+        String reason = state == State.UNAVAILABLE ? failureCode(failure)
+                : storageWorker.getQueue().size() >= config.storageQueueCapacity() || pending.size() >= publicationCapacity
+                ? "STORAGE_OVERLOAD" : economicRetry != null ? economicRetry : sample.readFailure();
+        return DiagnosticsReport.withFx(lines, state, sample.snapshot(), reason);
     }
 
     public static String failureCode(Throwable error) {
@@ -158,7 +169,7 @@ public final class ServerServices {
 
     private StorageLifecycle.Progress startupStep() {
         var step = storage.startupStep();
-        if (step.ready()) sampleStorage();
+        if (step.ready()) sampleDiagnosticsOnWorker();
         return step;
     }
 
@@ -177,6 +188,17 @@ public final class ServerServices {
         }
     }
 
+    private void sampleDiagnosticsOnWorker() {
+        sampleStorage();
+        if (storage instanceof FoundationRuntime runtime) {
+            try {
+                fxSample = new FxSample(runtime.readFxDiagnostics(), null);
+            } catch (RuntimeException error) {
+                fxSample = new FxSample(fxSample.snapshot(), failureCode(error));
+            }
+        }
+    }
+
     private void sampleDiagnostics() {
         long now = System.nanoTime();
         if (nextDiagnosticsSample != 0 && now - nextDiagnosticsSample < 0) return;
@@ -191,7 +213,7 @@ public final class ServerServices {
         }
         if (storage instanceof FoundationStore && (diagnosticProbe == null || diagnosticProbe.isDone())
                 && storageWorker.getQueue().isEmpty() && activeStorage.isEmpty()) {
-            diagnosticProbe = runOn(() -> { sampleStorage(); return null; }, storageWorker);
+            diagnosticProbe = runOn(() -> { sampleDiagnosticsOnWorker(); return null; }, storageWorker);
         }
     }
     public CompletionStage<Void> readiness() { return ready.minimalCompletionStage(); }
@@ -319,6 +341,7 @@ public final class ServerServices {
             if (!prepared.isDone()) return;
             var step = prepared.join();
             prepared = null;
+            economicRetry = null;
             economy = step.progress();
             economyObserved = true;
             if (step.calculation() != null) {
@@ -341,6 +364,7 @@ public final class ServerServices {
         if (committed != null) {
             if (!committed.isDone()) return;
             economy = committed.join();
+            economicRetry = null;
             committed = null;
         }
         if (nextEconomicProbe == 0 || System.nanoTime() - nextEconomicProbe >= 0) {
@@ -379,8 +403,9 @@ public final class ServerServices {
                 prepared = null;
                 calculating = null;
                 committed = null;
-                if (!(e.getCause() instanceof StorageException error)
-                        || error.kind() != StorageException.Kind.LOCK_TIMEOUT) {
+                if (e.getCause() instanceof StorageException error && error.kind() == StorageException.Kind.LOCK_TIMEOUT) {
+                    economicRetry = failureCode(error);
+                } else {
                     failure = e.getCause();
                     state = State.UNAVAILABLE;
                 }

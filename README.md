@@ -35,11 +35,20 @@ The callback budget limits when the server starts additional callbacks in a tick
 
 ## Status and diagnostics
 
-Use `/economy status` to check availability and startup or catch-up progress. The server console and permission-level 2 operators can also run `/economy diagnostics` for storage and journal checkpoints, queue waits, possible stalls, and the most recent failure code. Storage checkpoints reflect the latest completed sample. Economic rates describe observed progress and are shown only when measurable. During shutdown, check the server log for unresolved work.
+Use `/economy status` to check availability and startup or catch-up progress. The server console and permission-level 2 operators can also run `/economy diagnostics` for storage and journal checkpoints, queue waits, possible stalls, and the most recent failure code. Storage checkpoints reflect the latest completed sample. Economic rates describe observed progress and are shown only when measurable. Detailed diagnostics also show the latest FX sample, including selection status, the committed day, backlog, and effective and pending policy revisions. During shutdown, check the server log for unresolved work.
+
+## FX policy
+
+After a world has an opening FX publication, in-game operators with permission level 2 can use
+`/economy fx policy <operation-uuid> <currency> <baseline> <variation-ppm> <pull-ppm> <bounds-ppm>`.
+Enter the baseline in permanent-reference units per major unit of the selected currency.
+The edit takes effect at the next UTC midnight. Variation and pull each accept 0–1,000,000 ppm.
+Bounds accept 0–999,999 ppm, with the resulting band limited to 0.000000000001–1,000,000.
+For an uncertain result, repeat the same command with the same operation UUID.
 
 ## Schema upgrades
 
-New worlds initialize automatically. Redesigned worlds with schema 1, 2, or 3 require a validated complete-world backup before upgrading to schema 4. Prepare it while Minecraft is fully stopped:
+New worlds initialize automatically. Redesigned worlds with schemas 1 through 4 require a validated complete-world backup before upgrading to schema 5. Prepare it while Minecraft is fully stopped:
 
 ```sh
 ./gradlew prepareEconomyUpgrade -PeconomyWorld=/absolute/path/to/world
@@ -63,11 +72,11 @@ Restore into a **new, separate directory**:
 ./gradlew restoreEconomyWorld -PeconomyBackup=/absolute/path/to/backup-id -PeconomyRestoreDestination=/absolute/path/to/new-world
 ```
 
-The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Current restore support requires a clean schema-4 backup in this mod's supported manifest format. Earlier pre-upgrade snapshots remain preserved, but are not accepted as clean schema-4 restores.
+The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 and 5 backups in this mod’s backup format. A restored schema 4 world still requires the pre-upgrade backup before its first schema 5 startup.
 
 There is no online backup, automatic replacement, or retention/deletion service. Operators own backup storage and retention. Failed restores can leave a hidden staging directory without publishing the destination.
 
-Economy requests become available after startup recovery and required catch-up. Ordinary Minecraft can continue during that work. With an economic system registered, ongoing catch-up processes UTC intervals in chronological order and gates affected writes until current. Sleep and `/time` do not advance economic time. The core ships without gameplay economic systems, and market-scale catch-up performance has yet to be measured.
+Economy requests become available after startup recovery and required catch-up. Ordinary Minecraft can continue during that work. With an economic system registered, ongoing catch-up processes UTC intervals in chronological order and gates affected writes until current. Sleep and `/time` do not advance economic time. Daily FX starts at the UTC midnight after the world’s opening publication. World selection will be exposed in a later package.
 
 Legacy economy databases are not imported. Incompatible, corrupt, or mismatched identity data makes the economy unavailable while ordinary Minecraft play can continue. Preserve the files and inspect the logged error rather than deleting them.
 

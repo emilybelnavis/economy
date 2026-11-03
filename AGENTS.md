@@ -15,6 +15,11 @@
 
 ## Delegation
 
-- Main agent: GPT-6.1 Sol medium, shared contracts, integration and final checks. For substantial independent work, delegate to up to two `economy_worker` agents and one `economy_researcher` using the project profiles. Routine work stays with the main agent.
+- Main agent: GPT-6.1 Sol light, shared contracts, integration and final checks. For substantial independent work, delegate to up to two `economy_worker` agents and one `economy_researcher` using the project profiles. Routine work stays with the main agent.
 - Establish shared interfaces first. Assign narrow acceptance criteria, explicit disjoint write ownership or read-only boundaries, and allowed checks. Only the main agent delegates. One owner runs Gradle/game tasks sequentially.
 - Respect the user's settings and task-specific check limits. Do not silently substitute unavailable models.
+
+## Verification scope
+
+- For routine changes, run at most one targeted check if it adds confidence. For prose-only changes, review the diff.
+- Run required release checks once per runnable delivery. If a check fails, fix the issue and rerun only the affected check.

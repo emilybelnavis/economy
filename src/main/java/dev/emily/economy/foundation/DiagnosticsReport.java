@@ -1,6 +1,7 @@
 package dev.emily.economy.foundation;
 
 import dev.emily.economy.storage.StorageException;
+import dev.emily.economy.fx.FxDiagnostics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -53,6 +54,37 @@ public final class DiagnosticsReport {
         lines.add("Unresolved at shutdown " + metrics.unresolvedAtShutdown() + ".");
         lines.add(failureCode == null ? "Last failure none recorded." : "Last failure " + failure(failureCode)
                 + (correlation == null ? "" : ", correlation " + correlation) + ".");
+        return List.copyOf(lines);
+    }
+
+    public static List<String> withFx(List<String> report, ServerServices.State lifecycle,
+                                      FxDiagnostics snapshot, String reason) {
+        var lines = new ArrayList<>(report);
+        if (lifecycle != ServerServices.State.READY) {
+            lines.add("FX publication blocked (" + (reason == null
+                    ? lifecycle.name().toLowerCase(Locale.ROOT) : failure(reason)) + ").");
+        } else if (reason != null) {
+            boolean retryable = reason.equals("STORAGE_LOCK_TIMEOUT") || reason.equals("STORAGE_OVERLOAD");
+            lines.add("FX " + (retryable ? "inspection or publication can retry" : "inspection unavailable")
+                    + " (" + failure(reason) + ").");
+        } else if (snapshot == null) {
+            lines.add("FX sample pending.");
+        } else if (snapshot.reference() == null) {
+            lines.add("FX awaiting world currency selection.");
+        } else if (snapshot.waitingForWall()) {
+            lines.add("FX waiting for UTC wall clock.");
+        } else {
+            lines.add(snapshot.backlog() == 0 ? "FX current." : "FX catch-up due.");
+        }
+        if (snapshot != null && snapshot.reference() != null) {
+            lines.add("FX sample " + snapshot.sampledAt() + ", reference " + snapshot.reference().code()
+                    + ", last committed UTC day " + snapshot.lastDay() + ", effective policy "
+                    + snapshot.effectivePolicy() + ".");
+            lines.add("FX next due UTC day " + snapshot.nextDay() + ", backlog " + snapshot.backlog() + ".");
+            var pending = snapshot.pending();
+            lines.add(pending == null ? "FX pending policy none." : "FX pending policy " + pending.id()
+                    + ", scheduled UTC day " + pending.day() + ".");
+        }
         return List.copyOf(lines);
     }
 

@@ -17,6 +17,37 @@ class ServerServicesTest {
         }
         assertEquals(ServerServices.State.READY, services.state());
     }
+    @Test void fxDiagnosticsUsesDetachedSampleWhenStorageAdmissionIsFull() throws Exception {
+        var runtime = new dev.emily.economy.recovery.FoundationRuntime(
+                dev.emily.economy.recovery.FoundationRuntime.Configuration.production(java.time.Clock.systemUTC()));
+        var services = new ServerServices(world.toRealPath(), runtime, new SchedulingConfig(1, 2, 1, 5, 1000, 3));
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        try {
+            ready(services);
+            assertTrue(services.diagnostics(true, true).contains("FX awaiting world currency selection."));
+            services.storage(() -> {
+                started.countDown();
+                try {
+                    release.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return null;
+            });
+            assertTrue(started.await(3, TimeUnit.SECONDS));
+            services.storage(() -> null);
+            services.storage(() -> null);
+            assertTrue(services.storage(() -> null).toCompletableFuture().isCompletedExceptionally());
+            assertTrue(services.diagnostics(true, true).stream().anyMatch(line -> line.contains("STORAGE_OVERLOAD")));
+            assertFalse(services.diagnostics(false, true).stream().anyMatch(line -> line.contains("FX")));
+            assertFalse(services.diagnostics(true, false).stream().anyMatch(line -> line.contains("FX")));
+        } finally {
+            release.countDown();
+            assertTrue(services.stop(Duration.ofSeconds(3)));
+        }
+    }
+
     @Test void lifecycleIsolationAndDisposal() throws Exception {
         AtomicInteger closes = new AtomicInteger();
         StorageLifecycle adapter = new StorageLifecycle() {

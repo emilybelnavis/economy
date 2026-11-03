@@ -2,6 +2,8 @@ package dev.emily.economy.recovery;
 
 import dev.emily.economy.clock.EconomicClock;
 import dev.emily.economy.foundation.SchedulingConfig;
+import dev.emily.economy.fx.FxService;
+import dev.emily.economy.fx.FxDiagnostics;
 import dev.emily.economy.storage.*;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -9,8 +11,17 @@ import java.util.*;
 
 /** Storage recovery -> compatibility/migrations -> projections -> catch-up -> consistent publication. */
 public final class FoundationRuntime implements FoundationStore {
-    public record Configuration(RecordCatalog records,List<ProjectionManager.Definition> projections,List<EconomicClock.SystemDefinition> systems,Clock wall) {
-        public Configuration { Objects.requireNonNull(records); projections=List.copyOf(projections); systems=List.copyOf(systems); Objects.requireNonNull(wall); }
+    public record Configuration(RecordCatalog records,List<ProjectionManager.Definition> projections,List<EconomicClock.SystemDefinition> systems,Clock wall,
+                                Map<String, EconomicClock.DeferredSystem> deferredSystems) {
+        public Configuration(RecordCatalog records, List<ProjectionManager.Definition> projections,
+                             List<EconomicClock.SystemDefinition> systems, Clock wall) {
+            this(records, projections, systems, wall, Map.of());
+        }
+        public Configuration { Objects.requireNonNull(records); projections=List.copyOf(projections); systems=List.copyOf(systems); Objects.requireNonNull(wall); deferredSystems=Map.copyOf(deferredSystems); }
+        public static Configuration production(Clock wall) {
+            return new Configuration(RecordCatalog.core(), List.of(), List.of(FxService.definition()), wall,
+                    Map.of(FxService.SYSTEM, FxService.deferred()));
+        }
         public static Configuration core() { return new Configuration(RecordCatalog.core(),List.of(),List.of(),Clock.systemUTC()); }
     }
     private final Configuration configuration;
@@ -38,7 +49,7 @@ public final class FoundationRuntime implements FoundationStore {
             if(!progress.ready()) return progress;
             store.cleanShutdownEligible(false);
             projections=new ProjectionManager(store,configuration.projections());
-            clock=new EconomicClock(store,configuration.wall(),configuration.systems());
+            clock=new EconomicClock(store,configuration.wall(),configuration.systems(),configuration.deferredSystems());
             phase=1;
         }
         if(phase==1 || phase==3) {
@@ -91,6 +102,11 @@ public final class FoundationRuntime implements FoundationStore {
         }
         return new EconomicProgress(progress.completedSequence(), progress.outstandingIntervals(),
                 progress.waitingForWall(), progress.ready() && !economicProjectionsPending);
+    }
+
+    public FxDiagnostics readFxDiagnostics() {
+        if (!configuration.deferredSystems().containsKey(FxService.SYSTEM)) return null;
+        return store.transaction(tx -> FxDiagnostics.read(tx, configuration.wall().instant()));
     }
 
     public RecordCatalog recordCatalog() { return configuration.records(); }

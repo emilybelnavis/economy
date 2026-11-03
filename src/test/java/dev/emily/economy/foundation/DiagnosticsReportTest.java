@@ -39,6 +39,37 @@ class DiagnosticsReportTest {
         assertFalse(report.contains("ETA"));
     }
 
+    @Test void fxViewsDistinguishWaitingBlockedAndRetryableReasons() {
+        var day = java.time.LocalDate.parse("2026-11-03");
+        var now = java.time.Instant.parse("2026-11-03T19:00:00Z");
+        var pending = new dev.emily.economy.fx.FxDiagnostics.PendingPolicy(day.plusDays(1), CORRELATION);
+        var awaiting = new dev.emily.economy.fx.FxDiagnostics(now, null, null, null, null, 0, false, null);
+        var healthy = new dev.emily.economy.fx.FxDiagnostics(now, dev.emily.economy.api.EconomyCurrency.CAD,
+                day, WORLD, day.plusDays(1), 0, false, pending);
+        var overdue = new dev.emily.economy.fx.FxDiagnostics(now, healthy.reference(), day, WORLD,
+                day.plusDays(1), 2, false, pending);
+        var waiting = new dev.emily.economy.fx.FxDiagnostics(now, healthy.reference(), day, WORLD,
+                day.plusDays(1), 2, true, pending);
+        assertEquals("FX awaiting world currency selection.", fx(awaiting, null).getFirst());
+        var current = fx(healthy, null);
+        assertEquals("FX current.", current.getFirst());
+        assertTrue(current.get(1).contains("effective policy " + WORLD));
+        assertTrue(current.get(3).contains("pending policy " + CORRELATION));
+        assertEquals("FX catch-up due.", fx(overdue, null).getFirst());
+        assertTrue(fx(overdue, null).get(2).contains("backlog 2"));
+        assertEquals("FX waiting for UTC wall clock.", fx(waiting, null).getFirst());
+        assertTrue(fx(healthy, "STORAGE_OVERLOAD").getFirst().contains("can retry (STORAGE_OVERLOAD)"));
+        assertTrue(fx(healthy, "STORAGE_LOCK_TIMEOUT").getFirst().contains("can retry (STORAGE_LOCK_TIMEOUT)"));
+        for (String reason : List.of("CONFIGURATION_INVALID", "STORAGE_UNSAFE_CONNECTION")) {
+            assertEquals("FX publication blocked (" + reason + ").", DiagnosticsReport.withFx(
+                    List.of(), ServerServices.State.UNAVAILABLE, null, reason).getFirst());
+        }
+    }
+
+    private static List<String> fx(dev.emily.economy.fx.FxDiagnostics snapshot, String reason) {
+        return DiagnosticsReport.withFx(List.of(), ServerServices.State.READY, snapshot, reason);
+    }
+
     @Test void operatorStatusShowsMeasuredRateAndControlledFailure() {
         String status = String.join("\n", DiagnosticsReport.render(true, false, ServerServices.State.READY,
                 METRICS, null, "STORAGE_IDENTITY", CORRELATION, 2.5));

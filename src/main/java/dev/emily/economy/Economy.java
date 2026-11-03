@@ -19,6 +19,9 @@ import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import dev.emily.economy.recovery.FoundationRuntime;
+import dev.emily.economy.foundation.FxAdminCommands;
+import dev.emily.economy.foundation.DenominationChooser;
+import java.time.Clock;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
@@ -31,6 +34,7 @@ import java.util.Set;
 public final class Economy {
     public static final String MOD_ID = "economy";
     private static final Logger LOGGER = LogUtils.getLogger();
+    private final Map<MinecraftServer, DenominationChooser> choosers = new IdentityHashMap<>();
     private final Map<MinecraftServer, ServerServices> servers = new IdentityHashMap<>();
     private final Set<MinecraftServer> invalidConfiguration = Collections.newSetFromMap(new IdentityHashMap<>());
     private static final SchedulingMetrics.Queue NO_QUEUE = new SchedulingMetrics.Queue(0, 0, 0);
@@ -52,13 +56,17 @@ public final class Economy {
         catch (StorageException e) { LOGGER.error("event={} component=sqlite_driver", ServerServices.failureCode(e)); }
     }
     private void commands(RegisterCommandsEvent event) {
+        DenominationChooser.register(event.getDispatcher(), choosers::get);
+        FxAdminCommands.register(event.getDispatcher(), servers::get, Clock.systemUTC());
         EconomyCommands.register(event.getDispatcher(), (source, view) -> {
             var server = source.getServer();
             var services = servers.get(server);
             if (services != null) return services.diagnostics(view.privileged(), view.detailed());
-            return DiagnosticsReport.render(view.privileged(), view.detailed(), ServerServices.State.UNAVAILABLE,
-                    NO_METRICS, null, invalidConfiguration.contains(server) ? "CONFIGURATION_INVALID" : null,
-                    null, null);
+            String reason = invalidConfiguration.contains(server) ? "CONFIGURATION_INVALID" : null;
+            var report = DiagnosticsReport.render(view.privileged(), view.detailed(), ServerServices.State.UNAVAILABLE,
+                    NO_METRICS, null, reason, null, null);
+            return view.privileged() && view.detailed()
+                    ? DiagnosticsReport.withFx(report, ServerServices.State.UNAVAILABLE, null, reason) : report;
         });
     }
 
@@ -73,9 +81,10 @@ public final class Economy {
             LOGGER.error("event=CONFIGURATION_INVALID reason={}", e.safeReason());
             return;
         }
-        var runtime = new FoundationRuntime(FoundationRuntime.Configuration.core(), scheduling.sqliteLockTimeoutMillis());
+        var runtime = new FoundationRuntime(FoundationRuntime.Configuration.production(Clock.systemUTC()), scheduling.sqliteLockTimeoutMillis());
         servers.put(server, new ServerServices(server.getWorldPath(LevelResource.ROOT), runtime, scheduling));
         runtimes.put(server, runtime);
+        choosers.put(server, new DenominationChooser(servers.get(server), runtime, Clock.systemUTC()));
         LOGGER.info("Economy foundation initializing");
     }
     private void tick(ServerTickEvent.Post event) {
@@ -84,6 +93,7 @@ public final class Economy {
             var previous = services.state();
             var previousPhase = services.progress().phase();
             services.tick();
+            choosers.get(event.getServer()).tick(event.getServer());
             if (!services.progress().phase().equals(previousPhase)) LOGGER.info("Economy startup progress: {} ({}/{})", DiagnosticsReport.recoveryPhase(services.progress().phase()), services.progress().completed(), services.progress().target());
             if (services.state() != previous) {
                 LOGGER.info("Economy foundation state: {}", services.state());
@@ -95,6 +105,7 @@ public final class Economy {
     private void stopping(ServerStoppingEvent event) {
         shutdownErrors.put(event.getServer(),new dev.emily.economy.recovery.ShutdownErrors());
         ServerServices services = servers.remove(event.getServer());
+        choosers.remove(event.getServer());
         if (services != null) {
             boolean wasReady = services.state() == ServerServices.State.READY;
             boolean clean = services.stop();
@@ -108,6 +119,7 @@ public final class Economy {
         invalidConfiguration.remove(event.getServer());
         FoundationRuntime runtime=runtimes.remove(event.getServer());
         ServerServices orphan=servers.remove(event.getServer());
+        choosers.remove(event.getServer());
         if(orphan!=null) {orphan.stop();drained.remove(event.getServer());}
         var errors=shutdownErrors.remove(event.getServer());
         boolean saveFailed=errors==null || errors.failed() || event.getServer().isCurrentlySaving();

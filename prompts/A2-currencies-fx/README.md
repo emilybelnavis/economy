@@ -1,6 +1,6 @@
 # A2 — Currencies, FX and denomination
 
-Status: planning approved on 2026-11-03. Refine specifications and future prompts only. Do not implement code, scaffold, run Gradle/tests/game processes, generate assets, change dependencies, or migrate worlds. Edit planning files only when explicitly requested. Reading a roadmap or this file is not implementation authorization.
+Status: planning approved on 2026-11-03. [A2-01](../../.codex/A2-01.md), [A2-02](../../.codex/A2-02.md), and [A2-03-01](../../.codex/A2-03-01.md) and [A2-03-02](../../.codex/A2-03-02.md) are verified. Subsequent packages require explicit invocation.
 
 ## Goal and dependencies
 

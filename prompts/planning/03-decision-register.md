@@ -10,7 +10,7 @@ Foundation approvals below were given explicitly in chat on 2026-11-03. Approval
 | D04 | APPROVED: real-world elapsed time | Process all offline time gradually; gate affected actions; persisted chronological/versioned deterministic updates; sleep/time commands irrelevant; no backward repeat or forward truncation. Domain accrual/cadence rules later. | A1/A6/A7 |
 | D05 | APPROVED initial limits/target; full benchmark later | Maximum expected 15 players; target seven offline days in 30 seconds at eventual 800 listings. One storage worker, two CPU workers, 256/64 pending tasks, 1 ms callback-start budget/tick, 5 s lock timeout, 30 s drain target. Size caps/retention/hardware benchmark details remain to specify. | A1/B3 |
 | D06 | Account structure and limits | Separate identity/account/currency balance; preserve three-account/primary workflow unless explicit replacement approved | A3 |
-| D07 | Organization authorization | Roles, revocation, treasury/merchant/system accounts and audit actors | A3 |
+| D07 | Organization authorization deferred | [Registration, grants, revocation and integration authority](deferred-organization-identity.md). A3 retains typed owner references, player and system authorization, and audit actors. | Integration phase TBD |
 | D08 | World currency and rebase semantics | Default/reporting currency separate from explicit redenomination; preserve chooser and confirmed admin capability | A2/A3/A4 |
 | D09 | FX rounding, spread, fees and quote expiry | Explicit per-operation rules, versioned quotes, clearing/fee/residual postings | A2/A4 |
 | D10 | Cash issuance/supply and acquisition | Track issuance/redemption and creative/admin minting; choose survival acquisition and whether terminals hold finite cash | A5/A7 |

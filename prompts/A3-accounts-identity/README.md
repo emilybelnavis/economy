@@ -10,7 +10,7 @@ Fixed baseline: Minecraft 1.21.1, NeoForge 21.1.252, Java 21; server-authoritati
 
 ## Scope to flesh out
 
-Player, organization, merchant, treasury and system ownership; authorized roles; account types/lifecycle; multi-currency balances; available/reserved/restricted definitions; stable lookup; limits and administration.
+Player and system authority; typed owner references for future integrations; account types/lifecycle; multi-currency balances; available/reserved/restricted definitions; stable lookup; limits and administration.
 
 ## Mandatory current-feature reimplementation
 
@@ -28,7 +28,7 @@ For each subprompt define outcome, owner, prerequisites, persistence/entities, s
 
 ## Acceptance scenarios to specify, not execute
 
-Unauthorized opening/lookup/change rejected; organization permission revocation effective; duplicate currency/limit/protection enforced; closed accounts retain audit references. Monetary movement disabled until A4.
+Unauthorized opening/lookup/change rejected; duplicate currency/limit/protection enforced; closed accounts retain audit references. Monetary movement disabled until A4.
 
 Include concrete numerical or state-transition examples where useful. Describe future unit, integration, restart/crash and performance checks appropriate to each subprompt. Distinguish proposed guarantees from verified behavior. Future runnable deliveries require configured runClient/runServer, mod registration, required development runtime dependencies, and runClient help/dry-run verification; run no checks during this planning task.
 
@@ -41,3 +41,19 @@ Include concrete numerical or state-transition examples where useful. Describe f
 - Open questions and approved-versus-proposed rules.
 
 Stop at planning. Do not execute the prompts you draft or expand into later-phase implementation.
+
+## Design draft
+
+See [the proposed specification and execution packages](DESIGN.md) for review.
+
+Organization registration, roles and delegated access are tracked as a [deferred integration task](../planning/deferred-organization-identity.md).
+
+## Draft execution packages
+
+Read the [shared contract](CONTRACT.md). Invoke each package separately after its prerequisites are verified.
+
+1. [A3-01 Parties and authorization](A3-01.md)
+2. [A3-02 Account catalog and product constraints](A3-02.md)
+3. [A3-03 Lifecycle and limits](A3-03.md)
+4. [A3-04 Funds vocabulary and account queries](A3-04.md)
+5. [A3-05 Rebase mapping and integration handoff](A3-05.md)

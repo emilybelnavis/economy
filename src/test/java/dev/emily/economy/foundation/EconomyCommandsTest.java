@@ -37,6 +37,16 @@ class EconomyCommandsTest {
         assertEquals(List.of("operator status", "diagnostics"), console.messages);
     }
 
+    @Test void fxPolicyRejectsUnauthenticatedCommandSources() {
+        var dispatcher = new CommandDispatcher<CommandSourceStack>();
+        FxAdminCommands.register(dispatcher, server -> fail("An unauthorized source reached admission"), java.time.Clock.systemUTC());
+        String command = "economy fx policy 665cb020-9894-4c09-a41c-b6fc4e63d03d USD 1.4 3000 100000 50000";
+        for (var source : List.of(new TestSource(CommandSource.NULL, 0), new TestSource(CommandSource.NULL, 2),
+                new TestSource(new RconConsoleSource(null), 2))) {
+            assertThrows(CommandSyntaxException.class, () -> dispatcher.execute(command, source));
+        }
+    }
+
     private static final class TestSource extends CommandSourceStack {
         private final List<String> messages = new ArrayList<>();
 

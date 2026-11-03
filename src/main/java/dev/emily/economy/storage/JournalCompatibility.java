@@ -57,6 +57,8 @@ public final class JournalCompatibility {
                 if (tx.getString("economic_update_id") != null) uuid(tx.getString("economic_update_id"));
                 if (tx.getString("correction_of") != null) uuid(tx.getString("correction_of"));
                 int position = 0; long bytes = 0;
+                dev.emily.economy.clock.EconomicRecord economic = null;
+                String fxPublication = null;
                 try (var records = connection.prepareStatement("SELECT * FROM journal_records WHERE sequence=? ORDER BY position")) {
                     records.setLong(1, tx.getLong("sequence"));
                     try (var record = records.executeQuery()) {
@@ -65,9 +67,27 @@ public final class JournalCompatibility {
                             var entry = new Journal.Entry(record.getInt("position"), record.getString("record_type"), record.getInt("record_version"), record.getString("payload"));
                             bytes += entry.payload().getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
                             catalog.validate(entry.type(), entry.version(), entry.payload());
-                            if(entry.type().equals(dev.emily.economy.clock.EconomicRecord.TYPE)) validateEconomic(entry.payload(),tx);
+                            if (entry.type().equals(dev.emily.economy.clock.EconomicRecord.TYPE)) {
+                                validateEconomic(entry.payload(), tx);
+                                economic = dev.emily.economy.clock.EconomicRecord.decode(entry.payload());
+                            }
+                            if (entry.type().equals(dev.emily.economy.fx.FxFacts.PUBLICATION)) {
+                                if (fxPublication != null) throw new IllegalArgumentException("Multiple FX publications in one transaction");
+                                fxPublication = entry.payload();
+                            }
                         }
                     }
+                }
+                if (economic != null && economic.system().equals(dev.emily.economy.fx.FxService.SYSTEM)) {
+                    if (!economic.output().equals(fxPublication)) throw new IllegalArgumentException("Missing or mismatched FX clock publication");
+                    var published = dev.emily.economy.fx.FxFacts.Publication.decode(fxPublication);
+                    if (!published.updateId().equals(economic.updateId())
+                            || published.day().toEpochDay() * 86_400_000L != economic.endMillis()) {
+                        throw new IllegalArgumentException("FX publication identity or day mismatch");
+                    }
+                } else if (fxPublication != null && (!outcome.getString("operation_type").equals(dev.emily.economy.fx.FxService.OPEN.operationType())
+                        || !dev.emily.economy.fx.FxFacts.Publication.decode(fxPublication).updateId().toString().equals(tx.getString("operation_id")))) {
+                    throw new IllegalArgumentException("FX opening linkage mismatch");
                 }
                 if (position != tx.getInt("record_count") || position < 1 || bytes > 131072) throw new IllegalArgumentException("Record completeness/bounds");
             }

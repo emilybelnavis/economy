@@ -32,7 +32,7 @@ class ProjectionRecoveryTest {
     }
     @Test void unknownCommittedRecordFailsBeforeUpgradeOrRebuild()throws Exception{
         try(var c=DriverManager.getConnection("jdbc:sqlite:"+world.resolve("economy/economy.sqlite"));var s=c.createStatement()){
-            s.execute("DELETE FROM migration_history WHERE version=4");s.execute("UPDATE foundation_metadata SET schema_version=3");s.execute("PRAGMA user_version=3");
+            s.execute("DELETE FROM migration_history WHERE version>=4");s.execute("UPDATE foundation_metadata SET schema_version=3");s.execute("PRAGMA user_version=3");
         }
         var error=assertThrows(StorageException.class,()->new SqliteStorage().initialize(world));assertEquals(StorageException.Kind.SCHEMA,error.kind());assertTrue(error.getMessage().contains("Unknown committed record"));
         try(var c=DriverManager.getConnection("jdbc:sqlite:"+world.resolve("economy/economy.sqlite"));var s=c.createStatement();var r=s.executeQuery("PRAGMA user_version")){assertTrue(r.next());assertEquals(3,r.getInt(1));}

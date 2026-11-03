@@ -94,9 +94,9 @@ class SqliteStorageTest {
         assertEquals("fixture region", Files.readString(backup.resolve("world/region/test.mca")));
         var store = open(world);
         assertEquals(id, store.snapshot().worldId().value());
-        assertEquals(4, store.snapshot().schemaVersion());
+        assertEquals(5, store.snapshot().schemaVersion());
         var history = store.transaction(tx -> tx.query("SELECT version FROM migration_history ORDER BY version", List.of(), 32));
-        assertEquals(List.of("1", "2", "3", "4"), history.stream().map(r -> r.get("version")).toList());
+        assertEquals(List.of("1", "2", "3", "4", "5"), history.stream().map(r -> r.get("version")).toList());
         store.close();
     }
     @Test void changedBackupAndRunningWorldCannotAuthorizeUpgrade() throws Exception {
@@ -118,8 +118,8 @@ class SqliteStorageTest {
         Path world = world("rollback"); UUID id = versionOne(world);
         try (var c = DriverManager.getConnection("jdbc:sqlite:" + world.resolve("economy/economy.sqlite"))) {
             var migrations = new ArrayList<>(SchemaMigrations.REGISTRY);
-            migrations.add(new SchemaMigrations.Migration(5, "failure fixture", List.of("CREATE TABLE transient_fixture(id TEXT)", "INVALID SQL")));
-            StorageException error = assertThrows(StorageException.class, () -> SchemaMigrations.apply(c, id, 1, 5, migrations));
+            migrations.add(new SchemaMigrations.Migration(6, "failure fixture", List.of("CREATE TABLE transient_fixture(id TEXT)", "INVALID SQL")));
+            StorageException error = assertThrows(StorageException.class, () -> SchemaMigrations.apply(c, id, 1, 6, migrations));
             assertEquals(StorageException.Kind.MIGRATION, error.kind());
             try (var s = c.createStatement(); var r = s.executeQuery("PRAGMA user_version")) { assertTrue(r.next()); assertEquals(1, r.getInt(1)); }
             try (var s = c.createStatement(); var r = s.executeQuery("SELECT count(*) FROM migration_history")) { assertTrue(r.next()); assertEquals(1, r.getInt(1)); }
