@@ -3,7 +3,7 @@ plugins {
     id 'net.neoforged.moddev' version '2.0.148'
 }
 version = '0.1.0-alpha'
-group = 'ca.emilybelnavis.mc-mods.economy'
+group = 'ca.emilybelnavis.mcmods.economy'
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 java.withSourcesJar()
 neoForge {
@@ -24,7 +24,7 @@ sourceSets {
 tasks.register('ledgerTest', JavaExec) {
     dependsOn ledgerChecksClasses
     classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'dev.emily.economy.banking.LedgerTest'
+    mainClass = 'ca.emilybelnavis.mcmods.economy.banking.LedgerTest'
     enableAssertions = true
 }
 tasks.named('check') { dependsOn 'ledgerTest' }
@@ -32,7 +32,7 @@ tasks.named('check') { dependsOn 'ledgerTest' }
 tasks.register('persistenceTest', JavaExec) {
     dependsOn ledgerChecksClasses
     classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'dev.emily.economy.banking.BankPersistenceTest'
+    mainClass = 'ca.emilybelnavis.mcmods.economy.banking.BankPersistenceTest'
     enableAssertions = true
 }
 tasks.named('check') { dependsOn 'persistenceTest' }
@@ -48,12 +48,12 @@ sourceSets.main.java.srcDir('src/generated/java')
 tasks.register('machineLayoutTest', JavaExec) {
     dependsOn ledgerChecksClasses
     classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'dev.emily.economy.WideMachineLayoutChecks'
+    mainClass = 'ca.emilybelnavis.mcmods.economy.WideMachineLayoutChecks'
 }
 tasks.register('machineShapeTest', JavaExec) {
     dependsOn ledgerChecksClasses
     classpath = sourceSets.ledgerChecks.runtimeClasspath
-    mainClass = 'dev.emily.economy.MachineShapeChecks'
+    mainClass = 'ca.emilybelnavis.mcmods.economy.MachineShapeChecks'
     workingDir = projectDir
 }
 tasks.named('check') { dependsOn 'machineLayoutTest', 'machineShapeTest' }

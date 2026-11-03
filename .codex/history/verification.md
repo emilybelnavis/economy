@@ -118,3 +118,7 @@ Gradle group set to ca.emilybelnavis.mc-mods.economy; version reset to0.1.0 in G
 and NeoForge metadata. Minecraft namespace remains economy; Java package remains
  dev.emily.economy. Current implementation retained. Clean build and banking/layout/shape
 checks passed; runClient task help and dry-run passed. Final JAR metadata verified0.1.0.
+
+## 2026-11-02 — Group and source package migration
+
+Set Gradle group to `ca.emilybelnavis.mcmods.economy`; migrated main, generated, ledger-check and GameTest Java packages and generator output paths. Existing version preserved. Java 21 clean build, ledger/persistence/layout/shape checks, GameTest compilation, runClient help and dry-run passed. Release JAR contains new package paths and no old `dev/emily/economy` classes.

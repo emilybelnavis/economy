@@ -1,6 +1,6 @@
 # Economy
 
-Version **0.1.0** · Project ID `ca.emilybelnavis.mc-mods.economy`
+Version **0.1.0** · Project ID `ca.emilybelnavis.mcmods.economy`
 
 An early playable economy mod for **Minecraft 1.21.1**, **NeoForge 21.1.252**, and **Java 21**.
 Install the JAR on both the server and clients. No additional mods are required.
@@ -65,7 +65,7 @@ Computer recipe: `GGG / RCR / III` (C = comparator; other symbols as above).
 
 ## Integration API
 
-Use `dev.emily.economy.api.EconomyApi.get(server)` on the server thread. The API supports
+Use `ca.emilybelnavis.mcmods.economy.api.EconomyApi.get(server)` on the server thread. The API supports
 `balance`, `transfer`, `credit`, `debit`, and immutable `history` snapshots. Amounts are positive
 whole units; invalid amounts/overflow throw `IllegalArgumentException`, and insufficient funds
 throw `IllegalStateException`. Account IDs are UUIDs. Callers must authorize charges and money

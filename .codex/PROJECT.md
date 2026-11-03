@@ -2,9 +2,9 @@
 
 ## Identity and pins
 
-Mod ID `economy`; package `dev.emily.economy`; version 0.1.0; MIT license.
-Gradle group/project ID: `ca.emilybelnavis.mc-mods.economy`.
-Maven coordinates: `ca.emilybelnavis.mc-mods.economy:economy:0.1.0`.
+Mod ID `economy`; package `ca.emilybelnavis.mcmods.economy`; version 0.1.0; MIT license.
+Gradle group/project ID: `ca.emilybelnavis.mcmods.economy`.
+Maven coordinates: `ca.emilybelnavis.mcmods.economy:economy:0.1.0`.
 Minecraft 1.21.1 / NeoForge 21.1.252 / Java 21 / ModDevGradle 2.0.148 / Gradle 9.2.1.
 No extra mod dependencies. Client/server runs register `sourceSets.main`.
 
