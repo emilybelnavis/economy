@@ -1,0 +1,227 @@
+package dev.emily.economy.journal;
+
+import dev.emily.economy.api.*;
+import dev.emily.economy.api.Identifiers.*;
+import dev.emily.economy.storage.SqliteStorage;
+import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import static dev.emily.economy.api.EconomyCurrency.CAD;
+import static dev.emily.economy.journal.Journal.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class WithdrawalsTest {
+    @TempDir Path world;
+    private final PlayerId owner = new PlayerId(UUID.randomUUID());
+    private final UUID account = UUID.randomUUID();
+    private final UUID generation = UUID.randomUUID();
+    private final TerminalPolicy.Anchor anchor = new TerminalPolicy.Anchor("minecraft:overworld", 3, 64, 4);
+    private boolean fits = true;
+    private boolean live = true;
+    private String fxRevision = "fx-1";
+    private final Map<String, WithdrawalPlanner.Denomination> catalog = Map.of(
+            "economy:cad_bill_20", new WithdrawalPlanner.Denomination("economy:cad_bill_20", CAD, 2000, true),
+            "economy:cad_bill_50", new WithdrawalPlanner.Denomination("economy:cad_bill_50", CAD, 5000, true),
+            "economy:cad_coin_25", new WithdrawalPlanner.Denomination("economy:cad_coin_25", CAD, 25, false));
+
+    @Test void fullFitRequiredBeforeIntentAndBeforeDebitThenReplaySettlesOnce() throws Exception {
+        var store = open();
+        try {
+            seed(store, TerminalPolicy.Kind.ATM);
+            var preview = preview(store, 6000, null);
+            var reserve = intent(Withdrawals.Action.RESERVE, Withdrawals.reserveRequest(preview));
+            fits = false;
+            assertEquals(Status.NOT_ACCEPTED, engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve).status());
+            assertEquals(10000L, balance(store));
+            assertEquals("0", count(store, "cash_issuance"));
+            fits = true;
+            assertEquals(Status.COMMITTED, engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve).status());
+            var commit = commit(reserve.operationId().value());
+            fits = false;
+            assertEquals("WITHDRAWAL_CAPACITY", engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare).submit(commit).result().code());
+            assertEquals(10000L, balance(store));
+            assertEquals("0", count(store, "cash_issuance"));
+            fits = true;
+            var original = engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare).submit(commit);
+            assertEquals(Status.COMMITTED, original.status());
+            assertEquals(original, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare).submit(commit));
+            assertEquals(4000L, balance(store));
+            var delivery = store.transaction(tx -> Custody.find(tx::query, owner, reserve.operationId().value(), false)).orElseThrow();
+            assertEquals(Custody.State.COMMITTED, delivery.state());
+            var claims = WithdrawalDelivery.claims(delivery);
+            assertEquals(3, claims.getFirst().count());
+            long protectedCount = store.transaction(tx -> CashIssuance.reserved(tx::query, claims.getFirst().lot(), null));
+            assertEquals(3L, protectedCount);
+            var claimAction = Custody.Action.CLAIM;
+            var claimHandler = Custody.registration(claimAction, (a, i, current, reads) -> true,
+                    (current, evidence, reads) -> evidence.kind() == Custody.EvidenceKind.UNDELIVERED, null);
+            var claimIntent = new Intent(new OperationId(UUID.randomUUID()), new RequestId(UUID.randomUUID()), owner,
+                    claimAction.kind(), Custody.request(delivery.id(), null, new Custody.Evidence(
+                            Custody.EvidenceKind.UNDELIVERED, "capacity lost after commit", delivery.terms().destination(),
+                            "verified no physical insertion"), "whole batch undelivered"), null, null);
+            var claimEngine = new JournalEngine(store, (actor, kind) -> true, Map.of(claimAction.kind(), claimHandler));
+            var claimOutcome = claimEngine.submit(claimIntent);
+            assertEquals(Status.COMMITTED, claimOutcome.status());
+            assertEquals(claimOutcome, claimEngine.submit(claimIntent));
+            assertEquals(1, store.transaction(tx -> Custody.claims(tx::query, owner, null, 63)).cases().size());
+            assertEquals(4000L, balance(store));
+            assertEquals("1", count(store, "cash_issuance"));
+            assertThrows(IllegalArgumentException.class, () -> preview(store, 3000, null));
+            assertThrows(IllegalArgumentException.class, () -> preview(store, 6000, Map.of("economy:cad_coin_25", 240)));
+        } finally { store.close(); }
+    }
+
+    @Test void tellerCoinsAreAutomaticAndDebitUsesCeilingBankQuantum() throws Exception {
+        var store = open();
+        try {
+            seed(store, TerminalPolicy.Kind.TELLER);
+            var preview = preview(store, 75, Map.of());
+            assertEquals(Map.of("economy:cad_coin_25", 3), preview.plan().coins());
+            assertEquals(100L, preview.debit().minorUnits());
+            var reserve = intent(Withdrawals.Action.RESERVE, Withdrawals.reserveRequest(preview));
+            engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve);
+            assertEquals(Status.COMMITTED, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare)
+                    .submit(commit(reserve.operationId().value())).status());
+            assertEquals(9900L, balance(store));
+        } finally { store.close(); }
+    }
+
+    @Test void stalePublicationAndAuthorityRejectBeforeIssuance() throws Exception {
+        var store = open();
+        try {
+            seed(store, TerminalPolicy.Kind.ATM);
+            var reserve = intent(Withdrawals.Action.RESERVE, Withdrawals.reserveRequest(preview(store, 7000, null)));
+            engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve);
+            live = false;
+            assertEquals(Status.NOT_ACCEPTED, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare)
+                    .submit(commit(reserve.operationId().value())).status());
+            live = true;
+            fxRevision = "fx-2";
+            assertEquals(Status.DURABLY_REJECTED, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare)
+                    .submit(commit(reserve.operationId().value())).status());
+            assertEquals(10000L, balance(store));
+            assertEquals("0", count(store, "cash_issuance"));
+        } finally { store.close(); }
+    }
+
+    @Test void deliveryFailureRollsBackDebitIssuanceAndCustodyTogether() throws Exception {
+        var store = open();
+        try {
+            seed(store, TerminalPolicy.Kind.ATM);
+            var reserve = intent(Withdrawals.Action.RESERVE, Withdrawals.reserveRequest(preview(store, 6000, null)));
+            engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve);
+            var commit = commit(reserve.operationId().value());
+            Withdrawals.Delivery failure = (intent, current, lots, reads) -> {
+                var base = WithdrawalDelivery.prepare(intent, current, lots, reads);
+                return new JournalEngine.Commit(base.records(), base.result(), tx -> {
+                    base.projections().apply(tx);
+                    throw new IllegalStateException("injected delivery-intent failure");
+                });
+            };
+            assertThrows(IllegalStateException.class, () -> engine(store, Withdrawals.Action.COMMIT, failure).submit(commit));
+            assertEquals(10000L, balance(store));
+            assertEquals("0", count(store, "cash_issuance"));
+            assertEquals("0", count(store, "custody_cases"));
+            assertTrue(engine(store, Withdrawals.Action.COMMIT, failure).lookup(commit).isEmpty());
+            assertEquals(Status.COMMITTED, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare).submit(commit).status());
+        } finally { store.close(); }
+    }
+
+    @Test void committedOutcomeSurvivesRestartWithoutSpeculativeRedelivery() throws Exception {
+        var store = open();
+        Intent commit;
+        Outcome original;
+        UUID reservation;
+        try {
+            seed(store, TerminalPolicy.Kind.ATM);
+            var reserve = intent(Withdrawals.Action.RESERVE, Withdrawals.reserveRequest(preview(store, 6000, null)));
+            reservation = reserve.operationId().value();
+            engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve);
+            commit = commit(reservation);
+            original = engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare).submit(commit);
+        } finally { store.close(); }
+        var reopened = open();
+        try {
+            assertTrue(Withdrawals.reconcileBatch(reopened));
+            assertTrue(Custody.reconcileBatch(reopened));
+            assertTrue(CashIssuance.reconcileBatch(reopened));
+            assertEquals(original, engine(reopened, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare).submit(commit));
+            assertEquals(4000L, balance(reopened));
+            var delivery = reopened.transaction(tx -> Custody.find(tx::query, owner, reservation, false)).orElseThrow();
+            assertEquals(Custody.State.QUARANTINED, delivery.state());
+            assertTrue(reopened.transaction(tx -> Custody.claims(tx::query, owner, null, 63)).cases().isEmpty());
+            assertEquals("1", count(reopened, "cash_issuance"));
+        } finally { reopened.close(); }
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"account", "terminal"})
+    void changedAccountOrTerminalRejectsFrozenPlan(String changed) throws Exception {
+        var store = open();
+        try {
+            seed(store, TerminalPolicy.Kind.ATM);
+            var reserve = intent(Withdrawals.Action.RESERVE, Withdrawals.reserveRequest(preview(store, 6000, null)));
+            engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve);
+            if (changed.equals("account"))
+                store.transaction(tx -> tx.execute("UPDATE account_catalog SET revision=2 WHERE account_id=?",
+                        List.of(account.toString())));
+            else store.transaction(tx -> tx.execute("UPDATE terminal_settings SET revision=3", List.of()));
+            assertEquals(Status.DURABLY_REJECTED, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare)
+                    .submit(commit(reserve.operationId().value())).status());
+            assertEquals(10000L, balance(store));
+            assertEquals("0", count(store, "cash_issuance"));
+        } finally { store.close(); }
+    }
+
+    private SqliteStorage open() throws Exception {
+        var store = new SqliteStorage(); store.initialize(world.toRealPath()); return store;
+    }
+    private Withdrawals.Preview preview(SqliteStorage store, long amount, Map<String, Integer> edits) {
+        var binding = new Withdrawals.Binding(account, 1, CAD, anchor, generation, 2, fxRevision);
+        return store.transaction(tx -> Withdrawals.preview(tx::query, store.snapshot().worldId(), owner, binding,
+                new Money(CAD, amount), edits, catalog, this::fx));
+    }
+    private Withdrawals.FxSnapshot fx(JournalEngine.ReadView reads) {
+        return new Withdrawals.FxSnapshot(fxRevision, new CurrencyConversion.Rates(CAD, Map.of(CAD, BigDecimal.ONE)));
+    }
+    private JournalEngine engine(SqliteStorage store, Withdrawals.Action action, Withdrawals.Delivery delivery) {
+        return new JournalEngine(store, (actor, kind) -> actor.equals(owner), Map.of(action.kind(),
+                Withdrawals.registration(action, store.snapshot().worldId(), catalog, this::fx,
+                        (a, intent, current, reads) -> live, (a, intent, current, reads) -> fits, delivery)));
+    }
+    private Intent intent(Withdrawals.Action action, CanonicalRequest request) {
+        return new Intent(new OperationId(UUID.randomUUID()), new RequestId(UUID.randomUUID()), owner, action.kind(), request, null, null);
+    }
+    private Intent commit(UUID id) { return intent(Withdrawals.Action.COMMIT, Withdrawals.request(id, "admitted full fit", "withdraw")); }
+    private long balance(SqliteStorage store) { return store.transaction(tx -> Holds.available(tx::query, account, CAD)); }
+    private String count(SqliteStorage store, String table) {
+        return store.transaction(tx -> tx.query("SELECT count(*) AS total FROM " + table, List.of(), 1).getFirst().get("total"));
+    }
+    private void seed(SqliteStorage store, TerminalPolicy.Kind kind) {
+        store.transaction(tx -> tx.execute("INSERT INTO account_catalog VALUES(?,?,'BANK','CAD','OPEN',1,0)",
+                List.of(account.toString(), owner.value().toString())));
+        var funding = new Journal.Kind("economy:withdrawal_fixture", "economy:fund");
+        var engine = new JournalEngine(store, (a,k) -> true, Map.of(funding,
+                Settlement.registration((intent, legs, reads) -> PostingBatch.Authority.ISSUE)));
+        assertEquals(Status.COMMITTED, engine.submit(new Intent(new OperationId(UUID.randomUUID()), new RequestId(UUID.randomUUID()),
+                owner, funding, Settlement.request(List.of(
+                new PostingBatch.Leg(account, PostingBatch.Role.ACCOUNT, CAD, new Money(CAD, 10000)),
+                new PostingBatch.Leg(Settlement.issuanceAccount(CAD), PostingBatch.Role.ISSUANCE, CAD, new Money(CAD, -10000)))),
+                null, null)).status());
+        var terminalCatalog = new HashMap<String, TerminalPolicy.Denomination>();
+        catalog.values().stream().filter(value -> kind != TerminalPolicy.Kind.ATM || value.bill()).forEach(value ->
+                terminalCatalog.put(value.id(), new TerminalPolicy.Denomination(value.currency(), value.bill())));
+        for (var action : List.of(TerminalPolicy.Action.PLACE, TerminalPolicy.Action.CONFIGURE)) {
+            var handler = TerminalPolicy.registration(action, store.snapshot().worldId(), terminalCatalog,
+                    (a, i, current, reads) -> true, (a, reads) -> false);
+            var request = action == TerminalPolicy.Action.PLACE
+                    ? TerminalPolicy.placeRequest(anchor, generation, owner, kind, null, 0)
+                    : TerminalPolicy.configureRequest(anchor, generation, 1, new TerminalPolicy.Settings(
+                            TerminalPolicy.Mode.BOTH, Set.of(CAD), terminalCatalog.keySet()));
+            new JournalEngine(store, (a,k) -> true, Map.of(action.kind(), handler)).submit(new Intent(
+                    new OperationId(UUID.randomUUID()), new RequestId(UUID.randomUUID()), owner, action.kind(), request, null, null));
+        }
+    }
+}

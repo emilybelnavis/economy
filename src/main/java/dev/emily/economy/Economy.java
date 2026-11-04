@@ -46,7 +46,12 @@ public final class Economy {
     private final Map<MinecraftServer,FoundationRuntime> runtimes = new IdentityHashMap<>();
     private final Map<MinecraftServer,dev.emily.economy.recovery.ShutdownErrors> shutdownErrors = new IdentityHashMap<>();
     private final Map<MinecraftServer,Boolean> drained = new IdentityHashMap<>();
-    public Economy() {
+    public Economy(net.neoforged.bus.api.IEventBus modBus) {
+        dev.emily.economy.cash.CashCatalog.initialize(modBus);
+        dev.emily.economy.terminal.TerminalCatalog.initialize(modBus);
+        dev.emily.economy.banking.BankingCatalog.initialize(modBus);
+        NeoForge.EVENT_BUS.addListener(this::card);
+        dev.emily.economy.cash.CashStackIdentity.initialize(modBus);
         NeoForge.EVENT_BUS.addListener(this::commands);
         NeoForge.EVENT_BUS.addListener(this::starting);
         NeoForge.EVENT_BUS.addListener(this::tick);
@@ -62,10 +67,25 @@ public final class Economy {
         return servers.get(server);
     }
 
+    public static boolean canChooseWorld(net.minecraft.server.level.ServerPlayer player, java.util.UUID lease) {
+        var chooser = activeChoosers.get(player.server); return chooser != null && chooser.canChoose(player, lease);
+    }
+    public static boolean chooseWorld(net.minecraft.server.level.ServerPlayer player, java.util.UUID lease, String code) {
+        var chooser = activeChoosers.get(player.server); return chooser != null && chooser.choose(player, lease, code);
+    }
+    private static final Map<MinecraftServer, DenominationChooser> activeChoosers = new IdentityHashMap<>();
+    private void card(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickItem event) {
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player
+                && dev.emily.economy.cash.CashCatalog.hasBankingCard(event.getItemStack())) {
+            dev.emily.economy.banking.BankingController.openCard(player);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME); event.setCanceled(true);
+        }
+    }
     private void commands(RegisterCommandsEvent event) {
         DenominationChooser.register(event.getDispatcher(), choosers::get);
         FxAdminCommands.register(event.getDispatcher(), servers::get, Clock.systemUTC());
         LedgerCommands.register(event.getDispatcher(), servers::get);
+        dev.emily.economy.foundation.RegisterPriceCommands.register(event.getDispatcher(), servers::get);
         EconomyCommands.register(event.getDispatcher(), (source, view) -> {
             var server = source.getServer();
             var services = servers.get(server);
@@ -93,6 +113,7 @@ public final class Economy {
         servers.put(server, new ServerServices(server.getWorldPath(LevelResource.ROOT), runtime, scheduling));
         runtimes.put(server, runtime);
         choosers.put(server, new DenominationChooser(servers.get(server), runtime, Clock.systemUTC()));
+        activeChoosers.put(server, choosers.get(server));
         LOGGER.info("Economy foundation initializing");
     }
     private void tick(ServerTickEvent.Post event) {
@@ -101,6 +122,7 @@ public final class Economy {
             var previous = services.state();
             var previousPhase = services.progress().phase();
             services.tick();
+            dev.emily.economy.terminal.TerminalLifecycle.tick(event.getServer());
             choosers.get(event.getServer()).tick(event.getServer());
             if (!services.progress().phase().equals(previousPhase)) LOGGER.info("Economy startup progress: {} ({}/{})", DiagnosticsReport.recoveryPhase(services.progress().phase()), services.progress().completed(), services.progress().target());
             if (services.state() != previous) {
@@ -114,6 +136,7 @@ public final class Economy {
         shutdownErrors.put(event.getServer(),new dev.emily.economy.recovery.ShutdownErrors());
         ServerServices services = servers.remove(event.getServer());
         choosers.remove(event.getServer());
+        activeChoosers.remove(event.getServer());
         if (services != null) {
             boolean wasReady = services.state() == ServerServices.State.READY;
             boolean clean = services.stop();
@@ -125,9 +148,11 @@ public final class Economy {
     }
     private void stopped(ServerStoppedEvent event) {
         invalidConfiguration.remove(event.getServer());
+        dev.emily.economy.terminal.TerminalLifecycle.stopped(event.getServer());
         FoundationRuntime runtime=runtimes.remove(event.getServer());
         ServerServices orphan=servers.remove(event.getServer());
         choosers.remove(event.getServer());
+        activeChoosers.remove(event.getServer());
         if(orphan!=null) {orphan.stop();drained.remove(event.getServer());}
         var errors=shutdownErrors.remove(event.getServer());
         boolean saveFailed=errors==null || errors.failed() || event.getServer().isCurrentlySaving();

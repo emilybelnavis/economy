@@ -5,6 +5,59 @@ Project changes are recorded in reverse chronological order, with the most recen
 
 
 
+## 2026-11-04 — A5-09 banking menus and phase acceptance
+
+- Added world currency setup, bank accounts/history, FX preview and confirmation, terminal settings, cash deposit/withdrawal, register purchase and claim screens.
+- Bank cards provide remote banking access without credit. Server-issued sessions, revisions and current terminal checks reject stale or remote cash actions.
+- Protected originals survive page changes, closure and saved input recovery. Cash and goods delivery requires observed player/source saves, including the singleplayer host’s world metadata.
+- Verified normal dedicated/integrated workflows, original-operation lookup, disposable process interruption and paired/skewed recovery. Trading UI remains excluded.
+
+## 2026-11-04 — A5-08 physical terminals
+
+- Added 17 ATM finishes, 17 register finishes and a teller, with original art, recipes, recoloring and a creative tab.
+- Wide machines place across four cells, rotate toward the player and clean up with one survival drop when any cell breaks. Registers fit above stock containers.
+- Fresh placement identities bind terminals to owner policy. Saved removal records survive admission queue pressure. Banking and purchase screens remain in the next package.
+
+## 2026-11-04 — A5-07 register sales
+
+- Added owner-priced exact-batch register checkout with stock reservation, matching primary-account currencies, atomic payment receipts and protected delivery claims.
+- Added server-side stock and buyer-capacity checks, saved replay protection and the owner-authorized shop price command.
+- Schema 17 preserves register prices, sales and stock recovery. Physical blocks and purchase menus remain scheduled separately.
+
+## 2026-11-03 — A5-06 withdrawals
+
+- Added exact ATM bill planning and teller bill/coin planning with validated bill edits and ceiling account debit.
+- Full-batch capacity gates precede debit and issuance. Committed withdrawals retain protected custody delivery and saved replay markers.
+- Schema 16 preserves frozen withdrawal intents and recovery identity.
+
+## 2026-11-03 — A5-05 deposits
+
+- Added 24-slot deposit APIs with frozen account, terminal and FX terms, source-currency rounding and authentic cash quantity reservations.
+- Added exact-original cancellation and skipped-item returns, partial-capacity claims and saved return replay protection.
+- Schema 15 preserves deposit recovery and quantity locks through interrupted or uncertain delivery. Final menus remain in their integration package.
+
+## 2026-11-03 — Easier currency setup
+
+- Initial currency selection now uses /economy choose CAD with tab completion, lowercase support and no UUID to copy.
+
+## 2026-11-03 — A5-04 terminal policy
+
+- Added owner/operator terminal policy APIs with deposit/withdraw modes and currency/denomination allowlists.
+- New placements start disabled. Durable placement generations and revisions reject stale configuration after replacement.
+- Schema 14 preserves world-scoped settings, tombstones and used generation identities.
+
+## 2026-11-03 — A5-03 cash and cards
+
+- Restored 118 cash collectibles, eight single-stack banking cards, twelve tabs and both Canadian bill artworks.
+- Added persistent world-bound issuance markers and journaled quantity validation for trusted integrations. Copied markers share the original lot's remaining quantity.
+- Schema 13 quarantines outstanding restored issuance quantities pending verified custody reconciliation. Development collectibles and worlds are preserved.
+
+## 2026-11-03 — A5 custody foundation
+
+- Added trusted custody APIs, durable owner claims and evidence-based operator resolution.
+- Capacity checks precede settlement and collection. Restored cases enter review before new custody work is admitted.
+- Schema 12 preserves custody audit records and save witnesses. Live inventory adapters remain pending integration verification.
+
 ## 2026-11-03 — A4 ledger and transactions
 
 - Added balanced settlement, durable holds, quoted FX, funded closure, and atomic denomination rebase.

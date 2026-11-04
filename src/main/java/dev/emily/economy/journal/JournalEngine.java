@@ -14,7 +14,7 @@ public final class JournalEngine {
     @FunctionalInterface public interface ReadView { List<Map<String, String>> query(String sql, List<String> parameters, int maxRows); }
     @FunctionalInterface public interface Projection { void apply(FoundationStore.Transaction transaction) throws Exception; }
     @FunctionalInterface public interface Handler { Decision prepare(Intent intent, ReadView reads) throws Exception; }
-    public sealed interface Decision permits Commit, Reject {}
+    public sealed interface Decision permits Commit, Reject, Retry, Decline {}
     public record Commit(List<Record> records, Result result, Projection projections) implements Decision {
         public Commit {
             records = List.copyOf(records); Objects.requireNonNull(result); Objects.requireNonNull(projections);
@@ -23,7 +23,12 @@ public final class JournalEngine {
             if (bytes > 131072) throw new IllegalArgumentException("Transaction record payload bounds");
         }
     }
-    public record Reject(Result result) implements Decision { public Reject { Objects.requireNonNull(result); } }
+    public record Decline(Result result) implements Decision { public Decline { Objects.requireNonNull(result); } }
+    public record Retry(Result result) implements Decision { public Retry { Objects.requireNonNull(result); } }
+    public record Reject(Result result, Projection projection) implements Decision {
+        public Reject(Result result) { this(result, tx -> {}); }
+        public Reject { Objects.requireNonNull(result); Objects.requireNonNull(projection); }
+    }
     public record Registration(int canonicalVersion, Handler handler) { public Registration { if (canonicalVersion < 1 || canonicalVersion > 1024) throw new IllegalArgumentException("Canonical version"); Objects.requireNonNull(handler); } }
     private final FoundationStore store;
     private final AccessPolicy access;
@@ -86,6 +91,16 @@ public final class JournalEngine {
             replay[0] = true;
             return outcome(row);
         }
+        var retry = tx.query("SELECT * FROM journal_retry_intents WHERE operation_id=?",
+                List.of(intent.operationId().value().toString()), 1);
+        if (!retry.isEmpty()) {
+            var row = retry.getFirst();
+            if (!row.get("actor").equals(actorKey(intent.actor()))) return nonterminal(intent, Status.NOT_ACCEPTED, "ACCESS_DENIED");
+            if (!row.get("service").equals(intent.kind().service())
+                    || !row.get("operation_type").equals(intent.kind().operationType())
+                    || !row.get("canonical_request").equals(intent.canonical()))
+                return nonterminal(intent, Status.NOT_ACCEPTED, "OPERATION_CONFLICT");
+        }
         Registration registration = handlers.get(intent.kind());
         if (registration == null || registration.canonicalVersion() != intent.request().version())
             return nonterminal(intent, Status.NOT_ACCEPTED, "UNSUPPORTED_OPERATION");
@@ -97,6 +112,16 @@ public final class JournalEngine {
             return tx.query(sql, parameters, maxRows);
         };
         Decision decision = Objects.requireNonNull(registration.handler().prepare(intent, reads));
+        if (decision instanceof Decline declined)
+            return new Outcome(intent.operationId(), intent.requestId(), Status.NOT_ACCEPTED, null, null, declined.result());
+        if (decision instanceof Retry deferred) {
+            if (retry.isEmpty()) tx.execute("INSERT INTO journal_retry_intents VALUES(?,?,?,?,?)",
+                    List.of(intent.operationId().value().toString(), actorKey(intent.actor()),
+                            intent.kind().service(), intent.kind().operationType(), intent.canonical()));
+            return new Outcome(intent.operationId(), intent.requestId(), Status.NOT_ACCEPTED, null, null, deferred.result());
+        }
+        if (!retry.isEmpty()) tx.execute("DELETE FROM journal_retry_intents WHERE operation_id=?",
+                List.of(intent.operationId().value().toString()));
         String audit = Instant.now().toString();
         TransactionId transactionId = null; JournalSequence sequence = null; Result result;
         Status status;
@@ -114,7 +139,12 @@ public final class JournalEngine {
             }
             commit.projections().apply(tx);
             result = commit.result(); status = Status.COMMITTED;
-        } else { result = ((Reject) decision).result(); status = Status.DURABLY_REJECTED; }
+        } else {
+            var rejection = (Reject) decision;
+            rejection.projection().apply(tx);
+            result = rejection.result();
+            status = Status.DURABLY_REJECTED;
+        }
         tx.execute("INSERT INTO operation_outcomes(world_id,operation_id,actor,service,operation_type,canonical_version,canonical_request,request_id,status,result_version,result_code,result_payload,transaction_id,sequence,audit_utc) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 Arrays.asList(world(), intent.operationId().value().toString(), actorKey(intent.actor()), intent.kind().service(), intent.kind().operationType(),
                         Integer.toString(intent.request().version()), intent.canonical(), intent.requestId().value().toString(), status.name(),

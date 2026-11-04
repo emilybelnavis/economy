@@ -38,8 +38,8 @@ class SqliteStorageTest {
         var snapshot = first.snapshot();
         assertEquals("wal", snapshot.journalMode()); assertEquals(2, snapshot.synchronous());
         assertTrue(snapshot.foreignKeys()); assertEquals(5000, snapshot.busyTimeoutMillis());
-        var rows = first.transaction(tx -> tx.query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", List.of(), 32));
-        assertEquals(List.of("account_catalog", "economic_metadata", "economic_systems", "economic_updates", "economic_versions", "foundation_metadata", "journal_records", "journal_transactions", "ledger_balances", "ledger_fx_quotes", "ledger_holds", "migration_history", "operation_outcomes", "projection_cells", "projection_generations", "projection_heads", "runtime_state", "sqlite_sequence"), rows.stream().map(r -> r.get("name")).toList());
+        var rows = first.transaction(tx -> tx.query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", List.of(), 64));
+        assertEquals(List.of("account_catalog", "cash_issuance", "custody_cases", "custody_cash_reservations", "deposit_cash_reservations", "deposit_returns", "deposits", "economic_metadata", "economic_systems", "economic_updates", "economic_versions", "foundation_metadata", "journal_records", "journal_retry_intents", "journal_transactions", "ledger_balances", "ledger_fx_quotes", "ledger_holds", "migration_history", "operation_outcomes", "payment_clock", "payment_invoices", "payment_merchants", "payment_receipts", "projection_cells", "projection_generations", "projection_heads", "register_merchants", "register_prices", "register_sales", "register_stock_locks", "register_stock_sources", "runtime_state", "sqlite_sequence", "terminal_generations", "terminal_settings", "withdrawals"), rows.stream().map(r -> r.get("name")).toList());
         assertThrows(UnsupportedOperationException.class, () -> rows.getFirst().put("name", "changed"));
         first.close();
         var reopened = open(one); assertEquals(snapshot.worldId(), reopened.snapshot().worldId()); reopened.close();
@@ -94,9 +94,9 @@ class SqliteStorageTest {
         assertEquals("fixture region", Files.readString(backup.resolve("world/region/test.mca")));
         var store = open(world);
         assertEquals(id, store.snapshot().worldId().value());
-        assertEquals(10, store.snapshot().schemaVersion());
+        assertEquals(17, store.snapshot().schemaVersion());
         var history = store.transaction(tx -> tx.query("SELECT version FROM migration_history ORDER BY version", List.of(), 32));
-        assertEquals(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), history.stream().map(r -> r.get("version")).toList());
+        assertEquals(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"), history.stream().map(r -> r.get("version")).toList());
         store.close();
     }
     @Test void changedBackupAndRunningWorldCannotAuthorizeUpgrade() throws Exception {

@@ -16,7 +16,7 @@ Select Java 21 in your environment, then run:
 
 The mod jar is written to `build/libs/economy-0.1.0.jar`. Development client and server data are kept separately in `run/client` and `run/server`. Use disposable development worlds.
 
-No additional mods are required; SQLite JDBC is bundled. Each world stores its foundation database and identity under `<world>/economy/` and must be owned by a single Minecraft server. Trusted server integrations can initialize accounts and authorize ledger funding. Cash items, shops, and trading are planned separately.
+No additional mods are required; SQLite JDBC is bundled. Each world stores its foundation database and identity under `<world>/economy/` and must be owned by a single Minecraft server. Trusted server integrations can initialize accounts and authorize ledger funding. Collectible cash, cards and physical banking terminals are included. Banking and purchase menus are available; stock trading remains outside this release.
 
 ## Scheduling configuration
 
@@ -53,9 +53,15 @@ The edit takes effect at the next UTC midnight. Variation and pull each accept 0
 Bounds accept 0–999,999 ppm, with the resulting band limited to 0.000000000001–1,000,000.
 For an uncertain result, repeat the same command with the same operation UUID.
 
+## Cash and cards
+
+Creative inventory includes 118 cash collectibles and eight banking cards across twelve tabs, including both Canadian bill styles. Cards provide generic banking access without a credit facility.
+
+Unmarked development cash remains collectible. Trusted integrations validate issued cash quantities against the world ledger and custody evidence. Trusted server APIs support deposit previews and returns, plus exact withdrawals with full-batch capacity checks. Open the terminal to preview and confirm these operations.
+
 ## Schema upgrades
 
-New worlds initialize automatically. Redesigned worlds with schemas 1 through 9 require a validated complete-world backup before upgrading to schema 10. Prepare it while Minecraft is fully stopped:
+New worlds initialize automatically. Redesigned worlds with schemas 1 through 16 require a validated complete-world backup before upgrading to schema 17. Prepare it while Minecraft is fully stopped:
 
 ```sh
 ./gradlew prepareEconomyUpgrade -PeconomyWorld=/absolute/path/to/world
@@ -88,3 +94,29 @@ Economy requests become available after startup recovery and required catch-up. 
 Legacy economy databases are not imported. Incompatible, corrupt, or mismatched identity data makes the economy unavailable while ordinary Minecraft play can continue. Preserve the files and inspect the logged error rather than deleting them.
 
 Storage requires filesystem support for exclusive file locks, atomic file publication, and directory synchronization. These checks have been exercised on macOS; other platforms have not been runtime-tested.
+
+Register owners can use `/economy shop price <units>` while looking at their register and holding the exact product batch. The price uses the seller’s primary-account currency. Purchases require matching buyer currency and room for the entire batch; known undelivered paid goods remain protected claims. Open Shop to preview and buy the exact batch.
+
+
+## Physical terminals
+
+The Economy Terminals creative tab contains an ATM and register in a neutral finish and all 16 dye colors, plus a teller. ATMs and tellers occupy two blocks across and two high; both lower cells need solid support. Place them facing you with the whole space clear. Breaking any machine cell removes the entire machine and returns one item in survival. Registers occupy one block and can sit directly on the stock chest below.
+
+Craft a neutral ATM with iron ingots, glass pane, redstone and a chest. The teller also needs a hopper; registers use iron ingots, glass pane, redstone and a chest in a smaller pattern. Combine any ATM or register with a dye to recolor it. A broken or recolored machine receives fresh owner and placement settings when placed again.
+
+These blocks open banking or shop screens. Trading computers are not activated.
+
+
+## Banking and shops
+
+Right-click a teller or ATM, or use any bank card for account, history, FX and claim access. Cards grant access without credit. Choose Setup to create your primary account. Additional currency accounts open at a teller; select an account by its listed number. History and claim lists have bounded Next pages.
+
+The owner can enable terminal cash services in Settings. For example, `BOTH;CAD;all` enables CAD deposits and withdrawals using supported denominations; ATMs accept bills and tellers also accept coins. `DEPOSIT`, `WITHDRAW` and `DISABLED` are also available modes. A comma-separated list of cash item IDs can replace `all` for a narrower whitelist.
+
+For a deposit, place issued cash in the 24 input slots, choose Preview and review the bank credit, then Confirm. Changing pages or closing before reservation returns the originals; anything that cannot fit is retained as an owner claim. Unmarked collectible cash cannot be redeemed.
+
+For a withdrawal, enter a currency and amount such as `CAD 60`, then Preview and Confirm. A teller can use coins; optional bill edits use a form such as `CAD 60;economy:cad_bill_20=3`. The complete batch must fit before debit. A register owner holds the product batch and enters a whole-unit price in Shop. Buyers preview the exact batch and price before confirming.
+
+FX uses the selected source account. Enter a listed destination account number or ID followed by the whole-unit source amount, such as `2 10`, and review the frozen quote before confirming. Stock trading accounts and screens are excluded.
+
+Claims retain known undelivered goods. Enter a listed claim number and Collect when the whole batch fits. Check original resolves an uncertain request using its existing operation identity. Restored or uncertain physical deliveries require operator evidence review; the mod does not automatically create replacement items or repeat a charge.

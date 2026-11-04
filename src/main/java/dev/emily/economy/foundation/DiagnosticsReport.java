@@ -104,7 +104,7 @@ public final class DiagnosticsReport {
         if (phase == null) return "unknown";
         if (phase.startsWith("projection:")) return "projection rebuild";
         return switch (phase) {
-            case "storage", "storage-ready", "journal-validation", "ready", "catch-up", "waiting-for-wall-clock", "projection-final-validation" -> phase;
+            case "storage", "storage-ready", "journal-validation", "ready", "catch-up", "waiting-for-wall-clock", "projection-final-validation", "custody-reconciliation", "cash-reconciliation", "deposit-reconciliation", "deposit-return-reconciliation", "withdrawal-reconciliation", "register-reconciliation" -> phase;
             default -> "unknown";
         };
     }

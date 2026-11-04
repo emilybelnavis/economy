@@ -99,6 +99,28 @@ public final class Holds {
         });
     }
 
+    /** Trusted immediate checkout still records a real reservation and captured hold together. */
+    static JournalEngine.Decision checkout(Journal.Intent intent, UUID source, UUID target, Money amount,
+                                           JournalEngine.ReadView reads) throws Exception {
+        if (source.equals(target)) return reject("HOLD_DESTINATION");
+        var reservationIntent = new Journal.Intent(intent.operationId(), intent.requestId(), intent.actor(),
+                intent.kind(), reserveRequest(source, amount), null, null);
+        var reserved = reserve((i, from, to, view) -> true).handler().prepare(reservationIntent, reads);
+        if (!(reserved instanceof JournalEngine.Commit reservation)) return reserved;
+        var settlement = Settlement.prepare(reads, List.of(
+                new PostingBatch.Leg(source, ACCOUNT, amount.currency(), amount.negate()),
+                new PostingBatch.Leg(target, ACCOUNT, amount.currency(), amount)), PostingBatch.Authority.TRANSFER, null);
+        if (!(settlement instanceof JournalEngine.Commit postings)) return settlement;
+        var captured = new Hold(intent.operationId().value(), source, amount, State.CAPTURED);
+        var records = new ArrayList<>(reservation.records());
+        records.addAll(postings.records());
+        return commit(captured, records, tx -> {
+            reservation.projections().apply(tx);
+            postings.projections().apply(tx);
+            update(tx, captured);
+        });
+    }
+
     public static long available(JournalEngine.ReadView reads, UUID account, EconomyCurrency currency) {
         return Math.subtractExact(Settlement.posted(reads, account, currency), reserved(reads, account, currency));
     }

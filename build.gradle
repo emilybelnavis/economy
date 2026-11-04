@@ -8,6 +8,7 @@ java { toolchain { languageVersion = JavaLanguageVersion.of(21) }; withSourcesJa
 repositories { mavenCentral() }
 neoForge {
     version = '21.1.252'
+    accessTransformers.from('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client { client(); gameDirectory = file(providers.gradleProperty('economyRunRoot').getOrElse('run') + '/client') }
         server { server(); gameDirectory = file(providers.gradleProperty('economyRunRoot').getOrElse('run') + '/server'); programArgument '--nogui' }
@@ -68,5 +69,82 @@ tasks.register('restoreEconomyWorld', JavaExec) {
     mainClass = 'dev.emily.economy.storage.WorldBackup'
     if (providers.gradleProperty('economyBackup').isPresent() && providers.gradleProperty('economyRestoreDestination').isPresent()) {
         args 'restore', providers.gradleProperty('economyBackup').get(), providers.gradleProperty('economyRestoreDestination').get()
+    }
+}
+
+// Opt-in disposable Minecraft inventory persistence fixture, excluded from release jars.
+sourceSets {
+    inventoryProbe {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations.inventoryProbeImplementation.extendsFrom(configurations.implementation)
+neoForge {
+    addModdingDependenciesTo(sourceSets.inventoryProbe)
+    if (providers.gradleProperty('custodyInventoryProbe').isPresent()) {
+        mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
+    }
+}
+if (providers.gradleProperty('custodyInventoryProbe').isPresent()) {
+    def probeWorld = file(providers.gradleProperty('economyRunRoot').get() + '/server/world')
+    def restartProbe = new File(probeWorld, 'inventory-probe.properties').exists()
+    tasks.named('runServer') {
+        doLast {
+            def failure = new File(probeWorld, 'inventory-probe-failed.txt')
+            def success = new File(probeWorld, restartProbe ? 'inventory-probe-passed.txt' : 'inventory-probe.properties')
+            if (!providers.gradleProperty('terminalGeometryProbe').isPresent() && !providers.gradleProperty('bankingProbe').isPresent() && !providers.gradleProperty('bankingRecovery').isPresent() && (failure.exists() || !success.exists())) {
+                throw new GradleException('Minecraft custody inventory persistence fixture did not pass')
+            }
+        }
+    }
+}
+
+// Opt-in physical terminal acceptance; uses the same release-excluded fixture mod.
+if (providers.gradleProperty('terminalGeometryProbe').isPresent()) {
+    tasks.named('runServer') {
+        systemProperty 'economy.terminalGeometryProbe', 'true'
+        doLast {
+            def root = file(providers.gradleProperty('economyRunRoot').get() + '/server/world')
+            if (new File(root, 'terminal-probe-failed.txt').exists() || !new File(root, 'terminal-probe-passed.txt').exists())
+                throw new GradleException('Physical terminal fixture did not pass')
+        }
+    }
+}
+
+if (providers.gradleProperty('bankingProbe').isPresent()) {
+    tasks.named('runServer') {
+        systemProperty 'economy.bankingProbe', 'true'
+        doLast {
+            def root = file(providers.gradleProperty('economyRunRoot').get() + '/server/world')
+            if (!providers.gradleProperty('bankingCrash').isPresent() && (new File(root, 'banking-probe-failed.txt').exists() || !new File(root, 'banking-probe-passed.txt').exists()))
+                throw new GradleException('Normal banking menu acceptance did not pass')
+        }
+    }
+    tasks.named('runClient') { systemProperty 'economy.bankingProbe', 'true' }
+}
+if (providers.gradleProperty('bankingWorld').isPresent()) {
+    tasks.named('runClient') { systemProperty 'economy.bankingWorld', providers.gradleProperty('bankingWorld').get() }
+}
+
+if (providers.gradleProperty('bankingCrash').isPresent()) {
+    tasks.named('runServer') {
+        systemProperty 'economy.bankingCrash', providers.gradleProperty('bankingCrash').get()
+        ignoreExitValue = true
+        doLast {
+            def capture = file(providers.gradleProperty('economyRunRoot').get() + '/server/world/banking-crash-capture.dat')
+            if (executionResult.get().exitValue != 77 || !capture.exists())
+                throw new GradleException('Expected disposable banking process death was not observed')
+        }
+    }
+}
+if (providers.gradleProperty('bankingRecovery').isPresent()) {
+    tasks.named('runServer') {
+        systemProperty 'economy.bankingRecovery', 'true'
+        doLast {
+            def root = file(providers.gradleProperty('economyRunRoot').get() + '/server/world')
+            if (new File(root, 'banking-recovery-failed.txt').exists() || !new File(root, 'banking-recovery-passed.txt').exists())
+                throw new GradleException('Banking crash/restore recovery did not pass')
+        }
     }
 }

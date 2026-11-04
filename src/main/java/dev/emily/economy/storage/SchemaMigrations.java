@@ -8,7 +8,7 @@ import java.util.UUID;
 /** Ordered trusted SQL; the complete pending chain shares one transaction. */
 final class SchemaMigrations {
     static final int MINIMUM_SUPPORTED = 1;
-    static final int CURRENT = 10;
+    static final int CURRENT = 17;
     static final int APPLICATION_ID = 0x45434F4E;
     record Migration(int version, String name, List<String> statements) {
         Migration { statements = List.copyOf(statements); }
@@ -26,7 +26,23 @@ final class SchemaMigrations {
             new Migration(7, "ledger balance projection", List.of(LedgerProjection.CREATE_TABLE)),
             new Migration(8, "ledger holds", HoldSchema.statements()),
             new Migration(9, "durable FX quote consumption", FxSettlementSchema.statements()),
-            new Migration(10, "indexed account posting history", List.of(LedgerHistorySchema.INDEX)));
+            new Migration(10, "indexed account posting history", List.of(LedgerHistorySchema.INDEX)),
+            new Migration(11, "merchant payments and authorization deadlines", List.of(
+                    "CREATE TABLE payment_merchants(actor TEXT PRIMARY KEY, enabled INTEGER NOT NULL CHECK(enabled IN (0,1)))",
+                    "CREATE TABLE payment_clock(singleton INTEGER PRIMARY KEY CHECK(singleton=1), millis INTEGER NOT NULL)",
+                    "INSERT INTO payment_clock VALUES(1,0)",
+                    "CREATE TABLE payment_invoices(id TEXT PRIMARY KEY, merchant TEXT NOT NULL, payer TEXT NOT NULL, source TEXT NOT NULL, target TEXT NOT NULL, currency TEXT NOT NULL, units INTEGER NOT NULL, state TEXT NOT NULL, hold TEXT, deadline INTEGER)",
+                    "CREATE INDEX payment_expiry ON payment_invoices(state,deadline,id)",
+                    "CREATE TABLE payment_receipts(operation_id TEXT PRIMARY KEY, invoice_id TEXT NOT NULL REFERENCES payment_invoices(id), action TEXT NOT NULL, UNIQUE(invoice_id,action))",
+                    "CREATE TABLE journal_retry_intents(operation_id TEXT PRIMARY KEY, actor TEXT NOT NULL, service TEXT NOT NULL, operation_type TEXT NOT NULL, canonical_request TEXT NOT NULL)")),
+            new Migration(12, "durable custody and owner claims", CustodySchema.statements()),
+            new Migration(13, "world-bound cash issuance quantities", CashIssuanceSchema.statements()),
+            new Migration(14, "generation-bound terminal policy", TerminalPolicySchema.statements()),
+            new Migration(15, "reserved deposits and original cash returns",
+                    java.util.stream.Stream.concat(DepositSchema.statements().stream(),
+                            DepositReturnSchema.statements().stream()).toList()),
+            new Migration(16, "exact withdrawals and committed delivery intents", WithdrawalSchema.statements()),
+            new Migration(17, "owner-priced register sales and stock custody", RegisterSalesSchema.statements()));
 
     static void apply(Connection connection, UUID worldId, int from, int target, List<Migration> registry) {
         int expected = 1;

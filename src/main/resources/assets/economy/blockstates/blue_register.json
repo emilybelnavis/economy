@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "economy:block/blue_register",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "economy:block/blue_register",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "economy:block/blue_register",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "economy:block/blue_register",
+      "y": 270
+    }
+  }
+}

@@ -47,19 +47,18 @@ public final class DenominationChooser {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher,
                                 Function<MinecraftServer, DenominationChooser> sessions) {
         dispatcher.register(Commands.literal("economy").then(Commands.literal("choose")
-                .then(Commands.argument("lease", net.minecraft.commands.arguments.UuidArgument.uuid())
-                .then(Commands.argument("currency", StringArgumentType.word()).executes(context -> {
+                                .then(Commands.argument("currency", StringArgumentType.word()).suggests((context, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(EconomyCurrency.all().stream().map(EconomyCurrency::code), builder)).executes(context -> {
                     var source = context.getSource();
                     var chooser = sessions.apply(source.getServer());
                     var player = source.getPlayer();
                     if (chooser == null || player == null || source.source != player
-                            || !chooser.choose(player, net.minecraft.commands.arguments.UuidArgument.getUuid(context, "lease"),
-                            StringArgumentType.getString(context, "currency"))) {
+                            || !chooser.choose(player, chooser.lease,
+                            StringArgumentType.getString(context, "currency").toUpperCase(java.util.Locale.ROOT))) {
                         source.sendFailure(Component.literal("Currency choice unavailable. Use the current chooser prompt."));
                         return 0;
                     }
                     return 1;
-                })))));
+                }))));
     }
 
     public void tick(MinecraftServer server) {
@@ -87,12 +86,16 @@ public final class DenominationChooser {
         if (holder != null && players.contains(holder)) return;
         holder = players.isEmpty() ? null : players.getFirst();
         lease = holder == null ? null : UUID.randomUUID();
+        if (holder != null) dev.emily.economy.banking.BankingController.openWorldSetup(holder, lease);
         if (holder != null) holder.sendSystemMessage(Component.literal("Choose this world's currency with /economy choose "
-                + lease + " <currency>. Available: " + EconomyCurrency.all()));
+                + "<currency> (for example, /economy choose CAD). Available: " + EconomyCurrency.all()));
     }
 
-    private boolean choose(ServerPlayer player, UUID suppliedLease, String code) {
-        if (!known || open || accepted != null || holder != player || !suppliedLease.equals(lease)) return false;
+    public boolean canChoose(ServerPlayer player, UUID suppliedLease) {
+        return known && !open && accepted == null && holder == player && lease != null && lease.equals(suppliedLease);
+    }
+    public boolean choose(ServerPlayer player, UUID suppliedLease, String code) {
+        if (!known || open || accepted != null || holder != player || (suppliedLease == null || !suppliedLease.equals(lease))) return false;
         try {
             EconomyCurrency.fromCode(code);
         } catch (IllegalArgumentException invalid) {

@@ -8,5 +8,5 @@ import net.neoforged.fml.common.Mod;
 /** Distribution boundary for future client features; no gameplay screens in the foundation. */
 @Mod(value = Economy.MOD_ID, dist = Dist.CLIENT)
 public final class EconomyClient {
-    public EconomyClient() { LogUtils.getLogger().info("Economy client entry point loaded"); }
+    public EconomyClient(net.neoforged.bus.api.IEventBus modBus) { dev.emily.economy.client.BankingScreen.initialize(modBus); LogUtils.getLogger().info("Economy client entry point loaded"); }
 }

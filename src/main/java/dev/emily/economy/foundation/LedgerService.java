@@ -18,6 +18,7 @@ import net.minecraft.server.MinecraftServer;
 import java.math.BigInteger;
 import java.time.Clock;
 import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -34,13 +35,32 @@ public final class LedgerService {
 
     private final ServerServices services;
     private final FxRequests quotes;
+    private final FoundationStore store;
 
     LedgerService(ServerServices services, FoundationStore store) {
         this.services = services;
+        this.store = store;
         this.quotes = new FxRequests(services, store, Clock.systemUTC());
     }
 
     public record PrimaryFunds(AccountIdentity account, AccountFunds funds) {}
+    public record BankingContext(WorldId world, AccountIdentity account, TerminalPolicy.Snapshot terminal,
+                                 Deposits.FxSnapshot fx, RegisterSales.Price price) {}
+    public CompletionStage<BankingContext> bankingContext(PlayerId actor, TerminalPolicy.Anchor anchor, AccountId selected) {
+        return services.storage(actor, () -> store.transaction(tx -> {
+            var world = store.snapshot().worldId();
+            var owner = new PartyRef(world, new PartyRef.Player(actor));
+            var account = selected == null ? AccountCatalog.primary(tx::query, owner).orElse(null)
+                    : AccountCatalog.find(tx::query, owner, selected).orElse(null);
+            var terminal = TerminalPolicy.find(tx::query, world, anchor, actor, true).orElse(null);
+            return new BankingContext(world, account, terminal, depositFx(tx::query),
+                    RegisterSales.price(tx::query, world, anchor).orElse(null));
+        }));
+    }
+    public CompletionStage<Optional<Deposits.Reservation>> deposit(PlayerId actor, UUID id) {
+        return services.storage(actor, () -> store.transaction(tx -> Deposits.find(tx::query, actor, id)));
+    }
+
 
     public record Reconciliation(EconomyCurrency currency, long posted, BigInteger journal, boolean complete) {
         public boolean matches() {
@@ -186,6 +206,224 @@ public final class LedgerService {
                                          JournalEngine.Registration registration, JournalService.Publisher publisher) {
         return services.journal((actor, requested) -> kind.equals(requested) && access.allows(actor, requested),
                 Map.of(kind, registration), publisher == null ? NO_PUBLICATION : publisher);
+    }
+
+    /** Bind a payment action to authenticated server admission and live worker authority. */
+    public JournalService merchantPayments(MerchantPayments.Action action, JournalEngine.AccessPolicy admission,
+                                           MerchantPayments.Authority authority, JournalService.Publisher publisher) {
+        return trustedJournal(action.kind(), admission,
+                MerchantPayments.registration(action, authority, Clock.systemUTC()), publisher);
+    }
+
+    public CompletionStage<Optional<MerchantPayments.ReceiptView>> paymentReceipt(
+            ActorId actor, UUID operation, MerchantPayments.ReceiptAuthority authority) {
+        return services.storage(actor, () -> store.transaction(tx ->
+                MerchantPayments.receipt(tx::query, actor, operation, authority)));
+    }
+
+    public record PaymentInspection(PaymentDiagnostics.Page page, String releaseWorkerFailure) {}
+
+    /** Invoke with a server-authenticated actor and trusted live operator resolver. */
+    public CompletionStage<PaymentInspection> inspectPayments(ActorId actor, PaymentDiagnostics.Operators operators,
+                                                              UUID after, int limit, boolean overdueOnly) {
+        String failure = services.paymentReleaseFailure();
+        return services.storage(actor, () -> store.transaction(tx -> {
+            boolean operator = operators.allows(actor, tx::query);
+            var page = PaymentDiagnostics.page(tx::query, actor, (a, reads) -> operator,
+                    after, limit, overdueOnly, Clock.systemUTC());
+            return new PaymentInspection(page, operator ? failure : null);
+        }));
+    }
+
+    public CompletionStage<Optional<PaymentDiagnostics.Audit>> inspectPaymentOperation(
+            ActorId actor, PaymentDiagnostics.Operators operators, UUID invoice, UUID operation) {
+        return services.storage(actor, () -> store.transaction(tx ->
+                PaymentDiagnostics.audit(tx::query, actor, operators, invoice, operation)));
+    }
+
+    /** Trusted adapters bind immutable intent, external evidence and live server authority. */
+    public JournalService custody(Custody.Action action, JournalEngine.AccessPolicy admission,
+                                  Custody.Authority authority, Custody.EvidenceVerifier verifier,
+                                  Custody.Financial financial, Custody.Capacity capacity,
+                                  JournalService.Publisher publisher) {
+        return trustedJournal(action.kind(), admission,
+                Custody.registration(action, authority, verifier, financial, capacity), publisher);
+    }
+
+    public CompletionStage<Custody.Page> custodyClaims(ActorId authenticatedOwner, UUID after, int limit) {
+        return services.storage(authenticatedOwner, () -> store.transaction(tx ->
+                Custody.claims(tx::query, authenticatedOwner, after, limit)));
+    }
+
+    public CompletionStage<Optional<Custody.Case>> custodyCase(ActorId actor, UUID custody,
+                                                              PaymentDiagnostics.Operators operators) {
+        return services.storage(actor, () -> store.transaction(tx ->
+                Custody.find(tx::query, actor, custody, operators.allows(actor, tx::query))));
+    }
+
+    public CompletionStage<CustodyDiagnostics.Page> inspectCustody(ActorId actor,
+            PaymentDiagnostics.Operators operators, CustodyDiagnostics.Filter filter, UUID after, int limit) {
+        return services.storage(actor, () -> store.transaction(tx ->
+                CustodyDiagnostics.page(tx::query, actor, operators, filter, after, limit)));
+    }
+
+    public CompletionStage<Optional<CustodyDiagnostics.Witness>> inspectCustodyWitness(ActorId actor,
+            PaymentDiagnostics.Operators operators, UUID custody, CustodyDiagnostics.Slot slot) {
+        var world = services.worldDirectory();
+        return services.storage(actor, () -> store.transaction(tx ->
+                CustodyDiagnostics.witness(tx::query, actor, operators, custody, slot, world, store.snapshot().worldId())));
+    }
+
+    public CompletionStage<Optional<CustodyDiagnostics.Audit>> inspectCustodyOperation(ActorId actor,
+            PaymentDiagnostics.Operators operators, UUID custody, UUID operation) {
+        return services.storage(actor, () -> store.transaction(tx ->
+                CustodyDiagnostics.audit(tx::query, actor, operators, custody, operation)));
+    }
+
+    /** No gameplay redemption is enabled. Trusted integrations must prove custody and value backing. */
+    public JournalService cashIssuance(CashIssuance.Action action, JournalEngine.AccessPolicy admission,
+            CashIssuance.Authority authority, CashIssuance.EvidenceVerifier verifier,
+            CashIssuance.Financial financial, JournalService.Publisher publisher) {
+        var world = services.partyWorld();
+        var items = dev.emily.economy.cash.CashCatalog.all().stream()
+                .map(value -> "economy:" + value.id()).collect(java.util.stream.Collectors.toUnmodifiableSet());
+        CashIssuance.Authority catalogAuthority = (requested, intent, lots, reads) ->
+                lots.stream().allMatch(lot -> items.contains(lot.item()))
+                        && authority.allows(requested, intent, lots, reads);
+        return trustedJournal(action.kind(), admission,
+                CashIssuance.registration(action, world, catalogAuthority, verifier, financial), publisher);
+    }
+
+    /** Server placement/session admission and current owner/operator policy share one journal boundary. */
+    public JournalService terminalPolicy(TerminalPolicy.Action action, JournalEngine.AccessPolicy admission,
+            TerminalPolicy.Authority authority, TerminalPolicy.Operators operators,
+            JournalService.Publisher publisher) {
+        var catalog = dev.emily.economy.cash.CashCatalog.all().stream().collect(
+                java.util.stream.Collectors.toUnmodifiableMap(value -> "economy:" + value.id(),
+                        value -> new TerminalPolicy.Denomination(value.currency(), value.bill())));
+        return trustedJournal(action.kind(), admission,
+                TerminalPolicy.registration(action, services.partyWorld(), catalog, authority, operators), publisher);
+    }
+
+    public CompletionStage<Optional<TerminalPolicy.Snapshot>> terminalSettings(ActorId actor,
+            TerminalPolicy.Operators operators, TerminalPolicy.Anchor anchor) {
+        return services.storage(actor, () -> store.transaction(tx ->
+                TerminalPolicy.find(tx::query, store.snapshot().worldId(), anchor, actor,
+                        operators.allows(actor, tx::query))));
+    }
+
+    private static Map<String, Deposits.Denomination> depositCatalog() {
+        return dev.emily.economy.cash.CashCatalog.all().stream().collect(
+                java.util.stream.Collectors.toUnmodifiableMap(value -> "economy:" + value.id(),
+                        value -> new Deposits.Denomination(value.currency(), value.minorUnits(), value.bill())));
+    }
+
+    private static Deposits.FxSnapshot depositFx(JournalEngine.ReadView reads) {
+        var publication = dev.emily.economy.fx.FxService.publication(reads, java.time.LocalDate.now(java.time.ZoneOffset.UTC));
+        return publication == null ? null : new Deposits.FxSnapshot(
+                publication.day() + "/" + publication.updateId() + "/" + publication.policyId(), publication.conversionRates());
+    }
+
+    public CompletionStage<Deposits.Preview> previewDeposit(PlayerId actor, Deposits.Binding binding,
+            List<Deposits.Slot> slots, java.util.function.BiPredicate<Deposits.Binding, JournalEngine.ReadView> admission) {
+        var catalog = depositCatalog();
+        var originals = List.copyOf(slots);
+        return services.economicWrite(actor, () -> store.transaction(tx -> {
+            if (!admission.test(binding, tx::query)) throw new IllegalArgumentException("DEPOSIT_ACCESS");
+            return Deposits.preview(tx::query, store.snapshot().worldId(), actor, binding, originals, catalog,
+                    LedgerService::depositFx);
+        }));
+    }
+
+    public JournalService deposits(Deposits.Action action, JournalEngine.AccessPolicy admission,
+            Deposits.Authority authority, Deposits.EvidenceVerifier evidence, JournalService.Publisher publisher) {
+        return trustedJournal(action.kind(), admission, Deposits.registration(action, services.partyWorld(),
+                depositCatalog(), LedgerService::depositFx, authority, evidence), publisher);
+    }
+
+    public JournalService depositReturns(DepositReturns.Action action, JournalEngine.AccessPolicy admission,
+            DepositReturns.Authority authority, DepositReturns.EvidenceVerifier evidence, JournalService.Publisher publisher) {
+        return trustedJournal(action.kind(), admission, DepositReturns.registration(action, services.partyWorld(),
+                authority, evidence), publisher);
+    }
+
+    public CompletionStage<List<DepositReturns.Return>> depositReturns(PlayerId actor, UUID deposit) {
+        return services.storage(actor, () -> store.transaction(tx -> DepositReturns.list(tx::query, actor, deposit)));
+    }
+
+    private static Map<String, WithdrawalPlanner.Denomination> withdrawalCatalog() {
+        return dev.emily.economy.cash.CashCatalog.all().stream().collect(
+                java.util.stream.Collectors.toUnmodifiableMap(value -> "economy:" + value.id(),
+                        value -> new WithdrawalPlanner.Denomination("economy:" + value.id(),
+                                value.currency(), value.minorUnits(), value.bill())));
+    }
+
+    private static Withdrawals.FxSnapshot withdrawalFx(JournalEngine.ReadView reads) {
+        var publication = depositFx(reads);
+        return publication == null ? null : new Withdrawals.FxSnapshot(publication.revision(), publication.rates());
+    }
+
+    public CompletionStage<Withdrawals.Preview> previewWithdrawal(PlayerId actor, Withdrawals.Binding binding,
+            Money cash, Map<String, Integer> billEdits,
+            java.util.function.BiPredicate<Withdrawals.Binding, JournalEngine.ReadView> admission,
+            java.util.function.BiPredicate<Withdrawals.Preview, JournalEngine.ReadView> capacity) {
+        var catalog = withdrawalCatalog();
+        var edits = billEdits == null ? null : Map.copyOf(billEdits);
+        return services.economicWrite(actor, () -> store.transaction(tx -> {
+            if (!admission.test(binding, tx::query)) throw new IllegalArgumentException("WITHDRAWAL_ACCESS");
+            var preview = Withdrawals.preview(tx::query, store.snapshot().worldId(), actor, binding, cash,
+                    edits, catalog, LedgerService::withdrawalFx);
+            if (!capacity.test(preview, tx::query)) throw new IllegalArgumentException("WITHDRAWAL_CAPACITY");
+            return preview;
+        }));
+    }
+
+    public JournalService withdrawals(Withdrawals.Action action, JournalEngine.AccessPolicy admission,
+            Withdrawals.Authority authority, Withdrawals.Capacity capacity, JournalService.Publisher publisher) {
+        return trustedJournal(action.kind(), admission, Withdrawals.registration(action, services.partyWorld(),
+                withdrawalCatalog(), LedgerService::withdrawalFx, authority, capacity, WithdrawalDelivery::prepare), publisher);
+    }
+
+    public CompletionStage<Optional<Withdrawals.Reservation>> withdrawal(PlayerId actor, UUID reservation) {
+        return services.storage(actor, () -> store.transaction(tx -> Withdrawals.find(tx::query, actor, reservation)));
+    }
+
+    public CompletionStage<Optional<RegisterSales.Reservation>> registerSale(PlayerId actor, UUID id) {
+        return services.storage(actor, () -> store.transaction(tx -> RegisterSales.find(tx::query, actor, id)));
+    }
+    public record RegisterPriceContext(TerminalPolicy.Snapshot terminal, RegisterSales.Price price, AccountIdentity seller) {}
+
+    public CompletionStage<Optional<RegisterPriceContext>> registerPriceContext(PlayerId actor,
+            TerminalPolicy.Anchor anchor, RegisterSales.Operators operators) {
+        return services.storage(actor, () -> store.transaction(tx -> {
+            var terminal = TerminalPolicy.find(tx::query, store.snapshot().worldId(), anchor, actor,
+                    operators.allows(actor, tx::query)).orElse(null);
+            if (terminal == null || !terminal.active() || terminal.kind() != TerminalPolicy.Kind.REGISTER
+                    || !(terminal.owner() instanceof PlayerId owner)) return Optional.empty();
+            var party = new PartyRef(store.snapshot().worldId(), new PartyRef.Player(owner));
+            var seller = AccountCatalog.primary(tx::query, party).orElse(null);
+            if (seller == null) return Optional.empty();
+            return Optional.of(new RegisterPriceContext(terminal,
+                    RegisterSales.price(tx::query, store.snapshot().worldId(), anchor).orElse(null), seller));
+        }));
+    }
+
+    public CompletionStage<RegisterSales.Quote> quoteSale(PlayerId buyer, TerminalPolicy.Anchor anchor,
+            UUID generation, long terminalRevision, RegisterSales.SourceReader sources,
+            java.util.function.BiPredicate<TerminalPolicy.Anchor, JournalEngine.ReadView> admission) {
+        return services.economicWrite(buyer, () -> store.transaction(tx -> {
+            if (!admission.test(anchor, tx::query)) throw new IllegalArgumentException("SALE_ACCESS");
+            return RegisterSales.quote(tx::query, store.snapshot().worldId(), buyer, anchor, generation, terminalRevision, sources);
+        }));
+    }
+
+    public JournalService registerSales(RegisterSales.Action action, JournalEngine.AccessPolicy admission,
+            RegisterSales.Authority authority, RegisterSales.Operators operators, RegisterSales.Capacity capacity,
+            RegisterSales.SourceReader sources, RegisterSales.EvidenceVerifier evidence, JournalService.Publisher publisher) {
+        return trustedJournal(action.kind(), admission, RegisterSales.registration(action, services.partyWorld(),
+                authority, operators, capacity, sources, evidence,
+                RegisterSaleSettlement::checkout,
+                (intent, sale, uncertain, reads) -> RegisterSaleSettlement.returnOriginals(intent, sale, uncertain, reads, sources)), publisher);
     }
 
     private Journal.Intent ownedIntent(PartyAuthorization.Grant grant, OperationId operation, RequestId attempt,

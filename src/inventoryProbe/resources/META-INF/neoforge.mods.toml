@@ -1,0 +1,7 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+[[mods]]
+modId="economy_inventory_probe"
+version="1"
+displayName="Disposable custody inventory persistence fixture"

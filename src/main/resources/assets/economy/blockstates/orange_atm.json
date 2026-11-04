@@ -1,0 +1,68 @@
+{
+  "variants": {
+    "cell=0,facing=north": {
+      "model": "economy:block/orange_atm_0",
+      "y": 0
+    },
+    "cell=0,facing=east": {
+      "model": "economy:block/orange_atm_0",
+      "y": 90
+    },
+    "cell=0,facing=south": {
+      "model": "economy:block/orange_atm_0",
+      "y": 180
+    },
+    "cell=0,facing=west": {
+      "model": "economy:block/orange_atm_0",
+      "y": 270
+    },
+    "cell=1,facing=north": {
+      "model": "economy:block/orange_atm_1",
+      "y": 0
+    },
+    "cell=1,facing=east": {
+      "model": "economy:block/orange_atm_1",
+      "y": 90
+    },
+    "cell=1,facing=south": {
+      "model": "economy:block/orange_atm_1",
+      "y": 180
+    },
+    "cell=1,facing=west": {
+      "model": "economy:block/orange_atm_1",
+      "y": 270
+    },
+    "cell=2,facing=north": {
+      "model": "economy:block/orange_atm_2",
+      "y": 0
+    },
+    "cell=2,facing=east": {
+      "model": "economy:block/orange_atm_2",
+      "y": 90
+    },
+    "cell=2,facing=south": {
+      "model": "economy:block/orange_atm_2",
+      "y": 180
+    },
+    "cell=2,facing=west": {
+      "model": "economy:block/orange_atm_2",
+      "y": 270
+    },
+    "cell=3,facing=north": {
+      "model": "economy:block/orange_atm_3",
+      "y": 0
+    },
+    "cell=3,facing=east": {
+      "model": "economy:block/orange_atm_3",
+      "y": 90
+    },
+    "cell=3,facing=south": {
+      "model": "economy:block/orange_atm_3",
+      "y": 180
+    },
+    "cell=3,facing=west": {
+      "model": "economy:block/orange_atm_3",
+      "y": 270
+    }
+  }
+}

@@ -17,6 +17,15 @@ import dev.emily.economy.storage.FoundationStore;
 import dev.emily.economy.journal.Journal;
 import dev.emily.economy.journal.JournalEngine;
 import dev.emily.economy.journal.JournalService;
+import dev.emily.economy.journal.MerchantPayments;
+import dev.emily.economy.journal.Custody;
+import dev.emily.economy.journal.CashIssuance;
+import dev.emily.economy.journal.Deposits;
+import dev.emily.economy.journal.Withdrawals;
+import dev.emily.economy.journal.RegisterSales;
+import dev.emily.economy.journal.RegisterSaleSettlement;
+import dev.emily.economy.journal.DepositReturns;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +82,8 @@ public final class ServerServices {
     private volatile FxSample fxSample = new FxSample(null, null);
     private String economicRetry;
     private long nextDiagnosticsSample;
+    private long nextPaymentExpiry;
+    private CompletionStage<Void> paymentExpiry;
     private long rateSampleTime;
     private long rateSampleSequence;
     private Double observedRate;
@@ -92,11 +103,19 @@ public final class ServerServices {
     private volatile Throwable disposalFailure;
     private boolean stoppedCleanly;
 
+    private final Path worldDirectory;
+
+    Path worldDirectory() {
+        checkOwner();
+        return worldDirectory;
+    }
+
     public ServerServices(Path worldDirectory, StorageLifecycle storage) {
         this(worldDirectory, storage, SchedulingConfig.defaults());
     }
 
     public ServerServices(Path worldDirectory, StorageLifecycle storage, SchedulingConfig config) {
+        this.worldDirectory = worldDirectory.toAbsolutePath().normalize();
         this.storage = storage;
         this.config = config;
         scheduleEconomy = storage.schedulesEconomy();
@@ -144,8 +163,13 @@ public final class ServerServices {
         if (!(storage instanceof FoundationStore store))
             throw new IllegalStateException("Journal requires persistent foundation storage");
         return new JournalService(this,
-                new JournalEngine(store, access, handlers), publisher);
+                new JournalEngine(store, access, handlers), publisher == null ? new JournalService.Publisher() {
+                    public void invalidate(Journal.Outcome outcome) {}
+                    public void publish(Journal.Outcome outcome) {}
+                } : publisher);
     }
+
+    public WorldId worldId() { return partyWorld(); }
 
     WorldId partyWorld() {
         checkOwner();
@@ -385,6 +409,20 @@ public final class ServerServices {
 
     private StorageLifecycle.Progress startupStep() {
         var step = storage.startupStep();
+        if (step.ready() && storage instanceof FoundationStore store) {
+            if (!RegisterSales.reconcileBatch(store, RegisterSaleSettlement::returnOriginals))
+                return new StorageLifecycle.Progress("register-reconciliation", 0, -1, false);
+            if (!Withdrawals.reconcileBatch(store))
+                return new StorageLifecycle.Progress("withdrawal-reconciliation", 0, -1, false);
+            if (!Deposits.reconcileBatch(store))
+                return new StorageLifecycle.Progress("deposit-reconciliation", 0, -1, false);
+            if (!DepositReturns.reconcileBatch(store))
+                return new StorageLifecycle.Progress("deposit-return-reconciliation", 0, -1, false);
+            if (!Custody.reconcileBatch(store))
+                return new StorageLifecycle.Progress("custody-reconciliation", 0, -1, false);
+            if (!CashIssuance.reconcileBatch(store))
+                return new StorageLifecycle.Progress("cash-reconciliation", 0, -1, false);
+        }
         if (step.ready()) sampleDiagnosticsOnWorker();
         return step;
     }
@@ -432,6 +470,30 @@ public final class ServerServices {
             diagnosticProbe = runOn(() -> { sampleDiagnosticsOnWorker(); return null; }, storageWorker);
         }
     }
+    /** Current-process expiry failure code. No storage access or scheduling side effects. */
+    public String paymentReleaseFailure() {
+        checkOwner();
+        if (paymentExpiry == null || !paymentExpiry.toCompletableFuture().isCompletedExceptionally()) return null;
+        try {
+            paymentExpiry.toCompletableFuture().join();
+            return null;
+        } catch (CompletionException error) {
+            return failureCode(error.getCause());
+        }
+    }
+
+    private void schedulePaymentExpiry() {
+        if (!(storage instanceof FoundationStore store)) return;
+        long now = System.nanoTime();
+        if ((nextPaymentExpiry != 0 && now - nextPaymentExpiry < 0)
+                || (paymentExpiry != null && !paymentExpiry.toCompletableFuture().isDone())) return;
+        nextPaymentExpiry = now + TimeUnit.SECONDS.toNanos(1);
+        paymentExpiry = storage(() -> {
+            MerchantPayments.expireBatch(store, Clock.systemUTC());
+            return null;
+        });
+    }
+
     public CompletionStage<Void> readiness() { return ready.minimalCompletionStage(); }
 
     public void requireReady() {
@@ -614,6 +676,7 @@ public final class ServerServices {
             try {
                 advanceEconomy();
                 sampleDiagnostics();
+                schedulePaymentExpiry();
             }
             catch (CompletionException e) {
                 prepared = null;
