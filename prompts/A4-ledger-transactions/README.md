@@ -1,6 +1,10 @@
 # A4 — Double-entry ledger and transaction engine
 
-Status: draft DESIGN prompt. Refine specifications and future prompts only. Do not implement code, scaffold, run Gradle/tests/game processes, generate assets, change dependencies, or migrate worlds. Edit planning files only when explicitly requested. Reading a roadmap or this file is not implementation authorization.
+Status: A4-01 through A4-06 verified. See the A4-06 handoff for the A5 integration boundary.
+
+See the [phase design](DESIGN.md) for architecture and settlement behavior.
+
+See the [execution contract](EXECUTION.md) for activation, shared rules, and completion gates.
 
 ## Goal and dependencies
 
@@ -20,24 +24,39 @@ Reimplement P2P primary payments, owned-account transfers, credit/debit, funded 
 
 All assigned existing behavior must appear in the coverage table even when replacement architecture differs. Record any proposed behavior change and its approval status. Existing implementation and existing tests do not satisfy the new phase gate.
 
-## Proposed bounded subprompts
+**Hold scope decision.** A4 supports full capture and explicit release. Partial capture is deferred for future planning when a workflow needs to settle less than the reserved amount. That planning should decide whether to release the remainder immediately or keep it reserved.
 
-Posting invariants and counteraccounts; durable commit/idempotency; holds; same-currency transfers; FX and closure/rebase; audit/history/public service contracts.
+**FX scope decision.** Exchange fees go to a game-owned fee account. Round fractional exchange payouts down to whole coins. Fractional coins cannot be posted or paid out.
 
-For each subprompt define outcome, owner, prerequisites, persistence/entities, service/network contracts, permissions, state transitions, transaction boundary, server/worker handoff, time/version semantics, idempotency, configuration and diagnostics. Specify failures, overflow/rounding, stale requests, disconnects, retries and recovery where relevant. Avoid production code and premature class/file prescriptions.
 
-## Acceptance scenarios to specify, not execute
+**Funded closure decision.** Use the A3 destination and eligibility contract. If the confirmed exchange rounds down to zero whole coins, settle with a zero payout and close the source account in the same transaction.
+
+
+**Rebase decision.** Round converted balances down to whole coins, including zero. Preserve raw transaction history in its original units.
+
+
+## Feature coverage
+
+| Inventory | Existing behavior | Replacement and acceptance owner | Handoff |
+|---|---|---|---|
+| F08 | Primary payments and owned-account transfers | Balanced same-currency settlement and live eligibility in A4-04 | A4-06 service |
+| F08 | Credit, debit, and trade entries | Balanced counterentries in A4-01 and A4-05 | A5 cash and market consumers |
+| F08 | Funded closure | Atomic settlement and close in A4-05 | A4-06 service |
+| F09 | Raw history, cursors, paired identity | Durable facts in A4-02 and bounded history in A4-06 | API consumers |
+| F06 | Financial rebase | Atomic conversion and original history in A4-05 | A3 lifecycle and A4-06 history |
+| F20 | Financial API and commands | Shared authorization and settlement entry points in A4-06 | A5 and integrations |
+
+## Approved execution order
+
+1. [A4-01 · Posting model](A4-01.md)
+2. [A4-02 · Durable settlement](A4-02.md)
+3. [A4-03 · Holds](A4-03.md)
+4. [A4-04 · Same-currency operations](A4-04.md)
+5. [A4-05 · FX, funded closure and rebase](A4-05.md)
+6. [A4-06 · History and public contracts](A4-06.md)
+
+## Phase acceptance scenarios
 
 Duplicate same request returns same outcome; reused key/different payload rejects; overspend and overflow reject atomically; every currency balances independently; replay/restart reconciles; trusted issuance records source and authority. Define unknown commit-result retry behavior.
 
 Include concrete numerical or state-transition examples where useful. Describe future unit, integration, restart/crash and performance checks appropriate to each subprompt. Distinguish proposed guarantees from verified behavior. Future runnable deliveries require configured runClient/runServer, mod registration, required development runtime dependencies, and runClient help/dry-run verification; run no checks during this planning task.
-
-## Required planning response
-
-- Phase specification and dependency/ownership map.
-- F-ID coverage table: old behavior, new contract, owning subprompt, acceptance cases and explicit later handoff.
-- Ordered self-contained future prompts with scope exclusions and completion gates.
-- Decisions needed now, with recommended alternatives and consequences; do not silently approve defaults.
-- Open questions and approved-versus-proposed rules.
-
-Stop at planning. Do not execute the prompts you draft or expand into later-phase implementation.

@@ -39,7 +39,7 @@ class SqliteStorageTest {
         assertEquals("wal", snapshot.journalMode()); assertEquals(2, snapshot.synchronous());
         assertTrue(snapshot.foreignKeys()); assertEquals(5000, snapshot.busyTimeoutMillis());
         var rows = first.transaction(tx -> tx.query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", List.of(), 32));
-        assertEquals(List.of("account_catalog", "economic_metadata", "economic_systems", "economic_updates", "economic_versions", "foundation_metadata", "journal_records", "journal_transactions", "migration_history", "operation_outcomes", "projection_cells", "projection_generations", "projection_heads", "runtime_state", "sqlite_sequence"), rows.stream().map(r -> r.get("name")).toList());
+        assertEquals(List.of("account_catalog", "economic_metadata", "economic_systems", "economic_updates", "economic_versions", "foundation_metadata", "journal_records", "journal_transactions", "ledger_balances", "ledger_fx_quotes", "ledger_holds", "migration_history", "operation_outcomes", "projection_cells", "projection_generations", "projection_heads", "runtime_state", "sqlite_sequence"), rows.stream().map(r -> r.get("name")).toList());
         assertThrows(UnsupportedOperationException.class, () -> rows.getFirst().put("name", "changed"));
         first.close();
         var reopened = open(one); assertEquals(snapshot.worldId(), reopened.snapshot().worldId()); reopened.close();
@@ -94,9 +94,9 @@ class SqliteStorageTest {
         assertEquals("fixture region", Files.readString(backup.resolve("world/region/test.mca")));
         var store = open(world);
         assertEquals(id, store.snapshot().worldId().value());
-        assertEquals(6, store.snapshot().schemaVersion());
+        assertEquals(10, store.snapshot().schemaVersion());
         var history = store.transaction(tx -> tx.query("SELECT version FROM migration_history ORDER BY version", List.of(), 32));
-        assertEquals(List.of("1", "2", "3", "4", "5", "6"), history.stream().map(r -> r.get("version")).toList());
+        assertEquals(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), history.stream().map(r -> r.get("version")).toList());
         store.close();
     }
     @Test void changedBackupAndRunningWorldCannotAuthorizeUpgrade() throws Exception {

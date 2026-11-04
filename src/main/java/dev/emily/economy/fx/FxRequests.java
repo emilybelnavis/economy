@@ -1,6 +1,9 @@
 package dev.emily.economy.fx;
 
 import dev.emily.economy.api.Identifiers.PlayerId;
+import dev.emily.economy.api.Identifiers.WorldId;
+import dev.emily.economy.journal.JournalEngine;
+import java.util.UUID;
 import dev.emily.economy.api.Money;
 import dev.emily.economy.api.RequestContext;
 import dev.emily.economy.foundation.ServerServices;
@@ -39,6 +42,13 @@ public final class FxRequests {
         if (limit < 1 || limit > 100) throw new IllegalArgumentException("FX history page size");
         return services.storage(actor, () -> store.transaction(tx ->
                 FxPairHistory.page(tx::query, store.snapshot().worldId(), pair, cursor, limit)));
+    }
+
+    /** Worker-side quote lookup after journal retry resolution. */
+    public FxQuotes.Quote requireFresh(UUID id, PlayerId actor, WorldId world, JournalEngine.ReadView reads) {
+        if (quotes == null) throw new IllegalArgumentException("FX_QUOTE_UNAVAILABLE");
+        return quotes.requireFresh(id, actor, world, FxService.latest(reads),
+                FxQuotes.PRICING_VERSION, wall.instant());
     }
 
     private PlayerId authenticate(RequestContext context) {

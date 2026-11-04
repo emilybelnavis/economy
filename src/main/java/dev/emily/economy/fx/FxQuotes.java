@@ -26,7 +26,7 @@ public final class FxQuotes {
                         UUID publication, int pricingVersion, Instant expires, Money fee, Money debit, Money credit) {}
 
     private static final int CAPACITY = 1024;
-    private static final int PRICING_VERSION = 1;
+    static final int PRICING_VERSION = 1;
     private final WorldId world;
     private final Map<UUID, Quote> quotes = new HashMap<>();
 
@@ -54,7 +54,7 @@ public final class FxQuotes {
                 .multiply(BigDecimal.valueOf(target.minorUnitsPerMajor()));
         BigDecimal denominator = publication.rates().get(target).multiply(BigDecimal.valueOf(source.minorUnitsPerMajor()));
         long units = numerator.divide(denominator, 0, exactDebit ? RoundingMode.FLOOR : RoundingMode.CEILING).longValueExact();
-        if (units <= 0) throw new IllegalArgumentException("FX_ZERO_CREDIT");
+        if (units < 0 || (!exactDebit && units == 0)) throw new IllegalArgumentException("FX_ZERO_CREDIT");
         var converted = new Money(target, units);
         var quote = new Quote(UUID.randomUUID(), actor, world, pair, side, requested, publication.updateId(),
                 PRICING_VERSION, now.plus(lifetime), new Money(pair.source(), 0),

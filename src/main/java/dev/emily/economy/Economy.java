@@ -20,6 +20,7 @@ import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import dev.emily.economy.recovery.FoundationRuntime;
 import dev.emily.economy.foundation.FxAdminCommands;
+import dev.emily.economy.foundation.LedgerCommands;
 import dev.emily.economy.foundation.DenominationChooser;
 import java.time.Clock;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -35,7 +36,7 @@ public final class Economy {
     public static final String MOD_ID = "economy";
     private static final Logger LOGGER = LogUtils.getLogger();
     private final Map<MinecraftServer, DenominationChooser> choosers = new IdentityHashMap<>();
-    private final Map<MinecraftServer, ServerServices> servers = new IdentityHashMap<>();
+    private static final Map<MinecraftServer, ServerServices> servers = new IdentityHashMap<>();
     private final Set<MinecraftServer> invalidConfiguration = Collections.newSetFromMap(new IdentityHashMap<>());
     private static final SchedulingMetrics.Queue NO_QUEUE = new SchedulingMetrics.Queue(0, 0, 0);
     private static final SchedulingMetrics NO_METRICS = new SchedulingMetrics(NO_QUEUE, NO_QUEUE, NO_QUEUE,
@@ -55,9 +56,16 @@ public final class Economy {
         try { LOGGER.info("SQLite JDBC driver loaded: {}", SqliteStorage.verifyDriver()); }
         catch (StorageException e) { LOGGER.error("event={} component=sqlite_driver", ServerServices.failureCode(e)); }
     }
+    /** Trusted integrations can resolve the current service and issue fresh server-side grants. */
+    public static ServerServices serverServices(MinecraftServer server) {
+        if (!server.isSameThread()) throw new IllegalStateException("Requires server thread");
+        return servers.get(server);
+    }
+
     private void commands(RegisterCommandsEvent event) {
         DenominationChooser.register(event.getDispatcher(), choosers::get);
         FxAdminCommands.register(event.getDispatcher(), servers::get, Clock.systemUTC());
+        LedgerCommands.register(event.getDispatcher(), servers::get);
         EconomyCommands.register(event.getDispatcher(), (source, view) -> {
             var server = source.getServer();
             var services = servers.get(server);

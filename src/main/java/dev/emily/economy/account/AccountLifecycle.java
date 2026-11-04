@@ -10,12 +10,14 @@ import dev.emily.economy.journal.Journal;
 import dev.emily.economy.journal.JournalEngine;
 import dev.emily.economy.recovery.RecordCatalog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 
 /** Trusted worker registrations. A5 owns player-facing teller admission. */
 public final class AccountLifecycle {
@@ -97,21 +99,45 @@ public final class AccountLifecycle {
     }
 
     public static JournalEngine.Registration closing(PartyRef owner, Close close, ClosureReader reader) {
+        return closing(owner, close, reader, close.request(), (intent, reads) -> true,
+                (intent, reads) -> reject("FUNDED_SETTLEMENT_UNAVAILABLE"));
+    }
+
+    /** Compose an authorized settlement with the original account closure transition. */
+    public static JournalEngine.Registration closing(PartyRef owner, Close close, ClosureReader reader,
+                                                     Journal.CanonicalRequest request,
+                                                     BiPredicate<Journal.Intent, JournalEngine.ReadView> authority,
+                                                     JournalEngine.Handler settleFunded) {
         Objects.requireNonNull(reader);
-        return owned(owner, close.request(), (intent, reads) -> {
+        return owned(owner, request, (intent, reads) -> {
+            if (!authority.test(intent, reads)) return reject("AUTHORITY_REVOKED");
             var source = AccountCatalog.find(reads, owner, close.source()).orElse(null);
             var eligibility = eligibility(reads, owner, close, reader, source);
-            if (eligibility == Eligibility.FUNDED) return reject("FUNDED_SETTLEMENT_UNAVAILABLE");
-            if (eligibility != Eligibility.EMPTY) return reject(eligibility.name());
+            JournalEngine.Commit settlement = null;
+            if (eligibility == Eligibility.FUNDED) {
+                var decision = settleFunded.prepare(intent, reads);
+                if (!(decision instanceof JournalEngine.Commit postings)) return decision;
+                settlement = postings;
+            } else if (eligibility != Eligibility.EMPTY) {
+                return reject(eligibility.name());
+            }
 
             long revision = source.revision() + 1;
-            return commit("closed", source, revision, "BANK_CLOSED", tx -> {
+            var closure = commit("closed", source, revision, "BANK_CLOSED", tx -> {
                 int changed = tx.execute("""
                         UPDATE account_catalog SET status='CLOSED',revision=?
                         WHERE account_id=? AND owner_id=? AND status='OPEN' AND revision=?
                         """, List.of(Long.toString(revision), source.id().value().toString(),
                         AccountCatalog.ownerId(owner), Long.toString(close.expectedRevision())));
                 if (changed != 1) throw new IllegalStateException("Authorized closure target changed");
+            });
+            if (settlement == null) return closure;
+            var postings = settlement;
+            var records = new ArrayList<>(postings.records());
+            records.addAll(closure.records());
+            return new JournalEngine.Commit(records, closure.result(), tx -> {
+                postings.projections().apply(tx);
+                closure.projections().apply(tx);
             });
         });
     }

@@ -25,7 +25,7 @@ class JournalMigrationTest {
         assertEquals(StorageException.Kind.SCHEMA, assertThrows(StorageException.class, () -> new SqliteStorage().initialize(world)).kind());
         UpgradeBackup.prepare(world);
         var store = new SqliteStorage(); store.initialize(world);
-        assertEquals(id, store.snapshot().worldId().value()); assertEquals(6, store.snapshot().schemaVersion());
+        assertEquals(id, store.snapshot().worldId().value()); assertEquals(10, store.snapshot().schemaVersion());
         assertEquals(historicalUtc, store.transaction(tx -> tx.query("SELECT applied_at_utc FROM migration_history WHERE version=1", List.of(), 1)).getFirst().get("applied_at_utc"));
         assertEquals("0", store.transaction(tx -> tx.query("SELECT count(*) AS count FROM operation_outcomes", List.of(), 1)).getFirst().get("count"));
         store.close();

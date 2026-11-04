@@ -34,6 +34,10 @@ final class OfflineInspector {
             JournalSchema.validate(c);RecoverySchema.validate(c);
             if (schema >= 5) FxSchema.validate(c);
             if (schema >= 6) AccountSchema.validate(c);
+            if (schema >= 7) LedgerProjection.validateSchema(c);
+            if (schema >= 8) HoldSchema.validate(c);
+            if (schema >= 9) FxSettlementSchema.validate(c);
+            if (schema >= 10) LedgerHistorySchema.validate(c);
             var validation=new JournalCompatibility(c,configuration.records(),id); while(!validation.step()) {}
             long last=Long.parseLong(scalar(c,"SELECT COALESCE(max(sequence),0) FROM journal_transactions"));
             Map<String,ProjectionManager.Definition> projections=new HashMap<>(); configuration.projections().forEach(d->projections.put(d.name(),d));

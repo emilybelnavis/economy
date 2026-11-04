@@ -32,9 +32,21 @@ public final class JournalEngine {
     public JournalEngine(FoundationStore store, AccessPolicy access, Map<Kind, Registration> handlers) {
         this.store = Objects.requireNonNull(store); this.access = Objects.requireNonNull(access); this.handlers = Map.copyOf(handlers);
     }
+    record Attempt(Outcome outcome, boolean replay) {}
+
     public Outcome submit(Intent intent) {
+        return submitAttempt(intent).outcome();
+    }
+
+    Attempt submitAttempt(Intent intent) {
+        boolean[] replay = {false};
+        Outcome outcome = resolve(intent, replay);
+        return new Attempt(outcome, replay[0]);
+    }
+
+    private Outcome resolve(Intent intent, boolean[] replay) {
         if (!access.allows(intent.actor(), intent.kind())) return nonterminal(intent, Status.NOT_ACCEPTED, "ACCESS_DENIED");
-        try { return store.transaction(tx -> process(tx, intent)); }
+        try { return store.transaction(tx -> process(tx, intent, replay)); }
         catch (StorageException error) {
             if (error.kind() != StorageException.Kind.UNKNOWN_COMMIT && error.kind() != StorageException.Kind.UNSAFE_CONNECTION) throw error;
             // Never execute a new write while resolving uncertainty. Only reopen and look up the original ID.
@@ -63,7 +75,7 @@ public final class JournalEngine {
             return Optional.of(outcome(rows.getFirst()));
         });
     }
-    private Outcome process(FoundationStore.Transaction tx, Intent intent) throws Exception {
+    private Outcome process(FoundationStore.Transaction tx, Intent intent, boolean[] replay) throws Exception {
         var existing = tx.query("SELECT * FROM operation_outcomes WHERE world_id=? AND operation_id=?",
                 List.of(world(), intent.operationId().value().toString()), 1);
         if (!existing.isEmpty()) {
@@ -71,6 +83,7 @@ public final class JournalEngine {
             if (!row.get("actor").equals(actorKey(intent.actor()))) return nonterminal(intent, Status.NOT_ACCEPTED, "ACCESS_DENIED");
             if (!row.get("service").equals(intent.kind().service()) || !row.get("operation_type").equals(intent.kind().operationType())
                     || !row.get("canonical_request").equals(intent.canonical())) return nonterminal(intent, Status.NOT_ACCEPTED, "OPERATION_CONFLICT");
+            replay[0] = true;
             return outcome(row);
         }
         Registration registration = handlers.get(intent.kind());

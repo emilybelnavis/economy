@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import dev.emily.economy.account.AccountCatalog;
 import dev.emily.economy.account.AccountRebasePlanner;
 import dev.emily.economy.api.AccountIdentity;
+import dev.emily.economy.api.AccountFunds;
 import dev.emily.economy.api.FundingEligibility;
 import dev.emily.economy.api.Money;
 import dev.emily.economy.api.PartyRef;
@@ -63,6 +64,7 @@ public final class ServerServices {
     private StorageLifecycle.EconomicProgress economy;
     private boolean economyObserved;
     private int unresolvedAtShutdown;
+    private LedgerService ledger;
     private final OperationDiagnostics operationDiagnostics = new OperationDiagnostics();
     private final Map<Thread, Long> activeStorage = new ConcurrentHashMap<>();
     private final Map<Thread, Long> activeCalculations = new ConcurrentHashMap<>();
@@ -204,16 +206,30 @@ public final class ServerServices {
         return readAccounts(grant, false, reads -> AccountQueries.page(reads, grant.target(), anchor, limit));
     }
 
-    public CompletionStage<Optional<AccountQueries.FundsStatus>> accountFunds(
-            PartyAuthorization.Grant grant, AccountId id) {
-        return readAccounts(grant, false, reads -> AccountCatalog.find(reads, grant.target(), id)
-                .map(account -> AccountQueries.FundsStatus.LEDGER_UNAVAILABLE));
+    /** The financial service for this server session. */
+    public LedgerService ledger() {
+        checkOwner();
+        if (!(storage instanceof FoundationStore store))
+            throw new IllegalStateException("Ledger requires persistent foundation storage");
+        if (ledger == null) ledger = new LedgerService(this, store);
+        return ledger;
+    }
+
+    public CompletionStage<Optional<AccountFunds>> accountFunds(PartyAuthorization.Grant grant, AccountId id) {
+        return ledger().funds(grant, id);
     }
 
     public CompletionStage<Optional<FundingEligibility.Status>> evaluateFunding(
             PartyAuthorization.Grant grant, AccountId id, long expectedRevision, Money amount) {
-        return readAccounts(grant, false, reads -> AccountCatalog.find(reads, grant.target(), id)
-                .map(account -> FundingEligibility.withoutLedger().evaluate(account, expectedRevision, amount)));
+        return readAccounts(grant, false, reads -> AccountCatalog.find(reads, grant.target(), id).map(account -> {
+            var metadata = FundingEligibility.withoutLedger().evaluate(account, expectedRevision, amount);
+            if (metadata != FundingEligibility.Status.LEDGER_UNAVAILABLE || account.purpose() != AccountIdentity.Purpose.BANK) {
+                return metadata;
+            }
+            var funds = LedgerService.bankFunds(reads, account).orElseThrow();
+            return funds.availableMinorUnits() >= amount.minorUnits()
+                    ? FundingEligibility.Status.ELIGIBLE : FundingEligibility.Status.INSUFFICIENT_FUNDS;
+        }));
     }
 
     CompletionStage<Optional<AccountIdentity>> inspectAccount(
@@ -231,7 +247,7 @@ public final class ServerServices {
                 live, reads -> AccountQueries.page(reads, grant.target(), anchor, limit));
     }
 
-    private <T> CompletionStage<Optional<T>> inspectAccounts(
+    <T> CompletionStage<Optional<T>> inspectAccounts(
             PartyAuthorization.Grant grant, Map<String, String> scope, BooleanSupplier live,
             Function<JournalEngine.ReadView, Optional<T>> query) {
         checkOwner();
@@ -257,7 +273,7 @@ public final class ServerServices {
         });
     }
 
-    private <T> CompletionStage<Optional<T>> readAccounts(
+    <T> CompletionStage<Optional<T>> readAccounts(
             PartyAuthorization.Grant grant, boolean inspection, Function<JournalEngine.ReadView, Optional<T>> query) {
         checkOwner();
         if (!(storage instanceof FoundationStore store))

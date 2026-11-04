@@ -60,8 +60,8 @@ public final class JournalService {
 
     private Submission submit(Intent intent, Function<Outcome, DeliveryStatus> publish) {
         checkOwner();
-        CompletionStage<Outcome> work;
-        try { work = services.economicWrite(intent.actor(), () -> engine.submit(intent)); }
+        CompletionStage<JournalEngine.Attempt> work;
+        try { work = services.economicWrite(intent.actor(), () -> engine.submitAttempt(intent)); }
         catch (IllegalStateException unavailable) {
             record(intent, Event.OPERATION_ADMISSION_REJECTED);
             return new Submission(intent.requestId(), Receipt.NOT_ACCEPTED, CompletableFuture.completedStage(
@@ -69,7 +69,7 @@ public final class JournalService {
         }
         Receipt receipt = work.toCompletableFuture().isCompletedExceptionally() ? Receipt.NOT_ACCEPTED : Receipt.ACCEPTED_PENDING;
         // This independent stage means cancellation/disconnect cannot cancel accepted storage work.
-        CompletionStage<Delivery> completion = work.handle((outcome, error) -> {
+        CompletionStage<Delivery> completion = work.handle((attempt, error) -> {
             if (error != null) {
                 Throwable cause = unwrap(error);
                 if (cause instanceof StorageException storage) {
@@ -88,8 +88,11 @@ public final class JournalService {
                 }
                 return new Delivery(nonterminal(intent, Status.UNKNOWN, "LOOKUP_OR_RETRY_SAME_ID"), DeliveryStatus.SKIPPED);
             }
+            var outcome = attempt.outcome();
+            if (attempt.replay()) record(intent, Event.OPERATION_REPLAYED);
             switch (outcome.status()) {
-                case NOT_ACCEPTED -> record(intent, Event.OPERATION_ADMISSION_REJECTED);
+                case NOT_ACCEPTED -> record(intent, "OPERATION_CONFLICT".equals(outcome.result().code())
+                        ? Event.OPERATION_PAYLOAD_CONFLICT : Event.OPERATION_ADMISSION_REJECTED);
                 case DURABLY_REJECTED -> record(intent, Event.OPERATION_BUSINESS_REJECTED);
                 case UNKNOWN -> record(intent, Event.OPERATION_OUTCOME_UNKNOWN);
                 case COMMITTED -> {}
@@ -113,7 +116,16 @@ public final class JournalService {
     /** No outcome is disclosed unless current policy, bound actor, service and type match. */
     public CompletionStage<Optional<Outcome>> lookup(Intent intent) {
         checkOwner();
-        return services.shareStorageRead(intent.actor(), new LookupKey(this, intent), () -> engine.lookup(intent));
+        try {
+            var lookup = services.shareStorageRead(intent.actor(), new LookupKey(this, intent), () -> engine.lookup(intent));
+            lookup.whenComplete((outcome, error) -> {
+                if (error != null) record(intent, Event.OPERATION_LOOKUP_UNAVAILABLE);
+            });
+            return lookup;
+        } catch (IllegalStateException unavailable) {
+            record(intent, Event.OPERATION_LOOKUP_UNAVAILABLE);
+            throw unavailable;
+        }
     }
     private void record(Intent intent, Event event) {
         services.operationDiagnostics().record(event, intent.operationId().value(), intent.requestId().value());

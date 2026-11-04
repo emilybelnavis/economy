@@ -1,14 +1,19 @@
 package dev.emily.economy.foundation;
 
+import dev.emily.economy.api.AccountFunds;
 import dev.emily.economy.api.AccountIdentity;
 import dev.emily.economy.api.EconomyCurrency;
 import dev.emily.economy.api.FundingEligibility;
 import dev.emily.economy.api.Money;
 import dev.emily.economy.api.Identifiers.AccountId;
 import dev.emily.economy.api.Identifiers.PlayerId;
+import dev.emily.economy.api.Identifiers.OperationId;
+import dev.emily.economy.api.Identifiers.RequestId;
 import dev.emily.economy.api.PartyRef;
 import dev.emily.economy.journal.Journal;
 import dev.emily.economy.journal.JournalEngine;
+import dev.emily.economy.journal.LedgerHistory;
+import dev.emily.economy.journal.SameCurrency;
 import dev.emily.economy.storage.FoundationStore;
 import dev.emily.economy.storage.SqliteStorage;
 import org.junit.jupiter.api.Test;
@@ -48,9 +53,9 @@ class AccountQueriesTest {
             assertEquals(Optional.empty(), await(services, services.findOwnedAccount(grant, account(3))));
             assertEquals(Optional.empty(), await(services, services.accountFunds(grant, account(2))));
             assertEquals(Optional.empty(), await(services, services.accountFunds(grant, account(3))));
-            assertEquals(Optional.of(AccountQueries.FundsStatus.LEDGER_UNAVAILABLE),
+            assertEquals(Optional.of(new AccountFunds(EconomyCurrency.EUR, 0, 0, 0)),
                     await(services, services.accountFunds(grant, account(4))));
-            assertEquals(Optional.of(FundingEligibility.Status.LEDGER_UNAVAILABLE),
+            assertEquals(Optional.of(FundingEligibility.Status.INSUFFICIENT_FUNDS),
                     await(services, services.evaluateFunding(grant, account(4), 1, new Money(EconomyCurrency.EUR, 1))));
         } finally {
             assertTrue(services.stop(Duration.ofSeconds(5)));
@@ -125,6 +130,49 @@ class AccountQueriesTest {
                 assertEquals("player:" + owner.value(), envelope.records().getFirst().payload());
                 assertNotNull(envelope.auditInstant().value());
             }
+        } finally {
+            assertTrue(services.stop(Duration.ofSeconds(5)));
+        }
+    }
+
+    @Test void ledgerServiceScopesHistoryAndPreservesPaymentReplay() throws Exception {
+        var store = new SqliteStorage();
+        var services = open(store);
+        try {
+            change(services, store, tx -> {
+                tx.execute("INSERT INTO account_catalog VALUES(?,?,'BANK','CAD','OPEN',1,1)",
+                        List.of(account(1).value().toString(), owner.value().toString()));
+                tx.execute("INSERT INTO account_catalog VALUES(?,?,'BANK','CAD','OPEN',1,1)",
+                        List.of(account(2).value().toString(), other.value().toString()));
+            });
+            var ledger = services.ledger();
+            var grant = grant(services, owner, owner, false);
+            var otherGrant = grant(services, other, other, false);
+            var inspection = grant(services, other, owner, true);
+            var adjustment = new SameCurrency.Adjustment(owner, new SameCurrency.Revision(account(1), 1),
+                    new Money(EconomyCurrency.CAD, 10_000));
+            var credit = ledger.adjustments(SameCurrency.CREDIT, (actor, kind) -> actor.equals(owner),
+                    (intent, instruction, reads) -> true, null);
+            var funded = new Journal.Intent(new OperationId(UUID.randomUUID()), new RequestId(UUID.randomUUID()),
+                    owner, SameCurrency.CREDIT, adjustment.request(), null, null);
+            assertEquals(Journal.Status.COMMITTED, await(services, credit.submit(funded).completion()).outcome().status());
+
+            var payment = await(services, ledger.planPayment(grant, other, 30)).orElseThrow();
+            var operation = new OperationId(UUID.randomUUID());
+            var initial = await(services, ledger.submit(grant, operation, new RequestId(UUID.randomUUID()), payment).completion()).outcome();
+            assertEquals(Journal.Status.COMMITTED, initial.status());
+            assertEquals(initial, await(services, ledger.submit(grant, operation, new RequestId(UUID.randomUUID()), payment).completion()).outcome());
+            assertEquals(Optional.of(initial), await(services, ledger.lookup(grant, operation, new RequestId(UUID.randomUUID()), payment)));
+            assertThrows(IllegalArgumentException.class, () -> ledger.submit(otherGrant, operation, new RequestId(UUID.randomUUID()), payment));
+            assertEquals(7_000, await(services, ledger.primaryFunds(grant)).orElseThrow().funds().availableMinorUnits());
+
+            var visible = await(services, ledger.history(grant, account(1), null, 10)).orElseThrow();
+            assertEquals(initial.transactionId(), visible.entries().getLast().transactionId());
+            assertTrue(await(services, ledger.history(otherGrant, account(1), null, 10)).isEmpty());
+            assertTrue(await(services, ledger.history(inspection, account(1), null, 10)).isEmpty());
+            assertEquals(Optional.of(visible), await(services, services.inspectAccounts(inspection,
+                    Map.of("ledger_history", account(1).value().toString()), () -> true,
+                    reads -> LedgerHistory.page(reads, inspection.target(), account(1), null, 10))));
         } finally {
             assertTrue(services.stop(Duration.ofSeconds(5)));
         }

@@ -6,7 +6,7 @@ import dev.emily.economy.api.AccountIdentity.Status;
 import dev.emily.economy.api.EconomyCurrency;
 import dev.emily.economy.api.Identifiers.AccountId;
 import dev.emily.economy.api.PartyRef;
-import dev.emily.economy.fx.FxService;
+import dev.emily.economy.journal.RebaseSettlement;
 import dev.emily.economy.journal.Journal;
 import dev.emily.economy.journal.JournalEngine;
 import dev.emily.economy.recovery.RecordCatalog;
@@ -62,9 +62,8 @@ public final class AccountCatalog {
     }
 
     static EconomyCurrency currentDenomination(JournalEngine.ReadView reads) {
-        // The opening denomination remains current until A4 delivers durable rebase.
-        var publication = FxService.latest(reads);
-        return publication == null ? null : publication.reference();
+        return RebaseSettlement.denomination(reads)
+                .map(AccountRebasePlanner.Denomination::currency).orElse(null);
     }
 
     private static Optional<AccountIdentity> one(JournalEngine.ReadView reads, PartyRef owner, String filter,

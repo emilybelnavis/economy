@@ -9,6 +9,9 @@ import java.util.function.LongSupplier;
 /** Per-server diagnostic state with one log allowance per event per interval. */
 public final class OperationDiagnostics {
     public enum Event {
+        OPERATION_REPLAYED,
+        OPERATION_PAYLOAD_CONFLICT,
+        OPERATION_LOOKUP_UNAVAILABLE,
         OPERATION_ADMISSION_REJECTED,
         OPERATION_BUSINESS_REJECTED,
         OPERATION_STORAGE_FAILED,
@@ -40,7 +43,7 @@ public final class OperationDiagnostics {
     }
 
     public synchronized void record(Event event, UUID operationId, UUID requestId) {
-        lastFailure = new Failure(event.name(), operationId);
+        if (event != Event.OPERATION_REPLAYED) lastFailure = new Failure(event.name(), operationId);
         long now = nanoTime.getAsLong();
         Long previous = lastLogged.get(event);
         if (previous != null && now - previous < INTERVAL_NANOS) return;

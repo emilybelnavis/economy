@@ -1,0 +1,185 @@
+package dev.emily.economy.journal;
+
+import dev.emily.economy.api.EconomyCurrency;
+import dev.emily.economy.api.Identifiers.ActorId;
+import dev.emily.economy.api.Money;
+import dev.emily.economy.storage.FoundationStore;
+import java.util.*;
+
+import static dev.emily.economy.journal.PostingBatch.Role.ACCOUNT;
+
+/** Worker-side reservations for authenticated workflows using the durable journal. */
+public final class Holds {
+    public static final String FACT = "economy:hold";
+    public enum State { ACTIVE, CAPTURED, RELEASED }
+    public record Hold(UUID id, UUID account, Money amount, State state) {}
+
+    @FunctionalInterface
+    public interface Authority {
+        /** Check live workflow authority over source and optional capture destination. */
+        boolean allows(Journal.Intent intent, UUID source, UUID target, JournalEngine.ReadView reads);
+    }
+
+    private Holds() {}
+
+    public static Journal.CanonicalRequest reserveRequest(UUID account, Money amount) {
+        return request(Map.of("account", account.toString(), "currency", amount.currency().name(),
+                "units", Long.toString(amount.minorUnits())));
+    }
+
+    public static Journal.CanonicalRequest releaseRequest(UUID hold) {
+        return request(Map.of("hold", hold.toString()));
+    }
+
+    public static Journal.CanonicalRequest captureRequest(UUID hold, UUID target) {
+        return request(Map.of("hold", hold.toString(), "target", target.toString()));
+    }
+
+    public static JournalEngine.Registration reserve(Authority authority) {
+        return new JournalEngine.Registration(1, (intent, reads) -> {
+            UUID account;
+            Money amount;
+            try {
+                var fields = intent.request().fields();
+                account = parseId(fields.get("account"));
+                amount = parseAmount(fields.get("currency"), fields.get("units"));
+                if (!reserveRequest(account, amount).equals(intent.request())) return reject("HOLD_REQUEST");
+            } catch (IllegalArgumentException malformed) {
+                return reject("HOLD_REQUEST");
+            }
+            if (!authority.allows(intent, account, null, reads)) return reject("HOLD_ACCESS");
+            if (!Settlement.openBank(reads, account, amount.currency())) return reject("HOLD_ACCOUNT");
+            if (available(reads, account, amount.currency()) < amount.minorUnits()) return reject("INSUFFICIENT_FUNDS");
+            var hold = new Hold(intent.operationId().value(), account, amount, State.ACTIVE);
+            return commit(hold, List.of(), tx -> tx.execute("""
+                    INSERT INTO ledger_holds(hold_id,account_id,currency,minor_units,actor,state)
+                    VALUES(?,?,?,?,?,'ACTIVE')
+                    """, List.of(hold.id().toString(), account.toString(), amount.currency().name(),
+                    Long.toString(amount.minorUnits()), Journal.actorKey(intent.actor()))));
+        });
+    }
+
+    public static JournalEngine.Registration release(Authority authority) {
+        return transition(authority, State.RELEASED);
+    }
+
+    public static JournalEngine.Registration capture(Authority authority) {
+        return transition(authority, State.CAPTURED);
+    }
+
+    private static JournalEngine.Registration transition(Authority authority, State state) {
+        return new JournalEngine.Registration(1, (intent, reads) -> {
+            UUID id;
+            UUID target;
+            try {
+                var fields = intent.request().fields();
+                id = parseId(fields.get("hold"));
+                target = state == State.CAPTURED ? parseId(fields.get("target")) : null;
+                var canonical = target == null ? releaseRequest(id) : captureRequest(id, target);
+                if (!canonical.equals(intent.request())) return reject("HOLD_REQUEST");
+            } catch (IllegalArgumentException malformed) {
+                return reject("HOLD_REQUEST");
+            }
+            var hold = find(reads, intent.actor(), id).orElse(null);
+            if (hold == null || !authority.allows(intent, hold.account(), target, reads)) return reject("HOLD_ACCESS");
+            if (hold.state() != State.ACTIVE) return reject("HOLD_" + hold.state().name());
+
+            var next = new Hold(id, hold.account(), hold.amount(), state);
+            if (target == null) return commit(next, List.of(), tx -> update(tx, next));
+            if (target.equals(hold.account())) return reject("HOLD_DESTINATION");
+            var amount = hold.amount();
+            var legs = List.of(new PostingBatch.Leg(hold.account(), ACCOUNT, amount.currency(), amount.negate()),
+                    new PostingBatch.Leg(target, ACCOUNT, amount.currency(), amount));
+            var settlement = Settlement.prepare(reads, legs, PostingBatch.Authority.TRANSFER, hold);
+            if (!(settlement instanceof JournalEngine.Commit postings)) return settlement;
+            return commit(next, postings.records(), tx -> {
+                postings.projections().apply(tx);
+                update(tx, next);
+            });
+        });
+    }
+
+    public static long available(JournalEngine.ReadView reads, UUID account, EconomyCurrency currency) {
+        return Math.subtractExact(Settlement.posted(reads, account, currency), reserved(reads, account, currency));
+    }
+
+    public static long reserved(JournalEngine.ReadView reads, UUID account, EconomyCurrency currency) {
+        var row = reads.query("""
+                SELECT COALESCE(SUM(minor_units),0) AS held FROM ledger_holds
+                WHERE account_id=? AND currency=? AND state='ACTIVE'
+                """, List.of(account.toString(), currency.name()), 1).getFirst();
+        return Long.parseLong(row.get("held"));
+    }
+
+    public static boolean hasActiveClaim(JournalEngine.ReadView reads, UUID account) {
+        return !reads.query("""
+                SELECT hold_id FROM ledger_holds WHERE account_id=? AND state='ACTIVE' LIMIT 1
+                """, List.of(account.toString()), 1).isEmpty();
+    }
+
+    public static Optional<Hold> find(JournalEngine.ReadView reads, ActorId actor, UUID id) {
+        return reads.query("SELECT * FROM ledger_holds WHERE actor=? AND hold_id=?",
+                List.of(Journal.actorKey(actor), id.toString()), 1).stream().map(Holds::read).findFirst();
+    }
+
+    public static List<Hold> active(JournalEngine.ReadView reads, ActorId actor, UUID after, int limit) {
+        if (limit < 1 || limit > 64) throw new IllegalArgumentException("Hold page size");
+        return reads.query("""
+                SELECT * FROM ledger_holds WHERE actor=? AND state='ACTIVE' AND hold_id>?
+                ORDER BY hold_id LIMIT ?
+                """, List.of(Journal.actorKey(actor), after == null ? "" : after.toString(),
+                Integer.toString(limit)), limit).stream().map(Holds::read).toList();
+    }
+
+    public static void validateFact(String payload) {
+        var fields = payload.split("\\|", -1);
+        if (fields.length != 5) throw new IllegalArgumentException("Hold fact fields");
+        parseId(fields[0]);
+        parseId(fields[1]);
+        parseAmount(fields[2], fields[3]);
+        State.valueOf(fields[4]);
+    }
+
+    private static Hold read(Map<String, String> row) {
+        return new Hold(parseId(row.get("hold_id")), parseId(row.get("account_id")),
+                parseAmount(row.get("currency"), row.get("minor_units")), State.valueOf(row.get("state")));
+    }
+
+    private static UUID parseId(String value) {
+        if (value == null) throw new IllegalArgumentException("Missing hold identity");
+        var id = UUID.fromString(value);
+        if (!id.toString().equals(value)) throw new IllegalArgumentException("Noncanonical hold identity");
+        return id;
+    }
+
+    private static Money parseAmount(String currency, String units) {
+        if (currency == null || units == null) throw new IllegalArgumentException("Missing hold amount");
+        var amount = new Money(EconomyCurrency.valueOf(currency), Long.parseLong(units));
+        if (amount.minorUnits() <= 0 || amount.minorUnits() % amount.currency().minorUnitsPerMajor() != 0) {
+            throw new IllegalArgumentException("Invalid hold amount");
+        }
+        return amount;
+    }
+
+    private static Journal.CanonicalRequest request(Map<String, String> fields) {
+        return new Journal.CanonicalRequest(1, fields);
+    }
+
+    private static void update(FoundationStore.Transaction tx, Hold hold) {
+        int updated = tx.execute("UPDATE ledger_holds SET state=? WHERE hold_id=? AND state='ACTIVE'",
+                List.of(hold.state().name(), hold.id().toString()));
+        if (updated != 1) throw new IllegalStateException("Active hold changed during settlement");
+    }
+
+    private static JournalEngine.Commit commit(Hold hold, List<Journal.Record> postings,
+                                                JournalEngine.Projection projection) {
+        var records = new ArrayList<>(postings);
+        records.add(new Journal.Record(FACT, 1, hold.id() + "|" + hold.account() + "|"
+                + hold.amount().currency().name() + "|" + hold.amount().minorUnits() + "|" + hold.state().name()));
+        return new JournalEngine.Commit(records, new Journal.Result(1, "HOLD_" + hold.state().name(), ""), projection);
+    }
+
+    private static JournalEngine.Reject reject(String code) {
+        return new JournalEngine.Reject(new Journal.Result(1, code, ""));
+    }
+}

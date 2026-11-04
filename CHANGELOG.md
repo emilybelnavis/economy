@@ -5,6 +5,12 @@ Project changes are recorded in reverse chronological order, with the most recen
 
 
 
+## 2026-11-03 — A4 ledger and transactions
+
+- Added balanced settlement, durable holds, quoted FX, funded closure, and atomic denomination rebase.
+- Added payment, retry, balance, history, and operator reconciliation commands. History retains original amounts and pairs entries by transaction ID.
+- Added a shared ledger API for trusted server integrations. Schema 10 adds indexed account history. Existing worlds require a complete-world backup before upgrading.
+
 ## 2026-11-03 — A1 foundation acceptance
 
 - Added restart-only worker, queue, callback, SQLite lock and drain settings. Ongoing UTC catch-up uses bounded chronological work and gates affected writes while behind.

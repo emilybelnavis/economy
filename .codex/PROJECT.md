@@ -1,6 +1,6 @@
 # Current project state
 
-**A1 foundation is complete and verified.** SQLite schema V6 (minimum V1); the initial reset is complete. A2-01 through A2-03-03 are complete and verified. A3-01 through A3-05 are verified. Later packages await explicit invocation.
+**A1 foundation is complete and verified.** SQLite schema V10 (minimum V1); the initial reset is complete. A2-01 through A2-03-03 are complete and verified. A3-01 through A3-05 are verified. A4-01 through A4-06 are verified. Later packages await explicit invocation.
 
 | Package | Prerequisite | Status |
 | --- | --- | --- |
@@ -17,7 +17,7 @@
 | [A2-03-02](A2-03-02.md) FX diagnostics | A2-03-01 | Verified |
 | [A2-03-03](A2-03-03.md) FX foundation acceptance | A2-03-02 | Verified |
 | [A2-04](A2-04.md) versioned quotes and pair history | A2-03-03 | Verified |
-| [A2-05](A2-05.md) world denomination and change protocol | A2-04 | Implemented, chooser acceptance pending |
+| [A2-05](A2-05.md) world denomination and change protocol | A2-04 | Accepted |
 | [A3-01](A3-01.md) parties and authorization | A1 | Verified |
 | [A3-02](A3-02.md) account catalog and products | A3-01, A2 registry and denomination read | Verified |
 | [A3-03](A3-03.md) account lifecycle and limits | A3-02 | Verified |

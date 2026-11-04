@@ -128,6 +128,10 @@ public final class SqliteStorage implements FoundationStore {
             if (initializingVersion < SchemaMigrations.CURRENT)
                 SchemaMigrations.apply(connection, initializingIdentity, initializingVersion, SchemaMigrations.CURRENT, SchemaMigrations.REGISTRY);
             JournalSchema.validate(connection); RecoverySchema.validate(connection); FxSchema.validate(connection); AccountSchema.validate(connection);
+            LedgerProjection.validateSchema(connection);
+            HoldSchema.validate(connection);
+            FxSettlementSchema.validate(connection);
+            LedgerHistorySchema.validate(connection);
             if (!Files.exists(identityFile)) StorageFiles.writeNew(identityFile, encodeIdentity(initializingIdentity));
             if (Files.exists(pendingFile)) { Files.delete(pendingFile); StorageFiles.forceDirectory(databasePath.getParent()); }
             snapshot = new Snapshot(new WorldId(initializingIdentity), SchemaMigrations.CURRENT, scalar("PRAGMA journal_mode"),
@@ -279,6 +283,10 @@ public final class SqliteStorage implements FoundationStore {
                     || !snapshot.worldId().value().equals(readDatabaseIdentity(SchemaMigrations.CURRENT)))
                 throw identity("Storage changed during recovery");
             validateHistory(SchemaMigrations.CURRENT); checkIntegrity(); JournalSchema.validate(connection); RecoverySchema.validate(connection); FxSchema.validate(connection); AccountSchema.validate(connection);
+            LedgerProjection.validateSchema(connection);
+            HoldSchema.validate(connection);
+            FxSettlementSchema.validate(connection);
+            LedgerHistorySchema.validate(connection);
             var validation = new JournalCompatibility(connection, catalog, snapshot.worldId().value().toString());
             while (!validation.step()) { /* Recovery holds the sole worker; reads are paged and interruptible. */ }
             configure();

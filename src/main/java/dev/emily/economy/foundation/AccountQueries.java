@@ -29,8 +29,6 @@ public final class AccountQueries {
         public Page { accounts = List.copyOf(accounts); }
     }
 
-    public enum FundsStatus { LEDGER_UNAVAILABLE }
-
     public static CompletionStage<Optional<AccountIdentity>> inspectAccount(
             CommandSourceStack source, Function<MinecraftServer, ServerServices> sessions, PartyRef target, AccountId id) {
         return inspect(source, sessions, target, (services, grant) ->
