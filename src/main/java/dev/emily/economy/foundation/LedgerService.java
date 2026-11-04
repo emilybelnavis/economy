@@ -52,7 +52,8 @@ public final class LedgerService {
             var owner = new PartyRef(world, new PartyRef.Player(actor));
             var account = selected == null ? AccountCatalog.primary(tx::query, owner).orElse(null)
                     : AccountCatalog.find(tx::query, owner, selected).orElse(null);
-            var terminal = TerminalPolicy.find(tx::query, world, anchor, actor, true).orElse(null);
+            var terminal = TerminalPolicy.find(tx::query, world, anchor, actor, true)
+                    .map(value -> TerminalPolicy.effective(value, terminalCatalog())).orElse(null);
             return new BankingContext(world, account, terminal, depositFx(tx::query),
                     RegisterSales.price(tx::query, world, anchor).orElse(null));
         }));
@@ -298,9 +299,7 @@ public final class LedgerService {
     public JournalService terminalPolicy(TerminalPolicy.Action action, JournalEngine.AccessPolicy admission,
             TerminalPolicy.Authority authority, TerminalPolicy.Operators operators,
             JournalService.Publisher publisher) {
-        var catalog = dev.emily.economy.cash.CashCatalog.all().stream().collect(
-                java.util.stream.Collectors.toUnmodifiableMap(value -> "economy:" + value.id(),
-                        value -> new TerminalPolicy.Denomination(value.currency(), value.bill())));
+        var catalog = terminalCatalog();
         return trustedJournal(action.kind(), admission,
                 TerminalPolicy.registration(action, services.partyWorld(), catalog, authority, operators), publisher);
     }
@@ -309,7 +308,13 @@ public final class LedgerService {
             TerminalPolicy.Operators operators, TerminalPolicy.Anchor anchor) {
         return services.storage(actor, () -> store.transaction(tx ->
                 TerminalPolicy.find(tx::query, store.snapshot().worldId(), anchor, actor,
-                        operators.allows(actor, tx::query))));
+                        operators.allows(actor, tx::query)).map(value -> TerminalPolicy.effective(value, terminalCatalog()))));
+    }
+
+    private static Map<String, TerminalPolicy.Denomination> terminalCatalog() {
+        return dev.emily.economy.cash.CashCatalog.all().stream().collect(
+                java.util.stream.Collectors.toUnmodifiableMap(value -> "economy:" + value.id(),
+                        value -> new TerminalPolicy.Denomination(value.currency(), value.bill())));
     }
 
     private static Map<String, Deposits.Denomination> depositCatalog() {

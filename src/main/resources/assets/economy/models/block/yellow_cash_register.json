@@ -1,0 +1,6 @@
+{
+  "parent": "economy:block/cash_register",
+  "textures": {
+    "trim": "economy:block/terminal_trim_yellow"
+  }
+}

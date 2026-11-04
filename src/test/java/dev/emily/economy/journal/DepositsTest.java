@@ -27,7 +27,9 @@ class DepositsTest {
     private final Map<String, Deposits.Denomination> catalog = Map.of(
             "economy:cad_coin_25", new Deposits.Denomination(CAD, 25, false),
             "economy:eur_coin_1", new Deposits.Denomination(EUR, 1, false),
-            "economy:cad_bill_5", new Deposits.Denomination(CAD, 500, true));
+            "economy:cad_bill_5", new Deposits.Denomination(CAD, 500, true),
+            "economy:cad_bill_20", new Deposits.Denomination(CAD, 2000, true),
+            "economy:cad_bill_100_horizontal", new Deposits.Denomination(CAD, 10000, true));
 
     @Test void twentyFourSlotsRoundByCurrencyAndReplayOnlyOneSettlement() throws Exception {
         var store = open();
@@ -178,6 +180,127 @@ class DepositsTest {
         } finally { store.close(); }
     }
 
+    @Test void foreignWorldCashCannotBeReclassifiedAsNewCreativeCash() throws Exception {
+        var store = open();
+        try {
+            seed(store);
+            var foreign = new Deposits.Slot(0, new CashIssuance.Claim(new WorldId(UUID.randomUUID()),
+                    cad, "economy:cad_coin_25", 4), "foreign-marked-stack");
+            assertThrows(IllegalArgumentException.class, () -> preview(store, List.of(foreign)));
+            assertEquals(0L, balance(store));
+            assertEquals(64, lot(store, cad).remaining());
+        } finally { store.close(); }
+    }
+
+    @Test void creativeCashCreditsOnceWithoutAnExistingIssuedLot() throws Exception {
+        var store = open();
+        try {
+            seed(store);
+            var unmarked = new Deposits.Slot(0, new CashIssuance.Claim(store.snapshot().worldId(),
+                    UUID.randomUUID(), "economy:cad_coin_25", 4), "unmarked-creative-stack", true);
+            var preview = preview(store, List.of(unmarked));
+            assertEquals(100L, preview.credit().minorUnits());
+            var id = reserve(store, preview);
+            assertEquals(Status.COMMITTED, change(store, Deposits.Action.SAVED, id, "saved", "confirm").status());
+            var commit = intent(Deposits.Action.COMMIT, Deposits.request(id, "saved", "confirm"));
+            var outcome = engine(store, Deposits.Action.COMMIT).submit(commit);
+            assertEquals(Status.COMMITTED, outcome.status());
+            assertEquals(outcome, engine(store, Deposits.Action.COMMIT).submit(commit));
+            assertEquals(100L, balance(store));
+            assertEquals(64, lot(store, cad).remaining());
+            assertTrue(store.transaction(tx -> CashIssuance.find(tx::query, store.snapshot().worldId(),
+                    unmarked.claim().lot())).isEmpty());
+            assertTrue(store.transaction(tx -> DepositReturns.list(tx::query, owner, id)).isEmpty());
+        } finally { store.close(); }
+    }
+
+    @Test void freshCreativeTwentyDollarBillPreviewsAndCreditsWithoutIssuanceRecord() throws Exception {
+        var store = open();
+        try {
+            seed(store);
+            var creative = new Deposits.Slot(0, new CashIssuance.Claim(store.snapshot().worldId(),
+                    UUID.randomUUID(), "economy:cad_bill_20", 1), "fresh-creative-cad20", true);
+            var preview = preview(store, List.of(creative));
+            assertEquals(new Money(CAD, 2000), preview.credit());
+            assertEquals(List.of(creative), preview.payable());
+            assertTrue(preview.returned().isEmpty());
+            var id = reserve(store, preview);
+            assertEquals(Status.COMMITTED, change(store, Deposits.Action.SAVED, id, "saved", "confirm").status());
+            var commit = intent(Deposits.Action.COMMIT, Deposits.request(id, "saved", "confirm"));
+            var outcome = engine(store, Deposits.Action.COMMIT).submit(commit);
+            assertEquals(Status.COMMITTED, outcome.status());
+            assertEquals(outcome, engine(store, Deposits.Action.COMMIT).submit(commit));
+            assertEquals(2000, balance(store));
+            assertEquals(64, lot(store, cad).remaining());
+            assertTrue(store.transaction(tx -> CashIssuance.find(tx::query, store.snapshot().worldId(), creative.claim().lot())).isEmpty());
+        } finally { store.close(); }
+    }
+
+    @Test void creativeHorizontalBillReviewDistinguishesDisabledUnacceptedAndEnabledTerminal() throws Exception {
+        var store = open();
+        try {
+            seed(store);
+            var creative = new Deposits.Slot(0, new CashIssuance.Claim(store.snapshot().worldId(),
+                    UUID.randomUUID(), "economy:cad_bill_100_horizontal", 64), "fresh-creative-cad100-horizontal", true);
+            store.transaction(tx -> tx.execute("UPDATE terminal_settings SET terminal_kind='ATM',mode='DISABLED',currencies='',denominations=''", List.of()));
+            var disabled = assertThrows(IllegalArgumentException.class, () -> preview(store, List.of(creative)));
+            assertEquals("DEPOSIT_MODE", disabled.getMessage());
+            store.transaction(tx -> tx.execute("UPDATE terminal_settings SET mode='BOTH',currencies='CAD',denominations='economy:cad_bill_20'", List.of()));
+            var unaccepted = assertThrows(IllegalArgumentException.class, () -> preview(store, List.of(creative)));
+            assertEquals("DEPOSIT_DENOMINATION", unaccepted.getMessage());
+            store.transaction(tx -> tx.execute("UPDATE terminal_settings SET denominations='economy:cad_bill_100_horizontal'", List.of()));
+            var preview = preview(store, List.of(creative));
+            assertEquals(new Money(CAD, 640000), preview.credit());
+            assertEquals(List.of(creative), preview.payable());
+            var id = reserve(store, preview);
+            assertEquals(Status.COMMITTED, change(store, Deposits.Action.SAVED, id, "saved", "confirm").status());
+            assertEquals(Status.COMMITTED, change(store, Deposits.Action.COMMIT, id, "saved", "confirm").status());
+            assertEquals(640000, balance(store));
+            assertEquals(64, lot(store, cad).remaining());
+        } finally { store.close(); }
+    }
+
+    @Test void legacyDisabledTellerAcceptsCreativeBillsAndCoinsWithoutChangingItsSavedPolicy() throws Exception {
+        var store = open();
+        try {
+            seed(store);
+            store.transaction(tx -> tx.execute("UPDATE terminal_settings SET mode='DISABLED',currencies='',denominations=''", List.of()));
+            var bill = new Deposits.Slot(0, new CashIssuance.Claim(store.snapshot().worldId(), UUID.randomUUID(),
+                    "economy:cad_bill_20", 1), "creative-bill", true);
+            var coin = new Deposits.Slot(1, new CashIssuance.Claim(store.snapshot().worldId(), UUID.randomUUID(),
+                    "economy:cad_coin_25", 4), "creative-coins", true);
+            var preview = preview(store, List.of(bill, coin));
+            assertEquals(new Money(CAD, 2100), preview.credit());
+            var id = reserve(store, preview);
+            assertEquals(Status.COMMITTED, change(store, Deposits.Action.SAVED, id, "saved", "confirm").status());
+            assertEquals(Status.COMMITTED, change(store, Deposits.Action.COMMIT, id, "saved", "confirm").status());
+            assertEquals(2100, balance(store));
+            assertEquals("DISABLED", store.transaction(tx -> tx.query("SELECT mode FROM terminal_settings", List.of(), 1)).getFirst().get("mode"));
+        } finally { store.close(); }
+    }
+
+    @Test void mixedCreativeAndIssuedCashCreditsBothButRedeemsOnlyIssuedQuantity() throws Exception {
+        var store = open();
+        try {
+            seed(store);
+            var marked = slot(store, 0, cad, 4);
+            var unmarked = new Deposits.Slot(1, new CashIssuance.Claim(store.snapshot().worldId(),
+                    UUID.randomUUID(), "economy:cad_coin_25", 4), "unmarked-command-stack", true);
+            var preview = preview(store, List.of(marked, unmarked));
+            assertEquals(200L, preview.credit().minorUnits());
+            var id = reserve(store, preview);
+            change(store, Deposits.Action.SAVED, id, "saved", "confirm");
+            var commit = intent(Deposits.Action.COMMIT, Deposits.request(id, "saved", "confirm"));
+            var outcome = engine(store, Deposits.Action.COMMIT).submit(commit);
+            assertEquals(Status.COMMITTED, outcome.status());
+            assertEquals(outcome, engine(store, Deposits.Action.COMMIT).submit(commit));
+            assertEquals(200L, balance(store));
+            assertEquals(60, lot(store, cad).remaining());
+            assertTrue(store.transaction(tx -> CashIssuance.find(tx::query, store.snapshot().worldId(),
+                    unmarked.claim().lot())).isEmpty());
+        } finally { store.close(); }
+    }
+
     @Test void returnProjectionFailureRollsBackCreditAndRedemption() throws Exception {
         var store = open();
         try {
@@ -293,14 +416,14 @@ class DepositsTest {
         });
         Map<String, TerminalPolicy.Denomination> terminalCatalog = Map.of(
                 "economy:cad_coin_25", new TerminalPolicy.Denomination(CAD, false),
-                "economy:eur_coin_1", new TerminalPolicy.Denomination(EUR, false));
+                "economy:eur_coin_1", new TerminalPolicy.Denomination(EUR, false),
+                "economy:cad_bill_20", new TerminalPolicy.Denomination(CAD, true));
         for (var action : List.of(TerminalPolicy.Action.PLACE, TerminalPolicy.Action.CONFIGURE)) {
             var registration = TerminalPolicy.registration(action, store.snapshot().worldId(), terminalCatalog,
                     (a, intent, current, reads) -> true, (actor, reads) -> false);
             var request = action == TerminalPolicy.Action.PLACE
                     ? TerminalPolicy.placeRequest(anchor, generation, owner, TerminalPolicy.Kind.TELLER, null, 0)
-                    : TerminalPolicy.configureRequest(anchor, generation, 1, new TerminalPolicy.Settings(
-                            TerminalPolicy.Mode.BOTH, Set.of(CAD, EUR), terminalCatalog.keySet()));
+                    : TerminalPolicy.configureRequest(anchor, generation, 1, TerminalPolicy.defaultSettings(TerminalPolicy.Kind.TELLER, terminalCatalog));
             var engine = new JournalEngine(store, (actor, kind) -> true, Map.of(action.kind(), registration));
             assertEquals(Status.COMMITTED, engine.submit(new Intent(new OperationId(UUID.randomUUID()),
                     new RequestId(UUID.randomUUID()), owner, action.kind(), request, null, null)).status());

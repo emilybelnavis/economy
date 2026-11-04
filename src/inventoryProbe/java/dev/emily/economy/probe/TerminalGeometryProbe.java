@@ -90,7 +90,7 @@ public final class TerminalGeometryProbe {
                         require(error == null && found.isPresent(), "placement journal snapshot");
                         var snapshot = found.orElseThrow();
                         require(snapshot.generation().equals(generation) && snapshot.active(), "physical generation journal binding");
-                        require(snapshot.settings().mode() == TerminalPolicy.Mode.DISABLED, "placement disabled by default");
+                        require(snapshot.kind() == TerminalPolicy.Kind.REGISTER && snapshot.settings().equals(TerminalPolicy.Settings.disabled()), "register placement keeps cash services disabled");
                         var old = generation;
                         player.gameMode.destroyBlock(ANCHOR);
                         place(TerminalCatalog.get("register"), Direction.NORTH);

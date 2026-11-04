@@ -3,6 +3,7 @@ package dev.emily.economy.probe;
 import com.mojang.authlib.GameProfile;
 import dev.emily.economy.api.Identifiers.WorldId;
 import dev.emily.economy.cash.*;
+import dev.emily.economy.banking.BankingController;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,7 +51,35 @@ public final class DepositInventoryProbe {
         try { DepositInventory.returnOnce(restored, deposit, 1, UUID.randomUUID(), 1); }
         catch (IllegalStateException expected) { consumedDenied = true; }
         require(consumedDenied, "settled originals cannot be returned again");
-        System.out.println("DEPOSIT_INVENTORY_PASS 24 slots original custody partial capacity saved replay without duplication");
+        // Exercise the actual Creative item boundary, rather than supplying a synthetic unmarked journal Slot.
+        var creativeInputs = new SimpleContainer(24);
+        var creativeDenomination = CashCatalog.all().stream().filter(item -> item.id().equals("cad_bill_100_horizontal")).findFirst().orElseThrow();
+        var creativeCash = new ItemStack(creativeDenomination.item().get(), 64);
+        require(!creativeCash.has(CashStackIdentity.CASH_LOT.get()), "Creative catalog cash starts unmarked");
+        require(BankingController.canInput(restored, creativeCash), "Creative cash passes deposit input admission");
+        creativeInputs.setItem(0, creativeCash);
+        var creativeOriginals = DepositInventory.snapshot(restored, creativeInputs, world);
+        require(creativeOriginals.getFirst().unmarked(), "actual Creative stack selects mint path");
+        require(creativeOriginals.equals(DepositInventory.snapshot(restored, creativeInputs, world)), "Creative preview identity is stable for confirmation");
+        var creativeDeposit = UUID.randomUUID();
+        DepositInventory.reserve(restored, creativeInputs, world, creativeDeposit, creativeOriginals);
+        require(creativeInputs.isEmpty(), "Creative originals leave deposit slots once reserved");
+        storage.save(restored);
+        var creativeRestored = new ServerPlayer(server, server.overworld(), profile, ClientInformation.createDefault());
+        require(storage.load(creativeRestored).isPresent(), "Creative originals survive real player save/load");
+        DepositInventory.consumeCommitted(creativeRestored, creativeDeposit, creativeOriginals);
+        DepositInventory.consumeCommitted(creativeRestored, creativeDeposit, creativeOriginals);
+        boolean creativeReturnDenied = false;
+        try { DepositInventory.returnOnce(creativeRestored, creativeDeposit, 0, UUID.randomUUID(), 64); }
+        catch (IllegalStateException expected) { creativeReturnDenied = true; }
+        require(creativeReturnDenied, "committed Creative originals cannot be returned or consumed twice");
+        DepositInventory.clearDelivered(creativeRestored, creativeDeposit);
+        creativeInputs.setItem(0, CashStackIdentity.marked(creativeCash, new WorldId(UUID.randomUUID()), UUID.randomUUID()));
+        boolean foreignDenied = false;
+        try { DepositInventory.snapshot(creativeRestored, creativeInputs, world); }
+        catch (IllegalArgumentException expected) { foreignDenied = true; }
+        require(foreignDenied, "foreign marked cash cannot enter Creative mint path");
+        System.out.println("DEPOSIT_INVENTORY_PASS 24 slots original custody partial capacity saved replay Creative mint boundary without duplication");
     }
     private static void require(boolean value, String message) {
         if (!value) throw new IllegalStateException("Deposit inventory fixture failed: " + message);

@@ -1,3 +1,3 @@
 {
-  "parent": "economy:block/gray_register"
+  "parent": "economy:item/gray_cash_register"
 }

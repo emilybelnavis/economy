@@ -75,9 +75,11 @@ public final class BankingIntegratedClient {
                 + " proof=" + proofComplete + " screen=" + (minecraft.screen == null ? "none" : minecraft.screen.getClass().getSimpleName()));
         if (!(minecraft.screen instanceof BankingScreen) || !(minecraft.player.containerMenu instanceof BankingMenu menu)
                 || menu.worldSetup() || menu.busy() || ticks % 8 != 0) return;
-        if (step == 0 && menu.revision() > 0) { send(menu, "setup", "CAD"); step++; }
-        else if (step == 1 && menu.revision() > revision) { send(menu, "accounts", ""); step++; }
-        else if (step == 2 && menu.page().equals("accounts") && menu.revision() > revision) { send(menu, "history", ""); step++; }
+        if (step == 0 && menu.revision() > 0 && menu.page().equals("home")) { send(menu, "accounts", ""); step++; }
+        else if (step == 1 && menu.page().equals("accounts") && menu.revision() > revision
+                && menu.choices().stream().anyMatch(choice -> choice.action().equals("setup"))) { send(menu, "setup", ""); step++; }
+        else if (step == 2 && menu.page().equals("accounts") && menu.revision() > revision
+                && menu.choices().stream().anyMatch(choice -> choice.action().equals("account_select"))) { send(menu, "history", ""); step++; }
         else if (step == 3 && menu.page().equals("history") && menu.revision() > revision) { send(menu, "fx", ""); step++; }
         else if (step == 4 && menu.page().equals("fx") && menu.revision() > revision && !captured) {
             captured = true;
@@ -127,7 +129,7 @@ public final class BankingIntegratedClient {
             }
         } else if (step == 11 && menu.status().startsWith("Preview ready") && menu.revision() > revision) {
             send(menu, "deposit_confirm", ""); step = 12;
-        } else if (step == 12 && menu.status().equals("Deposit saved") && menu.revision() > revision) {
+        } else if (step == 12 && menu.status().equals("Thank you for using our banking service.") && menu.revision() > revision) {
             if (!proofRequested) {
                 proofRequested = true; var uuid = minecraft.player.getUUID();
                 server.execute(() -> verifyHostRoundtrip(server, uuid));

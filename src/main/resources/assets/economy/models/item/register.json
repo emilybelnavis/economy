@@ -1,3 +1,3 @@
 {
-  "parent": "economy:block/register"
+  "parent": "economy:item/cash_register"
 }

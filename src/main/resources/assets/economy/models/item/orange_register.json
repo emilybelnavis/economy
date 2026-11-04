@@ -1,3 +1,3 @@
 {
-  "parent": "economy:block/orange_register"
+  "parent": "economy:item/orange_cash_register"
 }

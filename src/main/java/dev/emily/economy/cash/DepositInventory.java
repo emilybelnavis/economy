@@ -1,6 +1,7 @@
 package dev.emily.economy.cash;
 
 import dev.emily.economy.api.Identifiers.WorldId;
+import dev.emily.economy.journal.CashIssuance;
 import dev.emily.economy.journal.Deposits;
 import java.io.*;
 import java.util.*;
@@ -23,11 +24,20 @@ public final class DepositInventory {
         for (int index = 0; index < 24; index++) {
             var stack = inputs.getItem(index);
             if (stack.isEmpty()) continue;
-            var claim = CashStackIdentity.claim(stack, world).orElseThrow(() -> new IllegalArgumentException("DEPOSIT_UNMARKED"));
             var encoded = encode(player, stack);
+            boolean unmarked = !stack.has(CashStackIdentity.CASH_LOT.get());
+            CashIssuance.Claim claim;
+            if (unmarked) {
+                var denomination = CashCatalog.find(stack).orElseThrow(() -> new IllegalArgumentException("DEPOSIT_DENOMINATION"));
+                var identity = UUID.nameUUIDFromBytes(("economy:unmarked-cash:" + world.value() + ":"
+                        + player.getUUID() + ":" + index + ":" + encoded).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                claim = new CashIssuance.Claim(world, identity, "economy:" + denomination.id(), stack.getCount());
+            } else {
+                claim = CashStackIdentity.claim(stack, world).orElseThrow(() -> new IllegalArgumentException("DEPOSIT_WORLD"));
+            }
             bytes = Math.addExact(bytes, encoded.length());
             if (bytes > Deposits.MAX_COMPONENT_BYTES) throw new IllegalArgumentException("DEPOSIT_COMPONENT_BUDGET");
-            slots.add(new Deposits.Slot(index, claim, encoded));
+            slots.add(new Deposits.Slot(index, claim, encoded, unmarked));
         }
         if (slots.isEmpty()) throw new IllegalArgumentException("DEPOSIT_SLOT_COUNT");
         return List.copyOf(slots);

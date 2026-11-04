@@ -2,6 +2,7 @@ package dev.emily.economy.journal;
 
 import dev.emily.economy.account.AccountLifecycle;
 import dev.emily.economy.api.Identifiers.*;
+import dev.emily.economy.api.AccountIdentity;
 import dev.emily.economy.api.Money;
 import dev.emily.economy.api.PartyRef;
 import dev.emily.economy.fx.FxQuotes;
@@ -59,7 +60,7 @@ class FundedClosureTest {
             var registration = FundedClosure.registration(owner, request,
                     (id, actor, world, reads) -> quotes.requireFresh(id, actor, world, FxService.latest(reads),
                             quote.pricingVersion(), now),
-                    (reads, account) -> Optional.of(new FundedClosure.Claims(false, false)),
+                    BankingClosureClaims::read,
                     (intent, reads) -> true);
             var engine = new JournalEngine(store, (actor, kind) -> true, Map.of(AccountLifecycle.CLOSE, registration));
             var fields = new HashMap<>(request.request().fields());
@@ -81,6 +82,33 @@ class FundedClosureTest {
         } finally {
             store.close();
         }
+    }
+
+    @Test void realPendingCashAndRefundObligationsBlockClosureAndRemainOwnerScoped() throws Exception {
+        var store = new SqliteStorage();
+        try {
+            store.initialize(world.toRealPath());
+            var owner = new PartyRef(store.snapshot().worldId(), new PartyRef.Player(ACTOR));
+            var id = new AccountId(UUID.randomUUID());
+            var account = new AccountIdentity(id, owner, AccountIdentity.Purpose.BANK, USD, AccountIdentity.Status.OPEN, 1, false);
+            store.transaction(tx -> {
+                assertFalse(BankingClosureClaims.read(tx::query, account).orElseThrow().unresolvedObligation());
+                tx.execute("INSERT INTO withdrawals VALUES(? ,?,'QUARANTINED','preview','','',1)",
+                        List.of(UUID.randomUUID().toString(), Journal.actorKey(ACTOR)));
+                assertTrue(BankingClosureClaims.read(tx::query, account).orElseThrow().unresolvedObligation());
+                tx.execute("UPDATE withdrawals SET state='CANCELLED'", List.of());
+                assertFalse(BankingClosureClaims.read(tx::query, account).orElseThrow().unresolvedObligation());
+                tx.execute("INSERT INTO withdrawals VALUES(? ,?,'QUARANTINED','preview','','',1)",
+                        List.of(UUID.randomUUID().toString(), Journal.actorKey(new PlayerId(UUID.randomUUID()))));
+                assertFalse(BankingClosureClaims.read(tx::query, account).orElseThrow().unresolvedObligation());
+                tx.execute("INSERT INTO payment_invoices(id,merchant,payer,source,target,currency,units,state) VALUES('invoice','merchant','payer',?,?,'USD',100,'CAPTURED')",
+                        List.of(UUID.randomUUID().toString(), id.value().toString()));
+                assertTrue(BankingClosureClaims.read(tx::query, account).orElseThrow().unresolvedObligation(), "captured refund still requires target account");
+                tx.execute("UPDATE payment_invoices SET state='REFUNDED'", List.of());
+                assertFalse(BankingClosureClaims.read(tx::query, account).orElseThrow().unresolvedObligation());
+                return null;
+            });
+        } finally { store.close(); }
     }
 
     private static Journal.Intent intent(Journal.Kind kind, Journal.CanonicalRequest request) {

@@ -1,0 +1,6 @@
+{
+  "parent": "economy:block/atm_upper",
+  "textures": {
+    "trim": "economy:block/terminal_trim_pink"
+  }
+}

@@ -19,6 +19,10 @@ public final class TerminalCatalog {
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, "economy");
     public record Entry(String id, TerminalPolicy.Kind kind, DeferredBlock<? extends Block> block, DeferredItem<? extends Item> item) {}
     private static final Map<String, Entry> ENTRIES = new LinkedHashMap<>();
+    public static final DeferredBlock<DecorativeFacingBlock> STOCK_TRADING_COMPUTER =
+            BLOCKS.register("stock_trading_computer", () -> new DecorativeFacingBlock(properties()));
+    public static final DeferredItem<BlockItem> STOCK_TRADING_COMPUTER_ITEM =
+            ITEMS.register("stock_trading_computer", () -> new BlockItem(STOCK_TRADING_COMPUTER.get(), new Item.Properties()));
     static {
         for (var kind : List.of(TerminalPolicy.Kind.ATM, TerminalPolicy.Kind.REGISTER)) {
             String base = kind.name().toLowerCase(Locale.ROOT);
@@ -33,7 +37,10 @@ public final class TerminalCatalog {
     static {
         TABS.register("terminals", () -> CreativeModeTab.builder().title(Component.translatable("itemGroup.economy.terminals"))
                 .icon(() -> new ItemStack(ENTRIES.get("atm").item().get()))
-                .displayItems((parameters, output) -> ENTRIES.values().forEach(e -> output.accept(e.item().get()))).build());
+                .displayItems((parameters, output) -> {
+                    ENTRIES.values().forEach(e -> output.accept(e.item().get()));
+                    output.accept(STOCK_TRADING_COMPUTER_ITEM.get());
+                }).build());
     }
     private TerminalCatalog() {}
     private static void register(String id, TerminalPolicy.Kind kind) {

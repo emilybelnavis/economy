@@ -71,16 +71,21 @@ public final class BankingAcceptanceProbe {
             case 3 -> {
                 if (!physicalReady(TELLER)) break;
                 BankingController.open(player, TELLER);
-                require(menu() != null && menu().valid(player), "normal physical menu open");
+                require(menu() != null && menu().valid(player) && menu().page().equals("home"), "normal physical menu opens Home");
                 next(server, 4);
             }
-            case 4 -> { if (act(server, "setup", "CAD")) next(server, 5); }
+            case 4 -> { if (act(server, "accounts", "")) next(server, 70); }
+            case 70 -> {
+                if (!snapshotReady() || !menu().page().equals("accounts")) break;
+                require(menu().choices().size() == 1 && menu().choices().getFirst().action().equals("setup"), "first account view offers only Open account");
+                if (act(server, "setup", "")) next(server, 5);
+            }
             case 5 -> {
                 if (!ready()) break; readContext(server);
                 if (context == null || context.account() == null) break;
                 seed(server, 10_000); next(server, 6);
             }
-            case 6 -> { if (funded && act(server, "configure", "BOTH;CAD;all")) next(server, 7); }
+            case 6 -> { if (funded && ready()) next(server, 7); }
             case 7 -> {
                 if (!snapshotReady()) break; readContext(server);
                 if (context == null || context.terminal() == null || context.terminal().settings().mode() != TerminalPolicy.Mode.BOTH) break;
@@ -89,7 +94,8 @@ public final class BankingAcceptanceProbe {
             }
             case 8 -> {
                 if (!snapshotReady()) break;
-                require(menu().page().equals("accounts") && !menu().lines().isEmpty(), "normal accounts snapshot");
+                require(menu().page().equals("accounts") && menu().choices().stream().anyMatch(choice -> choice.action().equals("account_select"))
+                        && menu().choices().stream().anyMatch(choice -> choice.action().equals("manage_accounts")), "normal accounts snapshot offers history and management");
                 if (act(server, "history", "")) next(server, 9);
             }
             case 9 -> { if (snapshotReady() && act(server, "fx", "")) next(server, 10); }
@@ -126,7 +132,7 @@ public final class BankingAcceptanceProbe {
                 if (act(server, "deposit_confirm", "")) next(server, 17);
             }
             case 17 -> {
-                if (!ready() || !menu().status().equals("Deposit saved")) break; readFunds(server);
+                if (!ready() || !menu().status().equals("Thank you for using our banking service.")) break; readFunds(server);
                 if (funds == null) break;
                 require(cashValue(player) == 0 && funds.funds().availableMinorUnits() == 10_000, "normal deposit restores original balance");
                 for (int index = 0; index < 24; index++) require(menu().depositInputs().getItem(index).isEmpty(), "consumed deposit inputs empty");
@@ -228,7 +234,11 @@ public final class BankingAcceptanceProbe {
                 player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(CashCatalog.cards().values().iterator().next().get()));
                 BankingController.openCard(player); next(server, 35);
             }
-            case 35 -> { if (act(server, "setup", "CAD")) next(server, 36); }
+            case 35 -> { if (act(server, "accounts", "")) next(server, 71); }
+            case 71 -> {
+                if (snapshotReady() && menu().page().equals("accounts") && menu().choices().stream().anyMatch(choice -> choice.action().equals("setup"))
+                        && act(server, "setup", "")) next(server, 36);
+            }
             case 36 -> {
                 if (!ready()) break; readContext(server);
                 if (context == null || context.account() == null) break;
@@ -253,7 +263,12 @@ public final class BankingAcceptanceProbe {
                 player.closeContainer(); player.setPos(TELLER.getX() + 3, TELLER.getY(), TELLER.getZ() - 2);
                 BankingController.open(player, TELLER); next(server, 60);
             }
-            case 60 -> { if (act(server, "account_open", "EUR")) next(server, 61); }
+            case 60 -> { if (act(server, "manage_accounts", "")) next(server, 72); }
+            case 72 -> {
+                if (!snapshotReady() || !menu().page().equals("manage")) break;
+                require(menu().choices().stream().anyMatch(choice -> choice.action().equals("account_open") && choice.value().equals("EUR")), "Manage account offers unopened EUR currency");
+                if (act(server, "account_open", "EUR")) next(server, 61);
+            }
             case 61 -> { if (snapshotReady() && act(server, "accounts", "")) next(server, 62); }
             case 62 -> {
                 if (!snapshotReady()) break; readEuroAccount(server);

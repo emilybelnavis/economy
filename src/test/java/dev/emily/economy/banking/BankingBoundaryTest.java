@@ -26,6 +26,51 @@ class BankingBoundaryTest {
                 () -> new BankingNetwork.Action(1, SESSION, -1, "accounts", ""));
     }
 
+    @Test void terminalModesExposeOnlyTheirOwnServerAuthorizedActions() {
+        assertTrue(BankingMenu.Access.ATM.allows("withdraw_confirm"));
+        assertTrue(BankingMenu.Access.ATM.allows("home"));
+        assertTrue(BankingMenu.Access.TELLER.allows("manage_accounts"));
+        assertTrue(BankingMenu.Access.CARD.allows("manage_accounts"));
+        assertFalse(BankingMenu.Access.REGISTER.allows("manage_accounts"));
+        assertFalse(BankingMenu.Access.WORLD_SETUP.allows("home"));
+        assertTrue(BankingMenu.Access.TELLER.allows("account_close_preview"));
+        assertTrue(BankingMenu.Access.TELLER.allows("account_close_confirm"));
+        assertFalse(BankingMenu.Access.ATM.allows("account_close_confirm"));
+        assertFalse(BankingMenu.Access.CARD.allows("account_close_confirm"));
+        assertFalse(BankingMenu.Access.REGISTER.allows("account_close_confirm"));
+        assertFalse(BankingMenu.Access.ATM.allows("shop"));
+        assertFalse(BankingMenu.Access.TELLER.allows("settings"));
+        assertTrue(BankingMenu.Access.REGISTER.allows("buy_confirm"));
+        assertFalse(BankingMenu.Access.REGISTER.allows("deposit"));
+        assertTrue(BankingMenu.Access.ADMIN.allows("configure"));
+        assertTrue(BankingMenu.Access.ADMIN.allows("banking"));
+        assertFalse(BankingMenu.Access.CARD.allows("configure"));
+        assertFalse(BankingMenu.Access.ADMIN.allows("withdraw"));
+        assertFalse(BankingMenu.Access.CARD.allows("deposit"));
+    }
+
+    @Test void placerCanConfigureWithoutOperatorPrivileges() {
+        UUID owner = UUID.randomUUID(), stranger = UUID.randomUUID();
+        assertTrue(BankingController.mayConfigure(owner, owner, false));
+        assertFalse(BankingController.mayConfigure(owner, stranger, false));
+        assertTrue(BankingController.mayConfigure(owner, stranger, true));
+        assertFalse(BankingController.mayConfigure(null, stranger, false));
+    }
+
+    @Test void normalPresentationHidesInternalIdentifiersAndProtocols() {
+        var id = UUID.randomUUID();
+        assertEquals(List.of("1. CAD primary — open", "History for CAD", "12.50 CAD", "1. Register purchase"), BankingPresentation.lines(List.of(
+                "1. CAD primary — open", "History for CAD " + id, "#42 12.50 CAD", "Transaction " + id,
+                "1. " + id + " — register-goods-v1")));
+        assertEquals("Outcome needs checking. Use Retry.", BankingPresentation.status("UNKNOWN — retry preserves operation " + id));
+        assertEquals("Register configured.", BankingPresentation.status("REGISTER_CONFIGURED"));
+    }
+
+    @Test void transactionHistoryHeadingSurvivesIdentifierFiltering() {
+        assertEquals(List.of("Transaction History", "Balance: 50.00 CAD", "12.50 CAD"), BankingPresentation.lines(
+                List.of("Transaction History", "Balance: 50.00 CAD", "#42 12.50 CAD", "Transaction " + UUID.randomUUID())));
+    }
+
     @Test void snapshotRejectsAggregateOverflowEvenWhenEachLineFits() {
         String line = "界".repeat(250); // 250 Java characters, 750 UTF-8 bytes per valid line.
         assertDoesNotThrow(() -> snapshot("history", Collections.nCopies(16, line), ""));
@@ -90,6 +135,20 @@ class BankingBoundaryTest {
         assertThrows(IllegalArgumentException.class, () -> BankingWithdrawals.parse("CAD 60;economy:cad_bill_20=3;extra"));
         String many = String.join(",", IntStream.range(0, 119).mapToObj(index -> "economy:bill_" + index + "=1").toList());
         assertThrows(IllegalArgumentException.class, () -> BankingWithdrawals.parse("CAD 60;" + many));
+    }
+
+    @Test void offeredControlsAreBoundedAndFrozenWithTheirSnapshot() {
+        var choice = new BankingNetwork.Choice("account_select", UUID.randomUUID() + "|history", "CAD primary account", true);
+        var offered = new ArrayList<>(List.of(choice));
+        var snapshot = new BankingNetwork.Snapshot(1, SESSION, 1, "accounts", List.of(), "Ready", false, offered);
+        offered.clear();
+        assertEquals(List.of(choice), snapshot.choices());
+        assertThrows(UnsupportedOperationException.class, () -> snapshot.choices().clear());
+        assertThrows(IllegalArgumentException.class, () -> new BankingNetwork.Choice("issue_cash", "", "Forged", false));
+        assertThrows(IllegalArgumentException.class, () -> new BankingNetwork.Choice("collect", "x".repeat(129), "Items", false));
+        assertThrows(IllegalArgumentException.class, () -> new BankingNetwork.Snapshot(1, SESSION, 1, "accounts", List.of(),
+                "Ready", false, Collections.nCopies(33, choice)));
+        assertDoesNotThrow(() -> new BankingNetwork.Choice("destination", UUID.randomUUID().toString(), "EUR account", false));
     }
 
     private static BankingNetwork.Snapshot snapshot(String page, List<String> lines, String status) {

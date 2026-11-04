@@ -57,7 +57,7 @@ For an uncertain result, repeat the same command with the same operation UUID.
 
 Creative inventory includes 118 cash collectibles and eight banking cards across twelve tabs, including both Canadian bill styles. Cards provide generic banking access without a credit facility.
 
-Unmarked development cash remains collectible. Trusted integrations validate issued cash quantities against the world ledger and custody evidence. Trusted server APIs support deposit previews and returns, plus exact withdrawals with full-batch capacity checks. Open the terminal to preview and confirm these operations.
+Cash taken from the Creative inventory or created with commands is accepted as newly minted cash when deposited. Existing world-marked cash still has its issued quantity checked against the world ledger and custody evidence. Trusted server APIs support deposit previews and returns, plus exact withdrawals with full-batch capacity checks.
 
 ## Schema upgrades
 
@@ -104,19 +104,25 @@ The Economy Terminals creative tab contains an ATM and register in a neutral fin
 
 Craft a neutral ATM with iron ingots, glass pane, redstone and a chest. The teller also needs a hopper; registers use iron ingots, glass pane, redstone and a chest in a smaller pattern. Combine any ATM or register with a dye to recolor it. A broken or recolored machine receives fresh owner and placement settings when placed again.
 
-These blocks open banking or shop screens. Trading computers are not activated.
+ATMs and tellers open banking screens; registers open the shop and protected-purchase claims. The Stock Trading Computer is available as a decorative block only and has no trading screen or economic behavior. Operators can look at a ready terminal and use `/economy admin config` to open its privileged configuration screen.
+
+Internal GUI identifiers and journal details are hidden by default. Set `debugGui=true` in `config/economy-scheduling.properties` and restart the server when those diagnostics are needed.
 
 
 ## Banking and shops
 
-Right-click a teller or ATM, or use any bank card for account, history, FX and claim access. Cards grant access without credit. Choose Setup to create your primary account. Additional currency accounts open at a teller; select an account by its listed number. History and claim lists have bounded Next pages.
+Right-click a teller or ATM, or use any bank card for account, history, FX and claim access. Cards grant access without credit. The banking home page lets you choose My accounts, Deposit, Withdrawal, Exchange or Collect items. Bank cards offer the services available remotely. If you have no bank account, My accounts shows one Open a new account button. Otherwise, click an account to see its transactions, or choose Open a new account to open account management. Manage account is also available from transaction history. History and collection lists have bounded Next pages.
 
-The owner can enable terminal cash services in Settings. For example, `BOTH;CAD;all` enables CAD deposits and withdrawals using supported denominations; ATMs accept bills and tellers also accept coins. `DEPOSIT`, `WITHDRAW` and `DISABLED` are also available modes. A comma-separated list of cash item IDs can replace `all` for a narrower whitelist.
+You can have three open bank accounts, including your permanent primary. Manage account lists your accounts with their currencies and balances. At a teller, choose Close account beside a secondary account, review any balance transfer to your primary, then confirm. To add an account, select an available currency and choose Open account. Opening is disabled when you already have three accounts. Pending payments, refunds, holds or item deliveries can block closure. Closed transaction history is retained.
 
-For a deposit, place issued cash in the 24 input slots, choose Preview and review the bank credit, then Confirm. Changing pages or closing before reservation returns the originals; anything that cannot fit is retained as an owner claim. Unmarked collectible cash cannot be redeemed.
+Only Deposit shows the player inventory. Deposit and Withdrawal each provide an account selector.
 
-For a withdrawal, enter a currency and amount such as `CAD 60`, then Preview and Confirm. A teller can use coins; optional bill edits use a form such as `CAD 60;economy:cad_bill_20=3`. The complete batch must fit before debit. A register owner holds the product batch and enters a whole-unit price in Shop. Buyers preview the exact batch and price before confirming.
+Tellers always provide deposits and withdrawals in every currency, with bills and coins. New ATMs default to deposits and withdrawals for all currencies and supported bills. The player who placed an ATM can right-click it with an empty hand to configure its services and currencies without operator permissions. Save applies only to that ATM; each ATM retains its own settings. Choose Use terminal in configuration to open banking. An operator can also use `/economy admin config` while looking at a terminal. ATMs accept bills only.
 
-FX uses the selected source account. Enter a listed destination account number or ID followed by the whole-unit source amount, such as `2 10`, and review the frozen quote before confirming. Stock trading accounts and screens are excluded.
+For a deposit, place cash in the 24 input slots, choose Review and check the bank credit, then confirm. Issued cash is redeemed against its remaining world quantity; unmarked Creative or command cash is minted and consumed by that one saved deposit. Changing pages or closing before reservation returns the originals; anything that cannot fit is retained as an owner claim.
 
-Claims retain known undelivered goods. Enter a listed claim number and Collect when the whole batch fits. Check original resolves an uncertain request using its existing operation identity. Restored or uncertain physical deliveries require operator evidence review; the mod does not automatically create replacement items or repeat a charge.
+For a withdrawal, choose your account and enter an amount, then Review and Confirm. The account determines the currency. A teller can dispense coins. The complete batch must fit before debit. A register owner holds the product batch and enters a whole-unit price in Shop. Buyers preview the exact batch and price before confirming.
+
+Exchange has From and To account selectors. Enter a whole-unit amount in the source account’s currency and review the debit, credit and fee before confirming. Stock trading accounts and screens are excluded.
+
+Collect items lists cash and goods waiting for delivery. Click a batch to collect it when the whole batch fits in your inventory. Check payment resolves an uncertain request using its existing operation identity. Restored or uncertain physical deliveries require operator evidence review; the mod does not automatically create replacement items or repeat a charge.

@@ -1,19 +1,19 @@
 {
   "variants": {
     "facing=north": {
-      "model": "economy:block/red_register",
+      "model": "economy:block/red_cash_register",
       "y": 0
     },
     "facing=east": {
-      "model": "economy:block/red_register",
+      "model": "economy:block/red_cash_register",
       "y": 90
     },
     "facing=south": {
-      "model": "economy:block/red_register",
+      "model": "economy:block/red_cash_register",
       "y": 180
     },
     "facing=west": {
-      "model": "economy:block/red_register",
+      "model": "economy:block/red_cash_register",
       "y": 270
     }
   }

@@ -5,6 +5,18 @@ Project changes are recorded in reverse chronological order, with the most recen
 
 
 
+## 2026-11-04 — Banking interface fixes
+
+- Replaced manual account and collection numbers with selectable accounts and item batches; My accounts opens transaction history directly.
+- Restored Deposit and Withdrawal wording, tied withdrawal currency to its account, and added From/To selectors for exchange.
+- Restored the compact original banking frame and restricted the player inventory to Deposit.
+- Explained the three-account limit and added reviewed teller account closure with balance transfer to the primary account.
+- Added specific deposit rejection messages, including disabled terminal services and unaccepted cash, with Creative cash regression coverage.
+- Made teller cash services always available, defaulted new ATMs to all cash services, and added per-ATM owner configuration through an empty-hand right-click.
+- Shortened deposit completion to a thank-you, mentioning returned or collectible bills only when applicable.
+- Replaced the New account tab with a banking home page, first-account creation in My accounts, and a dedicated account management screen with balances, available currencies and the three-account limit.
+- Added a full-width Open a new account button and separated transaction-history headings and balances from the scrolling transaction list.
+
 ## 2026-11-04 — A5-09 banking menus and phase acceptance
 
 - Added world currency setup, bank accounts/history, FX preview and confirmation, terminal settings, cash deposit/withdrawal, register purchase and claim screens.

@@ -1,0 +1,22 @@
+{
+  "parent": "economy:block/cyan_cash_register",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        -0.0,
+        1.672649,
+        2.257641
+      ],
+      "scale": [
+        0.752547,
+        0.752547,
+        0.752547
+      ]
+    }
+  }
+}

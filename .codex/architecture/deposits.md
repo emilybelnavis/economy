@@ -7,8 +7,10 @@ persisted state. Minecraft effects run through DepositInventory on the server
 thread. Live menu/reach/dimension and actor admission remain required when
 these APIs are connected to terminal menus.
 
-A preview accepts up to 24 nonempty indexed stacks. Each includes the exact
-cash lot and full serialized ItemStack components/count. Inputs are bounded to
+A preview accepts up to 24 nonempty indexed stacks. Marked cash includes its
+exact cash lot; unmarked Creative/command cash carries an explicit mint flag
+and deterministic request identity. Every slot retains the full serialized
+ItemStack components/count. Inputs are bounded to
 2048 encoded bytes per stack, 32 KiB aggregate components and the journal's
 16 KiB complete canonical request budget. Preview rejects an unreservable
 request before any originals move. The physical adapter permits at most
@@ -16,9 +18,10 @@ request before any originals move. The physical adapter permits at most
 
 Preview freezes bank account revision/currency, terminal anchor/generation/
 revision and the current UTC FX publication day/update/policy identity.
-It verifies account ownership/open state, active issued quantities,
+It verifies account ownership/open state, active issued quantities for marked cash,
 terminal deposit mode, currencies and denominations. ATMs accept bills;
-tellers accept bills and coins. Unknown or unmarked cash cannot be reserved.
+tellers accept bills and coins. Unmarked catalog cash can be reserved for the
+mint path; marked cash from another world or an unknown/exhausted lot rejects.
 
 Counts and face-value subtotals are grouped by source currency. A2 conversion
 is applied to each source subtotal, floored to the existing whole-major-unit
@@ -31,8 +34,8 @@ verified player save, journal SAVED and journal COMMIT. DepositInventory
 revalidates every slot before moving originals into player persistent data.
 Only an independently observed saved reservation may admit settlement.
 
-COMMIT rechecks account, terminal and FX bindings. Cash redemption, balanced
-target-bank issuance/credit, deposit state and durable skipped-original
+COMMIT rechecks account, terminal and FX bindings. Marked-cash redemption,
+unmarked-cash minting, balanced target-bank issuance/credit, deposit state and durable skipped-original
 return intents share one transaction. Original source subtotals and terms
 remain in the journal snapshot. Keep the COMMIT operation ID and request for
 lookup/retry when its outcome is unknown. Retire consumed physical originals

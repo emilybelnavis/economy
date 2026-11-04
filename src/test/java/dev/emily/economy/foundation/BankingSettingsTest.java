@@ -17,6 +17,15 @@ class BankingSettingsTest {
         return CATALOG.stream().filter(value -> ("economy:" + value.id()).equals(id)).findFirst().orElseThrow();
     }
 
+    @Test void lifecycleRejectionsExplainTheAccountLimitAndResolution() {
+        assertTrue(BankingAccounts.failureMessage("BANK_CAP_REACHED").contains("3 open accounts"));
+        assertTrue(BankingAccounts.failureMessage("BANK_CAP_REACHED").contains("Close one at a teller"));
+        assertTrue(BankingAccounts.failureMessage("BANK_CURRENCY_EXISTS").contains("already have"));
+        assertTrue(BankingAccounts.failureMessage("ACCOUNT_PROTECTED").contains("cannot be closed"));
+        assertTrue(BankingAccounts.failureMessage("ACTIVE_HOLD").contains("reserved"));
+        assertTrue(BankingAccounts.failureMessage("UNRESOLVED_OBLIGATION").contains("deliveries"));
+    }
+
     @Test void allCashMeansOnlyAcceptedCurrenciesAndAtmBills() {
         var atm = BankingAccounts.parseSettings("BOTH;CAD,USD;all", TerminalPolicy.Kind.ATM, CATALOG);
         assertEquals(Set.of(EconomyCurrency.CAD, EconomyCurrency.USD), atm.currencies());
@@ -29,6 +38,14 @@ class BankingSettingsTest {
         var teller = BankingAccounts.parseSettings("DEPOSIT;CAD;all", TerminalPolicy.Kind.TELLER, CATALOG);
         assertTrue(teller.denominations().stream().map(id -> denomination(id)).anyMatch(item -> !item.bill()));
         assertTrue(teller.denominations().stream().map(id -> denomination(id)).allMatch(item -> item.currency() == EconomyCurrency.CAD));
+    }
+
+    @Test void simplePlayerFacingSettingsMapToSafeFullAllowlists() {
+        var both = BankingAccounts.parseSettings("BOTH CAD", TerminalPolicy.Kind.ATM, CATALOG);
+        assertEquals(TerminalPolicy.Mode.BOTH, both.mode());
+        assertEquals(Set.of(EconomyCurrency.CAD), both.currencies());
+        assertEquals(Set.of("economy:cad_bill_20"), both.denominations());
+        assertEquals(TerminalPolicy.Settings.disabled(), BankingAccounts.parseSettings("OFF", TerminalPolicy.Kind.TELLER, CATALOG));
     }
 
     @Test void explicitCashSelectionCannotBypassKindCurrencyOrCatalog() {

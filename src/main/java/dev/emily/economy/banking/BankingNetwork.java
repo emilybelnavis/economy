@@ -13,10 +13,10 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 /** Bounded transport. Actor identity and original financial operations never come from packet fields. */
 public final class BankingNetwork {
-    public static final Set<String> ACTIONS = Set.of("setup", "accounts", "accounts_next", "account_select", "account_open",
+    public static final Set<String> ACTIONS = Set.of("home", "manage_accounts", "setup", "accounts", "accounts_next", "account_select", "account_open", "account_close_preview", "account_close_confirm",
             "history", "history_next", "fx", "exchange_preview", "exchange_confirm", "bank_retry", "deposit",
             "deposit_preview", "deposit_confirm", "withdraw", "withdraw_preview", "withdraw_confirm", "shop",
-            "buy_preview", "buy_confirm", "claims", "claims_next", "collect", "settings", "configure", "price", "retry", "cancel");
+            "buy_preview", "buy_confirm", "claims", "claims_next", "collect", "settings", "configure", "banking", "price", "retry", "cancel");
     private BankingNetwork() {}
     public record Action(int menuId, UUID session, long revision, String action, String value) implements CustomPacketPayload {
         public static final Type<Action> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("economy", "banking_action"));
@@ -37,7 +37,10 @@ public final class BankingNetwork {
         @Override public Type<Action> type() { return TYPE; }
     }
     public record Snapshot(int menuId, UUID session, long revision, String page, List<String> lines, String status,
-                           boolean busy) implements CustomPacketPayload {
+                           boolean busy, List<Choice> choices) implements CustomPacketPayload {
+        public Snapshot(int menuId, UUID session, long revision, String page, List<String> lines, String status, boolean busy) {
+            this(menuId, session, revision, page, lines, status, busy, List.of());
+        }
         public static final Type<Snapshot> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("economy", "banking_snapshot"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Snapshot> CODEC = new StreamCodec<>() {
             @Override public Snapshot decode(RegistryFriendlyByteBuf buffer) {
@@ -46,13 +49,24 @@ public final class BankingNetwork {
                 if (count < 0 || count > 32) throw new IllegalArgumentException("BANKING_SNAPSHOT_LINES");
                 var lines = new ArrayList<String>(count);
                 for (int index = 0; index < count; index++) lines.add(buffer.readUtf(256));
-                return new Snapshot(menu, session, revision, page, lines, buffer.readUtf(256), buffer.readBoolean());
+                String status = buffer.readUtf(256); boolean busy = buffer.readBoolean();
+                int choiceCount = buffer.readVarInt();
+                if (choiceCount < 0 || choiceCount > 32) throw new IllegalArgumentException("BANKING_CHOICES");
+                var choices = new ArrayList<Choice>();
+                for (int index = 0; index < choiceCount; index++)
+                    choices.add(new Choice(buffer.readUtf(24), buffer.readUtf(128), buffer.readUtf(128), buffer.readBoolean()));
+                return new Snapshot(menu, session, revision, page, lines, status, busy, choices);
             }
             @Override public void encode(RegistryFriendlyByteBuf buffer, Snapshot value) {
                 buffer.writeVarInt(value.menuId()); buffer.writeUUID(value.session()); buffer.writeVarLong(value.revision());
                 buffer.writeUtf(value.page(), 24); buffer.writeVarInt(value.lines().size());
                 for (var line : value.lines()) buffer.writeUtf(line, 256);
                 buffer.writeUtf(value.status(), 256); buffer.writeBoolean(value.busy());
+                buffer.writeVarInt(value.choices().size());
+                for (var choice : value.choices()) {
+                    buffer.writeUtf(choice.action(), 24); buffer.writeUtf(choice.value(), 128);
+                    buffer.writeUtf(choice.label(), 128); buffer.writeBoolean(choice.selected());
+                }
             }
         };
         public Snapshot {
@@ -64,8 +78,19 @@ public final class BankingNetwork {
             text(status, 256, 1024); bytes += status.getBytes(StandardCharsets.UTF_8).length;
             if (bytes > 12_000) throw new IllegalArgumentException("BANKING_SNAPSHOT_BUDGET");
             lines = List.copyOf(lines);
+            choices = List.copyOf(choices);
+            if (choices.size() > 32) throw new IllegalArgumentException("BANKING_CHOICES");
+            for (var choice : choices) bytes += (choice.action() + choice.value() + choice.label()).getBytes(StandardCharsets.UTF_8).length;
+            if (bytes > 12_000) throw new IllegalArgumentException("BANKING_SNAPSHOT_BUDGET");
         }
         @Override public Type<Snapshot> type() { return TYPE; }
+    }
+    /** Server-offered control. Destination choices are selected locally before requesting a quote. */
+    public record Choice(String action, String value, String label, boolean selected) {
+        public Choice {
+            if (!ACTIONS.contains(action) && !action.equals("destination")) throw new IllegalArgumentException("BANKING_CHOICE_ACTION");
+            text(value, 128, 512); text(label, 128, 512);
+        }
     }
     private static void identity(int menuId, UUID session, long revision) {
         if (menuId < 0 || menuId > 100 || revision < 0) throw new IllegalArgumentException("BANKING_SESSION");
@@ -77,7 +102,7 @@ public final class BankingNetwork {
     }
     public static void initialize(IEventBus bus) { bus.addListener(BankingNetwork::register); }
     private static void register(RegisterPayloadHandlersEvent event) {
-        var registrar = event.registrar("1");
+        var registrar = event.registrar("2");
         registrar.playToServer(Action.TYPE, Action.CODEC, (request, context) -> context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player && player.containerMenu instanceof BankingMenu menu
                     && menu.containerId == request.menuId()
@@ -87,7 +112,7 @@ public final class BankingNetwork {
         registrar.playToClient(Snapshot.TYPE, Snapshot.CODEC, (snapshot, context) -> context.enqueueWork(() -> {
             if (context.player().containerMenu instanceof BankingMenu menu && menu.containerId == snapshot.menuId()
                     && menu.session().equals(snapshot.session()))
-                menu.applyClientSnapshot(snapshot.revision(), snapshot.page(), snapshot.lines(), snapshot.status(), snapshot.busy());
+                menu.applyClientSnapshot(snapshot.revision(), snapshot.page(), snapshot.lines(), snapshot.status(), snapshot.busy(), snapshot.choices());
         }));
     }
     public static void send(ServerPlayer player, Snapshot snapshot) { PacketDistributor.sendToPlayer(player, snapshot); }

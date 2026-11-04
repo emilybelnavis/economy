@@ -12,7 +12,8 @@ no account funding or credit facility implied. Account/session authority
 remains the responsibility of the server interaction.
 
 CashStackIdentity stores world and issuance lot in a persistent, synchronized
-data component. A missing marker leaves development cash collectible.
+data component. A missing marker identifies Creative/command cash for the
+deposit mint path; a present marker from another world remains invalid.
 Recognition detaches an immutable CashIssuance.Claim on the server thread.
 A marker is only a lookup identity. Trusted journal admission must validate
 catalog identity, custody, the financial intent and available lot quantity.
@@ -34,6 +35,16 @@ counterparts. They share one finite lot balance. Aggregate overdraw and
 redemption after exhaustion reject. Custody evidence is required to admit
 physical quantity and prevent speculative replacement. This contract promises
 quantity conservation rather than individual clone identification.
+
+Deposit snapshots explicitly distinguish unmarked cash from marked issuance.
+Unmarked originals retain a deterministic request identity and their exact
+serialized components. They are removed and save-verified before COMMIT, then
+the deposit atomically applies the balanced issuance/account posting without
+creating a reusable active lot. Mixed deposits redeem only their marked lots.
+The deposit journal retains the unmarked flag and original components so replay
+cannot credit the same reservation twice. Because vanilla stacks do not retain
+their Creative or `/give` origin, any holder may deposit unmarked catalog cash;
+the trust boundary is that only operators can create those recipe-free items.
 
 Startup quarantines outstanding restored lots in journaled batches of 16
 before service readiness. This applies to paired and skewed restores alike.

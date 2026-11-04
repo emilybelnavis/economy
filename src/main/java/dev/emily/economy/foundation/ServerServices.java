@@ -110,6 +110,8 @@ public final class ServerServices {
         return worldDirectory;
     }
 
+    public boolean debugGui() { return config.debugGui(); }
+
     public ServerServices(Path worldDirectory, StorageLifecycle storage) {
         this(worldDirectory, storage, SchedulingConfig.defaults());
     }

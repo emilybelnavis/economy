@@ -27,6 +27,10 @@ public final class BankingWithdrawals {
     record Parsed(Money cash, Map<String, Integer> edits) {}
     private BankingWithdrawals() {}
     public static boolean handles(String action) { return ACTIONS.contains(action); }
+    public static boolean canChangeAccount(BankingMenu menu) {
+        var state = STATES.get(menu);
+        return state == null || (state.reservation == null || state.complete) && !state.cancelling;
+    }
     public static void action(ServerPlayer player, BankingMenu menu, String action, String value) {
         if (!handles(action) || !menu.valid(player) || menu.busy()) return;
         if (value == null || value.getBytes(StandardCharsets.UTF_8).length > 2048) return;
@@ -37,18 +41,17 @@ public final class BankingWithdrawals {
                     if (state.reservation != null && !state.complete) throw new IllegalStateException("Pending withdrawal");
                     state.preview = null;
                     if (state.complete) { state.reservation = null; state.complete = false; state.committing = false; }
-                    show(player, menu, List.of("Enter a cash currency and amount, such as CAD 60.",
-                            "ATMs issue bills; tellers can also issue coins.",
-                            "Optional bill edits follow a semicolon: CAD 60;economy:cad_bill_20=3",
-                            "An empty edit list asks a teller for coins: CAD 1;",
-                            "Preview shows the entire cash batch and bank debit before confirmation."), "Choose a withdrawal amount");
+                    BankingAccounts.cashAccounts(player, menu, "withdraw", List.of("Select the account to withdraw from, then enter an amount.",
+                            "Choose Review to see the cash and account total before anything happens.",
+                            "ATMs dispense bills. Tellers can also dispense coins."), "Enter an amount to continue");
                 }
-                case "withdraw_preview" -> preview(player, menu, state, parse(value));
+                case "withdraw_preview" -> preview(player, menu, state, value);
                 case "withdraw_confirm" -> confirm(player, menu, state);
                 default -> { }
             }
         } catch (IllegalArgumentException | IllegalStateException | ArithmeticException invalid) {
-            show(player, menu, List.of("Check the cash currency, amount and bill edits. Nothing was debited."), "Invalid withdrawal request");
+            show(player, menu, List.of("Enter a positive amount for the selected account, for example 60.",
+                    "Nothing was taken from your account."), "Check the amount and try again");
         }
     }
     static Parsed parse(String value) {
@@ -78,7 +81,7 @@ public final class BankingWithdrawals {
         }
         return new Parsed(new Money(currency, minor), edits);
     }
-    private static void preview(ServerPlayer player, BankingMenu menu, State state, Parsed parsed) {
+    private static void preview(ServerPlayer player, BankingMenu menu, State state, String value) {
         var services = BankingController.services(player);
         var actor = BankingController.actor(player);
         long revision = menu.revision(); var session = menu.session();
@@ -87,6 +90,12 @@ public final class BankingWithdrawals {
         services.ledger().bankingContext(actor, menu.anchor(), BankingAccounts.selected(menu)).whenComplete((context, error) -> {
             if (!live(player, menu, session, revision)) return;
             if (error != null || !usable(context, menu)) { unavailable(player, menu); return; }
+            final Parsed parsed;
+            try { parsed = parse(context.account().currency().code() + " " + value.trim()); }
+            catch (IllegalArgumentException | ArithmeticException invalid) {
+                show(player, menu, List.of("Enter a positive amount in " + context.account().currency().code() + ".", "Nothing was taken from your account."), "Check the amount and try again");
+                return;
+            }
             state.world = context.world();
             var binding = new Withdrawals.Binding(context.account().id().value(), context.account().revision(), context.account().currency(),
                     menu.anchor(), menu.generation(), context.terminal().revision(), context.fx().revision());
@@ -100,7 +109,7 @@ public final class BankingWithdrawals {
                 state.preview = quote;
                 var lines = new ArrayList<String>();
                 lines.add("Cash: " + money(quote.cash())); lines.add("Bank debit: " + money(quote.debit()));
-                for (var line : quote.plan().lines()) lines.add(line.count() + " × " + line.denomination().id());
+                for (var line : quote.plan().lines()) lines.add(line.count() + " × " + money(new Money(quote.cash().currency(), line.denomination().minorUnits())));
                 lines.add("The entire batch needs " + stacks(quote) + " free inventory slots.");
                 lines.add("Choose Confirm withdrawal to debit and receive this exact batch.");
                 show(player, menu, lines, "Withdrawal preview");

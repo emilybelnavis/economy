@@ -74,7 +74,27 @@ public final class TerminalPolicy {
 
     private TerminalPolicy() {}
 
-    /** New or replacement placement always starts disabled with empty allowlists. */
+    /** Cash services supplied by a new terminal. ATM configuration remains local to its anchor. */
+    public static Settings defaultSettings(Kind kind, Map<String, Denomination> catalog) {
+        Objects.requireNonNull(kind);
+        var immutable = Map.copyOf(catalog);
+        if (kind == Kind.REGISTER) return Settings.disabled();
+        var denominations = new TreeSet<String>();
+        immutable.forEach((id, denomination) -> {
+            if (kind == Kind.TELLER || denomination.bill()) denominations.add(id);
+        });
+        return new Settings(Mode.BOTH, EnumSet.allOf(EconomyCurrency.class), denominations);
+    }
+
+    /** Existing teller restrictions are historical data; teller services always use the complete catalog. */
+    public static Snapshot effective(Snapshot snapshot, Map<String, Denomination> catalog) {
+        Objects.requireNonNull(snapshot);
+        if (snapshot.kind() != Kind.TELLER) return snapshot;
+        return new Snapshot(snapshot.world(), snapshot.anchor(), snapshot.generation(), snapshot.owner(), snapshot.kind(),
+                snapshot.revision(), snapshot.active(), defaultSettings(Kind.TELLER, catalog));
+    }
+
+    /** Canonical placement identity; service defaults are selected from the trusted catalog at admission. */
     public static CanonicalRequest placeRequest(Anchor anchor, UUID generation, ActorId owner, Kind kind,
                                                 UUID expectedGeneration, long expectedRevision) {
         Objects.requireNonNull(generation); Objects.requireNonNull(owner); Objects.requireNonNull(kind);
@@ -166,7 +186,7 @@ public final class TerminalPolicy {
                     List.of(world.value().toString(), generation.toString()), 1).isEmpty())
                 return reject("TERMINAL_GENERATION_USED");
             changed = new Snapshot(world, anchor, generation, owner, kind, current == null ? 1 : current.revision() + 1,
-                    true, Settings.disabled());
+                    true, defaultSettings(kind, catalog));
         } else {
             if (action == Action.CONFIGURE && !valid(current.kind(), settings, catalog))
                 return reject("TERMINAL_POLICY");
@@ -185,6 +205,7 @@ public final class TerminalPolicy {
     }
 
     private static boolean valid(Kind kind, Settings settings, Map<String, Denomination> catalog) {
+        if (kind == Kind.TELLER) return settings.equals(defaultSettings(Kind.TELLER, catalog));
         if (kind == Kind.REGISTER && settings.mode() != Mode.DISABLED) return false;
         for (var id : settings.denominations()) {
             var denomination = catalog.get(id);

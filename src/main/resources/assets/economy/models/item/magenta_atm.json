@@ -1,3 +1,6 @@
 {
-  "parent": "economy:block/magenta_atm_inventory"
+  "parent": "economy:item/atm",
+  "textures": {
+    "trim": "economy:block/terminal_trim_magenta"
+  }
 }

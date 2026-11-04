@@ -1,67 +1,67 @@
 {
   "variants": {
     "cell=0,facing=north": {
-      "model": "economy:block/red_atm_0",
+      "model": "economy:block/red_atm_right",
       "y": 0
     },
     "cell=0,facing=east": {
-      "model": "economy:block/red_atm_0",
+      "model": "economy:block/red_atm_right",
       "y": 90
     },
     "cell=0,facing=south": {
-      "model": "economy:block/red_atm_0",
+      "model": "economy:block/red_atm_right",
       "y": 180
     },
     "cell=0,facing=west": {
-      "model": "economy:block/red_atm_0",
+      "model": "economy:block/red_atm_right",
       "y": 270
     },
     "cell=1,facing=north": {
-      "model": "economy:block/red_atm_1",
+      "model": "economy:block/red_atm",
       "y": 0
     },
     "cell=1,facing=east": {
-      "model": "economy:block/red_atm_1",
+      "model": "economy:block/red_atm",
       "y": 90
     },
     "cell=1,facing=south": {
-      "model": "economy:block/red_atm_1",
+      "model": "economy:block/red_atm",
       "y": 180
     },
     "cell=1,facing=west": {
-      "model": "economy:block/red_atm_1",
+      "model": "economy:block/red_atm",
       "y": 270
     },
     "cell=2,facing=north": {
-      "model": "economy:block/red_atm_2",
+      "model": "economy:block/red_atm_upper_right",
       "y": 0
     },
     "cell=2,facing=east": {
-      "model": "economy:block/red_atm_2",
+      "model": "economy:block/red_atm_upper_right",
       "y": 90
     },
     "cell=2,facing=south": {
-      "model": "economy:block/red_atm_2",
+      "model": "economy:block/red_atm_upper_right",
       "y": 180
     },
     "cell=2,facing=west": {
-      "model": "economy:block/red_atm_2",
+      "model": "economy:block/red_atm_upper_right",
       "y": 270
     },
     "cell=3,facing=north": {
-      "model": "economy:block/red_atm_3",
+      "model": "economy:block/red_atm_upper",
       "y": 0
     },
     "cell=3,facing=east": {
-      "model": "economy:block/red_atm_3",
+      "model": "economy:block/red_atm_upper",
       "y": 90
     },
     "cell=3,facing=south": {
-      "model": "economy:block/red_atm_3",
+      "model": "economy:block/red_atm_upper",
       "y": 180
     },
     "cell=3,facing=west": {
-      "model": "economy:block/red_atm_3",
+      "model": "economy:block/red_atm_upper",
       "y": 270
     }
   }

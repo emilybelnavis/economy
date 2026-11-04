@@ -20,6 +20,8 @@ class SchedulingConfigTest {
         assertEquals(new SchedulingConfig(2, 256, 64, 1, 5000, 30), SchedulingConfig.load(file));
         Files.writeString(file, "calculationWorkers=16\nsqliteLockTimeoutMillis=200\n");
         assertEquals(new SchedulingConfig(16, 256, 64, 1, 200, 30), SchedulingConfig.load(file));
+        Files.writeString(file, "debugGui=true\n");
+        assertTrue(SchedulingConfig.load(file).debugGui());
     }
 
     @Test
@@ -27,7 +29,7 @@ class SchedulingConfigTest {
         Path file = directory.resolve("economy-scheduling.properties");
         for (String entry : new String[] {"storageQueueCapacity=4097", "calculationQueueCapacity=0",
                 "callbackBudgetMillis=1.5", "calculationWorkers=17", "sqliteLockTimeoutMillis=-1",
-                "drainSeconds=301", "storageWorkers=2"}) {
+                "drainSeconds=301", "debugGui=yes", "storageWorkers=2"}) {
             Files.writeString(file, entry);
             var error = assertThrows(IllegalArgumentException.class, () -> SchedulingConfig.load(file));
             assertTrue(error.getMessage().contains(file.toString()));

@@ -83,6 +83,9 @@ public final class Withdrawals {
                 Long.toString(binding.accountRevision())), 1).isEmpty()) throw invalid("WITHDRAWAL_ACCOUNT_STALE");
         var terminal = TerminalPolicy.find(reads, world, binding.terminal(), owner, true)
                 .orElseThrow(() -> invalid("WITHDRAWAL_TERMINAL"));
+        var terminalCatalog = catalog.entrySet().stream().collect(java.util.stream.Collectors.toUnmodifiableMap(
+                Map.Entry::getKey, entry -> new TerminalPolicy.Denomination(entry.getValue().currency(), entry.getValue().bill())));
+        terminal = TerminalPolicy.effective(terminal, terminalCatalog);
         if (!terminal.active() || !terminal.generation().equals(binding.generation())
                 || terminal.revision() != binding.terminalRevision()) throw invalid("WITHDRAWAL_TERMINAL_STALE");
         if (terminal.kind() == TerminalPolicy.Kind.REGISTER || !terminal.settings().mode().withdrawals())

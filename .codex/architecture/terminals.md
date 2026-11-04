@@ -44,7 +44,7 @@ generation/revision. Physical terminal geometry and block events are implemented
 
 ## Physical terminals — A5-08
 
-TerminalCatalog registers `atm` and `register`, each with 16 `<dye>_atm` / `<dye>_register` counterparts, plus `teller` and the Economy Terminals creative tab. No trading computer is registered or activated. Textures/models are original deterministic code-authored art in tools/generate_terminal_assets.py. Data includes three base recipes, 32 dye recolors, tags, empty wide-machine loot and ordinary register self loot.
+TerminalCatalog registers `atm` and `register`, each with 16 `<dye>_atm` / `<dye>_register` counterparts, plus `teller` and the Economy Terminals creative tab. `stock_trading_computer` is a decorative facing block with no menu, block entity, or economic behavior. Data includes three base terminal recipes, 32 dye recolors, tags, empty wide-machine loot and ordinary single-block loot.
 
 WideTerminalBlock occupies 2×2 cells. CELL 0 is the lower anchor, 1 its right neighbor from the front, 2 above anchor, 3 above neighbor. Local right is FACING.getCounterClockWise(). Placement faces the player. Only the anchor has a TerminalBlockEntity. TerminalGeometry resolves every cell and verifies full loaded structure plus generation. BlockState rotation/mirror supports structure rotation; no wrench UI is introduced.
 

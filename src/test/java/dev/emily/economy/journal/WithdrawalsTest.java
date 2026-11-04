@@ -88,6 +88,22 @@ class WithdrawalsTest {
         } finally { store.close(); }
     }
 
+    @Test void legacyDisabledTellerDispensesBillsAndCoinsWithoutRewritingItsSavedPolicy() throws Exception {
+        var store = open();
+        try {
+            seed(store, TerminalPolicy.Kind.TELLER);
+            store.transaction(tx -> tx.execute("UPDATE terminal_settings SET mode='DISABLED',currencies='',denominations=''", List.of()));
+            var preview = preview(store, 2075, Map.of("economy:cad_bill_20", 1));
+            assertEquals(Map.of("economy:cad_bill_20", 1), preview.plan().bills());
+            assertEquals(Map.of("economy:cad_coin_25", 3), preview.plan().coins());
+            var reserve = intent(Withdrawals.Action.RESERVE, Withdrawals.reserveRequest(preview));
+            assertEquals(Status.COMMITTED, engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve).status());
+            assertEquals(Status.COMMITTED, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare).submit(commit(reserve.operationId().value())).status());
+            assertEquals(7900, balance(store));
+            assertEquals("DISABLED", store.transaction(tx -> tx.query("SELECT mode FROM terminal_settings", List.of(), 1)).getFirst().get("mode"));
+        } finally { store.close(); }
+    }
+
     @Test void stalePublicationAndAuthorityRejectBeforeIssuance() throws Exception {
         var store = open();
         try {
@@ -218,8 +234,7 @@ class WithdrawalsTest {
                     (a, i, current, reads) -> true, (a, reads) -> false);
             var request = action == TerminalPolicy.Action.PLACE
                     ? TerminalPolicy.placeRequest(anchor, generation, owner, kind, null, 0)
-                    : TerminalPolicy.configureRequest(anchor, generation, 1, new TerminalPolicy.Settings(
-                            TerminalPolicy.Mode.BOTH, Set.of(CAD), terminalCatalog.keySet()));
+                    : TerminalPolicy.configureRequest(anchor, generation, 1, TerminalPolicy.defaultSettings(kind, terminalCatalog));
             new JournalEngine(store, (a,k) -> true, Map.of(action.kind(), handler)).submit(new Intent(
                     new OperationId(UUID.randomUUID()), new RequestId(UUID.randomUUID()), owner, action.kind(), request, null, null));
         }

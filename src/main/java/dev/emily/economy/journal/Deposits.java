@@ -28,11 +28,12 @@ public final class Deposits {
             if (minorUnits <= 0) throw new IllegalArgumentException("DEPOSIT_DENOMINATION");
         }
     }
-    public record Slot(int index, CashIssuance.Claim claim, String components) {
+    public record Slot(int index, CashIssuance.Claim claim, String components, boolean unmarked) {
         public Slot {
             Objects.requireNonNull(claim); text(components, 2048);
             if (index < 0 || index >= MAX_SLOTS) throw new IllegalArgumentException("DEPOSIT_SLOT");
         }
+        public Slot(int index, CashIssuance.Claim claim, String components) { this(index, claim, components, false); }
     }
     public record Binding(UUID account, long accountRevision, EconomyCurrency currency, TerminalPolicy.Anchor terminal,
                           UUID generation, long terminalRevision, String fxRevision) {
@@ -114,6 +115,9 @@ public final class Deposits {
                 Long.toString(binding.accountRevision())), 1);
         if (account.isEmpty()) throw invalid("DEPOSIT_ACCOUNT_STALE");
         var terminal = TerminalPolicy.find(reads, world, binding.terminal(), owner, true).orElseThrow(() -> invalid("DEPOSIT_TERMINAL"));
+        var terminalCatalog = catalog.entrySet().stream().collect(java.util.stream.Collectors.toUnmodifiableMap(
+                Map.Entry::getKey, entry -> new TerminalPolicy.Denomination(entry.getValue().currency(), entry.getValue().bill())));
+        terminal = TerminalPolicy.effective(terminal, terminalCatalog);
         if (!terminal.active() || !terminal.generation().equals(binding.generation())
                 || terminal.revision() != binding.terminalRevision()) throw invalid("DEPOSIT_TERMINAL_STALE");
         if (!terminal.settings().mode().deposits() || terminal.kind() == TerminalPolicy.Kind.REGISTER)
@@ -130,9 +134,11 @@ public final class Deposits {
                     || !terminal.settings().currencies().contains(denomination.currency())
                     || (terminal.kind() == TerminalPolicy.Kind.ATM && !denomination.bill())) throw invalid("DEPOSIT_DENOMINATION");
             if (!claim.world().equals(world)) throw invalid("DEPOSIT_WORLD");
-            var lot = CashIssuance.find(reads, world, claim.lot()).orElseThrow(() -> invalid("DEPOSIT_UNRECOGNIZED"));
-            if (!lot.item().equals(claim.item()) || lot.state() != CashIssuance.State.ACTIVE) throw invalid("DEPOSIT_UNRECOGNIZED");
-            quantities.merge(lot.id(), claim.count(), Math::addExact);
+            if (!slot.unmarked()) {
+                var lot = CashIssuance.find(reads, world, claim.lot()).orElseThrow(() -> invalid("DEPOSIT_UNRECOGNIZED"));
+                if (!lot.item().equals(claim.item()) || lot.state() != CashIssuance.State.ACTIVE) throw invalid("DEPOSIT_UNRECOGNIZED");
+                quantities.merge(lot.id(), claim.count(), Math::addExact);
+            }
             amounts.merge(denomination.currency(), Math.multiplyExact(denomination.minorUnits(), claim.count()), Math::addExact);
             counts.merge(denomination.currency(), claim.count(), Math::addExact);
         }
@@ -251,12 +257,18 @@ public final class Deposits {
                         new PostingBatch.Leg(preview.binding().account(), ACCOUNT, amount.currency(), amount));
                 var financial = new Intent(intent.operationId(), intent.requestId(), intent.actor(),
                         new Kind("economy:deposits", "economy:credit"), Settlement.request(legs), null, null);
-                var redeem = CashIssuance.registration(CashIssuance.Action.REDEEM, world,
-                        (a, i, lots, r) -> true, (a, i, lots, proof, r) -> true,
-                        CashIssuance.financial(financial, Settlement.registration((i, l, r) -> PostingBatch.Authority.ISSUE)), current.id());
-                var request = CashIssuance.redeemRequest(preview.payable().stream().map(Slot::claim).toList(), evidence, financial);
-                var decision = redeem.handler().prepare(new Intent(intent.operationId(), intent.requestId(), intent.actor(),
-                        CashIssuance.Action.REDEEM.kind(), request, null, null), reads);
+                var marked = preview.payable().stream().filter(slot -> !slot.unmarked()).map(Slot::claim).toList();
+                Decision decision;
+                if (marked.isEmpty()) {
+                    decision = Settlement.registration((i, l, r) -> PostingBatch.Authority.ISSUE).handler().prepare(financial, reads);
+                } else {
+                    var redeem = CashIssuance.registration(CashIssuance.Action.REDEEM, world,
+                            (a, i, lots, r) -> true, (a, i, lots, proof, r) -> true,
+                            CashIssuance.financial(financial, Settlement.registration((i, l, r) -> PostingBatch.Authority.ISSUE)), current.id());
+                    var request = CashIssuance.redeemRequest(marked, evidence, financial);
+                    decision = redeem.handler().prepare(new Intent(intent.operationId(), intent.requestId(), intent.actor(),
+                            CashIssuance.Action.REDEEM.kind(), request, null, null), reads);
+                }
                 if (!(decision instanceof Commit accepted)) return decision;
                 composed = accepted;
                 released = preview.payable().stream().map(slot -> slot.claim().lot()).collect(java.util.stream.Collectors.toSet());
@@ -345,13 +357,15 @@ public final class Deposits {
     }
     private static String encodeSlot(Slot slot) {
         var claim = slot.claim();
-        return slot.index() + "|" + claim.world().value() + "|" + claim.lot() + "|" + claim.item() + "|" + claim.count() + "|" + pack(slot.components());
+        return slot.index() + "|" + claim.world().value() + "|" + claim.lot() + "|" + claim.item() + "|" + claim.count()
+                + "|" + pack(slot.components()) + "|" + slot.unmarked();
     }
     private static Slot decodeSlot(String encoded) {
         var fields = encoded.split("\\|", -1);
-        if (fields.length != 6) throw invalid("DEPOSIT_SLOT");
+        if (fields.length != 6 && fields.length != 7) throw invalid("DEPOSIT_SLOT");
         return new Slot(Integer.parseInt(fields[0]), new CashIssuance.Claim(new WorldId(UUID.fromString(fields[1])),
-                UUID.fromString(fields[2]), fields[3], Integer.parseInt(fields[4])), unpack(fields[5]));
+                UUID.fromString(fields[2]), fields[3], Integer.parseInt(fields[4])), unpack(fields[5]),
+                fields.length == 7 && Boolean.parseBoolean(fields[6]));
     }
     private static String encodeBinding(Binding b) {
         var a = b.terminal();
