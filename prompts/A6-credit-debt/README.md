@@ -1,43 +1,45 @@
-# A6 — Loans, credit and collateral
+# A6 — Banks, credit and debt
 
-Status: draft DESIGN prompt. Refine specifications and future prompts only. Do not implement code, scaffold, run Gradle/tests/game processes, generate assets, change dependencies, or migrate worlds. Edit planning files only when explicitly requested. Reading a roadmap or this file is not implementation authorization.
+**Status: all 23 prompts approved for execution on 2026-11-04; implementation not started.** [Execution preparation and approval record](EXECUTION.md) gives the queue, missing-input checklist and first-package launch instructions. Select one package, finish its acceptance/handoff, then stop; no repeated prompt approval is needed.
 
-## Goal and dependencies
+The user selected **elapsed UTC, 20 real minutes per financial day**, including downtime, and **APR/13 with thirteen monthly loan payments per year**. Other user rules and remaining unspecified inputs are recorded separately in [the specification](SPECIFICATION.md). Use the approved [original bank/network names and art scope](BRANDING.md) during asset implementation.
 
-Prepare a complete, reviewable specification for A6. Required upstream work: A4. Do not treat existing code as completed redesign work. Supply approved upstream contracts explicitly; mark missing contracts unresolved.
+The expansion adds **CHF cash and FX**, **23 banks** (18 Tier 1 including five hybrids; five Tier 2 specialists), **four open BANK accounts total**, bank-branded ATMs/tellers and a new **branch kiosk** for institution-specific opening/closing/replacement and credit-card/loan applications. Existing prompt IDs remain stable; the two new bounded packages bring the sequence to **23 prompts**.
 
-Fixed baseline: Minecraft 1.21.1, NeoForge 21.1.252, Java 21; server-authoritative behavior on both integrated and dedicated servers. Stage A owns money/FX/credit; custody owns shares/return obligations; no market-owned parallel banking database.
+## Ordered deployment prompts
 
-## Scope to flesh out
+Do not execute this list as a batch. Scheduling/configuration → diagnostics → foundation acceptance is split where temporal state and replay risk warrant it. Smaller catalog, art and interaction tasks retain their own scoped diagnostics/acceptance rather than requiring artificial three-stage work.
 
-Principal/rate/term contracts; secured/unsecured and fixed/variable lending; accrual and payment schedules; repayment allocation; arrears/default/recovery; collateral registration/valuation/priority; early repayment/closure; margin-facing API.
+| ID | Task | Prerequisites |
+| --- | --- | --- |
+| [A6-01](A6-01.md) | Shared contracts and policy checkpoint | Verified A1–A5 |
+| [A6-02-01](A6-02-01.md) | Financial calendar scheduling and configuration | A6-01 |
+| [A6-02-02](A6-02-02.md) | Financial calendar diagnostics | A6-02-01 |
+| [A6-02-03](A6-02-03.md) | Financial calendar foundation acceptance | A6-02-02 |
+| [A6-03-01](A6-03-01.md) | CHF currency, banknotes and coins | A6-01 |
+| [A6-03](A6-03.md) | Institution catalog and bank accounts | A6-01, A6-02-03, A6-03-01 |
+| [A6-04](A6-04.md) | Wealth qualification and service pricing | A6-03 |
+| [A6-05](A6-05.md) | Original bank, network, card and agent assets | A6-01, A6-03 |
+| [A6-05-01](A6-05-01.md) | Branded ATMs, tellers and branch kiosks | A6-03, A6-05 |
+| [A6-06](A6-06.md) | Issued bank cards and lifecycle | A6-03, A6-05, A6-05-01 |
+| [A6-07](A6-07.md) | Credit profiles and score policy | A6-01, A6-02-03, A6-03 |
+| [A6-08-01](A6-08-01.md) | Credit-card facilities, interest and statement configuration | A6-04, A6-06, A6-07 |
+| [A6-08-02](A6-08-02.md) | Credit-card diagnostics | A6-08-01 |
+| [A6-08-03](A6-08-03.md) | Credit-card foundation acceptance | A6-08-02 |
+| [A6-09-01](A6-09-01.md) | Loan underwriting, amortization and schedule configuration | A6-04, A6-07 |
+| [A6-09-02](A6-09-02.md) | Loan diagnostics | A6-09-01 |
+| [A6-09-03](A6-09-03.md) | Loan foundation acceptance | A6-09-02 |
+| [A6-10-01](A6-10-01.md) | Delinquency, reporting and collection-clock configuration | A6-08-03, A6-09-03 |
+| [A6-10-02](A6-10-02.md) | Delinquency and credit-report diagnostics | A6-10-01 |
+| [A6-10-03](A6-10-03.md) | Delinquency and reporting foundation acceptance | A6-10-02 |
+| [A6-11](A6-11.md) | Collection Agent gameplay and payment dialogue | A6-05, A6-10-03 |
+| [A6-12](A6-12.md) | Bank and credit menus, public API and integration | A6-05-01, A6-06, A6-08-03, A6-09-03, A6-10-03, A6-11 |
+| [A6-13](A6-13.md) | Integrated banking and credit foundation acceptance | A6-12 |
 
-## Mandatory current-feature reimplementation
+## Execution order and handoffs
 
-Inventory coverage: No current loan engine; F10 card semantics remain explicit.
+Start with A6-01, then calendar A6-02-01 →02-02 →02-03. CHF registry/cash A6-03-01 can follow A6-01 independently of the calendar; it must complete before institution catalog A6-03. Banks A6-03 precede tier/pricing A6-04 and card/art foundations. A6-05 artwork may be prepared independently of credit mechanics after the catalog/brief is approved. A6-05-01 then implements branded ATMs/tellers and branch-kiosk admission before card replacement and full application-menu integration. A6-07 establishes the scoring contract; A6-08 and09 implement cards and loans; A6-10 supplies reports/default/collection clocks; A6-11 provides agents; A6-12 integrates usable workflows; A6-13 accepts the release. This is a dependency map, not authorization for unattended phase execution.
 
-Credit-card artwork currently provides access only. Preserve that fact unless a separately approved borrowing product links it to a loan. Loans use shared accounting/clock contracts and explicit lender/borrower accounts; no second balance database. Specify offline debt and collateral claim conflicts before margin.
+Current feature coverage and deliberate changes: [specification coverage ledger](SPECIFICATION.md#feature-coverage-and-later-handoffs). A7 owns later prime/economic simulation; B2/B4 owns future securities valuation/trading and fee application; B6 receives margin/collateral capabilities only. Shared API boundaries can be delivered now; downstream integrations require their own invocation.
 
-All assigned existing behavior must appear in the coverage table even when replacement architecture differs. Record any proposed behavior change and its approval status. Existing implementation and existing tests do not satisfy the new phase gate.
-
-## Proposed bounded subprompts
-
-Loan state machine; interest/accrual precision; payment allocation and schedules; collateral and default; administration and future margin contract.
-
-For each subprompt define outcome, owner, prerequisites, persistence/entities, service/network contracts, permissions, state transitions, transaction boundary, server/worker handoff, time/version semantics, idempotency, configuration and diagnostics. Specify failures, overflow/rounding, stale requests, disconnects, retries and recovery where relevant. Avoid production code and premature class/file prescriptions.
-
-## Acceptance scenarios to specify, not execute
-
-Accrual retry cannot charge twice; partial/early payments allocate predictably; variable-rate changes have effective versions; loan/default/closure reconcile; pledged assets cannot secure incompatible claims twice.
-
-Include concrete numerical or state-transition examples where useful. Describe future unit, integration, restart/crash and performance checks appropriate to each subprompt. Distinguish proposed guarantees from verified behavior. Future runnable deliveries require configured runClient/runServer, mod registration, required development runtime dependencies, and runClient help/dry-run verification; run no checks during this planning task.
-
-## Required planning response
-
-- Phase specification and dependency/ownership map.
-- F-ID coverage table: old behavior, new contract, owning subprompt, acceptance cases and explicit later handoff.
-- Ordered self-contained future prompts with scope exclusions and completion gates.
-- Decisions needed now, with recommended alternatives and consequences; do not silently approve defaults.
-- Open questions and approved-versus-proposed rules.
-
-Stop at planning. Do not execute the prompts you draft or expand into later-phase implementation.
+All D01–D17 policies, branding and CHF denominations are approved, including the user-adjusted **28-billion** finite institution seed. [The approved policy set](POLICY-REVIEW.md) and its three owner contracts are normative; no policy-input blockers remain. A6-01 remains the first package to execute for shared contracts/interfaces and migration planning; no A6 implementation or verification is claimed.

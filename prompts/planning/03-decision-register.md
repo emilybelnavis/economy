@@ -48,3 +48,33 @@ All five A1 packages are design-approved. Remaining low-level specifications mus
 ## Historical implementation-location decision — completed in A1-01
 
 The approved one-time rebuild was performed in the economy Git root on the redesign branch, preserving .git, prompts/ and AGENTS.md. A1-01 records the original reset scope and the historical handoff records completion. This decision authorizes no further deletion. Runtime storage rejection and restore protections remain unchanged.
+
+## A6 banking and calendar decisions — 2026-11-04
+
+The user requested planning for banks alongside credit/debt. [A6 specification](../A6-credit-debt/SPECIFICATION.md) records the supplied gameplay requirements and distinguishes unresolved proposals. [Execution sequence](../A6-credit-debt/README.md); [proposed original branding](../A6-credit-debt/BRANDING.md). These files authorize no implementation or asset generation.
+
+- APPROVED: financial week=7 days, month=28 days, year=364 days. One financial day is 20 minutes elapsed UTC, including server downtime; sleep and world time do not set debt time. Existing A1 UTC scheduling/recovery remains authoritative.
+- APPROVED by explicit follow-up: loan periodic rate APR/13 and13 monthly payments/year, replacing the initial APR/12 example to match the thirteen-month year.
+- User-specified bank/card/loan/default/reporting requirements are retained in A6. D11 access-only legacy cards remain unchanged; a newly issued server-linked credit product is the explicit borrowing path. No implicit conversion of existing card collectibles.
+- OPEN: the A6 D01–D15 policy choices, including score/loan-limit bands, fees/deposit yields, statement minimum basis, default/collection boundary details, account attribution, net-worth/downgrade, funding and fictional branding. Recommendations require approval before affected implementation; no blanket approval is inferred.
+
+### Approved A6 expansion — CHF and bank branches
+
+- Add CHF to currency/FX/account/cash support, with original accompanying banknotes and coins. Denominations, opening FX quote and cash rounding policy remain proposals in A6 D16.
+- Add Zurich Cantonal Bank-inspired and Neue Bank AG-inspired institutions, both Tier 1 and CHF-based. Total23 institutions:18 Tier1 including five hybrids, plus five Tier2 specialists. Fictional display names remain proposals.
+- Raise the maximum from three to four open BANK accounts total per player, including the protected primary. Currency uniqueness is not implicitly removed.
+- Replace generic ATM colors with each bank's branding; provide matching branded tellers. Each branded ATM/teller corresponds to that bank's base currency; identity/currency are server-authoritative.
+- New branch kiosk: open/close accounts at that specific bank, obtain issuer replacement cards, apply for credit cards and loans. Generic/remote lifecycle paths cannot bypass the visit requirement. Preserve existing machines/worlds via explicit migration; D17 records migration and primary/currency questions.
+- [A6-03-01](../A6-credit-debt/A6-03-01.md) owns CHF/cash; [A6-05-01](../A6-credit-debt/A6-05-01.md) owns branded hardware and kiosks. Planning only, with no code or assets generated.
+
+### A6 execution approval — 2026-11-04
+
+The user reviewed and approved all 23 A6 draft prompts for execution and requested preparation. This supersedes the earlier A6 draft/unapproved labels, including pending approval of written recommendations, branding and CHF denominations. See [approval scope, remaining inputs and queue](../A6-credit-debt/EXECUTION.md). Missing numerical inputs and unresolved alternatives are assigned to A6-01; their absence is not a reason to request the entire phase's approval again. Preparation selects no implementation package and records no A6 verification. Next package: A6-01; later phases remain outside this approval.
+
+### A6 remaining-policy proposals — review pending
+
+Following the request to clear A6-01 blockers, the missing values/alternatives now have concrete proposals in [the consolidated policy review](../A6-credit-debt/POLICY-REVIEW.md), backed by credit/funding, banking and servicing contracts. Existing A6 scope/recommendations stay approved. These newly specified parameters await consolidated user acceptance; no implementation, world migration or new verification is claimed. In particular the finite7B game-money seed is explicit new issuance, not hidden origination funding.
+
+### A6 remaining policies approved; funding quadrupled — 2026-11-04
+
+The user directed “quadruple the bank funding to 28 billion” and approved the remaining proposed policy set. All allocations are4×:18 Tier1/hybrid banks ×400M =7.2B; five Tier2 specialists ×4B =20B; subprime400M; collector400M; total28B server-currency units. The 10% operating-floor policy is unchanged. This supersedes the earlier7B funding proposal and pending-policy labels. [Approved policy record](../A6-credit-debt/POLICY-REVIEW.md) and its three detail contracts now supply all D01–D17 inputs. No policy reapproval is needed; A6-01 shared-contract work remains unexecuted and no implementation/verification is claimed.

@@ -1,6 +1,6 @@
 # Current project state
 
-**A1 foundation is complete and verified.** SQLite schema V17 (minimum V1); the initial reset is complete. A2-01 through A2-03-03 are complete and verified. A3-01 through A3-05 are verified. A4-01 through A4-06 are verified. A5-01-01 through A5-02-03 and A5-03 through A5-09 are verified. Later packages await explicit invocation.
+**A1 foundation is complete and verified.** SQLite schema V17 (minimum V1); the initial reset is complete. A2-01 through A2-03-03 are complete and verified. A3-01 through A3-05 are verified. A4-01 through A4-06 are verified. A5-01-01 through A5-02-03 and A5-03 through A5-09 are verified. A6’s 23 prompts are approved and prepared for package-by-package execution; no A6 package has started. Start with [A6-01](../prompts/A6-credit-debt/A6-01.md); [approval, queue and remaining inputs](../prompts/A6-credit-debt/EXECUTION.md). Other later phases await explicit invocation.
 
 | Package | Prerequisite | Status |
 | --- | --- | --- |
@@ -37,6 +37,8 @@
 | [A5-07](A5-07.md) register sales | A5-06 | Verified |
 | [A5-08](A5-08.md) physical terminals and assets | A5-07 | Verified |
 | [A5-09](A5-09.md) menus and phase acceptance | A5-08 | Verified |
+
+A6 execution preparation: [approval and package queue](../prompts/A6-credit-debt/EXECUTION.md). A6-01 is ready to select; remaining A6 packages wait for prerequisite evidence. Approval is not implementation or verification.
 
 Load only the affected contracts: [lifecycle](architecture/lifecycle.md), [storage/migrations](architecture/storage.md), [journal](architecture/journal.md), [recovery/clock/backup](architecture/recovery-clock.md), [FX](architecture/fx.md), [identity](architecture/identity.md), [accounts](architecture/accounts.md). [custody](architecture/custody.md), [cash](architecture/cash.md), [terminals](architecture/terminals.md), [deposits](architecture/deposits.md), [withdrawals](architecture/withdrawals.md), [registers](architecture/registers.md), [banking menus](architecture/banking.md). [Verification guide](VERIFICATION.md) selects checks; historical notes describe the delivered state at the time and do not override current contracts.
 

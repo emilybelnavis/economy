@@ -1,0 +1,70 @@
+# A6 — Banks, credit and debt specification
+
+Status: **approved for execution, 2026-11-04; implementation not started**. The user approved all reviewed draft prompts, including their written recommendations. [Execution preparation](EXECUTION.md) records the approval and remaining unspecified inputs. Package selection and prerequisite gates still apply; this preparation does not start implementation. Current delivered behavior remains in [the project index](../../.codex/PROJECT.md).
+
+## Approved requirements and corrected arithmetic
+
+- Fixed platform: Minecraft 1.21.1 / NeoForge 21.1.252 / Java 21. Extend A1–A5; preserve worlds, backups, ledger, account identities, card IDs and public APIs.
+- CHF joins the currency system, with CHF banknotes and coins, FX quotes/history, account support and cash deposit/withdrawal support. Add Zurich Cantonal Bank-inspired and Neue Bank AG-inspired institutions, both Tier 1 with CHF base currency: **23 total institutions, 18 Tier 1 (including five hybrids), five Tier 2 specialists**. The roster names and original-art directions are approved.
+- Players may hold **up to four open BANK accounts total**, including the permanent primary, across all institutions; this replaces the existing cap of three. Account opening and closing require an in-person visit to the account institution using its branded **branch kiosk**. Kiosks also offer replacement cards and applications for credit cards and loans.
+- Replace generic ATM color variants with institution branding; provide matching branded teller stations and branch kiosks. Each ATM/teller variant has a server-owned institution and corresponding base currency. Texture selection never supplies authority. Legacy placed blocks/items need explicit compatible migration; no world reset or forced deletion.
+- Banks exist as persistent economic institutions. Issue linked bank cards and separate credit cards. Card possession/artwork alone never creates a loan or confers another player's account authority.
+- Two service tiers. Tier 2 eligibility begins at net worth **at least 100,000,000 in current server currency**. Tier 1: FX/trading fees, lower deposit rates, higher loan rates. Tier 2: zero FX/trading fees, higher deposit rates, lower loan rates. Five Tier 1 institutions also offer Tier 2; five specialist institutions offer Tier 2 only. See [the roster](BRANDING.md).
+- Calendar: week 7 days; month 28 days; year 364 days = **13 months**. User explicitly selected elapsed UTC: one financial day = 1,200 seconds, including server downtime; sleep, `/time`, tick rate and integrated pause do not define the calendar. Week = 8,400 seconds; month = 33,600 seconds; year = 436,800 seconds. Audit instants remain UTC and journal/economic sequences remain separate.
+- User explicitly selected loan periodic rate **APR / 13**, and **13 payments per year**. Bank terms 1–5 years =13–65 payments; subprime terms 1–8 years =13–104 payments.
+- Credit scores 300–900. An unestablished player starts at 650 upon first actual credit-card issuance, with a 2,500 limit in server currency. Recalculate scores every 28 days. Banking/debit-card issuance alone establishes no score.
+- Four fictional networks loosely inspired by American Express, Mastercard, Visa, Discover. Amex-inspired: purchases 21.99% APR, cash advances 23.99%; other three: purchases 19.99%, advances 21.99%. These are configured game rates supplied by the user, not claims about real issuers.
+- Credit-card statements every 28 days; minimum due 14 days later. Separate purchase/advance buckets, daily periodic rate APR /364, compounded daily, sum statement-period interest. Minimum wording is 2% of statement balance plus statement interest; the approved balance basis is pre-interest principal, as in D01 below.
+- Arithmetic correction: at 19.99%, daily rate is 0.1999/364 ≈0.0005491758 (0.05491758%). On 123, first-day interest ≈0.0675486, about 0.07 in a two-decimal currency. The supplied 0.68 example is a decimal-place error. No intermediate percent rounding.
+- Banks: Tier 1 base APR prime +2 percentage points; Tier 2 base APR prime /4. Subprime APR 19.99%–34.99%. Approval and maximum principal depend on score; low scores reduce access, and subprime also has rejection limits.
+- Amortized loan payment: P*r*(1+r)^n / ((1+r)^n-1), with r=APR/13 and n=13*years; r=0 uses P/n. Loan interest compounds monthly. Payment/final-installment rounding must reconcile principal to zero.
+- Missed monthly payments cause delinquency. Accounts may remain up to three months past due before default. Default closes spending/draw access and transfers the debt to collections; it does not erase the liability.
+- A Collection Agent follows the debtor. Right-click opens a trading-style payment dialogue: partial payment, full payment, exit. No contractual minimum; positive payments must still be representable currency amounts. Killing the agent permits no replacement for at least seven financial days. No debt forgiveness from entity death.
+- Payment reporting occurs two days after the payment due date; scores change on the separate 28-day cycle. Missed payments hurt less than defaults. Defaults remain reported seven years (2,548 days). Debt becomes uncollectable after two years (728 days), unless partial payment acknowledges it and restarts that collection clock.
+
+## Ownership, compatibility and accounting
+
+A6 owns institution/product catalogs, eligibility, issued cards, credit profiles, facilities, receivables, statements, schedules, arrears, collection cases and interfaces. A1 owns UTC scheduling, immutable journal/recovery, worker and DB. A2 owns currency/FX/denomination; A3 owns account identity/authorization; A4 owns balanced postings; A5 owns payment, custody, terminal/menu admission and existing items. A7 later owns prime/economic simulation; B2/B4 later supply authoritative securities valuation and trading fee application; B6 consumes collateral/margin contracts. None may create parallel money or balance databases.
+
+Current A3 allows three open BANK accounts with unique currencies per owner and a permanent primary. APPROVED CHANGE: raise the global open BANK cap to four, including the primary; closed history and TRADING/credit facilities do not consume these four slots. Keep currency uniqueness and primary/denomination protection unless separately approved; currency uniqueness remains the approved baseline; expanding it to multiple same-currency accounts is outside this approval. Associate each account with one institution. New lifecycle mutations require a live server-issued branch-kiosk admission for that same institution, even if the institution shares a currency with another bank. A provider switch requires source and target kiosk visits under the approved banking policy. Do not allow four accounts per bank or one primary per institution. Existing unassigned accounts follow the approved explicit matching-currency bank selection migration. Keep the existing eight unlinked card collectibles functional as generic access cards, with no credit conversion, debt creation or private-account disclosure. New issuer-specific cards require durable issuance and owner authorization. See [accounts](../../.codex/architecture/accounts.md), [cash](../../.codex/architecture/cash.md), [menus](../../.codex/architecture/banking.md), [clock](../../.codex/architecture/recovery-clock.md).
+
+Every origination, draw, interest posting, repayment, fee, deposit yield, debt sale and write-off has explicit currency, balanced counterparties and immutable journal facts. A collections sale changes creditor/receivable ownership once; never duplicate borrower debt. Institution capital, funding, interest expense/income, losses and collector consideration use the approved credit/funding contract. No unlimited minting hidden in a loan. Liability/receivable state derives from authoritative postings rather than independent writable balances.
+
+Server thread captures current actor/menu/entity context into immutable requests; the existing sole worker performs bounded storage/calculation. Revalidate economic eligibility and revisions at atomic commit. Only detached results return to a freshly checked live audience. Stable world/actor/type/canonical-intent operation IDs survive disconnects, retries and uncertain commits. No direct JDBC on ticks, no speculative physical re-delivery and no replayed entity spawning.
+
+Version catalog, score rules, pricing, schedule origins, effective policies, valuations and immutable input snapshots. Preserve historical implementations for backlog. Persist UTC origin/boundaries and deterministic update IDs; use A1 chronological dependencies, bounded catch-up and fail-closed readiness. Avoid one unbounded all-player transaction: page work with durable cursors, per-obligation identities and a completion frontier that cannot advance over incomplete obligations. Unknown/corrupt state blocks financial writes; operators receive sanitized diagnosis. A6-07 delivers profile/score contracts with recurring production scoring dormant; A6-10-03 installs and accepts the reporting/scoring DAG together. Do not register a missing reporting dependency or let an intentionally not-yet-installed domain scheduler block earlier foundation packages.
+
+Use checked minor-unit postings and documented high-precision accrual/residuals, with explicit rounding at settlement. Reject overflow, invalid currency, stale quotes, negative amounts, forged IDs, over-limit requests and unavailable valuations. Zero/full-paid/closed accounts accrue according to explicit state rules. Historical raw amounts retain their original currency; denomination change cannot reinterpret debt, thresholds or past reports silently.
+
+## Decision register — approved policy contracts
+
+All D01–D17 choices are covered by the [user-approved policy set](POLICY-REVIEW.md). On 2026-11-04 the user approved the remaining policies and quadrupled institution funding to **28,000,000,000 server-currency units**. The following contracts supply exact values and override the earlier unresolved/draft wording; do not ask for the same approval again.
+
+| Decisions | Normative contract | Coverage |
+| --- | --- | --- |
+| D01–D05, D13, servicing D14–D15 | [Servicing](POLICIES-SERVICING.md) | Minimums, repayment, default, reporting/expiry, agents, schedules, precision and autopay |
+| D06–D09, D12 | [Credit, pricing and funding](POLICIES-CREDIT.md) | Scores, credit limits, underwriting, prime, fees/yield, finite28B funding and debt sale |
+| D10–D11, card D14, D16–D17 | [Banking](POLICIES-BANKING.md) | Net worth/tiering, issuer matrix, accounts/migration, cards, CHF and branded hardware |
+
+A6-01 still owns current-contract inventory, shared interfaces and durable migration/fact design. Approval closes policy-input blockers; it is not implementation or verification evidence. Report any newly demonstrated incompatibility precisely, while continuing unaffected work.
+
+## Feature coverage and later handoffs
+
+| Coverage | Existing behavior → planned contract | Owner | Acceptance / later owner |
+| --- | --- | --- | --- |
+| F01–F03, F09, F23 | Preserve platform/storage/journal and worlds; additive versioned financial records | All; A6-13 | Bounded migrations/retry/recovery; A8 integrated release |
+| F05–F08 | Existing money/FX invariants retained; approved cap four and bank-specific lifecycle replace the old cap/teller opening rule; CHF and institution/tier policy added | A6-03-01/03/04/05-01/08/09 | Fee quote stale checks, balanced credit/debt, no duplicate primaries; B4 trading |
+| F10 | Eight access-only card IDs remain; newly issued linked debit/credit products are distinct | A6-05/06/08 | Old card grants no debt/foreign access; first issuance once |
+| F18–F20 | Existing menu/session/API protections extend to bank and debt actions | A6-11/12 | Forged/stale/disconnected requests reject; A8 polish |
+| F21–F22 | Existing IDs/world placements preserved via migration; ATM colors replaced with bank branding; matching branded tellers and new branch kiosks, plus original issuer/network/card/agent assets | A6-05/05-01/11 | Correct bank/currency binding, legacy mapping, geometry and resource review; A8/B9 polish |
+| NEW CHF/cash | Eleventh currency, original CHF notes/coins and settlement support | A6-03-01 | Minor units, FX history, issuance/deposit/withdrawal/change; no synthetic rate |
+| NEW branches | Institution-specific opening/closing/replacement, four-account total cap and branch-kiosk applications | A6-03/05-01/06/12 | Wrong bank/remote bypass rejected; simultaneous fourth/fifth opening; replaced block revokes admission |
+| NEW calendar | UTC-derived financial days and thirteen-month year | A6-02-01–03 | Offline catch-up, backward clock and boundary fixtures |
+| NEW banks/tiering | 23 institutions, two service levels, 100M net worth | A6-03/04 | Exact threshold, liabilities, FX snapshots, downgrade |
+| NEW credit/cards | 300–900 scoring, starter facility, two APR buckets and statements | A6-07/08-01–03 | First limit, compounding, minimums, repayment/restart |
+| NEW loans | Bank/subprime underwriting, amortization and monthly accrual | A6-09-01–03 | Zero rate, final rounding, early payoff, no over-borrow |
+| NEW delinquency/reporting | Arrears/default/sale, due+2 reporting, 7y/2y clocks | A6-10-01–03 | Exact boundaries, corrective reports, no erased liabilities |
+| NEW agent | Follow, pay/exit and kill cooldown | A6-11 | Restart/unload/death cannot respawn early or settle twice |
+| Prior A6 collateral/variable scope | Explicit supported capabilities; no silently omitted secured lending | A6-01/09 | Product expansion needs approved package; B6 margin contract only |
+
+Current implementation of these new features is **not started**; no new verification is claimed. Existing A1–A5 evidence proves only their recorded scopes.
