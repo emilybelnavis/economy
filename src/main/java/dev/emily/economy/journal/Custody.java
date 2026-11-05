@@ -15,6 +15,9 @@ public final class Custody {
     private static final SystemActorId RECOVERY = new SystemActorId(
             UUID.fromString("9f338063-8a19-451c-b508-cf2c4dfe327a"));
 
+    // Startup is gated against customer mutations. Losing this cursor on a crash safely rescans facts.
+    private static final Map<FoundationStore,String> RECONCILIATION_CURSORS=Collections.synchronizedMap(new WeakHashMap<>());
+
     public enum State { RESERVED, WITNESSED, COMMITTED, DELIVERING, ACKNOWLEDGED, CLAIM, QUARANTINED, DELIVERED, COMPENSATED }
     public enum Action {
         RESERVE, RESERVATION_SAVED, COMMIT, BEGIN_DELIVERY, ACKNOWLEDGE, DELIVERY_SAVED,
@@ -311,28 +314,73 @@ public final class Custody {
         return raw(reads, id).filter(value -> operator || value.terms().owner().equals(actor));
     }
 
-    /** Startup gate: quarantine at most sixteen cases per pass pending external save verification. */
+    /** Startup gate: inspect at most sixteen cases; never materialize an item during recovery. */
     public static boolean reconcileBatch(FoundationStore store) {
-        var rows = store.transaction(tx -> tx.query("""
+        String after=RECONCILIATION_CURSORS.getOrDefault(store, "");
+        var rows=store.transaction(tx->tx.query("""
                 SELECT id,revision FROM custody_cases
-                WHERE state<>'QUARANTINED' ORDER BY id LIMIT 16
-                """, List.of(), 16));
-        var action = Action.QUARANTINE;
-        var registration = registration(action, (a, intent, c, reads) -> intent.actor().equals(RECOVERY),
-                (c, evidence, reads) -> false, null);
-        var engine = new JournalEngine(store, (actor, kind) -> actor.equals(RECOVERY) && kind.equals(action.kind()),
-                Map.of(action.kind(), registration));
-        for (var row : rows) {
-            var id = UUID.fromString(row.get("id"));
-            var operation = UUID.nameUUIDFromBytes(("economy:custody-reconcile:" + id + ":" + row.get("revision"))
+                WHERE state<>'QUARANTINED' AND id>? ORDER BY id LIMIT 16
+                """,List.of(after),16));
+        var world=store.snapshot().worldId();
+        java.util.function.BiPredicate<Case,ReadView> verifiedCard=(current,reads)-> {
+            try {
+                var token=dev.emily.economy.card.IssuedCards.find(reads,world,current.id()).orElse(null);
+                if(token==null || !token.custodyId().equals(current.id()) || !token.owner().equals(current.terms().owner())
+                        || !token.id().equals(current.reservationOperation()) || !token.id().equals(current.financialOperation())
+                        || !current.terms().items().equals(dev.emily.economy.card.IssuedCards.deliveryItems(token))
+                        || !current.terms().source().equals("issued-card:"+token.id())
+                        || !current.terms().destination().equals(actorKey(token.owner())))return false;
+                var outcome=reads.query("""
+                        SELECT actor,service,operation_type,canonical_request,status FROM operation_outcomes
+                        WHERE world_id=? AND operation_id=?
+                        """,List.of(world.value().toString(),token.id().toString()),1);
+                if(outcome.isEmpty())return false;
+                var original=outcome.getFirst();
+                return original.get("status").equals("COMMITTED") && original.get("actor").equals(actorKey(token.owner()))
+                        && original.get("service").equals(dev.emily.economy.card.IssuedCards.ISSUE.service())
+                        && original.get("operation_type").equals(dev.emily.economy.card.IssuedCards.ISSUE.operationType())
+                        && current.terms().financialIntent().equals(token.id()+"\n"+original.get("actor")+"\n"
+                                +original.get("service")+"\n"+original.get("operation_type")+"\n"+original.get("canonical_request"));
+            } catch(IllegalArgumentException malformed) {return false;}
+        };
+        java.util.function.Predicate<Case> neverAttempted=current->current.deliveryAttempt()==null
+                && (current.acknowledgment()==null || current.acknowledgment().isBlank())
+                && (current.deliveryWitness()==null || current.deliveryWitness().isBlank())
+                && current.evidence().kind()==EvidenceKind.UNKNOWN;
+        var quarantine=registration(Action.QUARANTINE,(action,intent,current,reads)->intent.actor().equals(RECOVERY),
+                (current,evidence,reads)->false,null);
+        var claim=registration(Action.CLAIM,(action,intent,current,reads)->intent.actor().equals(RECOVERY)
+                        && current.state()==State.COMMITTED && neverAttempted.test(current) && verifiedCard.test(current,reads),
+                (current,evidence,reads)->verifiedCard.test(current,reads) && neverAttempted.test(current)
+                        && evidence.kind()==EvidenceKind.UNDELIVERED && evidence.reference().equals("card-committed:"+current.id())
+                        && evidence.location().equals(current.terms().destination()) && evidence.saveToken().equals("no-delivery-attempt"),null);
+        var engine=new JournalEngine(store,(actor,kind)->actor.equals(RECOVERY)
+                && (kind.equals(Action.QUARANTINE.kind()) || kind.equals(Action.CLAIM.kind())),
+                Map.of(Action.QUARANTINE.kind(),quarantine,Action.CLAIM.kind(),claim));
+        for(var row:rows) {
+            var id=UUID.fromString(row.get("id"));
+            var current=store.transaction(tx->raw(tx::query,id).orElseThrow());
+            boolean card=store.transaction(tx->verifiedCard.test(current,tx::query));
+            if(card && (current.state()==State.DELIVERED || current.state()==State.CLAIM
+                    && current.evidence().kind()==EvidenceKind.UNDELIVERED
+                    && (current.acknowledgment()==null || current.acknowledgment().isBlank())
+                    && (current.deliveryWitness()==null || current.deliveryWitness().isBlank())))continue;
+            var action=card && current.state()==State.COMMITTED && neverAttempted.test(current)?Action.CLAIM:Action.QUARANTINE;
+            var evidence=action==Action.CLAIM?new Evidence(EvidenceKind.UNDELIVERED,"card-committed:"+id,
+                    current.terms().destination(),"no-delivery-attempt"):Evidence.unknown();
+            var operation=UUID.nameUUIDFromBytes(("economy:custody-reconcile:"+id+":"+row.get("revision")+(action==Action.CLAIM?":CLAIM":""))
                     .getBytes(StandardCharsets.UTF_8));
-            var outcome = engine.submit(new Intent(new OperationId(operation), new RequestId(UUID.randomUUID()), RECOVERY,
-                    action.kind(), request(id, null, Evidence.unknown(), "startup save evidence requires reconciliation"), null, null));
-            if (outcome.status() != Status.COMMITTED) throw new IllegalStateException("Custody reconciliation failed");
+            var reason=action==Action.CLAIM?"committed card has no physical delivery attempt":"startup save evidence requires reconciliation";
+            var outcome=engine.submit(new Intent(new OperationId(operation),new RequestId(UUID.randomUUID()),RECOVERY,
+                    action.kind(),request(id,null,evidence,reason),null,null));
+            if(outcome.status()!=Status.COMMITTED)throw new IllegalStateException("Custody reconciliation failed");
         }
-        return store.transaction(tx -> tx.query("""
-                SELECT id FROM custody_cases WHERE state<>'QUARANTINED' LIMIT 1
-                """, List.of(), 1).isEmpty());
+        String cursor=rows.isEmpty()?after:rows.getLast().get("id");
+        boolean complete=store.transaction(tx->tx.query("""
+                SELECT id FROM custody_cases WHERE state<>'QUARANTINED' AND id>? LIMIT 1
+                """,List.of(cursor),1).isEmpty());
+        if(complete)RECONCILIATION_CURSORS.remove(store);else RECONCILIATION_CURSORS.put(store,cursor);
+        return complete;
     }
 
     private static Case read(Map<String, String> row) {

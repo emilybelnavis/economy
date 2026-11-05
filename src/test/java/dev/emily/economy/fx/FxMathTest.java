@@ -14,7 +14,7 @@ class FxMathTest {
     void openingRebasesDkkAndJpyAndPublishesAllRatesAtFixedPrecision() {
         var jpyRates = FxMath.opening(JPY);
         var dkkRates = FxMath.opening(DKK);
-        assertEquals(10, jpyRates.size());
+        assertEquals(11, jpyRates.size());
         assertEquals(new BigDecimal("1.000000000000"), jpyRates.get(JPY));
         assertEquals(new BigDecimal("23.541851514092"), jpyRates.get(DKK));
         assertEquals(new BigDecimal("0.042477542576"), dkkRates.get(JPY));

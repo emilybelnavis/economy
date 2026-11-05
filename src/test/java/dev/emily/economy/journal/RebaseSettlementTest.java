@@ -6,6 +6,7 @@ import dev.emily.economy.api.Identifiers.OperationId;
 import dev.emily.economy.api.Identifiers.PlayerId;
 import dev.emily.economy.api.Identifiers.RequestId;
 import dev.emily.economy.api.Money;
+import dev.emily.economy.api.EconomyCurrency;
 import dev.emily.economy.fx.DenominationChange;
 import dev.emily.economy.fx.FxService;
 import dev.emily.economy.storage.SqliteStorage;
@@ -30,7 +31,16 @@ class RebaseSettlementTest {
             (reads, id) -> Optional.of(new AccountRebasePlanner.Claims(false, false, false));
     @TempDir Path directory;
 
-    @Test void fundedCollisionsAtMaximumRosterRetireAndReplay() throws Exception {
+    static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> rebaseCases() {
+        return java.util.stream.Stream.of(
+                org.junit.jupiter.params.provider.Arguments.of(USD, false),
+                org.junit.jupiter.params.provider.Arguments.of(EconomyCurrency.CHF, false),
+                org.junit.jupiter.params.provider.Arguments.of(USD, true));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("rebaseCases")
+    void fundedCollisionsAtMaximumRosterRetireAndReplay(EconomyCurrency target, boolean fractionalSource) throws Exception {
         var store = new SqliteStorage();
         try {
             store.initialize(directory.toRealPath());
@@ -47,8 +57,8 @@ class RebaseSettlementTest {
                 store.transaction(tx -> {
                     tx.execute("INSERT INTO account_catalog VALUES(?,?,'BANK','CAD','OPEN',1,1)",
                             List.of(primary.value().toString(), owner.value().toString()));
-                    tx.execute("INSERT INTO account_catalog VALUES(?,?,'BANK','USD','OPEN',1,0)",
-                            List.of(collision.value().toString(), owner.value().toString()));
+                    tx.execute("INSERT INTO account_catalog VALUES(?,?,'BANK',?,'OPEN',1,0)",
+                            List.of(collision.value().toString(), owner.value().toString(), target.code()));
                     return null;
                 });
                 assertEquals(Status.COMMITTED, setup.submit(intent(SameCurrency.CREDIT,
@@ -56,11 +66,19 @@ class RebaseSettlementTest {
                                 new Money(CAD, 1_000)).request())).status());
                 assertEquals(Status.COMMITTED, setup.submit(intent(SameCurrency.CREDIT,
                         new SameCurrency.Adjustment(owner, new SameCurrency.Revision(collision, 1),
-                                new Money(USD, 500)).request())).status());
+                                new Money(target, 500)).request())).status());
+                if (fractionalSource) {
+                    var legs = List.of(new PostingBatch.Leg(primary.value(), PostingBatch.Role.ACCOUNT, CAD, new Money(CAD, 8)),
+                            new PostingBatch.Leg(Settlement.issuanceAccount(CAD), PostingBatch.Role.ISSUANCE, CAD, new Money(CAD, -8)));
+                    var minorKind = new Kind("economy:chf-fixture", "economy:minor-fund");
+                    var minor = new JournalEngine(store, (actor, kind) -> actor.equals(ACTOR), Map.of(minorKind,
+                            Settlement.registrationMinor((i, l, r) -> PostingBatch.Authority.ISSUE)));
+                    assertEquals(Status.COMMITTED, minor.submit(intent(minorKind, Settlement.minorRequest(legs))).status());
+                }
             }
             var session = UUID.randomUUID();
             var confirmation = new DenominationChange(world, session);
-            var proof = confirmation.confirm(confirmation.first(ACTOR, USD, 0, true, 0), ACTOR, 0, true, 1);
+            var proof = confirmation.confirm(confirmation.first(ACTOR, target, 0, true, 0), ACTOR, 0, true, 1);
             var plan = store.transaction(tx -> AccountRebasePlanner.plan(tx::query, world, session, ACTOR, proof,
                     RebaseSettlement.denomination(tx::query).orElseThrow(), CLEAR)).plan();
             assertEquals(RebaseSettlement.MAX_PRIMARIES, plan.mappings().size());
@@ -77,11 +95,11 @@ class RebaseSettlementTest {
                     ACTOR, request.kind(), request.request(), null, null)));
             var envelope = engine.readAfter(outcome.sequence().value() - 1, 1).getFirst();
             assertEquals(1 + 6 * RebaseSettlement.MAX_PRIMARIES, envelope.records().size());
-            assertEquals(new AccountRebasePlanner.Denomination(USD, 1),
+            assertEquals(new AccountRebasePlanner.Denomination(target, 1),
                     store.transaction(tx -> RebaseSettlement.denomination(tx::query).orElseThrow()));
             for (var mapping : plan.mappings()) {
-                var balance = store.transaction(tx -> Settlement.posted(tx::query, mapping.primary().id().value(), USD));
-                assertEquals(1_200, balance);
+                var balance = store.transaction(tx -> Settlement.posted(tx::query, mapping.primary().id().value(), target));
+                assertEquals(target == EconomyCurrency.CHF ? 1_100 : 1_200, balance);
                 var collision = store.transaction(tx -> tx.query("SELECT status,revision FROM account_catalog WHERE account_id=?",
                         List.of(mapping.collision().id().value().toString()), 1).getFirst());
                 assertEquals(Map.of("status", "CLOSED", "revision", "2"), collision);

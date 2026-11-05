@@ -7,7 +7,7 @@ import java.util.Objects;
 /** Immutable catalog metadata. A trading identity has no currency policy until B2. */
 public record AccountIdentity(AccountId id, PartyRef owner, Purpose purpose, EconomyCurrency currency,
                               Status status, long revision, boolean primary) {
-    public static final int MAX_OPEN_BANK_ACCOUNTS = 3;
+    public static final int MAX_OPEN_BANK_ACCOUNTS = 4;
     public enum Purpose { BANK, TRADING }
     public enum Status { OPEN, CLOSED }
 

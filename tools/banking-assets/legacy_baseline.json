@@ -1,0 +1,18 @@
+{
+  "src/main/resources/assets/economy/textures/item/summit_credit_card.png": "4e32ba030fe7e55fcdfcb470d59f25e11ce857394e4a1b6641b8a8c0758453cb",
+  "src/main/resources/assets/economy/models/item/summit_credit_card.json": "bfe1eed3223439e57ce832c03145de36b7b9680f3adedb663ebdfd8bce426266",
+  "src/main/resources/assets/economy/textures/item/meridian_credit_card.png": "2c1e6416850d1a3276a7402a3386ba399021ded4d7cedd544feff8b02bfaee5b",
+  "src/main/resources/assets/economy/models/item/meridian_credit_card.json": "2bffdfbc665faaa58823295a9508bfc859e7763d5ad63e6b0b3d36457ae2a047",
+  "src/main/resources/assets/economy/textures/item/aurora_credit_card.png": "8e8085b0b2d81205cde62eeddab30c4f491b5352861e974b2ad805d8401faa69",
+  "src/main/resources/assets/economy/models/item/aurora_credit_card.json": "5997115768546f93ebab0544ee9c821278071f4dd550280795d4cf56944bdbf2",
+  "src/main/resources/assets/economy/textures/item/obsidian_credit_card.png": "6d2c678559b86f79a60b6fe580067af809e18c087727183728b9f8f46004c772",
+  "src/main/resources/assets/economy/models/item/obsidian_credit_card.json": "6e81f3f3637c6e56a7a4206b75cfb9523df02aa3f2d0dec01f73982e78e6a6b5",
+  "src/main/resources/assets/economy/textures/item/harbor_bank_card.png": "1689feeb60472b72cdf8447d42ec4641a72174d73ed8c04b50a5646dca016794",
+  "src/main/resources/assets/economy/models/item/harbor_bank_card.json": "c994508f3bdc6482ce0b77117c75d2f67e96b5d56e9dccf90d1a43d4667472b5",
+  "src/main/resources/assets/economy/textures/item/meadow_bank_card.png": "590ee58b6c853f18251a2d0eab22296f322af9085e3ed9346f27b9197e1a1334",
+  "src/main/resources/assets/economy/models/item/meadow_bank_card.json": "6ab7bb51dfeaff28cb38dddddf6dac29ad2ff7a30ea5d6327080f5ab3a8b94f2",
+  "src/main/resources/assets/economy/textures/item/tide_bank_card.png": "6f63d781f581ed8d4c79b2007d14add935f6b25ecf1bd822b3612026d3c0b919",
+  "src/main/resources/assets/economy/models/item/tide_bank_card.json": "c61515d459b00c97b07c85c3848c98aa90433c1389d9071bb805864ee83473bc",
+  "src/main/resources/assets/economy/textures/item/ember_bank_card.png": "312007d9e561b66387f90b1159ac93fb00fc20475ac71ad3be574322ccec2920",
+  "src/main/resources/assets/economy/models/item/ember_bank_card.json": "8f04acdcd0ff66a2af1a187716471593a10bde5fcb01f9d725a4aeb6fa8ba660"
+}

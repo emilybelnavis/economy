@@ -17,9 +17,9 @@ public final class CashCatalogProbe {
     private CashCatalogProbe() {}
 
     public static void verify(MinecraftServer server) {
-        require(CashCatalog.all().size() == 118, "118 cash identities");
+        require(CashCatalog.all().size() == 131, "131 cash identities");
         require(CashCatalog.cards().size() == 8, "eight card identities");
-        require(CashCatalog.tabIds().size() == 12, "twelve creative tab identities");
+        require(CashCatalog.tabIds().size() == 13, "thirteen creative tab identities");
         net.minecraft.world.item.CreativeModeTabs.tryRebuildTabContents(
                 server.getWorldData().enabledFeatures(), true, server.registryAccess());
         for (var id : CashCatalog.tabIds()) {
@@ -59,6 +59,18 @@ public final class CashCatalogProbe {
         var restored = ItemStack.parse(server.registryAccess(), saved).orElseThrow();
         require(restored.getCount() == 16 && CashStackIdentity.mark(restored, world).orElseThrow().lot().equals(lot),
                 "persistent cash component serialization");
+        var chf = CashCatalog.all().stream().filter(value -> value.currency() == dev.emily.economy.api.EconomyCurrency.CHF).toList();
+        require(chf.size() == 13 && chf.stream().filter(CashCatalog.Denomination::bill).count() == 6,
+                "six CHF notes and seven coins");
+        for (var denomination : chf) {
+            var issued = CashStackIdentity.marked(new ItemStack(denomination.item().get(), 2), world, UUID.randomUUID());
+            var encoded = issued.save(server.registryAccess());
+            var decoded = ItemStack.parse(server.registryAccess(), encoded).orElseThrow();
+            require(CashCatalog.find(decoded).orElseThrow().equals(denomination), "CHF registered recognition and saved item identity");
+            require(CashStackIdentity.mark(decoded, world).equals(CashStackIdentity.mark(issued, world)), "CHF persistent lot identity");
+            require(CashStackIdentity.mark(decoded.split(1), world).isPresent() && decoded.getCount() == 1,
+                    "CHF vanilla split keeps world/lot marker");
+        }
         System.out.println("CASH_CATALOG_PASS identities cards access vanilla split merge world binding persistent components");
     }
 

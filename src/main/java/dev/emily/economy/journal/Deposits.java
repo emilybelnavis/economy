@@ -3,6 +3,8 @@ package dev.emily.economy.journal;
 import dev.emily.economy.api.*;
 import dev.emily.economy.api.Identifiers.*;
 import dev.emily.economy.storage.FoundationStore;
+import dev.emily.economy.pricing.CashPricing;
+import dev.emily.economy.pricing.ServicePricing;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -14,6 +16,8 @@ import static dev.emily.economy.journal.PostingBatch.Role.*;
 public final class Deposits {
     public static final String FACT = "economy:deposit";
     public static final int MAX_SLOTS = 24;
+    private static final String CHF_SETTLEMENT = "CHF_MINOR_V2";
+    private static final String PRICED_SETTLEMENT = "PRICED_MINOR_V3";
     public static final int MAX_COMPONENT_BYTES = 32_768;
     private static final SystemActorId RECOVERY = new SystemActorId(
             UUID.fromString("45d57bca-f394-4c34-8fb4-df79bf99c520"));
@@ -43,10 +47,14 @@ public final class Deposits {
             if (accountRevision < 1 || terminalRevision < 1) throw new IllegalArgumentException("DEPOSIT_REVISION");
         }
     }
-    public record FxSnapshot(String revision, CurrencyConversion.Rates rates) {
+    public record FxSnapshot(String revision, CurrencyConversion.Rates rates, CashPricing.Context pricing) {
+        public FxSnapshot(String revision, CurrencyConversion.Rates rates) { this(revision,rates,null); }
         public FxSnapshot { text(revision, 256); Objects.requireNonNull(rates); }
     }
-    public record Group(EconomyCurrency currency, int count, Money subtotal, Money credit, boolean skipped) {}
+    public record Group(EconomyCurrency currency, int count, Money subtotal, Money credit, boolean skipped, String pricing) {
+        public Group(EconomyCurrency currency,int count,Money subtotal,Money credit,boolean skipped){this(currency,count,subtotal,credit,skipped,null);}
+        public Group { if(pricing!=null)text(pricing,1024); }
+    }
     public record Preview(Binding binding, List<Slot> slots, List<Group> groups, Money credit,
                           List<Slot> payable, List<Slot> returned) {
         public Preview {
@@ -54,10 +62,12 @@ public final class Deposits {
             slots = List.copyOf(slots); groups = List.copyOf(groups);
             payable = List.copyOf(payable); returned = List.copyOf(returned);
             validateSlots(slots);
+            boolean minorSettlement = binding.currency() == EconomyCurrency.CHF
+                    || groups.stream().anyMatch(group -> group.currency() == EconomyCurrency.CHF || group.pricing()!=null);
             if (credit.currency() != binding.currency() || credit.minorUnits() < 0
-                    || credit.minorUnits() % binding.currency().minorUnitsPerMajor() != 0)
+                    || !minorSettlement && credit.minorUnits() % binding.currency().minorUnitsPerMajor() != 0)
                 throw new IllegalArgumentException("DEPOSIT_CREDIT");
-            if (groups.isEmpty() || groups.size() > 10) throw invalid("DEPOSIT_GROUP");
+            if (groups.isEmpty() || groups.size() > 11) throw invalid("DEPOSIT_GROUP");
             var currencies = EnumSet.noneOf(EconomyCurrency.class);
             long total = 0;
             int count = 0;
@@ -65,7 +75,7 @@ public final class Deposits {
                 if (!currencies.add(group.currency()) || group.count() < 1 || group.count() > MAX_SLOTS * 64
                         || group.subtotal().currency() != group.currency() || group.subtotal().minorUnits() < 1
                         || group.credit().currency() != binding.currency() || group.credit().minorUnits() < 0
-                        || group.credit().minorUnits() % binding.currency().minorUnitsPerMajor() != 0
+                        || group.credit().minorUnits() % (group.pricing()!=null?1:quantum(group.currency(), binding.currency())) != 0
                         || group.skipped() != (group.credit().minorUnits() == 0)) throw invalid("DEPOSIT_GROUP");
                 total = Math.addExact(total, group.credit().minorUnits());
                 count = Math.addExact(count, group.count());
@@ -96,7 +106,8 @@ public final class Deposits {
     /** Preview is worker-side and checks current account, terminal, publication and authentic quantity. */
     public static Preview preview(ReadView reads, WorldId world, ActorId owner, Binding binding,
                                   List<Slot> slots, Map<String, Denomination> catalog, FxReader fx) {
-        var result = calculate(reads, world, owner, binding, slots, Map.copyOf(catalog), fx, null);
+        if (!TerminalBanking.bound(reads,world,binding.terminal(),binding.generation())) throw invalid("UNBOUND_BANK");
+        var result = calculate(reads, world, owner, binding, slots, Map.copyOf(catalog), fx, null, Map.of());
         // Reject an unreservable preview before an adapter moves any originals.
         var validationId = new UUID(0, 0);
         new Intent(new OperationId(validationId), new RequestId(validationId), owner,
@@ -105,7 +116,7 @@ public final class Deposits {
     }
 
     private static Preview calculate(ReadView reads, WorldId world, ActorId owner, Binding binding,
-                                     List<Slot> slots, Map<String, Denomination> catalog, FxReader fx, UUID ownDeposit) {
+                                     List<Slot> slots, Map<String, Denomination> catalog, FxReader fx, UUID ownDeposit, Map<EconomyCurrency,String> capturedPricing) {
         validateSlots(slots);
         if (!(owner instanceof PlayerId player)) throw invalid("DEPOSIT_ACCOUNT");
         var account = reads.query("""
@@ -120,10 +131,21 @@ public final class Deposits {
         terminal = TerminalPolicy.effective(terminal, terminalCatalog);
         if (!terminal.active() || !terminal.generation().equals(binding.generation())
                 || terminal.revision() != binding.terminalRevision()) throw invalid("DEPOSIT_TERMINAL_STALE");
-        if (!terminal.settings().mode().deposits() || terminal.kind() == TerminalPolicy.Kind.REGISTER)
+        if (!terminal.settings().mode().deposits() || terminal.kind() == TerminalPolicy.Kind.REGISTER || terminal.kind() == TerminalPolicy.Kind.KIOSK)
             throw invalid("DEPOSIT_MODE");
         var publication = fx.current(reads);
         if (publication == null || !publication.revision().equals(binding.fxRevision())) throw invalid("DEPOSIT_FX_STALE");
+        var provider=dev.emily.economy.institution.BankProviders.find(reads,new AccountId(binding.account())).orElse(null);
+        boolean assigned=provider!=null&&!provider.bankKey().equals(dev.emily.economy.institution.BankProviders.UNASSIGNED_PROVIDER);
+        if(publication.pricing()!=null&&(!publication.pricing().world().equals(world)||!publication.pricing().owner().equals(player)||!publication.pricing().account().equals(binding.account())))throw invalid("PRICING_CONTEXT_MISMATCH");
+        if(assigned) {
+            var bank=dev.emily.economy.institution.InstitutionCatalog.require(new dev.emily.economy.institution.InstitutionCatalog.InstitutionId(provider.bankKey()));
+            if(!bank.tier1()) {
+                if(publication.pricing()==null)throw invalid("PRICING_CONTEXT_UNAVAILABLE");
+                var valuation=publication.pricing().pricing().valuation().snapshot(reads,world,player,publication.pricing().now());
+                if(!valuation.available()||!valuation.eligible())throw invalid("TIER2_UNAVAILABLE");
+            }
+        }
         var amounts = new EnumMap<EconomyCurrency, Long>(EconomyCurrency.class);
         var counts = new EnumMap<EconomyCurrency, Integer>(EconomyCurrency.class);
         var quantities = new HashMap<UUID, Integer>();
@@ -156,23 +178,33 @@ public final class Deposits {
             reserved = Math.addExact(reserved, Long.parseLong(custodyLocks.getFirst().get("total")));
             if (entry.getValue() > lot.remaining() - reserved) throw invalid("DEPOSIT_CASH_RESERVED");
         }
+        if(publication.pricing()!=null && CashPricing.bank(publication.pricing(),reads)!=null
+                && amounts.keySet().stream().filter(c->c!=binding.currency()).count()>4)throw invalid("PRICING_BATCH_LIMIT");
         var groups = new ArrayList<Group>();
         var payableCurrencies = EnumSet.noneOf(EconomyCurrency.class);
         long total = 0;
         for (var entry : amounts.entrySet()) {
             var subtotal = new Money(entry.getKey(), entry.getValue());
+            CashPricing.Quote price=null;
+            if(entry.getKey()!=binding.currency()) {
+                if(assigned&&publication.pricing()==null)throw invalid("PRICING_CONTEXT_UNAVAILABLE");
+                String captured=capturedPricing.get(entry.getKey());
+                price=captured==null?CashPricing.deposit(publication.pricing(),reads,subtotal):CashPricing.requireFresh(publication.pricing(),reads,captured);
+                if(price!=null&&(price.pricing().service()!=ServicePricing.Service.FX||price.payer()!=null||price.fee().currency()!=entry.getKey()||Math.addExact(price.principalMinor(),price.fee().minorUnits())!=subtotal.minorUnits()))throw invalid("DEPOSIT_PRICING");
+            } else if(capturedPricing.containsKey(entry.getKey()))throw invalid("DEPOSIT_PRICING");
+            var principal=price==null?subtotal:new Money(entry.getKey(),price.principalMinor());
             long credit;
             try {
-                credit = CurrencyConversion.deposit(List.of(subtotal), binding.currency(), publication.rates()).credit().minorUnits();
+                credit = CurrencyConversion.deposit(List.of(principal), binding.currency(), publication.rates()).credit().minorUnits();
             } catch (CurrencyConversion.Rejected rejection) {
                 if (rejection.failure() != CurrencyConversion.Failure.ZERO_CREDIT) throw rejection;
                 credit = 0;
             }
-            long quantum = binding.currency().minorUnitsPerMajor();
+            long quantum = price==null?quantum(entry.getKey(), binding.currency()):1;
             credit = Math.multiplyExact(credit / quantum, quantum);
             if (credit > 0) payableCurrencies.add(entry.getKey());
             groups.add(new Group(entry.getKey(), counts.get(entry.getKey()), subtotal,
-                    new Money(binding.currency(), credit), credit == 0));
+                    new Money(binding.currency(), credit), credit == 0,price==null?null:price.encoded()));
             total = Math.addExact(total, credit);
         }
         var payable = slots.stream().filter(slot -> payableCurrencies.contains(catalog.get(slot.claim().item()).currency())).toList();
@@ -186,6 +218,8 @@ public final class Deposits {
         fields.put("binding", encodeBinding(preview.binding()));
         fields.put("groups", encodeGroups(preview.groups()));
         fields.put("credit", Long.toString(preview.credit().minorUnits()));
+        if (priced(preview)) fields.put("settlement", PRICED_SETTLEMENT);
+        else if (minorSettlement(preview)) fields.put("settlement", CHF_SETTLEMENT);
         for (var slot : preview.slots()) fields.put("slot_" + slot.index(), encodeSlot(slot));
         return new CanonicalRequest(1, fields);
     }
@@ -206,7 +240,8 @@ public final class Deposits {
             Preview supplied;
             try {
                 supplied = decodeRequest(intent.request(), catalog);
-                var actual = calculate(reads, world, intent.actor(), supplied.binding(), supplied.slots(), catalog, fx, null);
+                if (!TerminalBanking.bound(reads,world,supplied.binding().terminal(),supplied.binding().generation())) return reject("UNBOUND_BANK");
+                var actual = calculate(reads, world, intent.actor(), supplied.binding(), supplied.slots(), catalog, fx, null, pricing(supplied));
                 if (!reserveRequest(actual).equals(intent.request())) return reject("DEPOSIT_PREVIEW");
                 supplied = actual;
             } catch (IllegalArgumentException | ArithmeticException | NullPointerException malformed) { return rejected(malformed); }
@@ -245,7 +280,7 @@ public final class Deposits {
             if (!verifier.verifies(action, intent, current, evidence, reads)) return decline("DEPOSIT_EVIDENCE");
             try {
                 var checked = calculate(reads, world, current.owner(), current.preview().binding(), current.preview().slots(),
-                        catalog, fx, current.id());
+                        catalog, fx, current.id(), pricing(current.preview()));
                 if (!reserveRequest(checked).equals(reserveRequest(current.preview()))) return reject("DEPOSIT_STALE");
             } catch (IllegalArgumentException | ArithmeticException stale) { return rejected(stale); }
             var preview = current.preview();
@@ -255,22 +290,32 @@ public final class Deposits {
                 var legs = List.of(new PostingBatch.Leg(Settlement.issuanceAccount(amount.currency()), ISSUANCE,
                                 amount.currency(), amount.negate()),
                         new PostingBatch.Leg(preview.binding().account(), ACCOUNT, amount.currency(), amount));
+                var minor = minorSettlement(preview);
+                var financialRegistration = minor
+                        ? Settlement.registrationMinor((i, l, r) -> PostingBatch.Authority.ISSUE)
+                        : Settlement.registration((i, l, r) -> PostingBatch.Authority.ISSUE);
                 var financial = new Intent(intent.operationId(), intent.requestId(), intent.actor(),
-                        new Kind("economy:deposits", "economy:credit"), Settlement.request(legs), null, null);
+                        new Kind("economy:deposits", "economy:credit"),
+                        minor ? Settlement.minorRequest(legs) : Settlement.request(legs), null, null);
                 var marked = preview.payable().stream().filter(slot -> !slot.unmarked()).map(Slot::claim).toList();
                 Decision decision;
                 if (marked.isEmpty()) {
-                    decision = Settlement.registration((i, l, r) -> PostingBatch.Authority.ISSUE).handler().prepare(financial, reads);
+                    decision = financialRegistration.handler().prepare(financial, reads);
                 } else {
                     var redeem = CashIssuance.registration(CashIssuance.Action.REDEEM, world,
                             (a, i, lots, r) -> true, (a, i, lots, proof, r) -> true,
-                            CashIssuance.financial(financial, Settlement.registration((i, l, r) -> PostingBatch.Authority.ISSUE)), current.id());
+                            CashIssuance.financial(financial, financialRegistration), current.id());
                     var request = CashIssuance.redeemRequest(marked, evidence, financial);
                     decision = redeem.handler().prepare(new Intent(intent.operationId(), intent.requestId(), intent.actor(),
                             CashIssuance.Action.REDEEM.kind(), request, null, null), reads);
                 }
                 if (!(decision instanceof Commit accepted)) return decision;
-                composed = accepted;
+                var prices=new ArrayList<CashPricing.Quote>();
+                var context=fx.current(reads).pricing();
+                for(var group:preview.groups())if(!group.skipped()&&group.pricing()!=null)prices.add(CashPricing.requireFresh(context,reads,group.pricing()));
+                var withFees=prices.isEmpty()?accepted:FeeSettlement.composeCash(reads,accepted,prices);
+                if(!(withFees instanceof Commit feeCommit))return withFees;
+                composed = feeCommit;
                 released = preview.payable().stream().map(slot -> slot.claim().lot()).collect(java.util.stream.Collectors.toSet());
             }
             next = State.COMMITTED;
@@ -283,7 +328,7 @@ public final class Deposits {
                                  List<Slot> returns, Set<UUID> released) {
         var records = new ArrayList<Journal.Record>();
         if (base != null) records.addAll(base.records());
-        records.add(new Journal.Record(FACT, 1, encodeReservation(action, value)));
+        records.add(new Journal.Record(FACT, priced(value.preview()) ? 3 : minorSettlement(value.preview()) ? 2 : 1, encodeReservation(action, value)));
         return new Commit(records, new Result(1, "DEPOSIT_" + action.name(), value.id().toString()), tx -> {
             if (base != null) base.projections().apply(tx);
             if (insert) {
@@ -381,7 +426,7 @@ public final class Deposits {
     }
     private static String encodeGroups(List<Group> groups) {
         return groups.stream().map(g -> g.currency() + "|" + g.count() + "|" + g.subtotal().minorUnits() + "|"
-                + g.credit().minorUnits() + "|" + g.skipped()).reduce((a,b) -> a + "\n" + b).orElse("");
+                + g.credit().minorUnits() + "|" + g.skipped()+(g.pricing()==null?"":"|"+pack(g.pricing()))).reduce((a,b) -> a + "\n" + b).orElse("");
     }
     private static Preview decodeRequest(CanonicalRequest request, Map<String,Denomination> catalog) {
         var fields = request.fields();
@@ -402,12 +447,12 @@ public final class Deposits {
         var result = new ArrayList<Group>();
         for (var row : value.split("\n", -1)) {
             var p = row.split("\\|", -1);
-            if (p.length != 5) throw invalid("DEPOSIT_GROUP");
+            if (p.length != 5 && p.length != 6) throw invalid("DEPOSIT_GROUP");
             var source = EconomyCurrency.valueOf(p[0]);
             result.add(new Group(source, Integer.parseInt(p[1]), new Money(source, Long.parseLong(p[2])),
-                    new Money(currency, Long.parseLong(p[3])), Boolean.parseBoolean(p[4])));
+                    new Money(currency, Long.parseLong(p[3])), Boolean.parseBoolean(p[4]),p.length==6?unpack(p[5]):null));
         }
-        if (result.size() > 10) throw invalid("DEPOSIT_GROUP");
+        if (result.size() > 11) throw invalid("DEPOSIT_GROUP");
         return List.copyOf(result);
     }
     private static String encodePreview(Preview preview) {
@@ -416,29 +461,55 @@ public final class Deposits {
         fields.add(pack(encodeGroups(preview.groups())));
         fields.add(pack(preview.slots().stream().map(Deposits::encodeSlot).reduce((a,b) -> a + "\n" + b).orElse("")));
         fields.add(preview.payable().stream().map(s -> Integer.toString(s.index())).reduce((a,b)->a+","+b).orElse(""));
+        if (priced(preview)) fields.add(PRICED_SETTLEMENT);
+        else if (minorSettlement(preview)) fields.add(CHF_SETTLEMENT);
         return String.join(";", fields);
     }
     private static Preview decodePreview(String value) {
         var parts = value.split(";", -1);
-        if (parts.length != 5) throw invalid("DEPOSIT_PREVIEW");
+        if (parts.length != 5 && parts.length != 6) throw invalid("DEPOSIT_PREVIEW");
         var binding = decodeBinding(unpack(parts[0]));
         var groups = decodeGroups(unpack(parts[2]), binding.currency());
         var slots = Arrays.stream(unpack(parts[3]).split("\n", -1)).map(Deposits::decodeSlot).toList();
         var payableIndexes = parts[4].isEmpty() ? Set.<Integer>of() : Arrays.stream(parts[4].split(",")).map(Integer::valueOf).collect(java.util.stream.Collectors.toSet());
-        return new Preview(binding, slots, groups, new Money(binding.currency(), Long.parseLong(parts[1])),
+        var preview = new Preview(binding, slots, groups, new Money(binding.currency(), Long.parseLong(parts[1])),
                 slots.stream().filter(s -> payableIndexes.contains(s.index())).toList(),
                 slots.stream().filter(s -> !payableIndexes.contains(s.index())).toList());
+        if (minorSettlement(preview) != (parts.length == 6)
+                || parts.length == 6 && !(priced(preview)?PRICED_SETTLEMENT:CHF_SETTLEMENT).equals(parts[5])) throw invalid("DEPOSIT_SETTLEMENT_VERSION");
+        return preview;
     }
     private static String encodeReservation(Action action, Reservation value) {
         return action.name() + "|" + value.id() + "|" + actorKey(value.owner()) + "|" + value.state() + "|"
                 + pack(encodePreview(value.preview())) + "|" + pack(value.evidence()) + "|" + pack(value.reason()) + "|" + value.revision();
     }
-    public static void validateFact(String payload) {
+    public static void validateFact(String payload) { validateFact(payload, 1); }
+    public static void validateFactV2(String payload) { validateFact(payload, 2); }
+    public static void validateFactV3(String payload) { validateFact(payload, 3); }
+    private static void validateFact(String payload, int version) {
         var p = payload.split("\\|", -1);
         if (p.length != 8) throw invalid("DEPOSIT_FACT");
-        Action.valueOf(p[0]); UUID.fromString(p[1]); actor(p[2]); State.valueOf(p[3]); decodePreview(unpack(p[4]));
-        text(unpack(p[5]),512); text(unpack(p[6]),512);
-        if (Long.parseLong(p[7]) < 1) throw invalid("DEPOSIT_REVISION");
+        var action = Action.valueOf(p[0]);
+        var reservation = new Reservation(UUID.fromString(p[1]), actor(p[2]), State.valueOf(p[3]),
+                decodePreview(unpack(p[4])), unpack(p[5]), unpack(p[6]), Long.parseLong(p[7]));
+        text(reservation.evidence(),512); text(reservation.reason(),512);
+        if (reservation.revision() < 1) throw invalid("DEPOSIT_REVISION");
+        if ((priced(reservation.preview())?3:minorSettlement(reservation.preview())?2:1)!=version) throw invalid("DEPOSIT_SETTLEMENT_VERSION");
+        if (version>=2 && !encodeReservation(action, reservation).equals(payload)) throw invalid("DEPOSIT_FACT");
+    }
+    private static boolean priced(Preview preview){return preview.groups().stream().anyMatch(g->g.pricing()!=null);}
+    private static Map<EconomyCurrency,String> pricing(Preview preview){
+        var result=new EnumMap<EconomyCurrency,String>(EconomyCurrency.class);
+        for(var group:preview.groups())if(group.pricing()!=null)result.put(group.currency(),group.pricing());
+        return result;
+    }
+    /** CHF-aware groups settle to account minor units; all legacy groups keep their historical quantum. */
+    private static long quantum(EconomyCurrency source, EconomyCurrency account) {
+        return source == EconomyCurrency.CHF || account == EconomyCurrency.CHF ? 1 : account.minorUnitsPerMajor();
+    }
+    private static boolean minorSettlement(Preview preview) {
+        return priced(preview)||preview.binding().currency() == EconomyCurrency.CHF
+                || preview.groups().stream().anyMatch(group -> group.currency() == EconomyCurrency.CHF);
     }
     private static String pack(String value) { return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8)); }
     private static String unpack(String value) { return new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8); }

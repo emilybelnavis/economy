@@ -165,6 +165,19 @@ public final class CashCatalog {
         register(cash, "dkk_bill_100", EconomyCurrency.DKK, 10000L, true);
         register(cash, "dkk_bill_200", EconomyCurrency.DKK, 20000L, true);
         register(cash, "dkk_bill_500", EconomyCurrency.DKK, 50000L, true);
+        register(cash, "chf_coin_5", EconomyCurrency.CHF, 5L, false);
+        register(cash, "chf_coin_10", EconomyCurrency.CHF, 10L, false);
+        register(cash, "chf_coin_20", EconomyCurrency.CHF, 20L, false);
+        register(cash, "chf_coin_50", EconomyCurrency.CHF, 50L, false);
+        register(cash, "chf_coin_100", EconomyCurrency.CHF, 100L, false);
+        register(cash, "chf_coin_200", EconomyCurrency.CHF, 200L, false);
+        register(cash, "chf_coin_500", EconomyCurrency.CHF, 500L, false);
+        register(cash, "chf_bill_10", EconomyCurrency.CHF, 1000L, true);
+        register(cash, "chf_bill_20", EconomyCurrency.CHF, 2000L, true);
+        register(cash, "chf_bill_50", EconomyCurrency.CHF, 5000L, true);
+        register(cash, "chf_bill_100", EconomyCurrency.CHF, 10000L, true);
+        register(cash, "chf_bill_200", EconomyCurrency.CHF, 20000L, true);
+        register(cash, "chf_bill_1000", EconomyCurrency.CHF, 100000L, true);
         CASH = Collections.unmodifiableMap(cash);
         CARDS = Collections.unmodifiableMap(cards);
         var tabs = new ArrayList<String>();
@@ -197,6 +210,8 @@ public final class CashCatalog {
         tabs.add("cny");
         previous = currencyTab("dkk", "dkk_coin_2000", EconomyCurrency.DKK, previous);
         tabs.add("dkk");
+        previous = currencyTab("chf", "chf_bill_100", EconomyCurrency.CHF, previous);
+        tabs.add("chf");
         var lastCurrency = previous;
         TABS.register("cards", () -> CreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.economy.cards"))

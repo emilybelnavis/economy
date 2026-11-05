@@ -37,49 +37,67 @@ public final class Settlement {
         return UUID.nameUUIDFromBytes(("economy:" + purpose + ":" + currency.name()).getBytes(StandardCharsets.UTF_8));
     }
 
-    public static Journal.CanonicalRequest request(List<PostingBatch.Leg> legs) {
+    public static Journal.CanonicalRequest request(List<PostingBatch.Leg> legs) { return request(legs, false); }
+
+    public static Journal.CanonicalRequest minorRequest(List<PostingBatch.Leg> legs) { return request(legs, true); }
+
+    private static Journal.CanonicalRequest request(List<PostingBatch.Leg> legs, boolean minor) {
         var entries = new StringJoiner("\n");
         for (var leg : legs) {
             entries.add(leg.account() + "|" + leg.role().name() + "|" + leg.accountCurrency().name()
                     + "|" + leg.amount().minorUnits());
             if (leg.amount().currency() != leg.accountCurrency()) throw new IllegalArgumentException("Posting currency");
         }
-        return new Journal.CanonicalRequest(1, Map.of("postings", entries.toString()));
+        return new Journal.CanonicalRequest(1, minor ? Map.of("postings", entries.toString(), "precision", "minor-v2")
+                : Map.of("postings", entries.toString()));
     }
 
     public static JournalEngine.Registration registration(AuthorityResolver resolver) {
         Objects.requireNonNull(resolver);
-        return new JournalEngine.Registration(1, (intent, reads) -> prepare(intent, reads, resolver));
+        return new JournalEngine.Registration(1, (intent, reads) -> prepare(intent, reads, resolver, false));
+    }
+
+    /** Explicitly versioned minor-unit composition, admitted only through a trusted resolver. */
+    public static JournalEngine.Registration registrationMinor(AuthorityResolver resolver) {
+        Objects.requireNonNull(resolver);
+        return new JournalEngine.Registration(1, (intent, reads) -> prepare(intent, reads, resolver, true));
     }
 
     private static JournalEngine.Decision prepare(Journal.Intent intent, JournalEngine.ReadView reads,
-                                                  AuthorityResolver resolver) {
+                                                  AuthorityResolver resolver, boolean minor) {
         List<PostingBatch.Leg> legs;
         try {
-            legs = decode(intent.request());
+            legs = decode(intent.request(), minor);
         } catch (IllegalArgumentException malformed) {
             return reject("POSTING_REQUEST");
         }
         var authority = resolver.resolve(intent, legs, reads);
-        return prepare(reads, legs, authority, null);
+        return minor ? prepareMinor(reads, legs, authority, null) : prepare(reads, legs, authority, null);
     }
 
     static JournalEngine.Decision prepare(JournalEngine.ReadView reads, List<PostingBatch.Leg> legs,
                                           PostingBatch.Authority authority, Holds.Hold captured) {
-        return prepare(reads, legs, authority, captured, Map.of());
+        return prepare(reads, legs, authority, captured, Map.of(), false);
+    }
+
+    static JournalEngine.Decision prepareMinor(JournalEngine.ReadView reads, List<PostingBatch.Leg> legs,
+                                               PostingBatch.Authority authority, Holds.Hold captured) {
+        return prepare(reads, legs, authority, captured, Map.of(), true);
     }
 
     static JournalEngine.Decision prepareRebase(JournalEngine.ReadView reads, List<PostingBatch.Leg> legs,
                                                 Map<UUID, EconomyCurrency> newCurrencies) {
         var authority = legs.stream().anyMatch(leg -> leg.role() == CLEARING)
                 ? PostingBatch.Authority.FX : PostingBatch.Authority.TRANSFER;
-        return prepare(reads, legs, authority, null, Map.copyOf(newCurrencies));
+        // Newly CHF-derived fractional legacy balances must also drain during an authorized rebase.
+        boolean fractional = legs.stream().anyMatch(leg -> leg.amount().minorUnits() % leg.accountCurrency().minorUnitsPerMajor() != 0);
+        return prepare(reads, legs, authority, null, Map.copyOf(newCurrencies), fractional);
     }
 
     private static JournalEngine.Decision prepare(JournalEngine.ReadView reads, List<PostingBatch.Leg> legs,
                                                    PostingBatch.Authority authority, Holds.Hold captured,
-                                                   Map<UUID, EconomyCurrency> newCurrencies) {
-        var decision = PostingBatch.prepare(legs, authority);
+                                                   Map<UUID, EconomyCurrency> newCurrencies, boolean minor) {
+        var decision = minor ? PostingBatch.prepareMinor(legs, authority) : PostingBatch.prepare(legs, authority);
         if (!(decision instanceof JournalEngine.Commit commit)) return decision;
 
         var deltas = new LinkedHashMap<Account, Long>();
@@ -121,7 +139,7 @@ public final class Settlement {
         });
     }
 
-    private static List<PostingBatch.Leg> decode(Journal.CanonicalRequest request) {
+    private static List<PostingBatch.Leg> decode(Journal.CanonicalRequest request, boolean minor) {
         String payload = request.fields().get("postings");
         if (payload == null) throw new IllegalArgumentException("Missing postings");
         var legs = new ArrayList<PostingBatch.Leg>();
@@ -132,7 +150,7 @@ public final class Settlement {
             legs.add(new PostingBatch.Leg(UUID.fromString(fields[0]), PostingBatch.Role.valueOf(fields[1]),
                     currency, new Money(currency, Long.parseLong(fields[3]))));
         }
-        if (!request(legs).equals(request)) throw new IllegalArgumentException("Noncanonical postings");
+        if (!request(legs, minor).equals(request)) throw new IllegalArgumentException("Noncanonical postings");
         return List.copyOf(legs);
     }
 
@@ -140,6 +158,7 @@ public final class Settlement {
         var id = account.id();
         var currency = account.currency();
         return switch (account.role()) {
+            case INSTITUTION_CASH, INSTITUTION_CLAIM -> false;
             case ISSUANCE -> id.equals(issuanceAccount(currency));
             case CLEARING -> id.equals(clearingAccount(currency));
             case FEE -> id.equals(feeAccount(currency));

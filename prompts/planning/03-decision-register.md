@@ -78,3 +78,7 @@ Following the request to clear A6-01 blockers, the missing values/alternatives n
 ### A6 remaining policies approved; funding quadrupled — 2026-11-04
 
 The user directed “quadruple the bank funding to 28 billion” and approved the remaining proposed policy set. All allocations are4×:18 Tier1/hybrid banks ×400M =7.2B; five Tier2 specialists ×4B =20B; subprime400M; collector400M; total28B server-currency units. The 10% operating-floor policy is unchanged. This supersedes the earlier7B funding proposal and pending-policy labels. [Approved policy record](../A6-credit-debt/POLICY-REVIEW.md) and its three detail contracts now supply all D01–D17 inputs. No policy reapproval is needed; A6-01 shared-contract work remains unexecuted and no implementation/verification is claimed.
+
+### A6-01 shared contract delivered — 2026-11-04
+
+At the user's request, [CONTRACT.md](../A6-credit-debt/CONTRACT.md) now defines stable identities/manifest, upstream compatibility inventory, service inputs/results, state vocabulary, journal fact families, accounting/clock extensions, bounded work, migration and package acceptance ownership. The approved28B allocation and D01–D17 policies remain normative. A6-01 is a completed document/source-review checkpoint only; no code, migration, assets, Gradle or game verification is claimed. Next eligible packages: A6-02-01 or independent A6-03-01.

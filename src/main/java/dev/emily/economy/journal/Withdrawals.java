@@ -3,6 +3,8 @@ package dev.emily.economy.journal;
 import dev.emily.economy.api.*;
 import dev.emily.economy.api.Identifiers.*;
 import dev.emily.economy.storage.FoundationStore;
+import dev.emily.economy.pricing.CashPricing;
+import dev.emily.economy.pricing.ServicePricing;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -14,6 +16,8 @@ import static dev.emily.economy.journal.PostingBatch.Role.*;
 public final class Withdrawals {
     public static final String FACT = "economy:withdrawal";
     public static final int MAX_LINES = 24;
+    private static final String CHF_SETTLEMENT = "CHF_MINOR_V2";
+    private static final String PRICED_SETTLEMENT = "PRICED_MINOR_V3";
     public static final int MAX_STACKS = 36;
     private static final SystemActorId RECOVERY = new SystemActorId(
             UUID.fromString("225d3dad-73e3-4b30-a121-81df44fc8564"));
@@ -31,17 +35,20 @@ public final class Withdrawals {
             if (accountRevision < 1 || terminalRevision < 1) throw invalid("WITHDRAWAL_REVISION");
         }
     }
-    public record FxSnapshot(String revision, CurrencyConversion.Rates rates) {
+    public record FxSnapshot(String revision, CurrencyConversion.Rates rates, CashPricing.Context pricing) {
+        public FxSnapshot(String revision, CurrencyConversion.Rates rates){this(revision,rates,null);}
         public FxSnapshot { bounded(revision, 256); Objects.requireNonNull(rates); }
     }
     public record Preview(Binding binding, Money cash, boolean edited, Map<String,Integer> billEdits,
-                          WithdrawalPlanner.Plan plan, Money debit) {
+                          WithdrawalPlanner.Plan plan, Money debit, String pricing) {
+        public Preview(Binding binding,Money cash,boolean edited,Map<String,Integer> billEdits,WithdrawalPlanner.Plan plan,Money debit){this(binding,cash,edited,billEdits,plan,debit,null);}
         public Preview {
             Objects.requireNonNull(binding); Objects.requireNonNull(cash); Objects.requireNonNull(plan); Objects.requireNonNull(debit);
             billEdits = Collections.unmodifiableMap(new TreeMap<>(billEdits));
+            if(pricing!=null)bounded(pricing,1024);
             if ((!edited && !billEdits.isEmpty()) || cash.minorUnits() <= 0 || plan.currency() != cash.currency()
                     || plan.minorUnits() != cash.minorUnits() || debit.currency() != binding.currency()
-                    || debit.minorUnits() <= 0 || debit.minorUnits() % binding.currency().minorUnitsPerMajor() != 0)
+                    || debit.minorUnits() <= 0 || debit.minorUnits() % (pricing==null?quantum(cash.currency(), binding.currency()):1) != 0)
                 throw invalid("WITHDRAWAL_PREVIEW");
             validatePlan(plan);
         }
@@ -66,7 +73,8 @@ public final class Withdrawals {
     public static Preview preview(ReadView reads, WorldId world, ActorId owner, Binding binding, Money cash,
                                   Map<String,Integer> billEdits, Map<String,WithdrawalPlanner.Denomination> catalog,
                                   FxReader fx) {
-        var result = calculate(reads, world, owner, binding, cash, billEdits, Map.copyOf(catalog), fx);
+        if (!TerminalBanking.bound(reads,world,binding.terminal(),binding.generation())) throw invalid("UNBOUND_BANK");
+        var result = calculate(reads, world, owner, binding, cash, billEdits, Map.copyOf(catalog), fx, null);
         var id = new UUID(0, 0);
         new Intent(new OperationId(id), new RequestId(id), owner, Action.RESERVE.kind(), reserveRequest(result), null, null);
         return result;
@@ -74,7 +82,7 @@ public final class Withdrawals {
 
     private static Preview calculate(ReadView reads, WorldId world, ActorId owner, Binding binding, Money cash,
                                      Map<String,Integer> edits, Map<String,WithdrawalPlanner.Denomination> catalog,
-                                     FxReader fx) {
+                                     FxReader fx, String capturedPricing) {
         if (!(owner instanceof PlayerId player)) throw invalid("WITHDRAWAL_ACCOUNT");
         if (reads.query("""
                 SELECT account_id FROM account_catalog WHERE account_id=? AND owner_id=? AND purpose='BANK'
@@ -88,11 +96,14 @@ public final class Withdrawals {
         terminal = TerminalPolicy.effective(terminal, terminalCatalog);
         if (!terminal.active() || !terminal.generation().equals(binding.generation())
                 || terminal.revision() != binding.terminalRevision()) throw invalid("WITHDRAWAL_TERMINAL_STALE");
-        if (terminal.kind() == TerminalPolicy.Kind.REGISTER || !terminal.settings().mode().withdrawals())
+        if (terminal.kind() == TerminalPolicy.Kind.REGISTER || terminal.kind() == TerminalPolicy.Kind.KIOSK || !terminal.settings().mode().withdrawals())
             throw invalid("WITHDRAWAL_MODE");
         if (!terminal.settings().currencies().contains(cash.currency())) throw invalid("WITHDRAWAL_CURRENCY");
         var publication = fx.current(reads);
         if (publication == null || !publication.revision().equals(binding.fxRevision())) throw invalid("WITHDRAWAL_FX_STALE");
+        var provider=dev.emily.economy.institution.BankProviders.find(reads,new AccountId(binding.account())).orElse(null);
+        boolean assigned=provider!=null&&!provider.bankKey().equals(dev.emily.economy.institution.BankProviders.UNASSIGNED_PROVIDER);
+        if(publication.pricing()!=null&&(!publication.pricing().world().equals(world)||!publication.pricing().owner().equals(player)||!publication.pricing().account().equals(binding.account())))throw invalid("PRICING_CONTEXT_MISMATCH");
         var denominations = new ArrayList<WithdrawalPlanner.Denomination>();
         for (var id : terminal.settings().denominations()) {
             var denomination = catalog.get(id);
@@ -102,9 +113,16 @@ public final class Withdrawals {
         boolean atm = terminal.kind() == TerminalPolicy.Kind.ATM;
         var plan = WithdrawalPlanner.plan(cash.currency(), cash.minorUnits(), denominations, atm, edits);
         var raw = CurrencyConversion.withdrawalDebit(cash, binding.currency(), publication.rates()).minorUnits();
-        long quantum = binding.currency().minorUnitsPerMajor();
-        long debit = Math.multiplyExact(Math.addExact(raw, quantum - 1) / quantum, quantum);
-        return new Preview(binding, cash, edits != null, edits == null ? Map.of() : edits, plan, new Money(binding.currency(), debit));
+        CashPricing.Quote price=null;
+        if(cash.currency()!=binding.currency()) {
+            if(assigned&&publication.pricing()==null)throw invalid("PRICING_CONTEXT_UNAVAILABLE");
+            price=capturedPricing==null?CashPricing.withdrawal(publication.pricing(),reads,new Money(binding.currency(),raw)):CashPricing.requireFresh(publication.pricing(),reads,capturedPricing);
+            if(price!=null&&(price.pricing().service()!=ServicePricing.Service.PROTECTED_WITHDRAWAL_FX||price.payer()==null||!price.payer().equals(binding.account())||price.principalMinor()!=raw||price.fee().currency()!=binding.currency()))throw invalid("WITHDRAWAL_PRICING");
+        } else if(capturedPricing!=null)throw invalid("WITHDRAWAL_PRICING");
+        long quantum = price==null?quantum(cash.currency(), binding.currency()):1;
+        long principal = Math.multiplyExact(Math.addExact(raw, quantum - 1) / quantum, quantum);
+        long debit = price==null?principal:Math.addExact(principal,price.fee().minorUnits());
+        return new Preview(binding, cash, edits != null, edits == null ? Map.of() : edits, plan, new Money(binding.currency(), debit),price==null?null:price.encoded());
     }
 
     public static CanonicalRequest reserveRequest(Preview preview) {
@@ -115,6 +133,8 @@ public final class Withdrawals {
         fields.put("edits", encodeCounts(preview.billEdits()));
         fields.put("plan", encodePlan(preview.plan()));
         fields.put("debit", Long.toString(preview.debit().minorUnits()));
+        if(preview.pricing()!=null){fields.put("settlement",PRICED_SETTLEMENT);fields.put("pricing",preview.pricing());}
+        else if (minorSettlement(preview)) fields.put("settlement", CHF_SETTLEMENT);
         return new CanonicalRequest(1, fields);
     }
     public static CanonicalRequest request(UUID reservation, String evidence, String reason) {
@@ -138,8 +158,9 @@ public final class Withdrawals {
             Preview actual;
             try {
                 var supplied = decodeRequest(intent.request());
+                if (!TerminalBanking.bound(reads,world,supplied.binding().terminal(),supplied.binding().generation())) return reject("UNBOUND_BANK");
                 actual = calculate(reads, world, intent.actor(), supplied.binding(), supplied.cash(),
-                        supplied.edited() ? supplied.billEdits() : null, catalog, fx);
+                        supplied.edited() ? supplied.billEdits() : null, catalog, fx,supplied.pricing());
                 if (!reserveRequest(actual).equals(intent.request())) return reject("WITHDRAWAL_PREVIEW");
             } catch (IllegalArgumentException | ArithmeticException | NullPointerException invalid) {
                 return rejected(invalid);
@@ -166,21 +187,31 @@ public final class Withdrawals {
         else if (action == Action.COMMIT) {
             try {
                 var checked = calculate(reads, world, current.owner(), current.preview().binding(), current.preview().cash(),
-                        current.preview().edited() ? current.preview().billEdits() : null, catalog, fx);
+                        current.preview().edited() ? current.preview().billEdits() : null, catalog, fx,current.preview().pricing());
                 if (!reserveRequest(checked).equals(reserveRequest(current.preview()))) return reject("WITHDRAWAL_STALE");
             } catch (IllegalArgumentException | ArithmeticException stale) { return rejected(stale); }
             if (!capacity.fits(action, intent, current, reads)) return decline("WITHDRAWAL_CAPACITY");
-            var debit = current.preview().debit();
+            var preview=current.preview();
+            var price=preview.pricing()==null?null:CashPricing.requireFresh(fx.current(reads).pricing(),reads,preview.pricing());
+            var debit = price==null?preview.debit():new Money(preview.debit().currency(),price.principalMinor());
+            if(price!=null&&Math.addExact(debit.minorUnits(),price.fee().minorUnits())!=preview.debit().minorUnits())return reject("WITHDRAWAL_PRICING");
             var legs = List.of(new PostingBatch.Leg(current.preview().binding().account(), ACCOUNT, debit.currency(), debit.negate()),
                     new PostingBatch.Leg(Settlement.issuanceAccount(debit.currency()), ISSUANCE, debit.currency(), debit));
-            var decision = Settlement.prepare(reads, legs, PostingBatch.Authority.REDEEM, null);
+            var decision = minorSettlement(current.preview())
+                    ? Settlement.prepareMinor(reads, legs, PostingBatch.Authority.REDEEM, null)
+                    : Settlement.prepare(reads, legs, PostingBatch.Authority.REDEEM, null);
             if (!(decision instanceof Commit financial)) {
                 if (decision instanceof Reject rejection && rejection.result().code().equals("INSUFFICIENT_FUNDS"))
                     return new Retry(rejection.result());
                 return decision;
             }
+            var withFees=price==null?financial:FeeSettlement.composeCash(reads,financial,List.of(price));
+            if(!(withFees instanceof Commit pricedFinancial)) {
+                if(withFees instanceof Reject rejection&&rejection.result().code().equals("INSUFFICIENT_FUNDS"))return new Retry(rejection.result());
+                return withFees;
+            }
             var lots = lots(current, world);
-            var issuance = CashIssuance.composeIssuance(world, lots, financial, reads);
+            var issuance = CashIssuance.composeIssuance(world, lots, pricedFinancial, reads);
             if (!(issuance instanceof Commit issued)) return issuance;
             var intended = delivery.prepare(intent, current, lots, reads);
             if (intended == null) return decline("WITHDRAWAL_DELIVERY");
@@ -212,7 +243,7 @@ public final class Withdrawals {
     private static Commit commit(Action action, Reservation value, Commit base, boolean insert) {
         var records = new ArrayList<Journal.Record>();
         if (base != null) records.addAll(base.records());
-        records.add(new Journal.Record(FACT, 1, encode(action, value)));
+        records.add(new Journal.Record(FACT, value.preview().pricing()!=null?3:minorSettlement(value.preview()) ? 2 : 1, encode(action, value)));
         return new Commit(records, new Result(1, "WITHDRAWAL_" + action.name(), value.id().toString()), tx -> {
             if (base != null) base.projections().apply(tx);
             if (insert) tx.execute("INSERT INTO withdrawals VALUES(?,?,?,?,?,?,?)", values(value));
@@ -307,7 +338,10 @@ public final class Withdrawals {
     }
     private static Preview decodeRequest(CanonicalRequest request) {
         var f = request.fields();
-        if (!f.keySet().equals(Set.of("binding","cash","edited","edits","plan","debit"))) throw invalid("WITHDRAWAL_REQUEST");
+        if (!f.keySet().equals(Set.of("binding","cash","edited","edits","plan","debit"))
+                && !f.keySet().equals(Set.of("binding","cash","edited","edits","plan","debit","settlement"))
+                && !f.keySet().equals(Set.of("binding","cash","edited","edits","plan","debit","settlement","pricing")))
+            throw invalid("WITHDRAWAL_REQUEST");
         var binding = decodeBinding(f.get("binding"));
         var cash = f.get("cash").split("\\|", -1);
         if (cash.length != 2) throw invalid("WITHDRAWAL_CASH");
@@ -326,7 +360,7 @@ public final class Withdrawals {
         }
         var plan = new WithdrawalPlanner.Plan(money.currency(), money.minorUnits(), bills, coins, lines, count);
         var result = new Preview(binding, money, Boolean.parseBoolean(f.get("edited")), edits, plan,
-                new Money(binding.currency(), Long.parseLong(f.get("debit"))));
+                new Money(binding.currency(), Long.parseLong(f.get("debit"))),f.get("pricing"));
         if (!reserveRequest(result).equals(request)) throw invalid("WITHDRAWAL_REQUEST");
         return result;
     }
@@ -347,12 +381,26 @@ public final class Withdrawals {
         return action + "|" + value.id() + "|" + pack(actorKey(value.owner())) + "|" + value.state()
                 + "|" + pack(encodePreview(value.preview())) + "|" + pack(value.evidence()) + "|" + pack(value.reason()) + "|" + value.revision();
     }
-    public static void validateFact(String value) {
+    public static void validateFact(String value) { validateFact(value, 1); }
+    public static void validateFactV2(String value) { validateFact(value, 2); }
+    public static void validateFactV3(String value) { validateFact(value, 3); }
+    private static void validateFact(String value, int version) {
         var p = value.split("\\|", -1);
         if (p.length != 8) throw invalid("WITHDRAWAL_FACT");
-        Action.valueOf(p[0]); UUID.fromString(p[1]); actor(unpack(p[2])); State.valueOf(p[3]);
-        decodePreview(unpack(p[4])); bounded(unpack(p[5]), 256); bounded(unpack(p[6]), 256);
-        if (Long.parseLong(p[7]) < 1) throw invalid("WITHDRAWAL_REVISION");
+        var action = Action.valueOf(p[0]);
+        var reservation = new Reservation(UUID.fromString(p[1]), actor(unpack(p[2])), State.valueOf(p[3]),
+                decodePreview(unpack(p[4])), unpack(p[5]), unpack(p[6]), Long.parseLong(p[7]));
+        bounded(reservation.evidence(), 256); bounded(reservation.reason(), 256);
+        if (reservation.revision() < 1) throw invalid("WITHDRAWAL_REVISION");
+        if ((reservation.preview().pricing()!=null?3:minorSettlement(reservation.preview())?2:1)!=version) throw invalid("WITHDRAWAL_SETTLEMENT_VERSION");
+        if (version>=2 && !encode(action, reservation).equals(value)) throw invalid("WITHDRAWAL_FACT");
+    }
+    /** CHF cash/account settlement preserves cents; legacy cash/account pairs retain the old bank quantum. */
+    private static long quantum(EconomyCurrency cash, EconomyCurrency account) {
+        return cash == EconomyCurrency.CHF || account == EconomyCurrency.CHF ? 1 : account.minorUnitsPerMajor();
+    }
+    private static boolean minorSettlement(Preview preview) {
+        return preview.pricing()!=null||preview.cash().currency() == EconomyCurrency.CHF || preview.binding().currency() == EconomyCurrency.CHF;
     }
     private static String pack(String value) { return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8)); }
     private static String unpack(String value) { return new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8); }

@@ -19,22 +19,36 @@ import net.minecraft.world.level.block.state.properties.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/** Four physical cells, one anchor identity and one teardown drop. */
-public final class WideTerminalBlock extends Block implements EntityBlock {
+/** Loaded-only multiblock structure, one anchor identity and one teardown drop. */
+public class WideTerminalBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final IntegerProperty CELL = IntegerProperty.create("cell", 0, 3);
+    public static final IntegerProperty BANK = IntegerProperty.create("bank", 0, 23);
     private static final Set<Guard> MUTATING = new HashSet<>();
     private record Guard(Level level, BlockPos anchor) {}
     private final TerminalPolicy.Kind kind;
     public WideTerminalBlock(BlockBehaviour.Properties properties, TerminalPolicy.Kind kind) {
         super(properties); this.kind = kind;
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(CELL, 0));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(cellProperty(), 0).setValue(BANK, 0));
     }
     public TerminalPolicy.Kind kind() { return kind; }
+    public IntegerProperty cellProperty() { return CELL; }
+    public int cellCount() { return 4; }
+    public BlockPos cellPosition(BlockPos anchor, Direction facing, int cell) {
+        return TerminalGeometry.cell(anchor, facing, cell);
+    }
+    public BlockPos anchorPosition(BlockPos position, BlockState state) {
+        int cell = state.getValue(cellProperty());
+        return position.relative(state.getValue(FACING).getClockWise(), cell & 1).below(cell >> 1);
+    }
+    protected boolean hasSupport(LevelReader level, BlockPos anchor, Direction facing) {
+        return supported(level, anchor, facing);
+    }
+
     @Override protected MapCodec<? extends Block> codec() { return simpleCodec(p -> new WideTerminalBlock(p, kind)); }
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, CELL); }
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, cellProperty(), BANK); }
     @Override public BlockEntity newBlockEntity(BlockPos position, BlockState state) {
-        return state.getValue(CELL) == 0 ? new TerminalBlockEntity(position, state) : null;
+        return state.getValue(cellProperty()) == 0 ? new TerminalBlockEntity(position, state) : null;
     }
     public static BlockPos resolveAnchor(LevelReader level, BlockPos position) { return TerminalGeometry.resolveAnchor(level, position); }
     public static boolean supported(LevelReader level, BlockPos anchor, Direction facing) {
@@ -46,16 +60,16 @@ public final class WideTerminalBlock extends Block implements EntityBlock {
     }
     public boolean canPlaceAll(BlockPlaceContext context, BlockState state) {
         var level = context.getLevel(); var anchor = context.getClickedPos(); var facing = state.getValue(FACING);
-        if (!supported(level, anchor, facing)) return false;
-        for (int cell = 0; cell < 4; cell++) {
-            var position = TerminalGeometry.cell(anchor, facing, cell);
+        if (!hasSupport(level, anchor, facing)) return false;
+        for (int cell = 0; cell < cellCount(); cell++) {
+            var position = cellPosition(anchor, facing, cell);
             if (!level.isInWorldBounds(position) || !level.getWorldBorder().isWithinBounds(position)
                     || !level.hasChunkAt(position) || !level.getBlockState(position).canBeReplaced(context)) return false;
             var player = context.getPlayer();
             if (player != null && (!level.mayInteract(player, position)
                     || !player.mayUseItemAt(position, context.getClickedFace(), context.getItemInHand()))) return false;
             var collision = player == null ? CollisionContext.empty() : CollisionContext.of(player);
-            if (!level.isUnobstructed(state.setValue(CELL, cell), position, collision)) return false;
+            if (!level.isUnobstructed(state.setValue(cellProperty(), cell), position, collision)) return false;
         }
         return true;
     }
@@ -64,9 +78,9 @@ public final class WideTerminalBlock extends Block implements EntityBlock {
         return canPlaceAll(context, state) ? state : null;
     }
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos position) {
-        return supported(level, TerminalGeometry.anchor(position, state), state.getValue(FACING));
+        return hasSupport(level, TerminalGeometry.anchor(position, state), state.getValue(FACING));
     }
-    /** Guard neighbor notifications while all four cells are installed or rolled back. */
+    /** Guard neighbor notifications while all cells are installed or rolled back. */
     static void beginPlacement(Level level, BlockPos anchor) { MUTATING.add(new Guard(level, anchor.immutable())); }
     static void endPlacement(Level level, BlockPos anchor) { MUTATING.remove(new Guard(level, anchor)); }
     @Override public void setPlacedBy(Level level, BlockPos position, BlockState state, LivingEntity placer, ItemStack stack) {
@@ -77,12 +91,12 @@ public final class WideTerminalBlock extends Block implements EntityBlock {
     @Override protected void onPlace(BlockState state, Level level, BlockPos position, BlockState previous, boolean moving) {
         super.onPlace(state, level, position, previous, moving);
         if (!level.isClientSide && previous.getBlock() != this)
-            level.scheduleTick(position, this, 20 + state.getValue(CELL));
+            level.scheduleTick(position, this, 20 + state.getValue(cellProperty()));
     }
     @Override protected void tick(BlockState state, ServerLevel level, BlockPos position, net.minecraft.util.RandomSource random) {
         neighborChanged(state, level, position, this, position, false);
         var current = level.getBlockState(position);
-        if (current.getBlock() == this && current.getValue(CELL).equals(state.getValue(CELL)))
+        if (current.getBlock() == this && current.getValue(cellProperty()).equals(state.getValue(cellProperty())))
             level.scheduleTick(position, this, 200);
     }
     @Override protected void neighborChanged(BlockState state, Level level, BlockPos position, Block neighbor,
@@ -90,21 +104,21 @@ public final class WideTerminalBlock extends Block implements EntityBlock {
         if (level.isClientSide) return;
         var anchor = TerminalGeometry.anchor(position, state);
         if (MUTATING.contains(new Guard(level, anchor))) return;
-        for (var target : TerminalGeometry.cells(anchor, state.getValue(FACING))) {
+        for (var target : TerminalGeometry.cells(anchor, state)) {
             if (!level.hasChunkAt(target) || !level.hasChunkAt(target.below())) return;
         }
-        if (!supported(level, anchor, state.getValue(FACING)) || !complete(level, anchor, state))
+        if (!hasSupport(level, anchor, state.getValue(FACING)) || !complete(level, anchor, state))
             teardown(level, position, state, true);
     }
     private boolean complete(LevelReader level, BlockPos anchor, BlockState state) {
         if (!(level.getBlockEntity(anchor) instanceof TerminalBlockEntity entity) || !entity.validIdentity()) return false;
         var facing = state.getValue(FACING);
-        for (int cell = 0; cell < 4; cell++) {
-            var position = TerminalGeometry.cell(anchor, facing, cell);
+        for (int cell = 0; cell < cellCount(); cell++) {
+            var position = cellPosition(anchor, facing, cell);
             // Do not turn an unloaded neighbor chunk into a destructive observation.
             if (!level.hasChunkAt(position)) return true;
             var part = level.getBlockState(position);
-            if (part.getBlock() != this || part.getValue(FACING) != facing || part.getValue(CELL) != cell) return false;
+            if (part.getBlock() != this || part.getValue(FACING) != facing || part.getValue(cellProperty()) != cell) return false;
         }
         return true;
     }
@@ -124,21 +138,28 @@ public final class WideTerminalBlock extends Block implements EntityBlock {
             // A satellite can only produce an item while the unique live anchor still exists.
             var entity = level.hasChunkAt(anchor) && level.getBlockEntity(anchor) instanceof TerminalBlockEntity found ? found : null;
             boolean ownedAnchor = entity != null && entity.validIdentity()
-                    && entity.getBlockState().getBlock() == this && entity.getBlockState().getValue(CELL) == 0
+                    && entity.getBlockState().getBlock() == this && entity.getBlockState().getValue(cellProperty()) == 0
                     && entity.getBlockState().getValue(FACING) == state.getValue(FACING);
             if (ownedAnchor) {
                 if (level instanceof ServerLevel server) TerminalLifecycle.removed(server, anchor, entity);
                 entity.invalidateIdentity();
             }
             var facing = state.getValue(FACING);
-            for (int cell = 3; cell >= 0; cell--) {
-                var target = TerminalGeometry.cell(anchor, facing, cell);
+            for (int cell = cellCount() - 1; cell >= 0; cell--) {
+                var target = cellPosition(anchor, facing, cell);
                 if (!level.hasChunkAt(target)) continue;
                 var part = level.getBlockState(target);
-                if (part.getBlock() == this && part.getValue(FACING) == facing && part.getValue(CELL) == cell)
+                if (part.getBlock() == this && part.getValue(FACING) == facing && part.getValue(cellProperty()) == cell)
                     level.setBlock(target, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL | Block.UPDATE_SUPPRESS_DROPS);
             }
-            if (ownedAnchor && drop) Block.popResource(level, anchor, new ItemStack(this));
+            if (ownedAnchor && drop) {
+                var item = new ItemStack(this);
+                // Cosmetic only: placement deliberately ignores all item components and starts unbound.
+                if (kind == TerminalPolicy.Kind.KIOSK && state.getValue(BANK) > 0)
+                    item.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+                            new net.minecraft.world.item.component.CustomModelData(state.getValue(BANK)));
+                Block.popResource(level, anchor, item);
+            }
         } finally { MUTATING.remove(guard); }
     }
     @Override protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level,

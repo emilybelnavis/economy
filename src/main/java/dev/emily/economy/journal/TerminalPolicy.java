@@ -12,10 +12,10 @@ import static dev.emily.economy.journal.JournalEngine.*;
 /** Worker-side settings for trusted terminal placement and configuration adapters. */
 public final class TerminalPolicy {
     public static final String FACT = "economy:terminal_policy";
-    public static final int MAX_CURRENCIES = 10;
-    public static final int MAX_DENOMINATIONS = 118;
+    public static final int MAX_CURRENCIES = 11;
+    public static final int MAX_DENOMINATIONS = 131;
 
-    public enum Kind { ATM, TELLER, REGISTER }
+    public enum Kind { ATM, TELLER, REGISTER, KIOSK }
     public enum Mode {
         BOTH, DEPOSIT, WITHDRAW, DISABLED;
         public boolean deposits() { return this == BOTH || this == DEPOSIT; }
@@ -54,12 +54,16 @@ public final class TerminalPolicy {
         public static Settings disabled() { return new Settings(Mode.DISABLED, Set.of(), Set.of()); }
     }
     public record Snapshot(WorldId world, Anchor anchor, UUID generation, ActorId owner, Kind kind,
-                           long revision, boolean active, Settings settings) {
+                           long revision, boolean active, Settings settings, TerminalBanking.Binding binding) {
+        public Snapshot(WorldId world, Anchor anchor, UUID generation, ActorId owner, Kind kind,
+                        long revision, boolean active, Settings settings) {
+            this(world, anchor, generation, owner, kind, revision, active, settings, null);
+        }
         public Snapshot {
             Objects.requireNonNull(world); Objects.requireNonNull(anchor); Objects.requireNonNull(generation);
             Objects.requireNonNull(owner); Objects.requireNonNull(kind); Objects.requireNonNull(settings);
             if (revision < 1) throw new IllegalArgumentException("Terminal revision");
-            if (kind == Kind.REGISTER && settings.mode() != Mode.DISABLED)
+            if ((kind == Kind.REGISTER || kind == Kind.KIOSK) && settings.mode() != Mode.DISABLED)
                 throw new IllegalArgumentException("Register cash modes disabled");
         }
     }
@@ -74,11 +78,11 @@ public final class TerminalPolicy {
 
     private TerminalPolicy() {}
 
-    /** Cash services supplied by a new terminal. ATM configuration remains local to its anchor. */
+    /** Historical pre-A6 defaults, retained solely for legacy teller operation revalidation. */
     public static Settings defaultSettings(Kind kind, Map<String, Denomination> catalog) {
         Objects.requireNonNull(kind);
         var immutable = Map.copyOf(catalog);
-        if (kind == Kind.REGISTER) return Settings.disabled();
+        if (kind == Kind.REGISTER || kind == Kind.KIOSK) return Settings.disabled();
         var denominations = new TreeSet<String>();
         immutable.forEach((id, denomination) -> {
             if (kind == Kind.TELLER || denomination.bill()) denominations.add(id);
@@ -86,10 +90,10 @@ public final class TerminalPolicy {
         return new Settings(Mode.BOTH, EnumSet.allOf(EconomyCurrency.class), denominations);
     }
 
-    /** Existing teller restrictions are historical data; teller services always use the complete catalog. */
+    /** Frozen legacy teller semantics; bound terminals retain their explicit native-currency settings. */
     public static Snapshot effective(Snapshot snapshot, Map<String, Denomination> catalog) {
         Objects.requireNonNull(snapshot);
-        if (snapshot.kind() != Kind.TELLER) return snapshot;
+        if (snapshot.kind() != Kind.TELLER || snapshot.binding() != null && snapshot.binding().bound()) return snapshot;
         return new Snapshot(snapshot.world(), snapshot.anchor(), snapshot.generation(), snapshot.owner(), snapshot.kind(),
                 snapshot.revision(), snapshot.active(), defaultSettings(Kind.TELLER, catalog));
     }
@@ -186,33 +190,32 @@ public final class TerminalPolicy {
                     List.of(world.value().toString(), generation.toString()), 1).isEmpty())
                 return reject("TERMINAL_GENERATION_USED");
             changed = new Snapshot(world, anchor, generation, owner, kind, current == null ? 1 : current.revision() + 1,
-                    true, defaultSettings(kind, catalog));
+                    true, Settings.disabled());
         } else {
-            if (action == Action.CONFIGURE && !valid(current.kind(), settings, catalog))
+            if (action == Action.CONFIGURE && !TerminalBanking.validSettings(current, settings, catalog))
                 return reject("TERMINAL_POLICY");
             changed = new Snapshot(world, anchor, current.generation(), current.owner(), current.kind(),
-                    current.revision() + 1, action != Action.REMOVE, action == Action.CONFIGURE ? settings : current.settings());
+                    current.revision() + 1, action != Action.REMOVE, action == Action.CONFIGURE ? settings : current.settings(), current.binding());
+        }
+        if(action==Action.CONFIGURE && changed.binding()!=null && changed.binding().bound() && settings.mode()!=Mode.DISABLED) {
+            var binding=changed.binding();
+            changed=new Snapshot(changed.world(),changed.anchor(),changed.generation(),changed.owner(),changed.kind(),changed.revision(),changed.active(),changed.settings(),
+                    new TerminalBanking.Binding(binding.world(),binding.anchor(),binding.generation(),binding.institution(),binding.catalogRevision(),binding.nativeCurrency(),TerminalBanking.MigrationState.ENABLED,binding.legacySettings()));
         }
         var previous = current;
-        return new Commit(List.of(new Journal.Record(FACT, 1, encode(action, changed))),
-                new Result(1, "TERMINAL_" + action.name(), changed.generation().toString()), tx -> {
+        var result=changed;
+        var facts=new ArrayList<Journal.Record>();facts.add(new Journal.Record(FACT,1,encode(action,result)));
+        if(action==Action.CONFIGURE && result.binding()!=null && result.binding().bound())facts.add(new Journal.Record(TerminalBanking.FACT,1,TerminalBanking.encode(result.binding(),result.revision())));
+        return new Commit(facts,
+                new Result(1, "TERMINAL_" + action.name(), result.generation().toString()), tx -> {
             if (action == Action.PLACE) tx.execute("""
                     INSERT INTO terminal_generations(world_id,generation,dimension,x,y,z) VALUES(?,?,?,?,?,?)
-                    """, List.of(world.value().toString(), changed.generation().toString(), anchor.dimension(),
+                    """, List.of(world.value().toString(), result.generation().toString(), anchor.dimension(),
                     Integer.toString(anchor.x()), Integer.toString(anchor.y()), Integer.toString(anchor.z())));
-            project(tx, previous, changed);
+            project(tx, previous, result);
+            if (action == Action.PLACE) TerminalBanking.unbound(tx, result);
+            if (action == Action.CONFIGURE && result.binding()!=null && result.binding().bound()) TerminalBanking.write(tx,result.binding());
         });
-    }
-
-    private static boolean valid(Kind kind, Settings settings, Map<String, Denomination> catalog) {
-        if (kind == Kind.TELLER) return settings.equals(defaultSettings(Kind.TELLER, catalog));
-        if (kind == Kind.REGISTER && settings.mode() != Mode.DISABLED) return false;
-        for (var id : settings.denominations()) {
-            var denomination = catalog.get(id);
-            if (denomination == null || !settings.currencies().contains(denomination.currency())
-                    || (kind == Kind.ATM && !denomination.bill())) return false;
-        }
-        return true;
     }
 
     /** Owner/operator inspection includes the tombstone needed for a subsequent placement token. */
@@ -226,12 +229,15 @@ public final class TerminalPolicy {
                 && snapshot.revision() == revision).isPresent();
     }
 
-    private static Optional<Snapshot> raw(ReadView reads, WorldId world, Anchor anchor) {
+    static Optional<Snapshot> raw(ReadView reads, WorldId world, Anchor anchor) {
         return reads.query("SELECT * FROM terminal_settings WHERE world_id=? AND dimension=? AND x=? AND y=? AND z=?",
-                anchorParameters(world, anchor), 1).stream().map(TerminalPolicy::read).findFirst();
+                anchorParameters(world, anchor), 1).stream().map(TerminalPolicy::read).map(snapshot -> new Snapshot(
+                        snapshot.world(), snapshot.anchor(), snapshot.generation(), snapshot.owner(), snapshot.kind(),
+                        snapshot.revision(), snapshot.active(), snapshot.settings(),
+                        TerminalBanking.find(reads,world,anchor,snapshot.generation()).orElse(null))).findFirst();
     }
 
-    private static void project(FoundationStore.Transaction tx, Snapshot previous, Snapshot changed) {
+    static void project(FoundationStore.Transaction tx, Snapshot previous, Snapshot changed) {
         if (previous == null) {
             tx.execute("INSERT INTO terminal_settings VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", values(changed));
             return;
@@ -322,7 +328,7 @@ public final class TerminalPolicy {
         if (value == null || value.length() > 96 || !value.matches("[a-z0-9_.-]+:[a-z0-9_./-]+"))
             throw new IllegalArgumentException("Terminal namespaced identity");
     }
-    private static String encode(Action action, Snapshot value) {
+    static String encode(Action action, Snapshot value) {
         var fields = new ArrayList<String>(); fields.add(action.name());
         for (var field : values(value)) fields.add(Base64.getUrlEncoder().withoutPadding().encodeToString(field.getBytes(StandardCharsets.UTF_8)));
         return String.join("|", fields);

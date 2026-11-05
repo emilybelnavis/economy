@@ -1,0 +1,143 @@
+{
+  "parent": "economy:block/branch_kiosk_inventory",
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "economy:item/banking/crownstone_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "economy:item/banking/orchard_direct_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "economy:item/banking/tidecrest_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 4
+      },
+      "model": "economy:item/banking/crosswind_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 5
+      },
+      "model": "economy:item/banking/lantern_union_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 6
+      },
+      "model": "economy:item/banking/mesa_trail_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7
+      },
+      "model": "economy:item/banking/asterbridge_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 8
+      },
+      "model": "economy:item/banking/greenhaven_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 9
+      },
+      "model": "economy:item/banking/meridian_grove_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 10
+      },
+      "model": "economy:item/banking/slate_harbor_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 11
+      },
+      "model": "economy:item/banking/fjordlight_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 12
+      },
+      "model": "economy:item/banking/harbor_meridian_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 13
+      },
+      "model": "economy:item/banking/jade_terrace_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 14
+      },
+      "model": "economy:item/banking/southern_arc_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 15
+      },
+      "model": "economy:item/banking/fernreach_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 16
+      },
+      "model": "economy:item/banking/cedar_parcel_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 17
+      },
+      "model": "economy:item/banking/lakeward_cantonal_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 18
+      },
+      "model": "economy:item/banking/newhaven_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 19
+      },
+      "model": "economy:item/banking/atlas_reserve_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 20
+      },
+      "model": "economy:item/banking/obsidian_capital_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 21
+      },
+      "model": "economy:item/banking/alpine_vault_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 22
+      },
+      "model": "economy:item/banking/kintsugi_trust_kiosk"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 23
+      },
+      "model": "economy:item/banking/mariner_crest_kiosk"
+    }
+  ]
+}

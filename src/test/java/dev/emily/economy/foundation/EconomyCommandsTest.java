@@ -37,6 +37,30 @@ class EconomyCommandsTest {
         assertEquals(List.of("operator status", "diagnostics"), console.messages);
     }
 
+    @Test void calendarPagesUseTheExistingConsoleOperatorGate() throws Exception {
+        var dispatcher = new CommandDispatcher<CommandSourceStack>();
+        var cursors = new ArrayList<String>();
+        EconomyCommands.register(dispatcher, (source, view) -> {
+            assertTrue(view.privileged());
+            assertTrue(view.detailed());
+            cursors.add(view.calendarAfter());
+            return List.of("calendar");
+        });
+        for (var denied : List.of(new TestSource(CommandSource.NULL, 0), new TestSource(CommandSource.NULL, 2))) {
+            assertThrows(CommandSyntaxException.class, () -> dispatcher.execute("economy diagnostics calendar", denied));
+            assertThrows(CommandSyntaxException.class, () -> dispatcher.execute("economy diagnostics calendar after domain/fixture:bank", denied));
+            assertTrue(denied.messages.isEmpty());
+        }
+        assertTrue(cursors.isEmpty());
+        var console = new TestSource(new RconConsoleSource(null), 2);
+        assertEquals(1, dispatcher.execute("economy diagnostics calendar", console));
+        assertEquals(1, dispatcher.execute("economy diagnostics calendar after domain/fixture:bank", console));
+        assertEquals(List.of("", "domain/fixture:bank"), cursors);
+        assertEquals(List.of("calendar", "calendar"), console.messages);
+        assertThrows(CommandSyntaxException.class, () -> dispatcher.execute("economy diagnostics reset", console));
+        assertThrows(CommandSyntaxException.class, () -> dispatcher.execute("economy diagnostics skip", console));
+    }
+
     @Test void fxPolicyRejectsUnauthenticatedCommandSources() {
         var dispatcher = new CommandDispatcher<CommandSourceStack>();
         FxAdminCommands.register(dispatcher, server -> fail("An unauthorized source reached admission"), java.time.Clock.systemUTC());
@@ -44,6 +68,18 @@ class EconomyCommandsTest {
         for (var source : List.of(new TestSource(CommandSource.NULL, 0), new TestSource(CommandSource.NULL, 2),
                 new TestSource(new RconConsoleSource(null), 2))) {
             assertThrows(CommandSyntaxException.class, () -> dispatcher.execute(command, source));
+        }
+    }
+
+    @Test void creditCommandsRejectConsoleAutomationAndUnauthenticatedSources() {
+        var dispatcher=new CommandDispatcher<CommandSourceStack>();
+        CreditCommands.register(dispatcher,server->fail("Unauthenticated caller reached credit service"));
+        String id="665cb020-9894-4c09-a41c-b6fc4e63d03d";
+        for(var source:List.of(new TestSource(CommandSource.NULL,0),new TestSource(CommandSource.NULL,2),new TestSource(new RconConsoleSource(null),2))){
+            assertThrows(CommandSyntaxException.class,()->dispatcher.execute("economy credit facility "+id,source));
+            assertThrows(CommandSyntaxException.class,()->dispatcher.execute("economy credit inspect "+id+" "+id+" payments after 0 -1 16",source));
+            assertThrows(CommandSyntaxException.class,()->dispatcher.execute("economy credit edit "+id,source));
+            assertTrue(source.messages.isEmpty());
         }
     }
 

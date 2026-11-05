@@ -30,6 +30,7 @@ public final class TerminalCatalog {
             for (var dye : DyeColor.values()) register(dye.getName() + "_" + base, kind);
         }
         register("teller", TerminalPolicy.Kind.TELLER);
+        register("branch_kiosk", TerminalPolicy.Kind.KIOSK);
     }
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TerminalBlockEntity>> BLOCK_ENTITY =
             ENTITIES.register("terminal", () -> BlockEntityType.Builder.of(TerminalBlockEntity::new,
@@ -45,7 +46,8 @@ public final class TerminalCatalog {
     private TerminalCatalog() {}
     private static void register(String id, TerminalPolicy.Kind kind) {
         var block = BLOCKS.register(id, () -> kind == TerminalPolicy.Kind.REGISTER
-                ? new RegisterBlock(properties(), kind) : new WideTerminalBlock(properties(), kind));
+                ? new RegisterBlock(properties(), kind) : kind == TerminalPolicy.Kind.KIOSK
+                        ? new BranchKioskBlock(properties()) : new WideTerminalBlock(properties(), kind));
         var item = ITEMS.register(id, () -> new TerminalBlockItem(block.get(), new Item.Properties()));
         ENTRIES.put(id, new Entry(id, kind, block, item));
     }

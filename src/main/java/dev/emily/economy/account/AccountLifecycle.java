@@ -7,6 +7,8 @@ import dev.emily.economy.api.EconomyCurrency;
 import dev.emily.economy.api.Identifiers.AccountId;
 import dev.emily.economy.api.PartyRef;
 import dev.emily.economy.journal.Journal;
+import dev.emily.economy.institution.BranchAdmission;
+import dev.emily.economy.institution.BankProviders;
 import dev.emily.economy.journal.JournalEngine;
 import dev.emily.economy.recovery.RecordCatalog;
 
@@ -83,19 +85,7 @@ public final class AccountLifecycle {
     }
 
     public static JournalEngine.Registration opening(PartyRef owner, Open open) {
-        return owned(owner, open.request(), (intent, reads) -> {
-            if (AccountCatalog.currentDenomination(reads) == null) return reject("DENOMINATION_PENDING");
-            var primary = AccountCatalog.primary(reads, owner).orElse(null);
-            if (primary == null) return reject("PRIMARY_REQUIRED");
-            if (primary.revision() != open.expectedPrimaryRevision()) return reject("ACCOUNT_STALE");
-            var banks = AccountCatalog.openBanks(reads, owner);
-            if (banks.stream().anyMatch(bank -> bank.currency() == open.currency())) return reject("BANK_CURRENCY_EXISTS");
-            if (banks.size() >= AccountIdentity.MAX_OPEN_BANK_ACCOUNTS) return reject("BANK_CAP_REACHED");
-
-            var account = new AccountIdentity(new AccountId(UUID.randomUUID()), owner, Purpose.BANK, open.currency(),
-                    Status.OPEN, 1, false);
-            return commit("opened", account, account.revision(), "BANK_OPENED", tx -> AccountCatalog.insert(tx, account));
-        });
+        return owned(owner, open.request(), (intent, reads) -> reject("BRANCH_REQUIRED"));
     }
 
     public static JournalEngine.Registration closing(PartyRef owner, Close close, ClosureReader reader) {
@@ -108,6 +98,42 @@ public final class AccountLifecycle {
                                                      Journal.CanonicalRequest request,
                                                      BiPredicate<Journal.Intent, JournalEngine.ReadView> authority,
                                                      JournalEngine.Handler settleFunded) {
+        return owned(owner, request, (intent, reads) -> reject("BRANCH_REQUIRED"));
+    }
+
+    /** Sealed branch capability plus original A3/A4 closure protections, consumed atomically with closure. */
+    public static JournalEngine.Registration closingAtBranch(PartyRef owner, Close close, ClosureReader reader,
+                                                             BranchAdmission.Proof proof,
+                                                             BiPredicate<Journal.Intent, JournalEngine.ReadView> authority,
+                                                             JournalEngine.Handler settleFunded) {
+        return closingAtBranch(owner,close,reader,proof,close.request(),authority,settleFunded);
+    }
+
+    public static JournalEngine.Registration closingAtBranch(PartyRef owner, Close close, ClosureReader reader,
+                                                             BranchAdmission.Proof proof, Journal.CanonicalRequest settlementRequest,
+                                                             BiPredicate<Journal.Intent, JournalEngine.ReadView> authority,
+                                                             JournalEngine.Handler settleFunded) {
+        if(settlementRequest.version()!=1 || !settlementRequest.fields().entrySet().containsAll(close.request().fields().entrySet()))
+            throw new IllegalArgumentException("Closure settlement binding");
+        Objects.requireNonNull(proof);
+        var context=proof.context();
+        if(context.action()!=BranchAdmission.Action.CLOSE || !close.source().equals(context.account())
+                || close.expectedRevision()!=context.accountRevision())
+            throw new IllegalArgumentException("Closure capability target mismatch");
+        var request=new BankProviders.Request(proof,0,settlementRequest.fields());
+        return BankProviders.closure(owner,request,closingProtected(owner,close,reader,request.request(),authority,settleFunded));
+    }
+
+    public static JournalEngine.Registration closingAtBranch(PartyRef owner, Close close, ClosureReader reader,
+                                                             BranchAdmission.Proof proof) {
+        return closingAtBranch(owner,close,reader,proof,(intent,reads)->true,
+                (intent,reads)->reject("FUNDED_SETTLEMENT_UNAVAILABLE"));
+    }
+
+    private static JournalEngine.Registration closingProtected(PartyRef owner, Close close, ClosureReader reader,
+                                                               Journal.CanonicalRequest request,
+                                                               BiPredicate<Journal.Intent, JournalEngine.ReadView> authority,
+                                                               JournalEngine.Handler settleFunded) {
         Objects.requireNonNull(reader);
         return owned(owner, request, (intent, reads) -> {
             if (!authority.test(intent, reads)) return reject("AUTHORITY_REVOKED");

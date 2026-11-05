@@ -1,0 +1,772 @@
+{
+  "variants": {
+    "bank=0,cell=0,facing=north": {
+      "model": "economy:block/branch_kiosk_0",
+      "y": 0
+    },
+    "bank=0,cell=0,facing=east": {
+      "model": "economy:block/branch_kiosk_0",
+      "y": 90
+    },
+    "bank=0,cell=0,facing=south": {
+      "model": "economy:block/branch_kiosk_0",
+      "y": 180
+    },
+    "bank=0,cell=0,facing=west": {
+      "model": "economy:block/branch_kiosk_0",
+      "y": 270
+    },
+    "bank=0,cell=1,facing=north": {
+      "model": "economy:block/branch_kiosk_1",
+      "y": 0
+    },
+    "bank=0,cell=1,facing=east": {
+      "model": "economy:block/branch_kiosk_1",
+      "y": 90
+    },
+    "bank=0,cell=1,facing=south": {
+      "model": "economy:block/branch_kiosk_1",
+      "y": 180
+    },
+    "bank=0,cell=1,facing=west": {
+      "model": "economy:block/branch_kiosk_1",
+      "y": 270
+    },
+    "bank=1,cell=0,facing=north": {
+      "model": "economy:block/banking/crownstone_kiosk_0",
+      "y": 0
+    },
+    "bank=1,cell=0,facing=east": {
+      "model": "economy:block/banking/crownstone_kiosk_0",
+      "y": 90
+    },
+    "bank=1,cell=0,facing=south": {
+      "model": "economy:block/banking/crownstone_kiosk_0",
+      "y": 180
+    },
+    "bank=1,cell=0,facing=west": {
+      "model": "economy:block/banking/crownstone_kiosk_0",
+      "y": 270
+    },
+    "bank=1,cell=1,facing=north": {
+      "model": "economy:block/banking/crownstone_kiosk_1",
+      "y": 0
+    },
+    "bank=1,cell=1,facing=east": {
+      "model": "economy:block/banking/crownstone_kiosk_1",
+      "y": 90
+    },
+    "bank=1,cell=1,facing=south": {
+      "model": "economy:block/banking/crownstone_kiosk_1",
+      "y": 180
+    },
+    "bank=1,cell=1,facing=west": {
+      "model": "economy:block/banking/crownstone_kiosk_1",
+      "y": 270
+    },
+    "bank=2,cell=0,facing=north": {
+      "model": "economy:block/banking/orchard_direct_kiosk_0",
+      "y": 0
+    },
+    "bank=2,cell=0,facing=east": {
+      "model": "economy:block/banking/orchard_direct_kiosk_0",
+      "y": 90
+    },
+    "bank=2,cell=0,facing=south": {
+      "model": "economy:block/banking/orchard_direct_kiosk_0",
+      "y": 180
+    },
+    "bank=2,cell=0,facing=west": {
+      "model": "economy:block/banking/orchard_direct_kiosk_0",
+      "y": 270
+    },
+    "bank=2,cell=1,facing=north": {
+      "model": "economy:block/banking/orchard_direct_kiosk_1",
+      "y": 0
+    },
+    "bank=2,cell=1,facing=east": {
+      "model": "economy:block/banking/orchard_direct_kiosk_1",
+      "y": 90
+    },
+    "bank=2,cell=1,facing=south": {
+      "model": "economy:block/banking/orchard_direct_kiosk_1",
+      "y": 180
+    },
+    "bank=2,cell=1,facing=west": {
+      "model": "economy:block/banking/orchard_direct_kiosk_1",
+      "y": 270
+    },
+    "bank=3,cell=0,facing=north": {
+      "model": "economy:block/banking/tidecrest_kiosk_0",
+      "y": 0
+    },
+    "bank=3,cell=0,facing=east": {
+      "model": "economy:block/banking/tidecrest_kiosk_0",
+      "y": 90
+    },
+    "bank=3,cell=0,facing=south": {
+      "model": "economy:block/banking/tidecrest_kiosk_0",
+      "y": 180
+    },
+    "bank=3,cell=0,facing=west": {
+      "model": "economy:block/banking/tidecrest_kiosk_0",
+      "y": 270
+    },
+    "bank=3,cell=1,facing=north": {
+      "model": "economy:block/banking/tidecrest_kiosk_1",
+      "y": 0
+    },
+    "bank=3,cell=1,facing=east": {
+      "model": "economy:block/banking/tidecrest_kiosk_1",
+      "y": 90
+    },
+    "bank=3,cell=1,facing=south": {
+      "model": "economy:block/banking/tidecrest_kiosk_1",
+      "y": 180
+    },
+    "bank=3,cell=1,facing=west": {
+      "model": "economy:block/banking/tidecrest_kiosk_1",
+      "y": 270
+    },
+    "bank=4,cell=0,facing=north": {
+      "model": "economy:block/banking/crosswind_kiosk_0",
+      "y": 0
+    },
+    "bank=4,cell=0,facing=east": {
+      "model": "economy:block/banking/crosswind_kiosk_0",
+      "y": 90
+    },
+    "bank=4,cell=0,facing=south": {
+      "model": "economy:block/banking/crosswind_kiosk_0",
+      "y": 180
+    },
+    "bank=4,cell=0,facing=west": {
+      "model": "economy:block/banking/crosswind_kiosk_0",
+      "y": 270
+    },
+    "bank=4,cell=1,facing=north": {
+      "model": "economy:block/banking/crosswind_kiosk_1",
+      "y": 0
+    },
+    "bank=4,cell=1,facing=east": {
+      "model": "economy:block/banking/crosswind_kiosk_1",
+      "y": 90
+    },
+    "bank=4,cell=1,facing=south": {
+      "model": "economy:block/banking/crosswind_kiosk_1",
+      "y": 180
+    },
+    "bank=4,cell=1,facing=west": {
+      "model": "economy:block/banking/crosswind_kiosk_1",
+      "y": 270
+    },
+    "bank=5,cell=0,facing=north": {
+      "model": "economy:block/banking/lantern_union_kiosk_0",
+      "y": 0
+    },
+    "bank=5,cell=0,facing=east": {
+      "model": "economy:block/banking/lantern_union_kiosk_0",
+      "y": 90
+    },
+    "bank=5,cell=0,facing=south": {
+      "model": "economy:block/banking/lantern_union_kiosk_0",
+      "y": 180
+    },
+    "bank=5,cell=0,facing=west": {
+      "model": "economy:block/banking/lantern_union_kiosk_0",
+      "y": 270
+    },
+    "bank=5,cell=1,facing=north": {
+      "model": "economy:block/banking/lantern_union_kiosk_1",
+      "y": 0
+    },
+    "bank=5,cell=1,facing=east": {
+      "model": "economy:block/banking/lantern_union_kiosk_1",
+      "y": 90
+    },
+    "bank=5,cell=1,facing=south": {
+      "model": "economy:block/banking/lantern_union_kiosk_1",
+      "y": 180
+    },
+    "bank=5,cell=1,facing=west": {
+      "model": "economy:block/banking/lantern_union_kiosk_1",
+      "y": 270
+    },
+    "bank=6,cell=0,facing=north": {
+      "model": "economy:block/banking/mesa_trail_kiosk_0",
+      "y": 0
+    },
+    "bank=6,cell=0,facing=east": {
+      "model": "economy:block/banking/mesa_trail_kiosk_0",
+      "y": 90
+    },
+    "bank=6,cell=0,facing=south": {
+      "model": "economy:block/banking/mesa_trail_kiosk_0",
+      "y": 180
+    },
+    "bank=6,cell=0,facing=west": {
+      "model": "economy:block/banking/mesa_trail_kiosk_0",
+      "y": 270
+    },
+    "bank=6,cell=1,facing=north": {
+      "model": "economy:block/banking/mesa_trail_kiosk_1",
+      "y": 0
+    },
+    "bank=6,cell=1,facing=east": {
+      "model": "economy:block/banking/mesa_trail_kiosk_1",
+      "y": 90
+    },
+    "bank=6,cell=1,facing=south": {
+      "model": "economy:block/banking/mesa_trail_kiosk_1",
+      "y": 180
+    },
+    "bank=6,cell=1,facing=west": {
+      "model": "economy:block/banking/mesa_trail_kiosk_1",
+      "y": 270
+    },
+    "bank=7,cell=0,facing=north": {
+      "model": "economy:block/banking/asterbridge_kiosk_0",
+      "y": 0
+    },
+    "bank=7,cell=0,facing=east": {
+      "model": "economy:block/banking/asterbridge_kiosk_0",
+      "y": 90
+    },
+    "bank=7,cell=0,facing=south": {
+      "model": "economy:block/banking/asterbridge_kiosk_0",
+      "y": 180
+    },
+    "bank=7,cell=0,facing=west": {
+      "model": "economy:block/banking/asterbridge_kiosk_0",
+      "y": 270
+    },
+    "bank=7,cell=1,facing=north": {
+      "model": "economy:block/banking/asterbridge_kiosk_1",
+      "y": 0
+    },
+    "bank=7,cell=1,facing=east": {
+      "model": "economy:block/banking/asterbridge_kiosk_1",
+      "y": 90
+    },
+    "bank=7,cell=1,facing=south": {
+      "model": "economy:block/banking/asterbridge_kiosk_1",
+      "y": 180
+    },
+    "bank=7,cell=1,facing=west": {
+      "model": "economy:block/banking/asterbridge_kiosk_1",
+      "y": 270
+    },
+    "bank=8,cell=0,facing=north": {
+      "model": "economy:block/banking/greenhaven_kiosk_0",
+      "y": 0
+    },
+    "bank=8,cell=0,facing=east": {
+      "model": "economy:block/banking/greenhaven_kiosk_0",
+      "y": 90
+    },
+    "bank=8,cell=0,facing=south": {
+      "model": "economy:block/banking/greenhaven_kiosk_0",
+      "y": 180
+    },
+    "bank=8,cell=0,facing=west": {
+      "model": "economy:block/banking/greenhaven_kiosk_0",
+      "y": 270
+    },
+    "bank=8,cell=1,facing=north": {
+      "model": "economy:block/banking/greenhaven_kiosk_1",
+      "y": 0
+    },
+    "bank=8,cell=1,facing=east": {
+      "model": "economy:block/banking/greenhaven_kiosk_1",
+      "y": 90
+    },
+    "bank=8,cell=1,facing=south": {
+      "model": "economy:block/banking/greenhaven_kiosk_1",
+      "y": 180
+    },
+    "bank=8,cell=1,facing=west": {
+      "model": "economy:block/banking/greenhaven_kiosk_1",
+      "y": 270
+    },
+    "bank=9,cell=0,facing=north": {
+      "model": "economy:block/banking/meridian_grove_kiosk_0",
+      "y": 0
+    },
+    "bank=9,cell=0,facing=east": {
+      "model": "economy:block/banking/meridian_grove_kiosk_0",
+      "y": 90
+    },
+    "bank=9,cell=0,facing=south": {
+      "model": "economy:block/banking/meridian_grove_kiosk_0",
+      "y": 180
+    },
+    "bank=9,cell=0,facing=west": {
+      "model": "economy:block/banking/meridian_grove_kiosk_0",
+      "y": 270
+    },
+    "bank=9,cell=1,facing=north": {
+      "model": "economy:block/banking/meridian_grove_kiosk_1",
+      "y": 0
+    },
+    "bank=9,cell=1,facing=east": {
+      "model": "economy:block/banking/meridian_grove_kiosk_1",
+      "y": 90
+    },
+    "bank=9,cell=1,facing=south": {
+      "model": "economy:block/banking/meridian_grove_kiosk_1",
+      "y": 180
+    },
+    "bank=9,cell=1,facing=west": {
+      "model": "economy:block/banking/meridian_grove_kiosk_1",
+      "y": 270
+    },
+    "bank=10,cell=0,facing=north": {
+      "model": "economy:block/banking/slate_harbor_kiosk_0",
+      "y": 0
+    },
+    "bank=10,cell=0,facing=east": {
+      "model": "economy:block/banking/slate_harbor_kiosk_0",
+      "y": 90
+    },
+    "bank=10,cell=0,facing=south": {
+      "model": "economy:block/banking/slate_harbor_kiosk_0",
+      "y": 180
+    },
+    "bank=10,cell=0,facing=west": {
+      "model": "economy:block/banking/slate_harbor_kiosk_0",
+      "y": 270
+    },
+    "bank=10,cell=1,facing=north": {
+      "model": "economy:block/banking/slate_harbor_kiosk_1",
+      "y": 0
+    },
+    "bank=10,cell=1,facing=east": {
+      "model": "economy:block/banking/slate_harbor_kiosk_1",
+      "y": 90
+    },
+    "bank=10,cell=1,facing=south": {
+      "model": "economy:block/banking/slate_harbor_kiosk_1",
+      "y": 180
+    },
+    "bank=10,cell=1,facing=west": {
+      "model": "economy:block/banking/slate_harbor_kiosk_1",
+      "y": 270
+    },
+    "bank=11,cell=0,facing=north": {
+      "model": "economy:block/banking/fjordlight_kiosk_0",
+      "y": 0
+    },
+    "bank=11,cell=0,facing=east": {
+      "model": "economy:block/banking/fjordlight_kiosk_0",
+      "y": 90
+    },
+    "bank=11,cell=0,facing=south": {
+      "model": "economy:block/banking/fjordlight_kiosk_0",
+      "y": 180
+    },
+    "bank=11,cell=0,facing=west": {
+      "model": "economy:block/banking/fjordlight_kiosk_0",
+      "y": 270
+    },
+    "bank=11,cell=1,facing=north": {
+      "model": "economy:block/banking/fjordlight_kiosk_1",
+      "y": 0
+    },
+    "bank=11,cell=1,facing=east": {
+      "model": "economy:block/banking/fjordlight_kiosk_1",
+      "y": 90
+    },
+    "bank=11,cell=1,facing=south": {
+      "model": "economy:block/banking/fjordlight_kiosk_1",
+      "y": 180
+    },
+    "bank=11,cell=1,facing=west": {
+      "model": "economy:block/banking/fjordlight_kiosk_1",
+      "y": 270
+    },
+    "bank=12,cell=0,facing=north": {
+      "model": "economy:block/banking/harbor_meridian_kiosk_0",
+      "y": 0
+    },
+    "bank=12,cell=0,facing=east": {
+      "model": "economy:block/banking/harbor_meridian_kiosk_0",
+      "y": 90
+    },
+    "bank=12,cell=0,facing=south": {
+      "model": "economy:block/banking/harbor_meridian_kiosk_0",
+      "y": 180
+    },
+    "bank=12,cell=0,facing=west": {
+      "model": "economy:block/banking/harbor_meridian_kiosk_0",
+      "y": 270
+    },
+    "bank=12,cell=1,facing=north": {
+      "model": "economy:block/banking/harbor_meridian_kiosk_1",
+      "y": 0
+    },
+    "bank=12,cell=1,facing=east": {
+      "model": "economy:block/banking/harbor_meridian_kiosk_1",
+      "y": 90
+    },
+    "bank=12,cell=1,facing=south": {
+      "model": "economy:block/banking/harbor_meridian_kiosk_1",
+      "y": 180
+    },
+    "bank=12,cell=1,facing=west": {
+      "model": "economy:block/banking/harbor_meridian_kiosk_1",
+      "y": 270
+    },
+    "bank=13,cell=0,facing=north": {
+      "model": "economy:block/banking/jade_terrace_kiosk_0",
+      "y": 0
+    },
+    "bank=13,cell=0,facing=east": {
+      "model": "economy:block/banking/jade_terrace_kiosk_0",
+      "y": 90
+    },
+    "bank=13,cell=0,facing=south": {
+      "model": "economy:block/banking/jade_terrace_kiosk_0",
+      "y": 180
+    },
+    "bank=13,cell=0,facing=west": {
+      "model": "economy:block/banking/jade_terrace_kiosk_0",
+      "y": 270
+    },
+    "bank=13,cell=1,facing=north": {
+      "model": "economy:block/banking/jade_terrace_kiosk_1",
+      "y": 0
+    },
+    "bank=13,cell=1,facing=east": {
+      "model": "economy:block/banking/jade_terrace_kiosk_1",
+      "y": 90
+    },
+    "bank=13,cell=1,facing=south": {
+      "model": "economy:block/banking/jade_terrace_kiosk_1",
+      "y": 180
+    },
+    "bank=13,cell=1,facing=west": {
+      "model": "economy:block/banking/jade_terrace_kiosk_1",
+      "y": 270
+    },
+    "bank=14,cell=0,facing=north": {
+      "model": "economy:block/banking/southern_arc_kiosk_0",
+      "y": 0
+    },
+    "bank=14,cell=0,facing=east": {
+      "model": "economy:block/banking/southern_arc_kiosk_0",
+      "y": 90
+    },
+    "bank=14,cell=0,facing=south": {
+      "model": "economy:block/banking/southern_arc_kiosk_0",
+      "y": 180
+    },
+    "bank=14,cell=0,facing=west": {
+      "model": "economy:block/banking/southern_arc_kiosk_0",
+      "y": 270
+    },
+    "bank=14,cell=1,facing=north": {
+      "model": "economy:block/banking/southern_arc_kiosk_1",
+      "y": 0
+    },
+    "bank=14,cell=1,facing=east": {
+      "model": "economy:block/banking/southern_arc_kiosk_1",
+      "y": 90
+    },
+    "bank=14,cell=1,facing=south": {
+      "model": "economy:block/banking/southern_arc_kiosk_1",
+      "y": 180
+    },
+    "bank=14,cell=1,facing=west": {
+      "model": "economy:block/banking/southern_arc_kiosk_1",
+      "y": 270
+    },
+    "bank=15,cell=0,facing=north": {
+      "model": "economy:block/banking/fernreach_kiosk_0",
+      "y": 0
+    },
+    "bank=15,cell=0,facing=east": {
+      "model": "economy:block/banking/fernreach_kiosk_0",
+      "y": 90
+    },
+    "bank=15,cell=0,facing=south": {
+      "model": "economy:block/banking/fernreach_kiosk_0",
+      "y": 180
+    },
+    "bank=15,cell=0,facing=west": {
+      "model": "economy:block/banking/fernreach_kiosk_0",
+      "y": 270
+    },
+    "bank=15,cell=1,facing=north": {
+      "model": "economy:block/banking/fernreach_kiosk_1",
+      "y": 0
+    },
+    "bank=15,cell=1,facing=east": {
+      "model": "economy:block/banking/fernreach_kiosk_1",
+      "y": 90
+    },
+    "bank=15,cell=1,facing=south": {
+      "model": "economy:block/banking/fernreach_kiosk_1",
+      "y": 180
+    },
+    "bank=15,cell=1,facing=west": {
+      "model": "economy:block/banking/fernreach_kiosk_1",
+      "y": 270
+    },
+    "bank=16,cell=0,facing=north": {
+      "model": "economy:block/banking/cedar_parcel_kiosk_0",
+      "y": 0
+    },
+    "bank=16,cell=0,facing=east": {
+      "model": "economy:block/banking/cedar_parcel_kiosk_0",
+      "y": 90
+    },
+    "bank=16,cell=0,facing=south": {
+      "model": "economy:block/banking/cedar_parcel_kiosk_0",
+      "y": 180
+    },
+    "bank=16,cell=0,facing=west": {
+      "model": "economy:block/banking/cedar_parcel_kiosk_0",
+      "y": 270
+    },
+    "bank=16,cell=1,facing=north": {
+      "model": "economy:block/banking/cedar_parcel_kiosk_1",
+      "y": 0
+    },
+    "bank=16,cell=1,facing=east": {
+      "model": "economy:block/banking/cedar_parcel_kiosk_1",
+      "y": 90
+    },
+    "bank=16,cell=1,facing=south": {
+      "model": "economy:block/banking/cedar_parcel_kiosk_1",
+      "y": 180
+    },
+    "bank=16,cell=1,facing=west": {
+      "model": "economy:block/banking/cedar_parcel_kiosk_1",
+      "y": 270
+    },
+    "bank=17,cell=0,facing=north": {
+      "model": "economy:block/banking/lakeward_cantonal_kiosk_0",
+      "y": 0
+    },
+    "bank=17,cell=0,facing=east": {
+      "model": "economy:block/banking/lakeward_cantonal_kiosk_0",
+      "y": 90
+    },
+    "bank=17,cell=0,facing=south": {
+      "model": "economy:block/banking/lakeward_cantonal_kiosk_0",
+      "y": 180
+    },
+    "bank=17,cell=0,facing=west": {
+      "model": "economy:block/banking/lakeward_cantonal_kiosk_0",
+      "y": 270
+    },
+    "bank=17,cell=1,facing=north": {
+      "model": "economy:block/banking/lakeward_cantonal_kiosk_1",
+      "y": 0
+    },
+    "bank=17,cell=1,facing=east": {
+      "model": "economy:block/banking/lakeward_cantonal_kiosk_1",
+      "y": 90
+    },
+    "bank=17,cell=1,facing=south": {
+      "model": "economy:block/banking/lakeward_cantonal_kiosk_1",
+      "y": 180
+    },
+    "bank=17,cell=1,facing=west": {
+      "model": "economy:block/banking/lakeward_cantonal_kiosk_1",
+      "y": 270
+    },
+    "bank=18,cell=0,facing=north": {
+      "model": "economy:block/banking/newhaven_kiosk_0",
+      "y": 0
+    },
+    "bank=18,cell=0,facing=east": {
+      "model": "economy:block/banking/newhaven_kiosk_0",
+      "y": 90
+    },
+    "bank=18,cell=0,facing=south": {
+      "model": "economy:block/banking/newhaven_kiosk_0",
+      "y": 180
+    },
+    "bank=18,cell=0,facing=west": {
+      "model": "economy:block/banking/newhaven_kiosk_0",
+      "y": 270
+    },
+    "bank=18,cell=1,facing=north": {
+      "model": "economy:block/banking/newhaven_kiosk_1",
+      "y": 0
+    },
+    "bank=18,cell=1,facing=east": {
+      "model": "economy:block/banking/newhaven_kiosk_1",
+      "y": 90
+    },
+    "bank=18,cell=1,facing=south": {
+      "model": "economy:block/banking/newhaven_kiosk_1",
+      "y": 180
+    },
+    "bank=18,cell=1,facing=west": {
+      "model": "economy:block/banking/newhaven_kiosk_1",
+      "y": 270
+    },
+    "bank=19,cell=0,facing=north": {
+      "model": "economy:block/banking/atlas_reserve_kiosk_0",
+      "y": 0
+    },
+    "bank=19,cell=0,facing=east": {
+      "model": "economy:block/banking/atlas_reserve_kiosk_0",
+      "y": 90
+    },
+    "bank=19,cell=0,facing=south": {
+      "model": "economy:block/banking/atlas_reserve_kiosk_0",
+      "y": 180
+    },
+    "bank=19,cell=0,facing=west": {
+      "model": "economy:block/banking/atlas_reserve_kiosk_0",
+      "y": 270
+    },
+    "bank=19,cell=1,facing=north": {
+      "model": "economy:block/banking/atlas_reserve_kiosk_1",
+      "y": 0
+    },
+    "bank=19,cell=1,facing=east": {
+      "model": "economy:block/banking/atlas_reserve_kiosk_1",
+      "y": 90
+    },
+    "bank=19,cell=1,facing=south": {
+      "model": "economy:block/banking/atlas_reserve_kiosk_1",
+      "y": 180
+    },
+    "bank=19,cell=1,facing=west": {
+      "model": "economy:block/banking/atlas_reserve_kiosk_1",
+      "y": 270
+    },
+    "bank=20,cell=0,facing=north": {
+      "model": "economy:block/banking/obsidian_capital_kiosk_0",
+      "y": 0
+    },
+    "bank=20,cell=0,facing=east": {
+      "model": "economy:block/banking/obsidian_capital_kiosk_0",
+      "y": 90
+    },
+    "bank=20,cell=0,facing=south": {
+      "model": "economy:block/banking/obsidian_capital_kiosk_0",
+      "y": 180
+    },
+    "bank=20,cell=0,facing=west": {
+      "model": "economy:block/banking/obsidian_capital_kiosk_0",
+      "y": 270
+    },
+    "bank=20,cell=1,facing=north": {
+      "model": "economy:block/banking/obsidian_capital_kiosk_1",
+      "y": 0
+    },
+    "bank=20,cell=1,facing=east": {
+      "model": "economy:block/banking/obsidian_capital_kiosk_1",
+      "y": 90
+    },
+    "bank=20,cell=1,facing=south": {
+      "model": "economy:block/banking/obsidian_capital_kiosk_1",
+      "y": 180
+    },
+    "bank=20,cell=1,facing=west": {
+      "model": "economy:block/banking/obsidian_capital_kiosk_1",
+      "y": 270
+    },
+    "bank=21,cell=0,facing=north": {
+      "model": "economy:block/banking/alpine_vault_kiosk_0",
+      "y": 0
+    },
+    "bank=21,cell=0,facing=east": {
+      "model": "economy:block/banking/alpine_vault_kiosk_0",
+      "y": 90
+    },
+    "bank=21,cell=0,facing=south": {
+      "model": "economy:block/banking/alpine_vault_kiosk_0",
+      "y": 180
+    },
+    "bank=21,cell=0,facing=west": {
+      "model": "economy:block/banking/alpine_vault_kiosk_0",
+      "y": 270
+    },
+    "bank=21,cell=1,facing=north": {
+      "model": "economy:block/banking/alpine_vault_kiosk_1",
+      "y": 0
+    },
+    "bank=21,cell=1,facing=east": {
+      "model": "economy:block/banking/alpine_vault_kiosk_1",
+      "y": 90
+    },
+    "bank=21,cell=1,facing=south": {
+      "model": "economy:block/banking/alpine_vault_kiosk_1",
+      "y": 180
+    },
+    "bank=21,cell=1,facing=west": {
+      "model": "economy:block/banking/alpine_vault_kiosk_1",
+      "y": 270
+    },
+    "bank=22,cell=0,facing=north": {
+      "model": "economy:block/banking/kintsugi_trust_kiosk_0",
+      "y": 0
+    },
+    "bank=22,cell=0,facing=east": {
+      "model": "economy:block/banking/kintsugi_trust_kiosk_0",
+      "y": 90
+    },
+    "bank=22,cell=0,facing=south": {
+      "model": "economy:block/banking/kintsugi_trust_kiosk_0",
+      "y": 180
+    },
+    "bank=22,cell=0,facing=west": {
+      "model": "economy:block/banking/kintsugi_trust_kiosk_0",
+      "y": 270
+    },
+    "bank=22,cell=1,facing=north": {
+      "model": "economy:block/banking/kintsugi_trust_kiosk_1",
+      "y": 0
+    },
+    "bank=22,cell=1,facing=east": {
+      "model": "economy:block/banking/kintsugi_trust_kiosk_1",
+      "y": 90
+    },
+    "bank=22,cell=1,facing=south": {
+      "model": "economy:block/banking/kintsugi_trust_kiosk_1",
+      "y": 180
+    },
+    "bank=22,cell=1,facing=west": {
+      "model": "economy:block/banking/kintsugi_trust_kiosk_1",
+      "y": 270
+    },
+    "bank=23,cell=0,facing=north": {
+      "model": "economy:block/banking/mariner_crest_kiosk_0",
+      "y": 0
+    },
+    "bank=23,cell=0,facing=east": {
+      "model": "economy:block/banking/mariner_crest_kiosk_0",
+      "y": 90
+    },
+    "bank=23,cell=0,facing=south": {
+      "model": "economy:block/banking/mariner_crest_kiosk_0",
+      "y": 180
+    },
+    "bank=23,cell=0,facing=west": {
+      "model": "economy:block/banking/mariner_crest_kiosk_0",
+      "y": 270
+    },
+    "bank=23,cell=1,facing=north": {
+      "model": "economy:block/banking/mariner_crest_kiosk_1",
+      "y": 0
+    },
+    "bank=23,cell=1,facing=east": {
+      "model": "economy:block/banking/mariner_crest_kiosk_1",
+      "y": 90
+    },
+    "bank=23,cell=1,facing=south": {
+      "model": "economy:block/banking/mariner_crest_kiosk_1",
+      "y": 180
+    },
+    "bank=23,cell=1,facing=west": {
+      "model": "economy:block/banking/mariner_crest_kiosk_1",
+      "y": 270
+    }
+  }
+}

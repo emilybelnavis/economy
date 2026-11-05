@@ -14,7 +14,8 @@ public enum EconomyCurrency {
     HKD(100, "0.1779"),
     JPY(1, "0.008870"),
     CNY(100, "0.2098"),
-    DKK(100, "0.20881622293");
+    DKK(100, "0.20881622293"),
+    CHF(100, "1.600000000000");
 
     private static final List<EconomyCurrency> ALL = List.of(values());
 
@@ -52,7 +53,7 @@ public enum EconomyCurrency {
         return minorUnitsPerMajor == 1 ? 0 : 2;
     }
 
-    /** Historical CAD per major unit, for opening-rate calculations. */
+    /** Approved opening CAD per major unit: historical fixtures plus the CHF game calibration. */
     public BigDecimal historicalCadRate() {
         return historicalCadRate;
     }

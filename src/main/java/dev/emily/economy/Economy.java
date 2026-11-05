@@ -48,6 +48,7 @@ public final class Economy {
     private final Map<MinecraftServer,Boolean> drained = new IdentityHashMap<>();
     public Economy(net.neoforged.bus.api.IEventBus modBus) {
         dev.emily.economy.cash.CashCatalog.initialize(modBus);
+        dev.emily.economy.card.CardCatalog.initialize(modBus);
         dev.emily.economy.terminal.TerminalCatalog.initialize(modBus);
         dev.emily.economy.banking.BankingCatalog.initialize(modBus);
         NeoForge.EVENT_BUS.addListener(this::card);
@@ -76,7 +77,7 @@ public final class Economy {
     private static final Map<MinecraftServer, DenominationChooser> activeChoosers = new IdentityHashMap<>();
     private void card(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickItem event) {
         if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player
-                && dev.emily.economy.cash.CashCatalog.hasBankingCard(event.getItemStack())) {
+                && (dev.emily.economy.cash.CashCatalog.hasBankingCard(event.getItemStack()) || dev.emily.economy.card.CardCatalog.find(event.getItemStack()).isPresent())) {
             dev.emily.economy.banking.BankingController.openCard(player);
             event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME); event.setCanceled(true);
         }
@@ -85,17 +86,26 @@ public final class Economy {
         DenominationChooser.register(event.getDispatcher(), choosers::get);
         FxAdminCommands.register(event.getDispatcher(), servers::get, Clock.systemUTC());
         LedgerCommands.register(event.getDispatcher(), servers::get);
+        dev.emily.economy.foundation.CreditCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.RegisterPriceCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.AdminConfigCommands.register(event.getDispatcher());
         EconomyCommands.register(event.getDispatcher(), (source, view) -> {
             var server = source.getServer();
             var services = servers.get(server);
-            if (services != null) return services.diagnostics(view.privileged(), view.detailed());
+            if (services != null) return view.calendarAfter() == null
+                    ? services.diagnostics(view.privileged(), view.detailed())
+                    : services.calendarDiagnostics(view.calendarAfter());
             String reason = invalidConfiguration.contains(server) ? "CONFIGURATION_INVALID" : null;
+            if (view.calendarAfter() != null) return dev.emily.economy.foundation.CalendarReport.render(
+                    null, ServerServices.State.UNAVAILABLE, reason, NO_METRICS, view.calendarAfter());
             var report = DiagnosticsReport.render(view.privileged(), view.detailed(), ServerServices.State.UNAVAILABLE,
                     NO_METRICS, null, reason, null, null);
-            return view.privileged() && view.detailed()
-                    ? DiagnosticsReport.withFx(report, ServerServices.State.UNAVAILABLE, null, reason) : report;
+            if (!view.privileged() || !view.detailed()) return report;
+            var detailed = new java.util.ArrayList<>(DiagnosticsReport.withFx(report,
+                    ServerServices.State.UNAVAILABLE, null, reason));
+            detailed.addAll(dev.emily.economy.foundation.CalendarReport.summary(null,
+                    ServerServices.State.UNAVAILABLE, reason, NO_METRICS));
+            return java.util.List.copyOf(detailed);
         });
     }
 
@@ -103,14 +113,21 @@ public final class Economy {
         MinecraftServer server = event.getServer();
         if (servers.containsKey(server)) throw new IllegalStateException("Duplicate server lifecycle");
         SchedulingConfig scheduling;
+        dev.emily.economy.clock.FinancialCalendar.Config calendar;
         try {
             scheduling = SchedulingConfig.load(FMLPaths.CONFIGDIR.get().resolve("economy-scheduling.properties"));
+            calendar = dev.emily.economy.clock.FinancialCalendar.Config.load(FMLPaths.CONFIGDIR.get().resolve("economy-calendar.properties"));
         } catch (SchedulingConfig.InvalidConfiguration e) {
             invalidConfiguration.add(server);
             LOGGER.error("event=CONFIGURATION_INVALID reason={}", e.safeReason());
             return;
         }
-        var runtime = new FoundationRuntime(FoundationRuntime.Configuration.production(Clock.systemUTC()), scheduling.sqliteLockTimeoutMillis());
+        catch (IllegalArgumentException e) {
+            invalidConfiguration.add(server);
+            LOGGER.error("event=CONFIGURATION_INVALID reason=financial_calendar_settings");
+            return;
+        }
+        var runtime = new FoundationRuntime(FoundationRuntime.Configuration.production(Clock.systemUTC(), calendar), scheduling.sqliteLockTimeoutMillis());
         servers.put(server, new ServerServices(server.getWorldPath(LevelResource.ROOT), runtime, scheduling));
         runtimes.put(server, runtime);
         choosers.put(server, new DenominationChooser(servers.get(server), runtime, Clock.systemUTC()));
@@ -122,6 +139,7 @@ public final class Economy {
         if (services != null) {
             var previous = services.state();
             var previousPhase = services.progress().phase();
+            dev.emily.economy.institution.KioskAdmission.tick(event.getServer());
             services.tick();
             dev.emily.economy.terminal.TerminalLifecycle.tick(event.getServer());
             choosers.get(event.getServer()).tick(event.getServer());
@@ -149,6 +167,7 @@ public final class Economy {
     }
     private void stopped(ServerStoppedEvent event) {
         invalidConfiguration.remove(event.getServer());
+        dev.emily.economy.institution.KioskAdmission.stopped(event.getServer());
         dev.emily.economy.terminal.TerminalLifecycle.stopped(event.getServer());
         FoundationRuntime runtime=runtimes.remove(event.getServer());
         ServerServices orphan=servers.remove(event.getServer());

@@ -92,12 +92,18 @@ class WithdrawalsTest {
         var store = open();
         try {
             seed(store, TerminalPolicy.Kind.TELLER);
-            store.transaction(tx -> tx.execute("UPDATE terminal_settings SET mode='DISABLED',currencies='',denominations=''", List.of()));
             var preview = preview(store, 2075, Map.of("economy:cad_bill_20", 1));
             assertEquals(Map.of("economy:cad_bill_20", 1), preview.plan().bills());
             assertEquals(Map.of("economy:cad_coin_25", 3), preview.plan().coins());
             var reserve = intent(Withdrawals.Action.RESERVE, Withdrawals.reserveRequest(preview));
             assertEquals(Status.COMMITTED, engine(store, Withdrawals.Action.RESERVE, WithdrawalDelivery::prepare).submit(reserve).status());
+            // Frozen pre-A6 pending reservation: an unbound disabled legacy teller keeps old commit semantics.
+            store.transaction(tx->{
+                tx.execute("UPDATE terminal_settings SET mode='DISABLED',currencies='',denominations=''",List.of());
+                tx.execute("UPDATE terminal_bank_bindings SET bank_key='',catalog_revision=0,native_currency='',migration_state='UNBOUND_BANK'",List.of());
+                return null;
+            });
+            assertEquals("UNBOUND_BANK",assertThrows(IllegalArgumentException.class,()->preview(store,2075,Map.of("economy:cad_bill_20",1))).getMessage());
             assertEquals(Status.COMMITTED, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare).submit(commit(reserve.operationId().value())).status());
             assertEquals(7900, balance(store));
             assertEquals("DISABLED", store.transaction(tx -> tx.query("SELECT mode FROM terminal_settings", List.of(), 1)).getFirst().get("mode"));
@@ -183,7 +189,7 @@ class WithdrawalsTest {
             if (changed.equals("account"))
                 store.transaction(tx -> tx.execute("UPDATE account_catalog SET revision=2 WHERE account_id=?",
                         List.of(account.toString())));
-            else store.transaction(tx -> tx.execute("UPDATE terminal_settings SET revision=3", List.of()));
+            else store.transaction(tx -> tx.execute("UPDATE terminal_settings SET revision=4", List.of()));
             assertEquals(Status.DURABLY_REJECTED, engine(store, Withdrawals.Action.COMMIT, WithdrawalDelivery::prepare)
                     .submit(commit(reserve.operationId().value())).status());
             assertEquals(10000L, balance(store));
@@ -195,7 +201,7 @@ class WithdrawalsTest {
         var store = new SqliteStorage(); store.initialize(world.toRealPath()); return store;
     }
     private Withdrawals.Preview preview(SqliteStorage store, long amount, Map<String, Integer> edits) {
-        var binding = new Withdrawals.Binding(account, 1, CAD, anchor, generation, 2, fxRevision);
+        var binding = new Withdrawals.Binding(account, 1, CAD, anchor, generation, 3, fxRevision);
         return store.transaction(tx -> Withdrawals.preview(tx::query, store.snapshot().worldId(), owner, binding,
                 new Money(CAD, amount), edits, catalog, this::fx));
     }
@@ -229,14 +235,16 @@ class WithdrawalsTest {
         var terminalCatalog = new HashMap<String, TerminalPolicy.Denomination>();
         catalog.values().stream().filter(value -> kind != TerminalPolicy.Kind.ATM || value.bill()).forEach(value ->
                 terminalCatalog.put(value.id(), new TerminalPolicy.Denomination(value.currency(), value.bill())));
-        for (var action : List.of(TerminalPolicy.Action.PLACE, TerminalPolicy.Action.CONFIGURE)) {
-            var handler = TerminalPolicy.registration(action, store.snapshot().worldId(), terminalCatalog,
-                    (a, i, current, reads) -> true, (a, reads) -> false);
-            var request = action == TerminalPolicy.Action.PLACE
-                    ? TerminalPolicy.placeRequest(anchor, generation, owner, kind, null, 0)
-                    : TerminalPolicy.configureRequest(anchor, generation, 1, TerminalPolicy.defaultSettings(kind, terminalCatalog));
-            new JournalEngine(store, (a,k) -> true, Map.of(action.kind(), handler)).submit(new Intent(
-                    new OperationId(UUID.randomUUID()), new RequestId(UUID.randomUUID()), owner, action.kind(), request, null, null));
-        }
+        var place=TerminalPolicy.Action.PLACE;
+        assertEquals(Status.COMMITTED,new JournalEngine(store,(a,k)->true,Map.of(place.kind(),TerminalPolicy.registration(place,store.snapshot().worldId(),terminalCatalog,(a,i,c,r)->true,(a,r)->false)))
+                .submit(new Intent(new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),owner,place.kind(),TerminalPolicy.placeRequest(anchor,generation,owner,kind,null,0),null,null)).status());
+        var bank=new dev.emily.economy.institution.InstitutionCatalog.InstitutionId("economy:bank/crownstone");
+        assertEquals(Status.COMMITTED,new JournalEngine(store,(a,k)->true,Map.of(TerminalBanking.BIND,TerminalBanking.registration(store.snapshot().worldId(),terminalCatalog,(a,i,c,r)->true,(a,r)->false)))
+                .submit(new Intent(new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),owner,TerminalBanking.BIND,TerminalBanking.bindRequest(anchor,generation,1,bank,true),null,null)).status());
+        var current=store.transaction(tx->TerminalPolicy.find(tx::query,store.snapshot().worldId(),anchor,owner,false)).orElseThrow();
+        var configure=TerminalPolicy.Action.CONFIGURE;
+        var nativeSettings=TerminalBanking.settings(current,TerminalPolicy.Mode.BOTH,terminalCatalog);
+        assertEquals(Status.COMMITTED,new JournalEngine(store,(a,k)->true,Map.of(configure.kind(),TerminalPolicy.registration(configure,store.snapshot().worldId(),terminalCatalog,(a,i,c,r)->true,(a,r)->false)))
+                .submit(new Intent(new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),owner,configure.kind(),TerminalPolicy.configureRequest(anchor,generation,2,nativeSettings),null,null)).status());
     }
 }

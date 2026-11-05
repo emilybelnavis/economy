@@ -58,9 +58,14 @@ final class AccountSchema {
                 """.strip());
     }
 
+    static String fourAccountGuard() { return statements().get(6).replace("OFFSET 2", "OFFSET 3"); }
+
     static void validate(Connection connection) throws SQLException {
+        int schema;
+        try (var stmt = connection.createStatement(); var rows = stmt.executeQuery("PRAGMA user_version")) { rows.next(); schema = rows.getInt(1); }
         try (var query = connection.prepareStatement("SELECT sql FROM sqlite_schema WHERE name=?")) {
-            for (String sql : statements()) {
+            for (String original : statements()) {
+                String sql = schema >= 20 && original.startsWith("CREATE TRIGGER account_insert_guard") ? fourAccountGuard() : original;
                 // CREATE [UNIQUE] <object kind> <object name> ...
                 String[] tokens = sql.split("[\\s(]+", 5);
                 String name = tokens[tokens[1].equals("UNIQUE") ? 3 : 2];

@@ -10,6 +10,40 @@ import static org.junit.jupiter.api.Assertions.*;
 class BankingBoundaryTest {
     private static final UUID SESSION = UUID.randomUUID();
 
+    @Test void issuanceAndReplacementRequireKioskButLostReportingAndClaimsRemainOwnerActions() {
+        for(var access:List.of(BankingMenu.Access.ATM,BankingMenu.Access.TELLER,BankingMenu.Access.CARD)) {
+            assertTrue(access.allows("cards"));assertTrue(access.allows("card_lost"));
+            assertFalse(access.allows("card_preview"));assertFalse(access.allows("card_confirm"));
+        }
+        assertTrue(BankingMenu.Access.KIOSK.allows("card_preview"));
+        assertTrue(BankingMenu.Access.KIOSK.allows("card_confirm"));
+        assertTrue(BankingMenu.Access.KIOSK.allows("collect"));
+        assertFalse(BankingMenu.Access.ADMIN.allows("card_confirm"));
+        assertFalse(BankingMenu.Access.REGISTER.allows("card_lost"));
+        assertFalse(BankingMenu.Access.CARD.allows("credit_apply"));
+    }
+
+    @Test void creditProfileIsReadOnlyAndDoesNotExposeScoringOrUnderwritingMutations() {
+        for(var access:List.of(BankingMenu.Access.ATM,BankingMenu.Access.TELLER,BankingMenu.Access.KIOSK,BankingMenu.Access.CARD)) {
+            assertTrue(access.allows("credit_profile"));assertTrue(access.allows("credit_history"));assertTrue(access.allows("credit_next"));
+            assertFalse(access.allows("score_recalculate"));assertFalse(access.allows("credit_establish"));assertFalse(access.allows("loan_apply"));
+        }
+        assertFalse(BankingMenu.Access.REGISTER.allows("credit_profile"));
+        assertFalse(BankingMenu.Access.ADMIN.allows("credit_history"));
+        assertThrows(IllegalArgumentException.class,()->new BankingNetwork.Action(1,SESSION,0,"score_recalculate",""));
+    }
+
+    @Test void creditFacilityDiagnosticsRemainOwnerReadActionsOnBankingSurfaces() {
+        var reads=List.of("credit_facilities","credit_facilities_next","credit_facility","credit_statements","credit_statements_next");
+        for(var action:reads) {
+            assertTrue(BankingNetwork.ACTIONS.contains(action));
+            assertDoesNotThrow(()->new BankingNetwork.Action(1,SESSION,0,action,""));
+            for(var access:List.of(BankingMenu.Access.ATM,BankingMenu.Access.TELLER,BankingMenu.Access.KIOSK,BankingMenu.Access.CARD))assertTrue(access.allows(action),access+" "+action);
+            for(var access:List.of(BankingMenu.Access.REGISTER,BankingMenu.Access.ADMIN,BankingMenu.Access.WORLD_SETUP))assertFalse(access.allows(action),access+" "+action);
+        }
+        for(var mutation:List.of("credit_limit_edit","credit_balance_edit","credit_recalculate","credit_draw","credit_repay"))assertFalse(BankingNetwork.ACTIONS.contains(mutation));
+    }
+
     @Test void actionBoundsCountUtf8BytesAndRejectForgedIdentityFields() {
         assertDoesNotThrow(() -> new BankingNetwork.Action(1, SESSION, 0, "withdraw_preview", "é".repeat(1024)));
         assertThrows(IllegalArgumentException.class,
@@ -33,8 +67,8 @@ class BankingBoundaryTest {
         assertTrue(BankingMenu.Access.CARD.allows("manage_accounts"));
         assertFalse(BankingMenu.Access.REGISTER.allows("manage_accounts"));
         assertFalse(BankingMenu.Access.WORLD_SETUP.allows("home"));
-        assertTrue(BankingMenu.Access.TELLER.allows("account_close_preview"));
-        assertTrue(BankingMenu.Access.TELLER.allows("account_close_confirm"));
+        assertFalse(BankingMenu.Access.TELLER.allows("account_close_preview"));
+        assertFalse(BankingMenu.Access.TELLER.allows("account_close_confirm"));
         assertFalse(BankingMenu.Access.ATM.allows("account_close_confirm"));
         assertFalse(BankingMenu.Access.CARD.allows("account_close_confirm"));
         assertFalse(BankingMenu.Access.REGISTER.allows("account_close_confirm"));
@@ -47,6 +81,37 @@ class BankingBoundaryTest {
         assertFalse(BankingMenu.Access.CARD.allows("configure"));
         assertFalse(BankingMenu.Access.ADMIN.allows("withdraw"));
         assertFalse(BankingMenu.Access.CARD.allows("deposit"));
+    }
+
+    @Test void branchLifecycleAndBrandingStayInTheirSeparateServerModes() {
+        var lifecycle = List.of("branch_open", "branch_assign", "branch_switch", "branch_accept", "branch_close");
+        for (String action : lifecycle) {
+            assertTrue(BankingMenu.Access.KIOSK.allows(action), action);
+            for (var access : List.of(BankingMenu.Access.ATM, BankingMenu.Access.TELLER, BankingMenu.Access.CARD,
+                    BankingMenu.Access.REGISTER, BankingMenu.Access.ADMIN, BankingMenu.Access.WORLD_SETUP))
+                assertFalse(access.allows(action), access + " " + action);
+        }
+        for (String action : List.of("brand_preview", "brand_confirm")) {
+            assertTrue(BankingMenu.Access.ADMIN.allows(action), action);
+            for (var access : BankingMenu.Access.values()) if (access != BankingMenu.Access.ADMIN)
+                assertFalse(access.allows(action), access + " " + action);
+        }
+        for (String action : List.of("deposit", "deposit_confirm", "withdraw", "withdraw_confirm", "fx", "exchange_confirm",
+                "configure", "account_open", "account_close_preview"))
+            assertFalse(BankingMenu.Access.KIOSK.allows(action), action);
+        for (String action : List.of("account_open", "account_close_preview", "account_close_confirm"))
+            for (var access : List.of(BankingMenu.Access.ATM, BankingMenu.Access.TELLER, BankingMenu.Access.CARD))
+                assertFalse(access.allows(action), access + " " + action);
+        assertTrue(BankingMenu.Access.KIOSK.allows("account_close_confirm"));
+        assertTrue(BankingMenu.Access.KIOSK.allows("branch_products"));
+    }
+
+    @Test void unsupportedProductsHaveNoFakeMutationPacketOrAccessGrant() {
+        for (String action : List.of("card_replace", "credit_apply", "loan_apply", "subprime_apply", "issue_card")) {
+            assertFalse(BankingNetwork.ACTIONS.contains(action), action);
+            assertThrows(IllegalArgumentException.class, () -> new BankingNetwork.Action(1, SESSION, 0, action, ""));
+            for (var access : BankingMenu.Access.values()) assertFalse(access.allows(action), access + " " + action);
+        }
     }
 
     @Test void placerCanConfigureWithoutOperatorPrivileges() {
@@ -133,7 +198,7 @@ class BankingBoundaryTest {
         assertThrows(IllegalArgumentException.class, () -> BankingWithdrawals.parse("CAD 60;economy:cad_bill_20=2305"));
         assertThrows(IllegalArgumentException.class, () -> BankingWithdrawals.parse("CAD 60;economy:cad_bill_20=2147483648"));
         assertThrows(IllegalArgumentException.class, () -> BankingWithdrawals.parse("CAD 60;economy:cad_bill_20=3;extra"));
-        String many = String.join(",", IntStream.range(0, 119).mapToObj(index -> "economy:bill_" + index + "=1").toList());
+        String many = String.join(",", IntStream.range(0, 132).mapToObj(index -> "economy:bill_" + index + "=1").toList());
         assertThrows(IllegalArgumentException.class, () -> BankingWithdrawals.parse("CAD 60;" + many));
     }
 

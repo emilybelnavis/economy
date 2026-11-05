@@ -18,8 +18,8 @@ class BankingSettingsTest {
     }
 
     @Test void lifecycleRejectionsExplainTheAccountLimitAndResolution() {
-        assertTrue(BankingAccounts.failureMessage("BANK_CAP_REACHED").contains("3 open accounts"));
-        assertTrue(BankingAccounts.failureMessage("BANK_CAP_REACHED").contains("Close one at a teller"));
+        assertTrue(BankingAccounts.failureMessage("BANK_CAP_REACHED").contains("4 open accounts"));
+        assertTrue(BankingAccounts.failureMessage("BANK_CAP_REACHED").contains("bank branch"));
         assertTrue(BankingAccounts.failureMessage("BANK_CURRENCY_EXISTS").contains("already have"));
         assertTrue(BankingAccounts.failureMessage("ACCOUNT_PROTECTED").contains("cannot be closed"));
         assertTrue(BankingAccounts.failureMessage("ACTIVE_HOLD").contains("reserved"));

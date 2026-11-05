@@ -37,6 +37,7 @@ public final class TerminalLifecycle {
         enqueue(level, anchor, entity, false);
     }
     public static void removed(ServerLevel level, BlockPos anchor, TerminalBlockEntity entity) {
+        dev.emily.economy.institution.KioskAdmission.removed(level.getServer(), level.dimension().location().toString(), anchor);
         entity.setPolicyReady(false);
         if (entity.owner() != null) {
             var kind = kind(entity.getBlockState().getBlock());
@@ -109,7 +110,7 @@ public final class TerminalLifecycle {
                     var entity = live(server, pending);
                     if (entity == null) { queue.remove(pending.key); return; }
                     if (current != null && current.active() && current.generation().equals(pending.key.generation())) {
-                        entity.setPolicyRevision(current.revision());
+                        entity.applyPolicy(current);
                         entity.setPolicyReady(true); queue.remove(pending.key); return;
                     }
                 }

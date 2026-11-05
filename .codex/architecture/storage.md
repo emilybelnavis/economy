@@ -53,7 +53,8 @@ and upstream license files, and explicitly in additionalRuntimeClasspath for dev
 Effective pragmas are verified: WAL, synchronous=2 (FULL), foreign_keys=1, busy_timeout=5000ms.
 No automatic busy retry is performed beyond SQLite's finite busy timeout.
 
-application_id=0x45434F4E identifies redesigned storage. Current schema=10; minimum=1. V3 adds the [journal](journal.md); V4 adds [recovery and clock metadata](recovery-clock.md). V5 adds the [FX journal indexes and activation-scoped observation](fx.md). V6 adds the [account catalog](accounts.md). V7 adds the [ledger balance projection](postings.md). V8 adds [holds](postings.md#holds). V9 adds [quote consumption and the denomination index](postings.md#fx-closure-and-rebase). V10 adds the [posting history index](postings.md#service-and-history).
+application_id=0x45434F4E identifies redesigned storage. Current schema=19; minimum=1. V3 adds the [journal](journal.md); V4 adds [recovery and clock metadata](recovery-clock.md). V5 adds the [FX journal indexes and activation-scoped observation](fx.md). V6 adds the [account catalog](accounts.md). V7 adds the [ledger balance projection](postings.md). V8 adds [holds](postings.md#holds). V9 adds [quote consumption and the denomination index](postings.md#fx-closure-and-rebase). V10 adds the [posting history index](postings.md#service-and-history).
+V11–V17 add merchant payments, custody, cash issuance, terminal policy, deposits/returns, withdrawals and register sales. V18 adds the [financial calendar](financial-calendar.md) and paged domain checkpoints, retaining prior IDs, balances and history.
 V1 creates only foundation_metadata (world UUID, product, schema version) and migration_history.
 V2 adds explicit identity_protocol=1. user_version must match metadata and contiguous
 recognized migration history. Newer/older unsupported versions and legacy/foreign databases
@@ -98,3 +99,41 @@ ASCII letters/digits beginning with a letter. Catalog keys are stable lowercase 
 keys (128 characters max), with company/security/exchange/listing kinds, independent of names.
 Payment/loan/order types are conventions only. JournalSequence is positive, database-assigned
 by the journal; EconomicSequence is nonnegative and independent; AuditInstant is UTC Instant.
+
+## CHF history compatibility
+
+V19 replaces only the posting-history index predicate with record_version IN (1,2), enabling [CHF minor-unit posting history](chf.md). V10 remains frozen for old schema/backup validation. Existing schemas1–18 require the normal stopped-world backup gate; no balance/account/cash table is changed. Strict v1 and v2 record decoders coexist. Supported clean backup manifests include19.
+
+
+## A6-03 current contract (2026-11-05)
+
+[Institution/provider contracts](institutions.md) supersede earlier lifecycle/cap references: schema V20, four total open BANK accounts including primary, version3 institution postings, explicit legacy provider migration, and sealed branch-only lifecycle admission. Live opening/closing/provider changes are unavailable until A6-05-01. Existing account services and original outcome lookup remain.
+
+
+## A6-04 current contract (2026-11-05)
+
+[Wealth, pricing and funded yield](wealth-pricing.md) defines schema V21, persisted required-source contracts, fresh qualification/fee witnesses, assigned-bank FX pricing and time-weighted bank-funded deposit yield. Production installs bounded accrual/payout providers at stage 1 and daily Tier reevaluation at stage 7; empty domains remain dormant. Source snapshots and unpaid receivables remain distinct from spendable funds. Live branch adapters, issued cards, lending and trading are still separate packages. Earlier no-product/default-Tier2-denial descriptions apply to their historical delivery checkpoints.
+
+## A6-05-01 schema V22
+
+Adds `terminal_bank_bindings` and preserves legacy terminal settings as explicit unbound metadata. [Exact binding/fact/migration contract](branch-hardware.md). Open/recovery/offline validation and complete-world restore recognize V22; original history and backup-before-upgrade rules remain.
+
+## A6-06 schema V23
+
+Adds `issued_cards` and one-use `issued_card_fee_quotes`; [facts/encoding and custody](issued-cards.md). Old IDs, journals and settings remain intact. V23 participates in open/recovery/offline schema validation and complete-world manifest restore under the existing backup-before-upgrade gate.
+
+## A6-07 schema V24
+
+Adds four unseeded credit profile/history/inquiry tables and three indexes; [exact fact/first-issuance contract](credit-profiles.md). V23 upgrade preserves existing accounts, tokens, settings, capital and journal history. Open/recovery/offline schema and complete-world manifests recognize V24 under the existing backup gate.
+
+## A6-08-01 extension
+
+V25 adds funded credit facilities, separate tokens and immutable statements with five lookup/uniqueness indexes. Main/offline schema checks and complete-world backup/restore accept V25; historical migrations remain unchanged. See [credit persistence](credit-facilities.md).
+
+## A6-08-02 diagnostics
+
+V26 appends four partial/expression indexes for bounded credit diagnostics; no table or monetary schema changes. New daily witness and payment allocation facts are registered v1 records; old financial facts are preserved. See [diagnostic persistence](credit-diagnostics.md).
+
+## A6-08-03 acceptance
+
+V27 appends one partial credit_event_feed index for ordered supported credit facts; no new monetary entity/table or fact family is added. Main/offline validation and backup/restore accept V27. Existing v1 facts and V1–V26 migrations are unchanged. See [immutable lifecycle source](credit-acceptance.md).

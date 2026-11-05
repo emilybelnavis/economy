@@ -51,3 +51,12 @@ lookups for diagnostics and later quote/history work. `Publication.conversionRat
 detaches one publication for A2-02. Startup verifies exact record types and
 versions and checks that daily publication bytes match the clock outcome.
 See [storage](storage.md) and [clock and recovery](recovery-clock.md).
+
+## CHF and version-two publications
+
+[A6-03-01](../A6-03-01.md) adds [CHF opening/availability compatibility](chf.md). Frozen v1 codecs keep the original ten-currency order; v2 appends CHF. Fresh openings include CHF; legacy backlog stays v1, then a strictly future UTC boundary publishes CHF at that same publication’s CAD rate×1.6 with a captured default baseline. The v2 policy/publication and economic completion commit atomically. Old history explicitly lacks CHF. Historical fixed-clock signatures/IDs remain; a deferred initial-version reader derives1/2 from the immutable earliest opening. Financial currency availability, quotes and account opening use committed publication membership. Diagnostics distinguish pending versus effective CHF dates. No new FX schema/table or external rate provider.
+
+
+## A6-04 current contract (2026-11-05)
+
+[Wealth, pricing and funded yield](wealth-pricing.md) defines schema V21, persisted required-source contracts, fresh qualification/fee witnesses, assigned-bank FX pricing and time-weighted bank-funded deposit yield. Production installs bounded accrual/payout providers at stage 1 and daily Tier reevaluation at stage 7; empty domains remain dormant. Source snapshots and unpaid receivables remain distinct from spendable funds. Live branch adapters, issued cards, lending and trading are still separate packages. Earlier no-product/default-Tier2-denial descriptions apply to their historical delivery checkpoints.

@@ -1,6 +1,7 @@
 package dev.emily.economy.foundation;
 
 import dev.emily.economy.account.AccountCatalog;
+import dev.emily.economy.institution.*;
 import dev.emily.economy.account.AccountLifecycle;
 import dev.emily.economy.account.AccountLifecycle.Close;
 import dev.emily.economy.account.AccountLifecycle.ClosureReader;
@@ -44,31 +45,18 @@ class AccountLifecycleTest {
         @Override public void publish(Journal.Outcome terminal) {}
     };
 
-    @Test void queuedDuplicateAndLastSlotOpensSerialize() throws Exception {
-        var store = new SqliteStorage();
-        var services = new ServerServices(world.toRealPath(), store);
-        try {
-            await(services, services.readiness());
-            var owner = owner(services.partyWorld(), player);
-            var grant = grant(owner, services.sessionId());
-            var journal = services.journal((actor, kind) -> actor.equals(player) && kind.equals(FxService.OPEN),
-                    Map.of(FxService.OPEN, FxService.opening(Clock.systemUTC())), PUBLISHER);
-            assertEquals(Journal.Status.COMMITTED, complete(services, journal.submit(selection())).status());
-            assertEquals(Journal.Status.COMMITTED,
-                    complete(services, services.initializePrimary(grant, operationId(), requestId(), PUBLISHER)).status());
-
-            var duplicate = compete(services, grant, new Open(EUR, 1), new Open(EUR, 1));
-            assertEquals(List.of("BANK_OPENED", "BANK_CURRENCY_EXISTS"), duplicate);
-            var lastSlot = compete(services, grant, new Open(JPY, 1), new Open(USD, 1));
-            assertEquals(List.of("BANK_OPENED", "BANK_CAP_REACHED"), lastSlot);
-
-            var accounts = await(services, services.storage(() -> store.transaction(tx ->
-                    AccountCatalog.history(tx::query, owner, null, 8))));
-            assertEquals(3, accounts.size());
-            assertEquals(3, accounts.stream().map(account -> account.currency()).distinct().count());
-        } finally {
-            assertTrue(services.stop(Duration.ofSeconds(5)));
-        }
+    @Test void rawOpeningAndClosingRequireBranchEvenWithTrueAuthorityPredicate() throws Exception {
+        var owner=owner(new WorldId(UUID.randomUUID()),player);
+        var open=new Open(EUR,1);
+        var request=new Journal.CanonicalRequest(1,Map.of("currency","EUR","primary_revision","1","economy:owner",Journal.actorKey(player)));
+        var intent=new Journal.Intent(operationId(),requestId(),player,AccountLifecycle.OPEN,request,null,null);
+        var reads=(JournalEngine.ReadView)(sql,p,max)->{throw new AssertionError("Raw lifecycle must deny before querying");};
+        assertEquals("BRANCH_REQUIRED",((JournalEngine.Reject)AccountLifecycle.opening(owner,open).handler().prepare(intent,reads)).result().code());
+        var close=new Close(accountId(),1,null,null);
+        var fields=new java.util.HashMap<>(close.request().fields());fields.put("economy:owner",Journal.actorKey(player));
+        var closeIntent=new Journal.Intent(operationId(),requestId(),player,AccountLifecycle.CLOSE,new Journal.CanonicalRequest(1,fields),null,null);
+        var registration=AccountLifecycle.closing(owner,close,state(0,false,false,false),close.request(),(i,r)->true,(i,r)->fail("No settlement"));
+        assertEquals("BRANCH_REQUIRED",((JournalEngine.Reject)registration.handler().prepare(closeIntent,reads)).result().code());
     }
 
     @Test void closureChecksProtectionClaimsAndDestinationWithoutChangingAccounts() throws Exception {
@@ -206,9 +194,19 @@ class AccountLifecycleTest {
         return attempt.engine(store, session).submit(attempt.intent()).result().code();
     }
 
+    private final Map<OperationId,BranchAdmission.Proof> proofs=new java.util.HashMap<>();
     private PartyOperation closure(PartyRef owner, UUID scope, OperationId id, Close request, ClosureReader reader) {
-        return PartyOperation.owned(grant(owner, scope), AccountLifecycle.CLOSE, id, requestId(), request.request(),
-                AccountLifecycle.closing(owner, request, reader));
+        var proof=proofs.computeIfAbsent(id,ignored->{
+            var context=new BranchAdmission.Context(owner.world(),scope,player,BranchAdmission.Action.CLOSE,
+                new InstitutionCatalog.InstitutionId("economy:bank/cedar_parcel"),null,request.source(),request.expectedRevision(),1,0);
+            return BranchFixtures.proof(context);
+        });
+        // Override the source kiosk for protection fixtures; only JPY can reach the closure reader.
+        var full=new BankProviders.Request(proof,0,request.request().fields()).request();
+        var fields=new java.util.HashMap<>(full.fields());fields.remove("economy:owner");
+        var canonical=new Journal.CanonicalRequest(full.version(),fields);
+        return PartyOperation.owned(grant(owner,scope),BankProviders.CLOSE,id,requestId(),canonical,
+            AccountLifecycle.closingAtBranch(owner,request,reader,proof));
     }
 
     private PartyAuthorization.Grant grant(PartyRef owner, UUID scope) {
@@ -229,6 +227,7 @@ class AccountLifecycleTest {
                 INSERT INTO account_catalog(account_id,owner_id,purpose,currency,status,revision,is_primary)
                 VALUES(?,?,'BANK',?,'OPEN',1,?)
                 """, List.of(account.value().toString(), owner.value().toString(), currency.code(), primary ? "1" : "0"));
+        tx.execute("INSERT INTO bank_account_providers VALUES(?,?,1,1,0)",List.of(account.value().toString(),"economy:bank/cedar_parcel"));
     }
 
     private void select(SqliteStorage store) {

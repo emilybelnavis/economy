@@ -4,7 +4,7 @@
 
 On 2026-11-04 the user stated: “all of the draft prompts have been reviewed and are approved for execution. Prep everything for execution.” This approves the 23 A6 prompts, their stated scope, acceptance gates and explicitly written recommendations. It supersedes their earlier draft-only and pending-approval labels. It does not select an implementation package in this preparation turn, fabricate missing policy values, authorize world resets or start A7/Stage B.
 
-**Preparation complete; no A6 package started or verified.** A6-01 is ready to select. All remaining packages are approved and queued behind prerequisites. A completed A1–A5 gate is upstream evidence, not A6 evidence. No code, assets, dependencies, schema, worlds, README release text or changelog changed in this preparation.
+**A6-01 is complete as a document/source-review contract checkpoint.** [CONTRACT.md](CONTRACT.md), [handoff](../../.codex/A6-01.md) and [document review](../../.codex/verification/A6-01.md) record its outcome. [A6-02-01](../../.codex/A6-02-01.md) calendar scheduling/configuration is implemented and verified, including isolated runtime loading. [A6-02-02](../../.codex/A6-02-02.md) calendar diagnostics are implemented and verified. [A6-02-03](../../.codex/A6-02-03.md) accepts the shared calendar foundation with restart/process/FIFO evidence. [A6-03-01](../../.codex/A6-03-01.md) CHF currency/cash is verified, including V19 minor-posting history and preserved legacy facts/assets. [A6-03](../../.codex/A6-03.md) institution catalog/accounts are verified, including V20 funding/provider migration and branch-only admission contracts. [A6-04](../../.codex/A6-04.md) wealth qualification, pricing and funded yield are verified in their package scope. Live kiosks are delivered by A6-05-01; bank loans and trading remain unimplemented. [A6-05](../../.codex/A6-05.md) original assets are verified. [A6-05-01](../../.codex/A6-05-01.md) branded hardware and live kiosk admission are verified. [A6-06](../../.codex/A6-06.md) issued debit cards are verified. [A6-07](../../.codex/A6-07.md) profile/score contracts are verified with recurring scoring dormant. [A6-08-01](../../.codex/A6-08-01.md) funded credit facilities and servicing APIs are verified in their recorded scope. [A6-08-02](../../.codex/A6-08-02.md) owner and audited operator credit diagnostics are verified. [A6-08-03](../../.codex/A6-08-03.md) credit foundation acceptance is recorded, with new production exposure gated pending downstream lifecycle safety. Next select A6-09-01 (loan foundation). Other packages await actual prerequisite evidence. A completed A1–A5 gate is upstream evidence, not A6 evidence. The original approval-preparation turn changed no code/assets/schema; subsequent A6-02-01 execution adds schema18 and the calendar foundation, with evidence in its handoff.
 
 Approval precedence: this record and the user's later instructions → approved specification/branding → package scope and recorded A6-01 contracts. Earlier dated statements that these drafts are unapproved are historical. Preserve shared contracts and bring material conflicts forward; do not ask again for the same prompt approval.
 
@@ -26,7 +26,7 @@ All original user requirements remain approved: UTC 20-minute days including dow
 
 The user approved [all remaining policies](POLICY-REVIEW.md) on 2026-11-04, with institution funding quadrupled from the reviewed7B to **28B**. All other policies are accepted unchanged. The detailed [credit/funding](POLICIES-CREDIT.md), [banking](POLICIES-BANKING.md) and [servicing](POLICIES-SERVICING.md) contracts are normative specification inputs. There are no remaining policy-approval blockers; do not ask again for these choices.
 
-A6-01 still must inventory current contracts and produce the shared interface/state/fact/migration design and handoff. Implementing a policy is separate from approving it. If a new incompatibility is demonstrated during that work, report its exact impact and continue unaffected work.
+A6-01 delivered the shared interface/state/fact/migration contract and handoff; downstream packages implement and verify those boundaries. Implementing a policy is separate from approving it. If a new incompatibility is demonstrated during that work, report its exact impact and continue unaffected work.
 
 ## Package queue
 
@@ -34,21 +34,21 @@ Execute in the table order as a conservative serial path; independent-ready pack
 
 | Package | State | Prerequisites |
 | --- | --- | --- |
-| [A6-01](A6-01.md) | Ready to select; contract checkpoint | Verified A1–A5 |
-| [A6-02-01](A6-02-01.md) | Approved; waiting for prerequisites | A6-01 |
-| [A6-02-02](A6-02-02.md) | Approved; waiting for prerequisites | A6-02-01 |
-| [A6-02-03](A6-02-03.md) | Approved; waiting for prerequisites | A6-02-02 |
-| [A6-03-01](A6-03-01.md) | Approved; waiting for prerequisites | A6-01 |
-| [A6-03](A6-03.md) | Approved; waiting for prerequisites | A6-01, A6-02-03, A6-03-01 |
-| [A6-04](A6-04.md) | Approved; waiting for prerequisites | A6-03 |
-| [A6-05](A6-05.md) | Approved; waiting for prerequisites | A6-01, A6-03 |
-| [A6-05-01](A6-05-01.md) | Approved; waiting for prerequisites | A6-03, A6-05 |
-| [A6-06](A6-06.md) | Approved; waiting for prerequisites | A6-03, A6-05, A6-05-01 |
-| [A6-07](A6-07.md) | Approved; waiting for prerequisites | A6-01, A6-02-03, A6-03 |
-| [A6-08-01](A6-08-01.md) | Approved; waiting for prerequisites | A6-04, A6-06, A6-07 |
-| [A6-08-02](A6-08-02.md) | Approved; waiting for prerequisites | A6-08-01 |
-| [A6-08-03](A6-08-03.md) | Approved; waiting for prerequisites | A6-08-02 |
-| [A6-09-01](A6-09-01.md) | Approved; waiting for prerequisites | A6-04, A6-07 |
+| [A6-01](A6-01.md) | Complete: contract/document review only | Verified A1–A5 |
+| [A6-02-01](A6-02-01.md) | Verified: calendar scheduling/configuration | A6-01 |
+| [A6-02-02](A6-02-02.md) | Verified: read-only calendar diagnostics | A6-02-01 |
+| [A6-02-03](A6-02-03.md) | Accepted: shared calendar foundation | A6-02-02 |
+| [A6-03-01](A6-03-01.md) | Verified: CHF currency/cash | A6-01 |
+| [A6-03](A6-03.md) | Verified: catalog/accounts; live kiosk deferred | A6-01, A6-02-03, A6-03-01 |
+| [A6-04](A6-04.md) | Verified: qualification/pricing/funded yield | A6-03 |
+| [A6-05](A6-05.md) | Verified: original resources only | A6-01, A6-03 |
+| [A6-05-01](A6-05-01.md) | Verified: branded hardware and live branch admission | A6-03, A6-05 |
+| [A6-06](A6-06.md) | Verified: issued debit lifecycle; no credit facility | A6-03, A6-05, A6-05-01 |
+| [A6-07](A6-07.md) | Verified; recurring scoring dormant | A6-01, A6-02-03, A6-03 |
+| [A6-08-01](A6-08-01.md) | Verified in recorded API scope; lifecycle activation pending | A6-04, A6-06, A6-07 |
+| [A6-08-02](A6-08-02.md) | Verified; bounded owner/operator diagnostics | A6-08-01 |
+| [A6-08-03](A6-08-03.md) | Accepted foundation; new exposure gated pending lifecycle | A6-08-02 |
+| [A6-09-01](A6-09-01.md) | Ready to select independently; not executed | A6-04, A6-07 |
 | [A6-09-02](A6-09-02.md) | Approved; waiting for prerequisites | A6-09-01 |
 | [A6-09-03](A6-09-03.md) | Approved; waiting for prerequisites | A6-09-02 |
 | [A6-10-01](A6-10-01.md) | Approved; waiting for prerequisites | A6-08-03, A6-09-03 |
@@ -58,11 +58,13 @@ Execute in the table order as a conservative serial path; independent-ready pack
 | [A6-12](A6-12.md) | Approved; waiting for prerequisites | A6-05-01, A6-06, A6-08-03, A6-09-03, A6-10-03, A6-11 |
 | [A6-13](A6-13.md) | Approved; waiting for prerequisites | A6-12 |
 
-## First-package launch
+## Next-package launch
 
 Copy into the next execution chat:
 
-> Execute A6-01 under the recorded A6 approval. Read prompts/A6-credit-debt/A6-01.md, EXECUTION.md, SPECIFICATION.md and BRANDING.md, plus only its stated current upstream contracts. Apply the approved POLICY-REVIEW.md and its credit/banking/servicing contracts (including28B funding), then produce the shared contract/interface/migration checkpoint; do not re-request approval for written recommendations already accepted. Preserve existing code, worlds and backups. This package is contracts only: review its document diff, do not run Gradle or generate assets. Write its handoff/status and stop before A6-02-01 or A6-03-01.
+> Execute A6-09-01 under the recorded A6 approval. Read only its selected prompt and required references, including current A6-04/A6-07 and accepted credit handoffs where referenced. Implement the loan foundation only, verify/handoff and stop. Preserve V27 credit source, canonical identities, finite capital and the production safety gate. Do not activate reporting/scoring or run dependent packages.
+
+A6-01 through A6-02-03 and A6-03-01 are complete in their recorded scopes. A6-03, A6-04, A6-05, A6-05-01, A6-06 and A6-07 are complete in their recorded scopes; later packages retain their prerequisite and explicit-invocation gates.
 
 For later packages use “Execute <exact A6 ID> under the recorded A6 approval,” confirm prerequisite evidence and load only that package/references. Existing project one-package boundaries remain in force; phase approval eliminates repeated approval requests, not verification.
 

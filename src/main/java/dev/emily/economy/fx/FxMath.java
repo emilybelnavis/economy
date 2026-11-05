@@ -72,7 +72,10 @@ public final class FxMath {
             Map<EconomyCurrency, BigDecimal> previous, Map<EconomyCurrency, Settings> policy, long seed) {
         Objects.requireNonNull(reference, "reference");
         var rates = new EnumMap<EconomyCurrency, BigDecimal>(EconomyCurrency.class);
+        if (!previous.keySet().equals(policy.keySet()) || !previous.containsKey(reference))
+            throw new IllegalArgumentException("FX policy and rate membership differ");
         for (EconomyCurrency currency : EconomyCurrency.all()) {
+            if (!previous.containsKey(currency)) continue;
             Settings settings = policy.get(currency);
             BigDecimal prior = previous.get(currency);
             if (settings == null || prior == null || prior.compareTo(MINIMUM) < 0 || prior.compareTo(MAXIMUM) > 0

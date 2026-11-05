@@ -40,87 +40,19 @@ class AccountCatalogTest {
         @Override public void publish(Journal.Outcome terminal) {}
     };
 
-    @Test void primaryWaitsForSelectionAndQueuedRequestsConvergeAcrossRestart() throws Exception {
-        var store = new SqliteStorage();
-        var services = open(store);
-        var pendingId = operationId();
-        var firstId = operationId();
-        Journal.Outcome first;
-        String tradingId;
-        PartyRef target;
-        var release = new CountDownLatch(1);
+    @Test void primaryRequiresBranchAndExistingLegacyPrimaryStillResolves() throws Exception {
+        var store=new SqliteStorage();store.initialize(world.toRealPath());
         try {
-            target = owner(services);
-            var grant = grant(services, target);
-            var pending = complete(services, services.initializePrimary(grant, pendingId, requestId(), PUBLISHER));
-            assertEquals(Journal.Status.DURABLY_REJECTED, pending.status());
-            assertEquals("DENOMINATION_PENDING", pending.result().code());
-            assertTrue(await(services, services.storage(() -> store.transaction(tx ->
-                    AccountCatalog.primary(tx::query, target)))).isEmpty());
-
-            selectCurrency(services, "JPY");
-            assertEquals(pending, complete(services, services.initializePrimary(grant, pendingId, requestId(), PUBLISHER)));
-            var started = new CountDownLatch(1);
-            services.storage(() -> {
-                started.countDown();
-                try {
-                    assertTrue(release.await(5, TimeUnit.SECONDS));
-                } catch (InterruptedException interrupted) {
-                    Thread.currentThread().interrupt();
-                    throw new AssertionError(interrupted);
-                }
-                return null;
-            });
-            assertTrue(started.await(5, TimeUnit.SECONDS));
-            var one = services.initializePrimary(grant, firstId, requestId(), PUBLISHER);
-            var two = services.initializePrimary(grant, operationId(), requestId(), PUBLISHER);
-            assertEquals(Journal.Receipt.ACCEPTED_PENDING, one.receipt());
-            assertEquals(Journal.Receipt.ACCEPTED_PENDING, two.receipt());
-            release.countDown();
-
-            first = complete(services, one);
-            var second = complete(services, two);
-            assertEquals(Journal.Status.COMMITTED, first.status());
-            assertEquals("ACCOUNT_READY", first.result().code());
-            assertEquals(first.result().payload(), second.result().payload());
-            var trading = complete(services, services.initializeTrading(grant, operationId(), requestId(), PUBLISHER));
-            assertEquals("ACCOUNT_READY", trading.result().code());
-            tradingId = trading.result().payload();
-            assertNotEquals(first.result().payload(), tradingId);
-            var primaryId = new AccountId(UUID.fromString(first.result().payload()));
-            assertEquals(primaryId, await(services, services.findOwnedAccount(grant, primaryId)).orElseThrow().id());
-            var stranger = new PlayerId(UUID.randomUUID());
-            var strangerOwner = new PartyRef(target.world(), new PartyRef.Player(stranger));
-            var strangerGrant = PartyAuthorization.admit(target.world(), services.sessionId(), stranger,
-                    false, strangerOwner, false).orElseThrow();
-            assertTrue(await(services, services.findOwnedAccount(strangerGrant, primaryId)).isEmpty());
-            var rows = await(services, services.storage(() -> store.transaction(tx -> tx.query(
-                    "SELECT account_id,purpose,currency,is_primary,revision FROM account_catalog WHERE owner_id=? ORDER BY purpose",
-                    List.of(player.value().toString()), 2))));
-            assertEquals(2, rows.size());
-            assertEquals(Map.of("account_id", first.result().payload(), "purpose", "BANK", "currency", "JPY",
-                    "is_primary", "1", "revision", "1"), rows.getFirst());
-            assertEquals("TRADING", rows.getLast().get("purpose"));
-            assertNull(rows.getLast().get("currency"));
-        } finally {
-            release.countDown();
-            assertTrue(services.stop(Duration.ofSeconds(5)));
-        }
-
-        var reopenedStore = new SqliteStorage();
-        var reopened = open(reopenedStore);
-        try {
-            assertEquals(target, owner(reopened));
-            var grant = grant(reopened, target);
-            assertEquals(first, await(reopened, reopened.lookupPrimaryOperation(grant, firstId, requestId())).orElseThrow());
-            assertEquals(first, complete(reopened, reopened.initializePrimary(grant, firstId, requestId(), PUBLISHER)));
-            assertEquals(first.result().payload(), complete(reopened,
-                    reopened.initializePrimary(grant, operationId(), requestId(), PUBLISHER)).result().payload());
-            assertEquals(tradingId, complete(reopened,
-                    reopened.initializeTrading(grant, operationId(), requestId(), PUBLISHER)).result().payload());
-        } finally {
-            assertTrue(reopened.stop(Duration.ofSeconds(5)));
-        }
+            var owner=new PartyRef(store.snapshot().worldId(),new PartyRef.Player(player));
+            var request=new Journal.CanonicalRequest(1,Map.of("economy:owner",Journal.actorKey(player)));
+            var engine=new JournalEngine(store,(actor,kind)->true,Map.of(AccountCatalog.INITIALIZE_PRIMARY,AccountCatalog.initialization(owner,Purpose.BANK)));
+            var intent=new Journal.Intent(operationId(),requestId(),player,AccountCatalog.INITIALIZE_PRIMARY,request,null,null);
+            assertEquals("BRANCH_REQUIRED",engine.submit(intent).result().code());
+            store.transaction(tx->{insert(tx,account(1),player,"BANK","CAD","OPEN",true);return null;});
+            var resolve=new Journal.Intent(operationId(),requestId(),player,AccountCatalog.INITIALIZE_PRIMARY,request,null,null);
+            assertEquals(account(1).value().toString(),engine.submit(resolve).result().payload());
+            assertEquals("BRANCH_REQUIRED",engine.submit(intent).result().code());
+        } finally {store.close();}
     }
 
     @Test void schemaCapsOpenBanksAndPagesRetainedHistoryByOwnerAndId() throws Exception {
@@ -140,8 +72,9 @@ class AccountCatalogTest {
                 assertThrows(StorageException.class, () ->
                         insert(tx, account(4), player, "TRADING", null, "OPEN", false));
                 insert(tx, account(4), player, "BANK", "JPY", "OPEN", false);
+                insert(tx, account(6), player, "BANK", "USD", "OPEN", false);
                 assertThrows(StorageException.class, () ->
-                        insert(tx, account(5), player, "BANK", "USD", "OPEN", false));
+                        insert(tx, account(7), player, "BANK", "GBP", "OPEN", false));
 
                 var other = new PlayerId(UUID.randomUUID());
                 insert(tx, account(5), other, "BANK", "CAD", "OPEN", true);
@@ -162,7 +95,7 @@ class AccountCatalogTest {
                 lookup.set(new Query(sql, parameters));
                 assertTrue(maximum <= 5);
                 return tx.query(sql, parameters, maximum);
-            }, owner, account(4), 4));
+            }, owner, account(6), 4));
             assertEquals(4, firstPage.size());
             assertEquals(4, nextPage.size());
             assertEquals(account(10), nextPage.getFirst().id());
@@ -201,7 +134,7 @@ class AccountCatalogTest {
             var session = UUID.randomUUID();
             var grant = PartyAuthorization.admit(worldId, session, player, false, owner, false).orElseThrow();
             var attempt = PartyOperation.owned(grant, AccountCatalog.INITIALIZE_PRIMARY, operationId(), requestId(),
-                    new Journal.CanonicalRequest(1, Map.of()), AccountCatalog.initialization(owner, Purpose.BANK));
+                    new Journal.CanonicalRequest(1, Map.of()), dev.emily.economy.support.LegacyAccounts.initialization(owner, Purpose.BANK));
             var journal = attempt.engine(store, session);
 
             harness.fault.set(FailureHarness.Fault.BEFORE_COMMIT);

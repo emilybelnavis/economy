@@ -1,6 +1,7 @@
 package dev.emily.economy.foundation;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -13,7 +14,9 @@ import java.util.function.BiFunction;
 public final class EconomyCommands {
     private EconomyCommands() {}
 
-    public record View(boolean privileged, boolean detailed) {}
+    public record View(boolean privileged, boolean detailed, String calendarAfter) {
+        public View(boolean privileged, boolean detailed) { this(privileged, detailed, null); }
+    }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher,
                                 BiFunction<CommandSourceStack, View, List<String>> report) {
@@ -21,7 +24,13 @@ public final class EconomyCommands {
                 .then(Commands.literal("status").executes(context -> send(context.getSource(),
                         report, new View(privileged(context.getSource()), false))))
                 .then(Commands.literal("diagnostics").requires(EconomyCommands::privileged)
-                        .executes(context -> send(context.getSource(), report, new View(true, true)))));
+                        .executes(context -> send(context.getSource(), report, new View(true, true)))
+                        .then(Commands.literal("calendar")
+                                .executes(context -> send(context.getSource(), report, new View(true, true, "")))
+                                .then(Commands.literal("after")
+                                        .then(Commands.argument("cursor", StringArgumentType.greedyString())
+                                                .executes(context -> send(context.getSource(), report,
+                                                        new View(true, true, StringArgumentType.getString(context, "cursor")))))))));
     }
 
     static boolean privileged(CommandSourceStack source) {

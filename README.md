@@ -37,6 +37,8 @@ The callback budget limits when the server starts additional callbacks in a tick
 
 Use `/economy status` to check availability and startup or catch-up progress. The server console and permission-level 2 operators can also run `/economy diagnostics` for storage and journal checkpoints, queue waits, possible stalls, and the most recent failure code. Storage checkpoints reflect the latest completed sample. Economic rates describe observed progress and are shown only when measurable. Detailed diagnostics also show the latest FX sample, including selection status, the committed day, backlog, and effective and pending policy revisions. During shutdown, check the server log for unresolved work.
 
+Detailed diagnostics include the financial calendar’s UTC origin, elapsed whole days/months/years, retained clock target, next boundaries and catch-up state. `/economy diagnostics calendar` shows policy versions and active work in pages of eight registry entries; follow the printed `after` command for the next page. Reports use their displayed sample timestamp. Day/month/year values count completed periods from zero. Fixed-interval backlog is separate from the domain pending-event indicator, which is not a total debt or obligation count. These commands are read-only and remain available from cached samples while financial work is catching up.
+
 ## Ledger commands
 
 - `/economy ledger balance` shows posted, available, and reserved funds on your primary account.
@@ -55,13 +57,17 @@ For an uncertain result, repeat the same command with the same operation UUID.
 
 ## Cash and cards
 
-Creative inventory includes 118 cash collectibles and eight banking cards across twelve tabs, including both Canadian bill styles. Cards provide generic banking access without a credit facility.
+Creative inventory includes 131 cash collectibles and eight banking cards across thirteen tabs, including both Canadian bill styles. Cards provide generic banking access without a credit facility.
+
+CHF is the eleventh currency, with two-decimal electronic balances. Its game opening calibration is 1 CHF = 1.60 CAD, not a live market quote. Fresh worlds include CHF immediately; existing worlds add it at the next UTC FX publication after catch-up, without changing the world currency or inventing historical CHF rates. Operator diagnostics show whether its rate is available or scheduled.
+
+Original CHF cash includes 10, 20, 50, 100, 200 and 1,000 notes, plus 0.05, 0.10, 0.20, 0.50, 1, 2 and 5 coins. Tellers support notes and coins; ATMs use notes only. Withdrawals must be exactly representable with enabled cash: 1.02 CHF is rejected rather than silently changed. Electronic balances can still hold 0.01 CHF. CHF cash conversions and CHF account settlement preserve account cents; other legacy currency groups keep their existing whole-unit rounding.
 
 Cash taken from the Creative inventory or created with commands is accepted as newly minted cash when deposited. Existing world-marked cash still has its issued quantity checked against the world ledger and custody evidence. Trusted server APIs support deposit previews and returns, plus exact withdrawals with full-batch capacity checks.
 
 ## Schema upgrades
 
-New worlds initialize automatically. Redesigned worlds with schemas 1 through 16 require a validated complete-world backup before upgrading to schema 17. Prepare it while Minecraft is fully stopped:
+New worlds initialize automatically. Redesigned worlds with schemas 1 through 20 require a validated complete-world backup before upgrading to schema 21. Prepare it while Minecraft is fully stopped:
 
 ```sh
 ./gradlew prepareEconomyUpgrade -PeconomyWorld=/absolute/path/to/world
@@ -85,7 +91,7 @@ Restore into a **new, separate directory**:
 ./gradlew restoreEconomyWorld -PeconomyBackup=/absolute/path/to/backup-id -PeconomyRestoreDestination=/absolute/path/to/new-world
 ```
 
-The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 10 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
+The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 21 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
 
 There is no online backup, automatic replacement, or retention/deletion service. Operators own backup storage and retention. Failed restores can leave a hidden staging directory without publishing the destination.
 
@@ -100,29 +106,54 @@ Register owners can use `/economy shop price <units>` while looking at their reg
 
 ## Physical terminals
 
-The Economy Terminals creative tab contains an ATM and register in a neutral finish and all 16 dye colors, plus a teller. ATMs and tellers occupy two blocks across and two high; both lower cells need solid support. Place them facing you with the whole space clear. Breaking any machine cell removes the entire machine and returns one item in survival. Registers occupy one block and can sit directly on the stock chest below.
+The Economy Terminals creative tab contains an ATM and register in a neutral finish and all 16 dye colors, plus a teller and branch kiosk. ATMs and tellers occupy two blocks across and two high; both lower cells need solid support. Place them facing you with the whole space clear. Breaking any machine cell removes the entire machine and returns one item in survival. Branch kiosks are one block wide and two high, with solid support under their lower anchor. Registers occupy one block and can sit directly on the stock chest below.
 
-Craft a neutral ATM with iron ingots, glass pane, redstone and a chest. The teller also needs a hopper; registers use iron ingots, glass pane, redstone and a chest in a smaller pattern. Combine any ATM or register with a dye to recolor it. A broken or recolored machine receives fresh owner and placement settings when placed again.
+Craft a neutral ATM with iron ingots, glass pane, redstone and a chest. The teller also needs a hopper; registers use iron ingots, glass pane, redstone and a chest in a smaller pattern. Register dye recipes remain available. ATM dye recipes are retired; existing colored machine IDs and items remain compatible. Craft an unbound kiosk with iron/glass/iron, iron/redstone/iron, iron/chest/iron. A broken or recolored machine receives fresh owner and placement settings when placed again.
 
-ATMs and tellers open banking screens; registers open the shop and protected-purchase claims. The Stock Trading Computer is available as a decorative block only and has no trading screen or economic behavior. Operators can look at a ready terminal and use `/economy admin config` to open its privileged configuration screen.
+Owners configure ATMs, tellers and kiosks by sneaking and right-clicking with an empty hand. Select a bank, review its native currency and confirm. New and legacy unbound machines cannot start cash or FX operations. Pending old transactions and claims remain protected. Enable native-currency cash settings separately after binding; ATM uses bills, teller uses bills and coins. A binding is fixed after cash service has first been enabled for that placement.
+
+ATMs and tellers open banking screens; kiosks open branch account services; registers open the shop and protected-purchase claims. The Stock Trading Computer is available as a decorative block only and has no trading screen or economic behavior. Operators can look at a ready terminal and use `/economy admin config` to open its privileged configuration screen. `/economy admin binding` reports the looked-at terminal's bank, currency, migration state, generation, geometry and blocking cash work without changing it.
 
 Internal GUI identifiers and journal details are hidden by default. Set `debugGui=true` in `config/economy-scheduling.properties` and restart the server when those diagnostics are needed.
 
 
 ## Banking and shops
 
-Right-click a teller or ATM, or use any bank card for account, history, FX and claim access. Cards grant access without credit. The banking home page lets you choose My accounts, Deposit, Withdrawal, Exchange or Collect items. Bank cards offer the services available remotely. If you have no bank account, My accounts shows one Open a new account button. Otherwise, click an account to see its transactions, or choose Open a new account to open account management. Manage account is also available from transaction history. History and collection lists have bounded Next pages.
+Right-click a teller or ATM, or use any bank card for account, history, FX and claim access. Cards grant access without credit. The banking home page lets you choose My accounts, Deposit, Withdrawal, Exchange or Collect items. Bank cards offer the services available remotely. Click an existing account to see its transactions, or open account management to view its balance. Manage account is also available from transaction history. History and collection lists have bounded Next pages.
 
-You can have three open bank accounts, including your permanent primary. Manage account lists your accounts with their currencies and balances. At a teller, choose Close account beside a secondary account, review any balance transfer to your primary, then confirm. To add an account, select an available currency and choose Open account. Opening is disabled when you already have three accounts. Pending payments, refunds, holds or item deliveries can block closure. Closed transaction history is retained.
+The account limit is four open bank accounts, including the permanent primary, with one open account per currency. Existing accounts, balances and history remain available. Opening, closing, assigning a bank and switching providers require the appropriate branded branch kiosk. New primaries require a Tier 1/hybrid bank matching the world currency. Legacy accounts can be assigned at a matching-currency kiosk; provider switching requires a source visit then the named target within seven financial days. Tellers, ATMs and remote cards continue to serve existing accounts.
+
+The institution catalog contains 23 fictional banks, including two CHF retail banks. Existing accounts retain an explicit legacy, unassigned provider until branch assignment becomes available. Institution capital is funded once per world using the selected world currency and a captured FX publication; it does not credit player accounts.
+
+Original issuer and network art now covers all 23 banks, approved card variants, matching native-currency ATMs and tellers, and distinct branch kiosk designs. Bank-specific hardware is selected in authenticated terminal settings. Issued debit cards are available at the account issuer's kiosk; credit facilities remain unavailable. Existing collectible cards remain available.
+
+
+Assigned bank accounts use the bank's service tier. Tier 2 qualification requires at least 100,000,000 in the current world currency after supported assets and unpaid liabilities are valued together. Five hybrid banks and five specialists offer Tier 2; unavailable valuations cannot grant it. Existing unassigned accounts retain their earlier access and pricing during migration.
+
+Tier 1 FX costs 0.50% of the source principal, rounded upward to a source minor unit; Tier 2 FX is free. Previews show principal, fee and the amount received. A branded terminal accepts only its bank's native cash currency per batch. Some cash totals cannot exactly fit principal plus the rounded fee; adjust the total or deposit into an account in that currency first.
+
+Eligible assigned deposits earn 0.50% nominal APR at Tier 1 or 1.00% at Tier 2. Yield uses the funded time during each 20-minute financial day, with payouts at world-aligned 28-day boundaries. It is paid from the bank's own cash. Earned unpaid yield stays separate from spendable funds when a payout must wait; no replacement money is minted. Specialist accounts below qualification retain protected access but earn no future deposit yield. Bank loans and securities trading still await their separate packages. Credit-card and loan application screens remain unavailable.
+
+Use **Issued cards** to view an account's debit token. First issuance is free at the account's bank kiosk. Tokens last five financial years; renewal is free within 28 financial days before expiry or afterward. Earlier replacement costs 25 in the world's currency, converted into your selected funding account with a combined FX preview. Replacement revokes every copy of the old token only when the new issuance and fee commit. Report lost is free from an authenticated banking menu.
+
+Receive committed cards through **Collect items**, including at the kiosk. Full inventory leaves an owner claim; uncertain delivery stays protected for evidence review. Copied items share one token status and cannot grant another owner's access or duplicate benefits. Issued debit cards create no credit score, loan or debt; the eight old generic collectibles retain their access-only behavior.
+
+**Credit profile** shows whether credit is established and provides saved scores, component explanations and paged history. Login, debit cards, previews and failed applications do not establish credit. The first real credit-card issuance starts at 650 with one 2,500 starter limit across issuers. Scheduled score updates remain unavailable until reporting is enabled. Lower score ceilings never erase existing debt or enlarge spending room.
+
+Credit-facility processing now supports funded limits, purchase and advance balances, daily compound interest, monthly statements and repayments. Advances are limited to 20% of the facility limit in outstanding principal. Application, advance and repayment screens will arrive in later packages. The tested foundation APIs keep new production credit issuance, increases and draws unavailable until default/reporting safety is installed. Reads and protected existing-debt actions remain available. Reporting, collections and automatic payments are not enabled.
+
+**Credit facilities** lists your issued facilities. Select one to review its limit, contractual headroom, purchase/advance rates, current balance, rounding carry, outstanding minimum and past-due amount. **Statements** shows the original dated amounts in the facility currency; later payments do not rewrite them. A pending-work label means the view shows the saved balance while scheduled processing catches up.
+
+`/economy credit facility <facility-uuid>` reads your own facility. Player operators can inspect a selected owner's facility with `/economy credit inspect <owner-uuid> <facility-uuid> daily`, `payments` or `events`. Each operator page is audited. Use the reported `after <sequence> <position>` cursor for more records; payment allocations also accept an offset after that cursor. Reconciliation says incomplete if its bounded portfolio or journal window is exceeded. These commands provide no balance or limit editing.
 
 Only Deposit shows the player inventory. Deposit and Withdrawal each provide an account selector.
 
-Tellers always provide deposits and withdrawals in every currency, with bills and coins. New ATMs default to deposits and withdrawals for all currencies and supported bills. The player who placed an ATM can right-click it with an empty hand to configure its services and currencies without operator permissions. Save applies only to that ATM; each ATM retains its own settings. Choose Use terminal in configuration to open banking. An operator can also use `/economy admin config` while looking at a terminal. ATMs accept bills only.
+ATMs and tellers start disabled and unbound. Their owner or an operator selects a bank, confirms its native currency and enables cash services. Each machine accepts or dispenses that bank's cash only; ATMs use bills and tellers can use coins. Select any owned account and review FX when its currency differs. Sneak-right-click with an empty hand to configure, then choose Use terminal to return to banking.
 
 For a deposit, place cash in the 24 input slots, choose Review and check the bank credit, then confirm. Issued cash is redeemed against its remaining world quantity; unmarked Creative or command cash is minted and consumed by that one saved deposit. Changing pages or closing before reservation returns the originals; anything that cannot fit is retained as an owner claim.
 
-For a withdrawal, choose your account and enter an amount, then Review and Confirm. The account determines the currency. A teller can dispense coins. The complete batch must fit before debit. A register owner holds the product batch and enters a whole-unit price in Shop. Buyers preview the exact batch and price before confirming.
+For a withdrawal, choose your account and enter an amount, then Review and Confirm. The bank determines the cash currency; a different account currency requires an explicit FX preview and its normal tier fee. Same-currency cross-bank service has no surcharge. A teller can dispense coins. The complete batch must fit before debit. A register owner holds the product batch and enters a whole-unit price in Shop. Buyers preview the exact batch and price before confirming.
 
-Exchange has From and To account selectors. Enter a whole-unit amount in the source account’s currency and review the debit, credit and fee before confirming. Stock trading accounts and screens are excluded.
+Exchange has From and To account selectors. CHF pairs accept exact source-currency cents; other pairs retain whole-unit input. Review the debit, credit and fee before confirming. Stock trading accounts and screens are excluded.
 
 Collect items lists cash and goods waiting for delivery. Click a batch to collect it when the whole batch fits in your inventory. Check payment resolves an uncertain request using its existing operation identity. Restored or uncertain physical deliveries require operator evidence review; the mod does not automatically create replacement items or repeat a charge.

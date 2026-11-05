@@ -34,11 +34,25 @@ final class OfflineInspector {
             JournalSchema.validate(c);RecoverySchema.validate(c);
             if (schema >= 5) FxSchema.validate(c);
             if (schema >= 6) AccountSchema.validate(c);
+            if (schema >= 20) dev.emily.economy.institution.InstitutionSchema.validate(c);
+            if (schema >= 21) {
+                dev.emily.economy.pricing.PricingSchema.validate(c); dev.emily.economy.interest.InterestSchema.validate(c);
+                dev.emily.economy.pricing.ValuationSources.validate((q,p,max)->query(c,q,p,max),new dev.emily.economy.api.Identifiers.WorldId(UUID.fromString(id)),configuration.valuation());
+            }
+            if (schema >= 22) TerminalBankingSchema.validate(c);
+            if (schema >= 23) dev.emily.economy.card.CardSchema.validate(c);
+            if (schema >= 24) dev.emily.economy.credit.CreditProfileSchema.validate(c);
+            if (schema >= 25) dev.emily.economy.credit.CreditFacilitySchema.validate(c);
+            if (schema >= 26) dev.emily.economy.credit.CreditAuditFacts.validateSchema(c);
+            if (schema >= 27) dev.emily.economy.credit.CreditEvents.validateSchema(c);
             if (schema >= 7) LedgerProjection.validateSchema(c);
             if (schema >= 8) HoldSchema.validate(c);
             if (schema >= 9) FxSettlementSchema.validate(c);
             if (schema >= 10) LedgerHistorySchema.validate(c);
             var validation=new JournalCompatibility(c,configuration.records(),id); while(!validation.step()) {}
+            if (schema >= 18) FinancialCalendarSchema.validate(c);
+            if (schema >= 18) dev.emily.economy.clock.DeadlineDispatcher.validateProviders(
+                    (query, parameters, max) -> query(c, query, parameters, max), configuration.deadlineProviders());
             long last=Long.parseLong(scalar(c,"SELECT COALESCE(max(sequence),0) FROM journal_transactions"));
             Map<String,ProjectionManager.Definition> projections=new HashMap<>(); configuration.projections().forEach(d->projections.put(d.name(),d));
             try(var sql=c.createStatement();var rows=sql.executeQuery("SELECT h.name,g.* FROM projection_heads h LEFT JOIN projection_generations g ON g.name=h.name AND g.generation=h.active_generation")) {

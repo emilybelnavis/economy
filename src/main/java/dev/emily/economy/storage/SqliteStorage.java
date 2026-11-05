@@ -127,11 +127,20 @@ public final class SqliteStorage implements FoundationStore {
             configure();
             if (initializingVersion < SchemaMigrations.CURRENT)
                 SchemaMigrations.apply(connection, initializingIdentity, initializingVersion, SchemaMigrations.CURRENT, SchemaMigrations.REGISTRY);
-            JournalSchema.validate(connection); RecoverySchema.validate(connection); FxSchema.validate(connection); AccountSchema.validate(connection);
+            JournalSchema.validate(connection); RecoverySchema.validate(connection); FxSchema.validate(connection); AccountSchema.validate(connection); dev.emily.economy.institution.InstitutionSchema.validate(connection);
+            dev.emily.economy.pricing.PricingSchema.validate(connection);
+            dev.emily.economy.interest.InterestSchema.validate(connection);
+            dev.emily.economy.storage.TerminalBankingSchema.validate(connection);
+            dev.emily.economy.card.CardSchema.validate(connection);
+            dev.emily.economy.credit.CreditProfileSchema.validate(connection);
+            dev.emily.economy.credit.CreditFacilitySchema.validate(connection);
+            dev.emily.economy.credit.CreditAuditFacts.validateSchema(connection);
+            dev.emily.economy.credit.CreditEvents.validateSchema(connection);
             LedgerProjection.validateSchema(connection);
             HoldSchema.validate(connection);
             FxSettlementSchema.validate(connection);
             LedgerHistorySchema.validate(connection);
+            FinancialCalendarSchema.validate(connection);
             if (!Files.exists(identityFile)) StorageFiles.writeNew(identityFile, encodeIdentity(initializingIdentity));
             if (Files.exists(pendingFile)) { Files.delete(pendingFile); StorageFiles.forceDirectory(databasePath.getParent()); }
             snapshot = new Snapshot(new WorldId(initializingIdentity), SchemaMigrations.CURRENT, scalar("PRAGMA journal_mode"),
@@ -143,6 +152,12 @@ public final class SqliteStorage implements FoundationStore {
         catch (IOException e) { cleanupFailure(); throw new StorageException(StorageException.Kind.CORRUPTION_IO, "Identity publication failed", e); }
         catch (RuntimeException e) { cleanupFailure(); throw e; }
     }
+    private CommitObserver commitObserver = (intent, reads, commit) -> commit;
+    public void commitObserver(CommitObserver observer) { checkOwner(); commitObserver = java.util.Objects.requireNonNull(observer); }
+    @Override public dev.emily.economy.journal.JournalEngine.Decision decorateCommit(
+            dev.emily.economy.journal.Journal.Intent intent, dev.emily.economy.journal.JournalEngine.ReadView reads,
+            dev.emily.economy.journal.JournalEngine.Commit commit) { return commitObserver.prepare(intent,reads,commit); }
+
     public void cleanShutdownEligible(boolean eligible) { checkOwner(); cleanEligible = eligible; }
 
     static String encodeIdentity(UUID id) { return "economy-world-v1\n" + id + "\n"; }
@@ -282,11 +297,20 @@ public final class SqliteStorage implements FoundationStore {
             if (scalarInt("PRAGMA application_id") != SchemaMigrations.APPLICATION_ID || scalarInt("PRAGMA user_version") != SchemaMigrations.CURRENT
                     || !snapshot.worldId().value().equals(readDatabaseIdentity(SchemaMigrations.CURRENT)))
                 throw identity("Storage changed during recovery");
-            validateHistory(SchemaMigrations.CURRENT); checkIntegrity(); JournalSchema.validate(connection); RecoverySchema.validate(connection); FxSchema.validate(connection); AccountSchema.validate(connection);
+            validateHistory(SchemaMigrations.CURRENT); checkIntegrity(); JournalSchema.validate(connection); RecoverySchema.validate(connection); FxSchema.validate(connection); AccountSchema.validate(connection); dev.emily.economy.institution.InstitutionSchema.validate(connection);
+            dev.emily.economy.pricing.PricingSchema.validate(connection);
+            dev.emily.economy.interest.InterestSchema.validate(connection);
+            dev.emily.economy.storage.TerminalBankingSchema.validate(connection);
+            dev.emily.economy.card.CardSchema.validate(connection);
+            dev.emily.economy.credit.CreditProfileSchema.validate(connection);
+            dev.emily.economy.credit.CreditFacilitySchema.validate(connection);
+            dev.emily.economy.credit.CreditAuditFacts.validateSchema(connection);
+            dev.emily.economy.credit.CreditEvents.validateSchema(connection);
             LedgerProjection.validateSchema(connection);
             HoldSchema.validate(connection);
             FxSettlementSchema.validate(connection);
             LedgerHistorySchema.validate(connection);
+            FinancialCalendarSchema.validate(connection);
             var validation = new JournalCompatibility(connection, catalog, snapshot.worldId().value().toString());
             while (!validation.step()) { /* Recovery holds the sole worker; reads are paged and interruptible. */ }
             configure();

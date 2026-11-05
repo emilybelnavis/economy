@@ -26,6 +26,7 @@ class ServerServicesTest {
         try {
             ready(services);
             assertTrue(services.diagnostics(true, true).contains("FX awaiting world currency selection."));
+            assertTrue(services.calendarDiagnostics("").stream().anyMatch(line -> line.contains("Calendar v1 origin")));
             services.storage(() -> {
                 started.countDown();
                 try {
@@ -40,6 +41,10 @@ class ServerServicesTest {
             services.storage(() -> null);
             assertTrue(services.storage(() -> null).toCompletableFuture().isCompletedExceptionally());
             assertTrue(services.diagnostics(true, true).stream().anyMatch(line -> line.contains("STORAGE_OVERLOAD")));
+            assertTrue(services.calendarDiagnostics("").stream().anyMatch(line -> line.contains("STORAGE_OVERLOAD")));
+            assertTrue(services.calendarDiagnostics("").stream().anyMatch(line -> line.contains("Calendar v1 origin")));
+            assertFalse(services.diagnostics(false, true).stream().anyMatch(line -> line.contains("Calendar")));
+            assertFalse(services.diagnostics(true, false).stream().anyMatch(line -> line.contains("Calendar")));
             assertFalse(services.diagnostics(false, true).stream().anyMatch(line -> line.contains("FX")));
             assertFalse(services.diagnostics(true, false).stream().anyMatch(line -> line.contains("FX")));
         } finally {

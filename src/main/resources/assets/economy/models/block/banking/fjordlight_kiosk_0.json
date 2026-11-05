@@ -1,0 +1,224 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        3
+      ],
+      "to": [
+        14,
+        2,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#metal"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#metal"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#metal"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#metal"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#metal"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        2,
+        7
+      ],
+      "to": [
+        11,
+        16,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#shell"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#shell"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#shell"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#shell"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#shell"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#shell"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        13,
+        6
+      ],
+      "to": [
+        12,
+        16,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#trim"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#trim"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#trim"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#trim"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#trim"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#trim"
+        }
+      }
+    }
+  ],
+  "textures": {
+    "front": "economy:block/banking/fjordlight_kiosk_front",
+    "shell": "economy:block/banking/fjordlight_kiosk_shell",
+    "trim": "economy:block/banking/fjordlight_kiosk_trim",
+    "metal": "economy:block/banking/fjordlight_kiosk_metal",
+    "dark": "economy:block/banking/fjordlight_kiosk_dark",
+    "keypad": "economy:block/banking/fjordlight_kiosk_keypad",
+    "slot": "economy:block/banking/fjordlight_kiosk_slot",
+    "vent": "economy:block/banking/fjordlight_kiosk_vent",
+    "screen": "economy:block/banking/fjordlight_kiosk_front",
+    "glass": "economy:block/banking/fjordlight_kiosk_front",
+    "chart": "economy:block/banking/fjordlight_kiosk_front",
+    "particle": "economy:block/banking/fjordlight_kiosk_shell"
+  },
+  "render_type": "minecraft:cutout"
+}

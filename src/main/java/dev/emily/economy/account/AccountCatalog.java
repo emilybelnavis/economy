@@ -55,7 +55,7 @@ public final class AccountCatalog {
                 .stream().map(row -> decode(owner, row)).toList();
     }
 
-    static List<AccountIdentity> openBanks(JournalEngine.ReadView reads, PartyRef owner) {
+    public static List<AccountIdentity> openBanks(JournalEngine.ReadView reads, PartyRef owner) {
         return reads.query(OWNED + " AND purpose='BANK' AND status='OPEN'",
                 List.of(ownerId(owner)), AccountIdentity.MAX_OPEN_BANK_ACCOUNTS)
                 .stream().map(row -> decode(owner, row)).toList();
@@ -84,12 +84,9 @@ public final class AccountCatalog {
             Optional<AccountIdentity> existing = purpose == Purpose.BANK ? primary(reads, owner) : trading(reads, owner);
             if (existing.isPresent()) return resolved(existing.get(), false, tx -> {});
 
+            if (purpose == Purpose.BANK)
+                return new JournalEngine.Reject(new Journal.Result(1, "BRANCH_REQUIRED", ""));
             EconomyCurrency currency = null;
-            if (purpose == Purpose.BANK) {
-                currency = currentDenomination(reads);
-                if (currency == null)
-                    return new JournalEngine.Reject(new Journal.Result(1, "DENOMINATION_PENDING", ""));
-            }
             var account = new AccountIdentity(new AccountId(UUID.randomUUID()), owner, purpose, currency,
                     Status.OPEN, 1, purpose == Purpose.BANK);
             return resolved(account, true, tx -> insert(tx, account));

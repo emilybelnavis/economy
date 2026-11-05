@@ -1,6 +1,6 @@
 # A6 — Banks, credit and debt specification
 
-Status: **approved for execution, 2026-11-04; implementation not started**. The user approved all reviewed draft prompts, including their written recommendations. [Execution preparation](EXECUTION.md) records the approval and remaining unspecified inputs. Package selection and prerequisite gates still apply; this preparation does not start implementation. Current delivered behavior remains in [the project index](../../.codex/PROJECT.md).
+Status: **approved for execution, 2026-11-04; A6-01 through A6-02-03 and A6-03-01 complete in their recorded scopes**. The user approved all reviewed draft prompts, including their written recommendations. [Execution preparation](EXECUTION.md) records the approval and remaining unspecified inputs. Package selection and prerequisite gates still apply; this preparation does not start implementation. Shared interfaces, identities and migration boundaries are in [CONTRACT.md](CONTRACT.md). Current delivered behavior remains in [the project index](../../.codex/PROJECT.md).
 
 ## Approved requirements and corrected arithmetic
 
@@ -46,7 +46,7 @@ All D01–D17 choices are covered by the [user-approved policy set](POLICY-REVIE
 | D06–D09, D12 | [Credit, pricing and funding](POLICIES-CREDIT.md) | Scores, credit limits, underwriting, prime, fees/yield, finite28B funding and debt sale |
 | D10–D11, card D14, D16–D17 | [Banking](POLICIES-BANKING.md) | Net worth/tiering, issuer matrix, accounts/migration, cards, CHF and branded hardware |
 
-A6-01 still owns current-contract inventory, shared interfaces and durable migration/fact design. Approval closes policy-input blockers; it is not implementation or verification evidence. Report any newly demonstrated incompatibility precisely, while continuing unaffected work.
+A6-01 delivered the current-contract inventory, shared interfaces and durable migration/fact boundaries in [CONTRACT.md](CONTRACT.md). Approval closes policy-input blockers; it is not implementation or verification evidence. Report any newly demonstrated incompatibility precisely, while continuing unaffected work.
 
 ## Feature coverage and later handoffs
 
@@ -67,4 +67,4 @@ A6-01 still owns current-contract inventory, shared interfaces and durable migra
 | NEW agent | Follow, pay/exit and kill cooldown | A6-11 | Restart/unload/death cannot respawn early or settle twice |
 | Prior A6 collateral/variable scope | Explicit supported capabilities; no silently omitted secured lending | A6-01/09 | Product expansion needs approved package; B6 margin contract only |
 
-Current implementation of these new features is **not started**; no new verification is claimed. Existing A1–A5 evidence proves only their recorded scopes.
+The [A6-02-01 calendar foundation](../../.codex/A6-02-01.md) and [A6-02-02 diagnostics](../../.codex/A6-02-02.md) are implemented and verified, with [A6-02-03 foundation acceptance](../../.codex/A6-02-03.md) in its recorded scope. [A6-03-01 CHF currency/cash](../../.codex/A6-03-01.md) is also implemented and verified. [A6-03 institutions/accounts](../../.codex/A6-03.md) and [A6-04 qualification/pricing/yield](../../.codex/A6-04.md) are verified in their recorded scopes. [A6-05-01 branded branches](../../.codex/A6-05-01.md) are verified. Later credit/trading products remain **not started**; their acceptance is not implied. Existing A1–A5 evidence proves only their recorded scopes.

@@ -47,13 +47,14 @@ public final class BankingController {
                 || !TerminalLifecycle.matches(player.serverLevel(), anchor, entity.generation())) {
             player.displayClientMessage(Component.literal("Terminal is still preparing. Try again shortly."), true); return;
         }
-        if (entity.kind() == TerminalPolicy.Kind.ATM && player.getMainHandItem().isEmpty()
+        if ((entity.kind() == TerminalPolicy.Kind.ATM || entity.kind() == TerminalPolicy.Kind.KIOSK || entity.kind() == TerminalPolicy.Kind.TELLER) && player.getMainHandItem().isEmpty() && player.isShiftKeyDown()
                 && mayConfigure(entity.owner(), player.getUUID(), player.hasPermissions(2))) {
             openAdmin(player, anchor); return;
         }
         var access = switch (entity.kind()) {
             case ATM -> BankingMenu.Access.ATM;
             case TELLER -> BankingMenu.Access.TELLER;
+            case KIOSK -> BankingMenu.Access.KIOSK;
             case REGISTER -> BankingMenu.Access.REGISTER;
         };
         open(player, new TerminalPolicy.Anchor(player.serverLevel().dimension().location().toString(), anchor.getX(), anchor.getY(), anchor.getZ()), entity.generation(), access);
@@ -71,15 +72,48 @@ public final class BankingController {
         return operator || player.equals(owner);
     }
     public static void openCard(ServerPlayer player) {
-        if (!CashCatalog.hasBankingCard(player.getMainHandItem()) && !CashCatalog.hasBankingCard(player.getOffhandItem())) return;
-        var position = player.blockPosition();
-        open(player, new TerminalPolicy.Anchor(player.serverLevel().dimension().location().toString(), position.getX(), position.getY(), position.getZ()), UUID.randomUUID(), BankingMenu.Access.CARD);
+        var position=player.blockPosition();
+        var anchor=new TerminalPolicy.Anchor(player.serverLevel().dimension().location().toString(),position.getX(),position.getY(),position.getZ());
+        if(CashCatalog.hasBankingCard(player.getMainHandItem()) || CashCatalog.hasBankingCard(player.getOffhandItem())) {
+            open(player,anchor,UUID.randomUUID(),BankingMenu.Access.CARD);return;
+        }
+        var services=services(player);if(services==null || services.worldId()==null)return;
+        var mark=java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem())
+                .map(stack->dev.emily.economy.card.CardStackIdentity.mark(stack,services.worldId())).flatMap(Optional::stream).findFirst().orElse(null);
+        if(mark==null)return;
+        services.ledger().usableCardAccess(actor(player),services.worldId(),mark.token()).whenComplete((found,error)->{
+            if(player.server.getPlayerList().getPlayer(player.getUUID())!=player || services.state()!=ServerServices.State.READY || services.worldId()==null)return;
+            boolean held=java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(stack->
+                    dev.emily.economy.card.CardStackIdentity.mark(stack,services.worldId()).filter(mark::equals).isPresent());
+            if(error!=null || found.isEmpty() || !held || !heldIssuedCard(player,services.worldId(),found.orElseThrow())) {player.displayClientMessage(Component.literal("This card is unavailable, expired or revoked."),true);return;}
+            open(player,anchor,UUID.randomUUID(),BankingMenu.Access.CARD,mark.token());
+        });
     }
+    private static boolean heldIssuedCard(ServerPlayer player,WorldId world,dev.emily.economy.card.CardAccess token) {
+        return java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(stack->
+                dev.emily.economy.card.CardStackIdentity.mark(stack,world).filter(mark->mark.token().equals(token.id())).isPresent()
+                && dev.emily.economy.card.CardCatalog.find(stack).filter(item->item.id().equals(token.design())).isPresent());
+    }
+    public static void checkedAction(ServerPlayer player,BankingMenu menu,String action,String value) {
+        if(menu.issuedToken()==null){action(player,menu,action,value);return;}
+        var services=services(player);if(services==null || services.worldId()==null)return;
+        long revision=menu.revision();var session=menu.session();menu.setBusy(true);
+        services.ledger().usableCardAccess(actor(player),services.worldId(),menu.issuedToken()).whenComplete((found,error)->{
+            if(player.server.getPlayerList().getPlayer(player.getUUID())!=player || !menu.valid(player) || menu.revision()!=revision || !menu.session().equals(session))return;
+            menu.setBusy(false);
+            if(error!=null || found.isEmpty() || !heldIssuedCard(player,services.worldId(),found.orElseThrow())){player.closeContainer();return;}
+            action(player,menu,action,value);
+        });
+    }
+
     public static void openWorldSetup(ServerPlayer player, UUID lease) {
         var position = player.blockPosition();
         open(player, new TerminalPolicy.Anchor(player.serverLevel().dimension().location().toString(), position.getX(), position.getY(), position.getZ()), lease, BankingMenu.Access.WORLD_SETUP);
     }
     private static void open(ServerPlayer player, TerminalPolicy.Anchor anchor, UUID generation, BankingMenu.Access access) {
+        open(player,anchor,generation,access,null);
+    }
+    private static void open(ServerPlayer player, TerminalPolicy.Anchor anchor, UUID generation, BankingMenu.Access access,UUID issuedToken) {
         if (services(player) == null || services(player).state() != ServerServices.State.READY) return;
         var session = UUID.randomUUID();
         var holder = new BankingMenu[1];
@@ -87,6 +121,7 @@ public final class BankingController {
                 new BankingMenu(id, inventory, anchor, generation, session, access),
                 Component.literal(access == BankingMenu.Access.REGISTER ? "Register" : access == BankingMenu.Access.ADMIN ? "Terminal Configuration" : "Banking")),
                 buffer -> holder[0].writeOpening(buffer));
+        if(holder[0]!=null && issuedToken!=null)holder[0].setIssuedToken(issuedToken);
         if (holder[0] != null && access != BankingMenu.Access.WORLD_SETUP) {
             try { recoverInputs(player, holder[0]); }
             catch (RuntimeException unavailable) {
@@ -100,6 +135,8 @@ public final class BankingController {
                 : access == BankingMenu.Access.REGISTER ? List.of()
                 : access == BankingMenu.Access.ADMIN ? List.of("Configure the terminal's cash services.", "Debug details are controlled by debugGui in economy-scheduling.properties.")
                 : List.of(), "How can we help?");
+        if (holder[0] != null && access == BankingMenu.Access.KIOSK)
+            BankingAccounts.action(player, holder[0], "manage_accounts", "");
         if (holder[0] != null && access == BankingMenu.Access.ADMIN)
             BankingAccounts.action(player, holder[0], "settings", "");
     }
@@ -112,6 +149,7 @@ public final class BankingController {
             var access = switch (entity.kind()) {
                 case ATM -> BankingMenu.Access.ATM;
                 case TELLER -> BankingMenu.Access.TELLER;
+            case KIOSK -> BankingMenu.Access.KIOSK;
                 case REGISTER -> BankingMenu.Access.REGISTER;
             };
             open(player, menu.anchor(), menu.generation(), access);
@@ -132,11 +170,11 @@ public final class BankingController {
         }
         if (player.getPersistentData().getCompound(PENDING).hasUUID("operation")
                 || player.getPersistentData().getCompound("economy_banking_pending").hasUUID("operation")) {
-            if (!Set.of("retry", "bank_retry", "home", "accounts", "manage_accounts", "history", "fx", "claims", "claims_next").contains(action)) {
+            if (!Set.of("retry", "bank_retry", "home", "accounts", "manage_accounts", "history", "fx", "claims", "claims_next", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next").contains(action)) {
                 report(menu, menu.page(), menu.lines(), "Resolve the original pending operation with Retry before another mutation."); return;
             }
         }
-        if (!menu.busy() && menu.page().equals("deposit") && Set.of("home", "manage_accounts", "setup", "accounts", "history", "fx", "withdraw", "shop", "claims", "settings").contains(action)) {
+        if (!menu.busy() && menu.page().equals("deposit") && Set.of("home", "manage_accounts", "setup", "accounts", "history", "fx", "withdraw", "shop", "claims", "settings", "credit_profile", "credit_history", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next").contains(action)) {
             var prior = FLOWS.get(menu);
             if (prior != null && prior.reservation != null) { report(menu, "deposit", menu.lines(), "Resolve the current reservation first."); return; }
             returnInputs(player, menu);
@@ -147,7 +185,10 @@ public final class BankingController {
         if (menu.busy() && !action.equals("retry")) return;
         try {
             switch (action) {
-                case "home" -> report(menu, "home", List.of(), "How can we help?");
+                case "home" -> {
+                    if (menu.access() == BankingMenu.Access.KIOSK) BankingAccounts.action(player, menu, "manage_accounts", "");
+                    else report(menu, "home", List.of(), "How can we help?");
+                }
                 case "deposit" -> {
                     flow.deposit = null;
                     BankingAccounts.cashAccounts(player, menu, "deposit", List.of("Add cash in the left slots.", "Review before depositing."), "Add cash, then choose Review");
@@ -192,6 +233,10 @@ public final class BankingController {
     static String depositProblem(Throwable failure) {
         String code = failure.getMessage() == null ? "" : failure.getMessage();
         return switch (code) {
+            case "PRICING_BATCH_LIMIT" -> "Review at most four exchange currencies per deposit. Split this cash into smaller batches.";
+            case "FX_CASH_BUDGET_UNREPRESENTABLE" -> "This cash total cannot exactly cover the exchange and rounded fee. Adjust the cash amount or deposit it into an account in the same currency.";
+            case "TIER2_UNAVAILABLE", "SERVICE_ACCOUNT_UNAVAILABLE" -> "This bank requires current Tier 2 qualification for deposits. Your existing funds remain available.";
+            case "PRICING_QUOTE_STALE", "CASH_PRICING_STALE", "PRICING_CONTEXT_UNAVAILABLE" -> "Account pricing changed or is unavailable. Review again shortly.";
             case "DEPOSIT_MODE" -> "Deposits are disabled on this ATM. Its owner can enable them with an empty-hand right-click.";
             case "DEPOSIT_DENOMINATION" -> "This terminal does not accept that cash. ATMs accept bills only; check its accepted currencies.";
             case "DEPOSIT_ACCOUNT", "DEPOSIT_ACCOUNT_STALE" -> "Choose an open account, then review again. Create your primary account first if needed.";
@@ -320,6 +365,7 @@ public final class BankingController {
             case "register-goods-v1" -> "Purchased items";
             case "withdrawal-cash-v1" -> "Cash withdrawal";
             case "deposit-original-v1" -> "Returned deposit cash";
+            case "issued-card-v1" -> "Issued card";
             default -> "Returned items";
         };
         try {
@@ -348,10 +394,25 @@ public final class BankingController {
                 flow.deposit = preview;
                 var lines = new ArrayList<String>();
                 lines.add("Bank credit: " + money(preview.credit()));
-                for (var group : preview.groups()) lines.add(group.count() + " items " + money(group.subtotal()) + " → " + (group.skipped() ? "returned unchanged" : money(group.credit())));
+                for (var group : preview.groups()) {
+                    lines.add(group.count() + " items " + money(group.subtotal()) + " → " + (group.skipped() ? "returned unchanged" : money(group.credit())));
+                    if(group.pricing()!=null&&!group.skipped()) {
+                        var price=group.pricing().split("\\|",-1);
+                        lines.add("Source principal: "+money(new Money(group.currency(),Long.parseLong(price[1])))+"; FX fee: "+money(new Money(group.currency(),Long.parseLong(price[3]))));
+                    }
+                }
                 if (preview.credit().minorUnits() == 0) {
-                    lines.add("Each currency group must credit at least 1 " + preview.credit().currency().code() + ". Add more cash.");
-                    report(menu, "deposit", lines, "No credit yet. Add cash worth at least 1 " + preview.credit().currency().code() + ".");
+                    boolean chfAccount = preview.credit().currency() == EconomyCurrency.CHF;
+                    boolean chfGroup = preview.groups().stream().anyMatch(group -> group.currency() == EconomyCurrency.CHF);
+                    if (chfAccount || chfGroup) {
+                        String minimum = money(new Money(preview.credit().currency(), 1));
+                        lines.add((chfAccount ? "Each currency group" : "Each CHF group")
+                                + " must credit at least " + minimum + (chfAccount ? "." : ". Other legacy groups retain whole-unit rounding."));
+                        report(menu, "deposit", lines, "No credit yet. Add more cash to a currency group.");
+                    } else {
+                        lines.add("Each currency group must credit at least 1 " + preview.credit().currency().code() + ". Add more cash.");
+                        report(menu, "deposit", lines, "No credit yet. Add cash worth at least 1 " + preview.credit().currency().code() + ".");
+                    }
                 } else report(menu, "deposit", lines, "Preview ready. Confirm to deposit this cash.");
                 flow.depositRevision = menu.revision();
             });
@@ -587,6 +648,7 @@ public final class BankingController {
         });
     }
     private static boolean capacity(ServerPlayer player, Custody.Case value, RegisterInventory.Snapshot stock) {
+        if(value.terms().items().startsWith("issued-card-v1")) {dev.emily.economy.card.CardInventory.decode(value);return dev.emily.economy.card.CardInventory.fits(player);}
         if (stock != null) return RegisterInventory.fitsBuyer(player, RegisterInventory.decodeTemplate(player.server, stock.template()), stock.batch());
         if (value.terms().items().startsWith("withdrawal-cash-v1")) return WithdrawalInventory.fits(player, WithdrawalDelivery.claims(value).size());
         if (BankingInventory.supports(value)) return BankingInventory.fits(player,
@@ -618,10 +680,17 @@ public final class BankingController {
                 if (error != null || fresh.isEmpty()) { fail(menu, new IllegalStateException("Current delivery attempt unavailable")); return; }
                 var delivering = fresh.orElseThrow();
                 if (delivering.state() != Custody.State.DELIVERING || !attempt.equals(delivering.deliveryAttempt())) { report(menu, "claims", menu.lines(), "Delivery attempt changed"); return; }
+                if(delivering.terms().items().startsWith("issued-card-v1") && (!menu.valid(player)
+                        || player.server.getPlayerList().getPlayer(player.getUUID())!=player)) {
+                    var undelivered=new Custody.Evidence(Custody.EvidenceKind.UNDELIVERED,"card-insertion-not-started",delivering.terms().destination(),"server-before-insertion");
+                    custodyStep(player,menu,delivering,Custody.Action.CLAIM,attempt,undelivered,true,true,ignoredCardClaim->{});
+                    return;
+                }
                 boolean delivered;
                 try {
                     if (player.server.getPlayerList().getPlayer(player.getUUID()) != player) delivered = false;
                     else if (stock != null) delivered = RegisterInventory.deliverOnce(player.server, player, stock, sale, attempt) != RegisterInventory.Result.UNDELIVERED;
+                    else if(delivering.terms().items().startsWith("issued-card-v1"))delivered=dev.emily.economy.card.CardInventory.deliverOnce(player,world,delivering)!=dev.emily.economy.card.CardInventory.Result.UNDELIVERED;
                     else if (delivering.terms().items().startsWith("withdrawal-cash-v1")) delivered = WithdrawalInventory.deliverOnce(player, delivering) != WithdrawalInventory.Result.UNDELIVERED;
                     else delivered = BankingInventory.deliverOnce(player, delivering);
                     var proof = BankingSaves.player(player, world, attempt);
@@ -653,6 +722,7 @@ public final class BankingController {
             services(player).ledger().custodyCase(actor(player), current.id(), (who, reads) -> false).whenComplete((done, error) -> {
                 if (error != null || done.isEmpty() || done.orElseThrow().state() != Custody.State.DELIVERED) return;
                 if (stock != null) RegisterInventory.clearDelivered(player.server, player, stock, sale, done.orElseThrow());
+                else if(current.terms().items().startsWith("issued-card-v1"))dev.emily.economy.card.CardInventory.clearDelivered(player,world,done.orElseThrow());
                 else if (current.terms().items().startsWith("withdrawal-cash-v1")) WithdrawalInventory.clearDelivered(player, done.orElseThrow());
                 else BankingInventory.clearDelivered(player, done.orElseThrow());
                 BankingSaves.player(player, world, current.id());

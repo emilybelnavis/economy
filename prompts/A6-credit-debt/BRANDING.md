@@ -1,6 +1,6 @@
 # Original banking and card art brief
 
-Status: **approved original-art brief for execution, 2026-11-04; no images generated yet**. The user approved the listed fictional institution/network names, home-currency recommendations, palettes, motifs and CHF denomination set. See [execution preparation](EXECUTION.md). Real organizations are inspiration supplied by the user, not in-game providers, affiliations or API integrations. Create original logos, palettes, layouts and typography; do not trace their marks, card layouts, slogans or trade dress. Keep provenance/license records. A6-01 assigns stable machine IDs from this approved roster before dependent asset work.
+Status: **approved original-art brief for execution, 2026-11-04; CHF cash artwork delivered by A6-03-01; institution/network/hardware/agent artwork delivered by A6-05; physical binding delivered by A6-05-01; issued debit cards delivered by A6-06; credit facilities and agent behavior await their owning packages**. The user approved the listed fictional institution/network names, home-currency recommendations, palettes, motifs and CHF denomination set. See [execution preparation](EXECUTION.md). Real organizations are inspiration supplied by the user, not in-game providers, affiliations or API integrations. Create original logos, palettes, layouts and typography; do not trace their marks, card layouts, slogans or trade dress. Keep provenance/license records. A6-01 assigns stable machine IDs from this approved roster before dependent asset work.
 
 ## Institution roster
 

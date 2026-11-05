@@ -1,0 +1,4195 @@
+{
+  "version": 1,
+  "license": "CC0-1.0",
+  "source": "tools/banking-assets/generate.py",
+  "sources": [
+    "art.py",
+    "brands.json",
+    "hardware.py",
+    "agent.py"
+  ],
+  "scope": "Artwork and model resources only. No issuer, facility, entity, hardware registration or world migration.",
+  "issuers": [
+    {
+      "key": "crownstone",
+      "institution": "economy:bank/crownstone",
+      "name": "Crownstone Bank",
+      "currency": "CAD",
+      "tier": "HYBRID",
+      "networks": [
+        "wayline",
+        "orbit"
+      ],
+      "palette": {
+        "primary": "#263B50",
+        "accent": "#D4A84C"
+      },
+      "sprite": "economy:banking/issuers/crownstone",
+      "texture": "economy:gui/sprites/banking/issuers/crownstone"
+    },
+    {
+      "key": "orchard_direct",
+      "institution": "economy:bank/orchard_direct",
+      "name": "Orchard Direct",
+      "currency": "CAD",
+      "tier": "TIER1",
+      "networks": [
+        "orbit"
+      ],
+      "palette": {
+        "primary": "#E79768",
+        "accent": "#202C3E"
+      },
+      "sprite": "economy:banking/issuers/orchard_direct",
+      "texture": "economy:gui/sprites/banking/issuers/orchard_direct"
+    },
+    {
+      "key": "tidecrest",
+      "institution": "economy:bank/tidecrest",
+      "name": "Tidecrest Bank",
+      "currency": "CAD",
+      "tier": "TIER1",
+      "networks": [
+        "wayline"
+      ],
+      "palette": {
+        "primary": "#7FCBB8",
+        "accent": "#51324F"
+      },
+      "sprite": "economy:banking/issuers/tidecrest",
+      "texture": "economy:gui/sprites/banking/issuers/tidecrest"
+    },
+    {
+      "key": "crosswind",
+      "institution": "economy:bank/crosswind",
+      "name": "Crosswind Bank",
+      "currency": "USD",
+      "tier": "TIER1",
+      "networks": [
+        "wayline",
+        "ember"
+      ],
+      "palette": {
+        "primary": "#A34F39",
+        "accent": "#F4E6CE"
+      },
+      "sprite": "economy:banking/issuers/crosswind",
+      "texture": "economy:gui/sprites/banking/issuers/crosswind"
+    },
+    {
+      "key": "lantern_union",
+      "institution": "economy:bank/lantern_union",
+      "name": "Lantern Union",
+      "currency": "USD",
+      "tier": "HYBRID",
+      "networks": [
+        "orbit",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#3C386B",
+        "accent": "#BC815B"
+      },
+      "sprite": "economy:banking/issuers/lantern_union",
+      "texture": "economy:gui/sprites/banking/issuers/lantern_union"
+    },
+    {
+      "key": "mesa_trail",
+      "institution": "economy:bank/mesa_trail",
+      "name": "Mesa Trail Bank",
+      "currency": "USD",
+      "tier": "TIER1",
+      "networks": [
+        "wayline",
+        "ember"
+      ],
+      "palette": {
+        "primary": "#D9BB84",
+        "accent": "#266D71"
+      },
+      "sprite": "economy:banking/issuers/mesa_trail",
+      "texture": "economy:gui/sprites/banking/issuers/mesa_trail"
+    },
+    {
+      "key": "asterbridge",
+      "institution": "economy:bank/asterbridge",
+      "name": "Asterbridge Bank",
+      "currency": "GBP",
+      "tier": "HYBRID",
+      "networks": [
+        "orbit",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#68557F",
+        "accent": "#CCD3DD"
+      },
+      "sprite": "economy:banking/issuers/asterbridge",
+      "texture": "economy:gui/sprites/banking/issuers/asterbridge"
+    },
+    {
+      "key": "greenhaven",
+      "institution": "economy:bank/greenhaven",
+      "name": "Greenhaven Bank",
+      "currency": "GBP",
+      "tier": "TIER1",
+      "networks": [
+        "wayline"
+      ],
+      "palette": {
+        "primary": "#526B45",
+        "accent": "#DE977F"
+      },
+      "sprite": "economy:banking/issuers/greenhaven",
+      "texture": "economy:gui/sprites/banking/issuers/greenhaven"
+    },
+    {
+      "key": "meridian_grove",
+      "institution": "economy:bank/meridian_grove",
+      "name": "Meridian Grove",
+      "currency": "EUR",
+      "tier": "HYBRID",
+      "networks": [
+        "orbit",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#244D91",
+        "accent": "#D6A546"
+      },
+      "sprite": "economy:banking/issuers/meridian_grove",
+      "texture": "economy:gui/sprites/banking/issuers/meridian_grove"
+    },
+    {
+      "key": "slate_harbor",
+      "institution": "economy:bank/slate_harbor",
+      "name": "Slate Harbor Bank",
+      "currency": "EUR",
+      "tier": "TIER1",
+      "networks": [
+        "wayline"
+      ],
+      "palette": {
+        "primary": "#303B45",
+        "accent": "#BDCB6E"
+      },
+      "sprite": "economy:banking/issuers/slate_harbor",
+      "texture": "economy:gui/sprites/banking/issuers/slate_harbor"
+    },
+    {
+      "key": "fjordlight",
+      "institution": "economy:bank/fjordlight",
+      "name": "Fjordlight Bank",
+      "currency": "DKK",
+      "tier": "TIER1",
+      "networks": [
+        "orbit"
+      ],
+      "palette": {
+        "primary": "#A1C9D7",
+        "accent": "#A65142"
+      },
+      "sprite": "economy:banking/issuers/fjordlight",
+      "texture": "economy:gui/sprites/banking/issuers/fjordlight"
+    },
+    {
+      "key": "harbor_meridian",
+      "institution": "economy:bank/harbor_meridian",
+      "name": "Harbor Meridian",
+      "currency": "HKD",
+      "tier": "HYBRID",
+      "networks": [
+        "wayline",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#245864",
+        "accent": "#D9BC68"
+      },
+      "sprite": "economy:banking/issuers/harbor_meridian",
+      "texture": "economy:gui/sprites/banking/issuers/harbor_meridian"
+    },
+    {
+      "key": "jade_terrace",
+      "institution": "economy:bank/jade_terrace",
+      "name": "Jade Terrace Bank",
+      "currency": "CNY",
+      "tier": "TIER1",
+      "networks": [
+        "orbit"
+      ],
+      "palette": {
+        "primary": "#50866F",
+        "accent": "#F1ECD6"
+      },
+      "sprite": "economy:banking/issuers/jade_terrace",
+      "texture": "economy:gui/sprites/banking/issuers/jade_terrace"
+    },
+    {
+      "key": "southern_arc",
+      "institution": "economy:bank/southern_arc",
+      "name": "Southern Arc Bank",
+      "currency": "AUD",
+      "tier": "TIER1",
+      "networks": [
+        "wayline"
+      ],
+      "palette": {
+        "primary": "#C69B48",
+        "accent": "#243B59"
+      },
+      "sprite": "economy:banking/issuers/southern_arc",
+      "texture": "economy:gui/sprites/banking/issuers/southern_arc"
+    },
+    {
+      "key": "fernreach",
+      "institution": "economy:bank/fernreach",
+      "name": "Fernreach Bank",
+      "currency": "NZD",
+      "tier": "TIER1",
+      "networks": [
+        "orbit"
+      ],
+      "palette": {
+        "primary": "#603D60",
+        "accent": "#A0B9A0"
+      },
+      "sprite": "economy:banking/issuers/fernreach",
+      "texture": "economy:gui/sprites/banking/issuers/fernreach"
+    },
+    {
+      "key": "cedar_parcel",
+      "institution": "economy:bank/cedar_parcel",
+      "name": "Cedar Parcel Bank",
+      "currency": "JPY",
+      "tier": "TIER1",
+      "networks": [
+        "wayline"
+      ],
+      "palette": {
+        "primary": "#845B42",
+        "accent": "#EEE3C7"
+      },
+      "sprite": "economy:banking/issuers/cedar_parcel",
+      "texture": "economy:gui/sprites/banking/issuers/cedar_parcel"
+    },
+    {
+      "key": "lakeward_cantonal",
+      "institution": "economy:bank/lakeward_cantonal",
+      "name": "Lakeward Cantonal Bank",
+      "currency": "CHF",
+      "tier": "TIER1",
+      "networks": [
+        "wayline",
+        "orbit"
+      ],
+      "palette": {
+        "primary": "#306F94",
+        "accent": "#D6D3BC"
+      },
+      "sprite": "economy:banking/issuers/lakeward_cantonal",
+      "texture": "economy:gui/sprites/banking/issuers/lakeward_cantonal"
+    },
+    {
+      "key": "newhaven",
+      "institution": "economy:bank/newhaven",
+      "name": "Newhaven Bank",
+      "currency": "CHF",
+      "tier": "TIER1",
+      "networks": [
+        "orbit"
+      ],
+      "palette": {
+        "primary": "#70384B",
+        "accent": "#E8DED4"
+      },
+      "sprite": "economy:banking/issuers/newhaven",
+      "texture": "economy:gui/sprites/banking/issuers/newhaven"
+    },
+    {
+      "key": "atlas_reserve",
+      "institution": "economy:bank/atlas_reserve",
+      "name": "Atlas Reserve",
+      "currency": "USD",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "wayline",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#3C4149",
+        "accent": "#BB876B"
+      },
+      "sprite": "economy:banking/issuers/atlas_reserve",
+      "texture": "economy:gui/sprites/banking/issuers/atlas_reserve"
+    },
+    {
+      "key": "obsidian_capital",
+      "institution": "economy:bank/obsidian_capital",
+      "name": "Obsidian Capital Bank",
+      "currency": "EUR",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "orbit",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#302F39",
+        "accent": "#DDD9CF"
+      },
+      "sprite": "economy:banking/issuers/obsidian_capital",
+      "texture": "economy:gui/sprites/banking/issuers/obsidian_capital"
+    },
+    {
+      "key": "alpine_vault",
+      "institution": "economy:bank/alpine_vault",
+      "name": "Alpine Vault",
+      "currency": "CHF",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "wayline",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#584358",
+        "accent": "#C7CDD4"
+      },
+      "sprite": "economy:banking/issuers/alpine_vault",
+      "texture": "economy:gui/sprites/banking/issuers/alpine_vault"
+    },
+    {
+      "key": "kintsugi_trust",
+      "institution": "economy:bank/kintsugi_trust",
+      "name": "Kintsugi Trust",
+      "currency": "JPY",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "orbit",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#253748",
+        "accent": "#B58B58"
+      },
+      "sprite": "economy:banking/issuers/kintsugi_trust",
+      "texture": "economy:gui/sprites/banking/issuers/kintsugi_trust"
+    },
+    {
+      "key": "mariner_crest",
+      "institution": "economy:bank/mariner_crest",
+      "name": "Mariner Crest",
+      "currency": "AUD",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "wayline",
+        "keystone"
+      ],
+      "palette": {
+        "primary": "#195866",
+        "accent": "#ECE5CE"
+      },
+      "sprite": "economy:banking/issuers/mariner_crest",
+      "texture": "economy:gui/sprites/banking/issuers/mariner_crest"
+    }
+  ],
+  "networks": [
+    {
+      "key": "keystone",
+      "name": "Keystone",
+      "primary": "#4C5771",
+      "accent": "#E0C99B",
+      "sprite": "economy:banking/networks/keystone",
+      "texture": "economy:gui/sprites/banking/networks/keystone"
+    },
+    {
+      "key": "orbit",
+      "name": "Orbit",
+      "primary": "#406D76",
+      "accent": "#D4DCBE",
+      "sprite": "economy:banking/networks/orbit",
+      "texture": "economy:gui/sprites/banking/networks/orbit"
+    },
+    {
+      "key": "wayline",
+      "name": "Wayline",
+      "primary": "#606C50",
+      "accent": "#E2D5AE",
+      "sprite": "economy:banking/networks/wayline",
+      "texture": "economy:gui/sprites/banking/networks/wayline"
+    },
+    {
+      "key": "ember",
+      "name": "Ember",
+      "primary": "#7F4B49",
+      "accent": "#F1BC78",
+      "sprite": "economy:banking/networks/ember",
+      "texture": "economy:gui/sprites/banking/networks/ember"
+    }
+  ],
+  "cards": [
+    {
+      "key": "crownstone_debit_t1",
+      "institution": "economy:bank/crownstone",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/crownstone_debit_t1",
+      "model": "economy:item/banking/crownstone_debit_t1",
+      "translation": "item.economy.crownstone_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "crownstone_credit_wayline_t1",
+      "institution": "economy:bank/crownstone",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/crownstone_credit_wayline_t1",
+      "model": "economy:item/banking/crownstone_credit_wayline_t1",
+      "translation": "item.economy.crownstone_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "crownstone_credit_orbit_t1",
+      "institution": "economy:bank/crownstone",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/crownstone_credit_orbit_t1",
+      "model": "economy:item/banking/crownstone_credit_orbit_t1",
+      "translation": "item.economy.crownstone_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "crownstone_debit_t2",
+      "institution": "economy:bank/crownstone",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/crownstone_debit_t2",
+      "model": "economy:item/banking/crownstone_debit_t2",
+      "translation": "item.economy.crownstone_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "crownstone_credit_wayline_t2",
+      "institution": "economy:bank/crownstone",
+      "product": "credit",
+      "tier": 2,
+      "network": "wayline",
+      "texture": "economy:item/banking/crownstone_credit_wayline_t2",
+      "model": "economy:item/banking/crownstone_credit_wayline_t2",
+      "translation": "item.economy.crownstone_credit_wayline_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "crownstone_credit_orbit_t2",
+      "institution": "economy:bank/crownstone",
+      "product": "credit",
+      "tier": 2,
+      "network": "orbit",
+      "texture": "economy:item/banking/crownstone_credit_orbit_t2",
+      "model": "economy:item/banking/crownstone_credit_orbit_t2",
+      "translation": "item.economy.crownstone_credit_orbit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "orchard_direct_debit_t1",
+      "institution": "economy:bank/orchard_direct",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/orchard_direct_debit_t1",
+      "model": "economy:item/banking/orchard_direct_debit_t1",
+      "translation": "item.economy.orchard_direct_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "orchard_direct_credit_orbit_t1",
+      "institution": "economy:bank/orchard_direct",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/orchard_direct_credit_orbit_t1",
+      "model": "economy:item/banking/orchard_direct_credit_orbit_t1",
+      "translation": "item.economy.orchard_direct_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "tidecrest_debit_t1",
+      "institution": "economy:bank/tidecrest",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/tidecrest_debit_t1",
+      "model": "economy:item/banking/tidecrest_debit_t1",
+      "translation": "item.economy.tidecrest_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "tidecrest_credit_wayline_t1",
+      "institution": "economy:bank/tidecrest",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/tidecrest_credit_wayline_t1",
+      "model": "economy:item/banking/tidecrest_credit_wayline_t1",
+      "translation": "item.economy.tidecrest_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "crosswind_debit_t1",
+      "institution": "economy:bank/crosswind",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/crosswind_debit_t1",
+      "model": "economy:item/banking/crosswind_debit_t1",
+      "translation": "item.economy.crosswind_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "crosswind_credit_wayline_t1",
+      "institution": "economy:bank/crosswind",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/crosswind_credit_wayline_t1",
+      "model": "economy:item/banking/crosswind_credit_wayline_t1",
+      "translation": "item.economy.crosswind_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "crosswind_credit_ember_t1",
+      "institution": "economy:bank/crosswind",
+      "product": "credit",
+      "tier": 1,
+      "network": "ember",
+      "texture": "economy:item/banking/crosswind_credit_ember_t1",
+      "model": "economy:item/banking/crosswind_credit_ember_t1",
+      "translation": "item.economy.crosswind_credit_ember_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lantern_union_debit_t1",
+      "institution": "economy:bank/lantern_union",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/lantern_union_debit_t1",
+      "model": "economy:item/banking/lantern_union_debit_t1",
+      "translation": "item.economy.lantern_union_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lantern_union_credit_orbit_t1",
+      "institution": "economy:bank/lantern_union",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/lantern_union_credit_orbit_t1",
+      "model": "economy:item/banking/lantern_union_credit_orbit_t1",
+      "translation": "item.economy.lantern_union_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lantern_union_credit_keystone_t1",
+      "institution": "economy:bank/lantern_union",
+      "product": "credit",
+      "tier": 1,
+      "network": "keystone",
+      "texture": "economy:item/banking/lantern_union_credit_keystone_t1",
+      "model": "economy:item/banking/lantern_union_credit_keystone_t1",
+      "translation": "item.economy.lantern_union_credit_keystone_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lantern_union_debit_t2",
+      "institution": "economy:bank/lantern_union",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/lantern_union_debit_t2",
+      "model": "economy:item/banking/lantern_union_debit_t2",
+      "translation": "item.economy.lantern_union_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lantern_union_credit_orbit_t2",
+      "institution": "economy:bank/lantern_union",
+      "product": "credit",
+      "tier": 2,
+      "network": "orbit",
+      "texture": "economy:item/banking/lantern_union_credit_orbit_t2",
+      "model": "economy:item/banking/lantern_union_credit_orbit_t2",
+      "translation": "item.economy.lantern_union_credit_orbit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lantern_union_credit_keystone_t2",
+      "institution": "economy:bank/lantern_union",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/lantern_union_credit_keystone_t2",
+      "model": "economy:item/banking/lantern_union_credit_keystone_t2",
+      "translation": "item.economy.lantern_union_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "mesa_trail_debit_t1",
+      "institution": "economy:bank/mesa_trail",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/mesa_trail_debit_t1",
+      "model": "economy:item/banking/mesa_trail_debit_t1",
+      "translation": "item.economy.mesa_trail_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "mesa_trail_credit_wayline_t1",
+      "institution": "economy:bank/mesa_trail",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/mesa_trail_credit_wayline_t1",
+      "model": "economy:item/banking/mesa_trail_credit_wayline_t1",
+      "translation": "item.economy.mesa_trail_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "mesa_trail_credit_ember_t1",
+      "institution": "economy:bank/mesa_trail",
+      "product": "credit",
+      "tier": 1,
+      "network": "ember",
+      "texture": "economy:item/banking/mesa_trail_credit_ember_t1",
+      "model": "economy:item/banking/mesa_trail_credit_ember_t1",
+      "translation": "item.economy.mesa_trail_credit_ember_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "asterbridge_debit_t1",
+      "institution": "economy:bank/asterbridge",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/asterbridge_debit_t1",
+      "model": "economy:item/banking/asterbridge_debit_t1",
+      "translation": "item.economy.asterbridge_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "asterbridge_credit_orbit_t1",
+      "institution": "economy:bank/asterbridge",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/asterbridge_credit_orbit_t1",
+      "model": "economy:item/banking/asterbridge_credit_orbit_t1",
+      "translation": "item.economy.asterbridge_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "asterbridge_credit_keystone_t1",
+      "institution": "economy:bank/asterbridge",
+      "product": "credit",
+      "tier": 1,
+      "network": "keystone",
+      "texture": "economy:item/banking/asterbridge_credit_keystone_t1",
+      "model": "economy:item/banking/asterbridge_credit_keystone_t1",
+      "translation": "item.economy.asterbridge_credit_keystone_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "asterbridge_debit_t2",
+      "institution": "economy:bank/asterbridge",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/asterbridge_debit_t2",
+      "model": "economy:item/banking/asterbridge_debit_t2",
+      "translation": "item.economy.asterbridge_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "asterbridge_credit_orbit_t2",
+      "institution": "economy:bank/asterbridge",
+      "product": "credit",
+      "tier": 2,
+      "network": "orbit",
+      "texture": "economy:item/banking/asterbridge_credit_orbit_t2",
+      "model": "economy:item/banking/asterbridge_credit_orbit_t2",
+      "translation": "item.economy.asterbridge_credit_orbit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "asterbridge_credit_keystone_t2",
+      "institution": "economy:bank/asterbridge",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/asterbridge_credit_keystone_t2",
+      "model": "economy:item/banking/asterbridge_credit_keystone_t2",
+      "translation": "item.economy.asterbridge_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "greenhaven_debit_t1",
+      "institution": "economy:bank/greenhaven",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/greenhaven_debit_t1",
+      "model": "economy:item/banking/greenhaven_debit_t1",
+      "translation": "item.economy.greenhaven_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "greenhaven_credit_wayline_t1",
+      "institution": "economy:bank/greenhaven",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/greenhaven_credit_wayline_t1",
+      "model": "economy:item/banking/greenhaven_credit_wayline_t1",
+      "translation": "item.economy.greenhaven_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "meridian_grove_debit_t1",
+      "institution": "economy:bank/meridian_grove",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/meridian_grove_debit_t1",
+      "model": "economy:item/banking/meridian_grove_debit_t1",
+      "translation": "item.economy.meridian_grove_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "meridian_grove_credit_orbit_t1",
+      "institution": "economy:bank/meridian_grove",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/meridian_grove_credit_orbit_t1",
+      "model": "economy:item/banking/meridian_grove_credit_orbit_t1",
+      "translation": "item.economy.meridian_grove_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "meridian_grove_credit_keystone_t1",
+      "institution": "economy:bank/meridian_grove",
+      "product": "credit",
+      "tier": 1,
+      "network": "keystone",
+      "texture": "economy:item/banking/meridian_grove_credit_keystone_t1",
+      "model": "economy:item/banking/meridian_grove_credit_keystone_t1",
+      "translation": "item.economy.meridian_grove_credit_keystone_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "meridian_grove_debit_t2",
+      "institution": "economy:bank/meridian_grove",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/meridian_grove_debit_t2",
+      "model": "economy:item/banking/meridian_grove_debit_t2",
+      "translation": "item.economy.meridian_grove_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "meridian_grove_credit_orbit_t2",
+      "institution": "economy:bank/meridian_grove",
+      "product": "credit",
+      "tier": 2,
+      "network": "orbit",
+      "texture": "economy:item/banking/meridian_grove_credit_orbit_t2",
+      "model": "economy:item/banking/meridian_grove_credit_orbit_t2",
+      "translation": "item.economy.meridian_grove_credit_orbit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "meridian_grove_credit_keystone_t2",
+      "institution": "economy:bank/meridian_grove",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/meridian_grove_credit_keystone_t2",
+      "model": "economy:item/banking/meridian_grove_credit_keystone_t2",
+      "translation": "item.economy.meridian_grove_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "slate_harbor_debit_t1",
+      "institution": "economy:bank/slate_harbor",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/slate_harbor_debit_t1",
+      "model": "economy:item/banking/slate_harbor_debit_t1",
+      "translation": "item.economy.slate_harbor_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "slate_harbor_credit_wayline_t1",
+      "institution": "economy:bank/slate_harbor",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/slate_harbor_credit_wayline_t1",
+      "model": "economy:item/banking/slate_harbor_credit_wayline_t1",
+      "translation": "item.economy.slate_harbor_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "fjordlight_debit_t1",
+      "institution": "economy:bank/fjordlight",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/fjordlight_debit_t1",
+      "model": "economy:item/banking/fjordlight_debit_t1",
+      "translation": "item.economy.fjordlight_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "fjordlight_credit_orbit_t1",
+      "institution": "economy:bank/fjordlight",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/fjordlight_credit_orbit_t1",
+      "model": "economy:item/banking/fjordlight_credit_orbit_t1",
+      "translation": "item.economy.fjordlight_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "harbor_meridian_debit_t1",
+      "institution": "economy:bank/harbor_meridian",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/harbor_meridian_debit_t1",
+      "model": "economy:item/banking/harbor_meridian_debit_t1",
+      "translation": "item.economy.harbor_meridian_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "harbor_meridian_credit_wayline_t1",
+      "institution": "economy:bank/harbor_meridian",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/harbor_meridian_credit_wayline_t1",
+      "model": "economy:item/banking/harbor_meridian_credit_wayline_t1",
+      "translation": "item.economy.harbor_meridian_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "harbor_meridian_credit_keystone_t1",
+      "institution": "economy:bank/harbor_meridian",
+      "product": "credit",
+      "tier": 1,
+      "network": "keystone",
+      "texture": "economy:item/banking/harbor_meridian_credit_keystone_t1",
+      "model": "economy:item/banking/harbor_meridian_credit_keystone_t1",
+      "translation": "item.economy.harbor_meridian_credit_keystone_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "harbor_meridian_debit_t2",
+      "institution": "economy:bank/harbor_meridian",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/harbor_meridian_debit_t2",
+      "model": "economy:item/banking/harbor_meridian_debit_t2",
+      "translation": "item.economy.harbor_meridian_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "harbor_meridian_credit_wayline_t2",
+      "institution": "economy:bank/harbor_meridian",
+      "product": "credit",
+      "tier": 2,
+      "network": "wayline",
+      "texture": "economy:item/banking/harbor_meridian_credit_wayline_t2",
+      "model": "economy:item/banking/harbor_meridian_credit_wayline_t2",
+      "translation": "item.economy.harbor_meridian_credit_wayline_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "harbor_meridian_credit_keystone_t2",
+      "institution": "economy:bank/harbor_meridian",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/harbor_meridian_credit_keystone_t2",
+      "model": "economy:item/banking/harbor_meridian_credit_keystone_t2",
+      "translation": "item.economy.harbor_meridian_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "jade_terrace_debit_t1",
+      "institution": "economy:bank/jade_terrace",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/jade_terrace_debit_t1",
+      "model": "economy:item/banking/jade_terrace_debit_t1",
+      "translation": "item.economy.jade_terrace_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "jade_terrace_credit_orbit_t1",
+      "institution": "economy:bank/jade_terrace",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/jade_terrace_credit_orbit_t1",
+      "model": "economy:item/banking/jade_terrace_credit_orbit_t1",
+      "translation": "item.economy.jade_terrace_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "southern_arc_debit_t1",
+      "institution": "economy:bank/southern_arc",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/southern_arc_debit_t1",
+      "model": "economy:item/banking/southern_arc_debit_t1",
+      "translation": "item.economy.southern_arc_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "southern_arc_credit_wayline_t1",
+      "institution": "economy:bank/southern_arc",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/southern_arc_credit_wayline_t1",
+      "model": "economy:item/banking/southern_arc_credit_wayline_t1",
+      "translation": "item.economy.southern_arc_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "fernreach_debit_t1",
+      "institution": "economy:bank/fernreach",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/fernreach_debit_t1",
+      "model": "economy:item/banking/fernreach_debit_t1",
+      "translation": "item.economy.fernreach_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "fernreach_credit_orbit_t1",
+      "institution": "economy:bank/fernreach",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/fernreach_credit_orbit_t1",
+      "model": "economy:item/banking/fernreach_credit_orbit_t1",
+      "translation": "item.economy.fernreach_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "cedar_parcel_debit_t1",
+      "institution": "economy:bank/cedar_parcel",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/cedar_parcel_debit_t1",
+      "model": "economy:item/banking/cedar_parcel_debit_t1",
+      "translation": "item.economy.cedar_parcel_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "cedar_parcel_credit_wayline_t1",
+      "institution": "economy:bank/cedar_parcel",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/cedar_parcel_credit_wayline_t1",
+      "model": "economy:item/banking/cedar_parcel_credit_wayline_t1",
+      "translation": "item.economy.cedar_parcel_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lakeward_cantonal_debit_t1",
+      "institution": "economy:bank/lakeward_cantonal",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/lakeward_cantonal_debit_t1",
+      "model": "economy:item/banking/lakeward_cantonal_debit_t1",
+      "translation": "item.economy.lakeward_cantonal_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lakeward_cantonal_credit_wayline_t1",
+      "institution": "economy:bank/lakeward_cantonal",
+      "product": "credit",
+      "tier": 1,
+      "network": "wayline",
+      "texture": "economy:item/banking/lakeward_cantonal_credit_wayline_t1",
+      "model": "economy:item/banking/lakeward_cantonal_credit_wayline_t1",
+      "translation": "item.economy.lakeward_cantonal_credit_wayline_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "lakeward_cantonal_credit_orbit_t1",
+      "institution": "economy:bank/lakeward_cantonal",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/lakeward_cantonal_credit_orbit_t1",
+      "model": "economy:item/banking/lakeward_cantonal_credit_orbit_t1",
+      "translation": "item.economy.lakeward_cantonal_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "newhaven_debit_t1",
+      "institution": "economy:bank/newhaven",
+      "product": "debit",
+      "tier": 1,
+      "network": null,
+      "texture": "economy:item/banking/newhaven_debit_t1",
+      "model": "economy:item/banking/newhaven_debit_t1",
+      "translation": "item.economy.newhaven_debit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "newhaven_credit_orbit_t1",
+      "institution": "economy:bank/newhaven",
+      "product": "credit",
+      "tier": 1,
+      "network": "orbit",
+      "texture": "economy:item/banking/newhaven_credit_orbit_t1",
+      "model": "economy:item/banking/newhaven_credit_orbit_t1",
+      "translation": "item.economy.newhaven_credit_orbit_t1",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "atlas_reserve_debit_t2",
+      "institution": "economy:bank/atlas_reserve",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/atlas_reserve_debit_t2",
+      "model": "economy:item/banking/atlas_reserve_debit_t2",
+      "translation": "item.economy.atlas_reserve_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "atlas_reserve_credit_wayline_t2",
+      "institution": "economy:bank/atlas_reserve",
+      "product": "credit",
+      "tier": 2,
+      "network": "wayline",
+      "texture": "economy:item/banking/atlas_reserve_credit_wayline_t2",
+      "model": "economy:item/banking/atlas_reserve_credit_wayline_t2",
+      "translation": "item.economy.atlas_reserve_credit_wayline_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "atlas_reserve_credit_keystone_t2",
+      "institution": "economy:bank/atlas_reserve",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/atlas_reserve_credit_keystone_t2",
+      "model": "economy:item/banking/atlas_reserve_credit_keystone_t2",
+      "translation": "item.economy.atlas_reserve_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "obsidian_capital_debit_t2",
+      "institution": "economy:bank/obsidian_capital",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/obsidian_capital_debit_t2",
+      "model": "economy:item/banking/obsidian_capital_debit_t2",
+      "translation": "item.economy.obsidian_capital_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "obsidian_capital_credit_orbit_t2",
+      "institution": "economy:bank/obsidian_capital",
+      "product": "credit",
+      "tier": 2,
+      "network": "orbit",
+      "texture": "economy:item/banking/obsidian_capital_credit_orbit_t2",
+      "model": "economy:item/banking/obsidian_capital_credit_orbit_t2",
+      "translation": "item.economy.obsidian_capital_credit_orbit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "obsidian_capital_credit_keystone_t2",
+      "institution": "economy:bank/obsidian_capital",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/obsidian_capital_credit_keystone_t2",
+      "model": "economy:item/banking/obsidian_capital_credit_keystone_t2",
+      "translation": "item.economy.obsidian_capital_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "alpine_vault_debit_t2",
+      "institution": "economy:bank/alpine_vault",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/alpine_vault_debit_t2",
+      "model": "economy:item/banking/alpine_vault_debit_t2",
+      "translation": "item.economy.alpine_vault_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "alpine_vault_credit_wayline_t2",
+      "institution": "economy:bank/alpine_vault",
+      "product": "credit",
+      "tier": 2,
+      "network": "wayline",
+      "texture": "economy:item/banking/alpine_vault_credit_wayline_t2",
+      "model": "economy:item/banking/alpine_vault_credit_wayline_t2",
+      "translation": "item.economy.alpine_vault_credit_wayline_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "alpine_vault_credit_keystone_t2",
+      "institution": "economy:bank/alpine_vault",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/alpine_vault_credit_keystone_t2",
+      "model": "economy:item/banking/alpine_vault_credit_keystone_t2",
+      "translation": "item.economy.alpine_vault_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "kintsugi_trust_debit_t2",
+      "institution": "economy:bank/kintsugi_trust",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/kintsugi_trust_debit_t2",
+      "model": "economy:item/banking/kintsugi_trust_debit_t2",
+      "translation": "item.economy.kintsugi_trust_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "kintsugi_trust_credit_orbit_t2",
+      "institution": "economy:bank/kintsugi_trust",
+      "product": "credit",
+      "tier": 2,
+      "network": "orbit",
+      "texture": "economy:item/banking/kintsugi_trust_credit_orbit_t2",
+      "model": "economy:item/banking/kintsugi_trust_credit_orbit_t2",
+      "translation": "item.economy.kintsugi_trust_credit_orbit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "kintsugi_trust_credit_keystone_t2",
+      "institution": "economy:bank/kintsugi_trust",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/kintsugi_trust_credit_keystone_t2",
+      "model": "economy:item/banking/kintsugi_trust_credit_keystone_t2",
+      "translation": "item.economy.kintsugi_trust_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "mariner_crest_debit_t2",
+      "institution": "economy:bank/mariner_crest",
+      "product": "debit",
+      "tier": 2,
+      "network": null,
+      "texture": "economy:item/banking/mariner_crest_debit_t2",
+      "model": "economy:item/banking/mariner_crest_debit_t2",
+      "translation": "item.economy.mariner_crest_debit_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "mariner_crest_credit_wayline_t2",
+      "institution": "economy:bank/mariner_crest",
+      "product": "credit",
+      "tier": 2,
+      "network": "wayline",
+      "texture": "economy:item/banking/mariner_crest_credit_wayline_t2",
+      "model": "economy:item/banking/mariner_crest_credit_wayline_t2",
+      "translation": "item.economy.mariner_crest_credit_wayline_t2",
+      "registered": false,
+      "financial_authority": false
+    },
+    {
+      "key": "mariner_crest_credit_keystone_t2",
+      "institution": "economy:bank/mariner_crest",
+      "product": "credit",
+      "tier": 2,
+      "network": "keystone",
+      "texture": "economy:item/banking/mariner_crest_credit_keystone_t2",
+      "model": "economy:item/banking/mariner_crest_credit_keystone_t2",
+      "translation": "item.economy.mariner_crest_credit_keystone_t2",
+      "registered": false,
+      "financial_authority": false
+    }
+  ],
+  "icons": [
+    {
+      "key": "accounts",
+      "sprite": "economy:banking/accounts",
+      "texture": "economy:gui/sprites/banking/accounts"
+    },
+    {
+      "key": "debit",
+      "sprite": "economy:banking/debit",
+      "texture": "economy:gui/sprites/banking/debit"
+    },
+    {
+      "key": "credit",
+      "sprite": "economy:banking/credit",
+      "texture": "economy:gui/sprites/banking/credit"
+    },
+    {
+      "key": "loan",
+      "sprite": "economy:banking/loan",
+      "texture": "economy:gui/sprites/banking/loan"
+    },
+    {
+      "key": "replace",
+      "sprite": "economy:banking/replace",
+      "texture": "economy:gui/sprites/banking/replace"
+    },
+    {
+      "key": "deposit",
+      "sprite": "economy:banking/deposit",
+      "texture": "economy:gui/sprites/banking/deposit"
+    },
+    {
+      "key": "withdraw",
+      "sprite": "economy:banking/withdraw",
+      "texture": "economy:gui/sprites/banking/withdraw"
+    },
+    {
+      "key": "fx",
+      "sprite": "economy:banking/fx",
+      "texture": "economy:gui/sprites/banking/fx"
+    },
+    {
+      "key": "history",
+      "sprite": "economy:banking/history",
+      "texture": "economy:gui/sprites/banking/history"
+    },
+    {
+      "key": "tier2",
+      "sprite": "economy:banking/tier2",
+      "texture": "economy:gui/sprites/banking/tier2"
+    },
+    {
+      "key": "collections",
+      "sprite": "economy:banking/collections",
+      "texture": "economy:gui/sprites/banking/collections"
+    },
+    {
+      "key": "branch",
+      "sprite": "economy:banking/branch",
+      "texture": "economy:gui/sprites/banking/branch"
+    }
+  ],
+  "hardware": {
+    "banks": [
+      {
+        "key": "crownstone",
+        "currency": "CAD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/crownstone_atm_front",
+            "shell": "economy:block/banking/crownstone_atm_shell",
+            "trim": "economy:block/banking/crownstone_atm_trim",
+            "metal": "economy:block/banking/crownstone_atm_metal",
+            "dark": "economy:block/banking/crownstone_atm_dark",
+            "keypad": "economy:block/banking/crownstone_atm_keypad",
+            "slot": "economy:block/banking/crownstone_atm_slot",
+            "vent": "economy:block/banking/crownstone_atm_vent",
+            "screen": "economy:block/banking/crownstone_atm_front",
+            "glass": "economy:block/banking/crownstone_atm_front",
+            "chart": "economy:block/banking/crownstone_atm_front",
+            "particle": "economy:block/banking/crownstone_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/crownstone_atm_0",
+            "economy:block/banking/crownstone_atm_1",
+            "economy:block/banking/crownstone_atm_2",
+            "economy:block/banking/crownstone_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/crownstone_atm_inventory",
+          "item_model": "economy:item/banking/crownstone_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "CROWN",
+            "STONE"
+          ],
+          "display_currency": "CAD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/crownstone_teller_front",
+            "shell": "economy:block/banking/crownstone_teller_shell",
+            "trim": "economy:block/banking/crownstone_teller_trim",
+            "metal": "economy:block/banking/crownstone_teller_metal",
+            "dark": "economy:block/banking/crownstone_teller_dark",
+            "keypad": "economy:block/banking/crownstone_teller_keypad",
+            "slot": "economy:block/banking/crownstone_teller_slot",
+            "vent": "economy:block/banking/crownstone_teller_vent",
+            "screen": "economy:block/banking/crownstone_teller_front",
+            "glass": "economy:block/banking/crownstone_teller_front",
+            "chart": "economy:block/banking/crownstone_teller_front",
+            "particle": "economy:block/banking/crownstone_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/crownstone_teller_0",
+            "economy:block/banking/crownstone_teller_1",
+            "economy:block/banking/crownstone_teller_2",
+            "economy:block/banking/crownstone_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/crownstone_teller_inventory",
+          "item_model": "economy:item/banking/crownstone_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "CROWN",
+            "STONE"
+          ],
+          "display_currency": "CAD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/crownstone_kiosk_front",
+            "shell": "economy:block/banking/crownstone_kiosk_shell",
+            "trim": "economy:block/banking/crownstone_kiosk_trim",
+            "metal": "economy:block/banking/crownstone_kiosk_metal",
+            "dark": "economy:block/banking/crownstone_kiosk_dark",
+            "keypad": "economy:block/banking/crownstone_kiosk_keypad",
+            "slot": "economy:block/banking/crownstone_kiosk_slot",
+            "vent": "economy:block/banking/crownstone_kiosk_vent",
+            "screen": "economy:block/banking/crownstone_kiosk_front",
+            "glass": "economy:block/banking/crownstone_kiosk_front",
+            "chart": "economy:block/banking/crownstone_kiosk_front",
+            "particle": "economy:block/banking/crownstone_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/crownstone_kiosk_0",
+            "economy:block/banking/crownstone_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/crownstone_kiosk_inventory",
+          "item_model": "economy:item/banking/crownstone_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "CROWN",
+            "STONE"
+          ],
+          "display_currency": "CAD"
+        }
+      },
+      {
+        "key": "orchard_direct",
+        "currency": "CAD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/orchard_direct_atm_front",
+            "shell": "economy:block/banking/orchard_direct_atm_shell",
+            "trim": "economy:block/banking/orchard_direct_atm_trim",
+            "metal": "economy:block/banking/orchard_direct_atm_metal",
+            "dark": "economy:block/banking/orchard_direct_atm_dark",
+            "keypad": "economy:block/banking/orchard_direct_atm_keypad",
+            "slot": "economy:block/banking/orchard_direct_atm_slot",
+            "vent": "economy:block/banking/orchard_direct_atm_vent",
+            "screen": "economy:block/banking/orchard_direct_atm_front",
+            "glass": "economy:block/banking/orchard_direct_atm_front",
+            "chart": "economy:block/banking/orchard_direct_atm_front",
+            "particle": "economy:block/banking/orchard_direct_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/orchard_direct_atm_0",
+            "economy:block/banking/orchard_direct_atm_1",
+            "economy:block/banking/orchard_direct_atm_2",
+            "economy:block/banking/orchard_direct_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/orchard_direct_atm_inventory",
+          "item_model": "economy:item/banking/orchard_direct_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "ORCHARD",
+            "DIRECT"
+          ],
+          "display_currency": "CAD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/orchard_direct_teller_front",
+            "shell": "economy:block/banking/orchard_direct_teller_shell",
+            "trim": "economy:block/banking/orchard_direct_teller_trim",
+            "metal": "economy:block/banking/orchard_direct_teller_metal",
+            "dark": "economy:block/banking/orchard_direct_teller_dark",
+            "keypad": "economy:block/banking/orchard_direct_teller_keypad",
+            "slot": "economy:block/banking/orchard_direct_teller_slot",
+            "vent": "economy:block/banking/orchard_direct_teller_vent",
+            "screen": "economy:block/banking/orchard_direct_teller_front",
+            "glass": "economy:block/banking/orchard_direct_teller_front",
+            "chart": "economy:block/banking/orchard_direct_teller_front",
+            "particle": "economy:block/banking/orchard_direct_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/orchard_direct_teller_0",
+            "economy:block/banking/orchard_direct_teller_1",
+            "economy:block/banking/orchard_direct_teller_2",
+            "economy:block/banking/orchard_direct_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/orchard_direct_teller_inventory",
+          "item_model": "economy:item/banking/orchard_direct_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "ORCHARD",
+            "DIRECT"
+          ],
+          "display_currency": "CAD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/orchard_direct_kiosk_front",
+            "shell": "economy:block/banking/orchard_direct_kiosk_shell",
+            "trim": "economy:block/banking/orchard_direct_kiosk_trim",
+            "metal": "economy:block/banking/orchard_direct_kiosk_metal",
+            "dark": "economy:block/banking/orchard_direct_kiosk_dark",
+            "keypad": "economy:block/banking/orchard_direct_kiosk_keypad",
+            "slot": "economy:block/banking/orchard_direct_kiosk_slot",
+            "vent": "economy:block/banking/orchard_direct_kiosk_vent",
+            "screen": "economy:block/banking/orchard_direct_kiosk_front",
+            "glass": "economy:block/banking/orchard_direct_kiosk_front",
+            "chart": "economy:block/banking/orchard_direct_kiosk_front",
+            "particle": "economy:block/banking/orchard_direct_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/orchard_direct_kiosk_0",
+            "economy:block/banking/orchard_direct_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/orchard_direct_kiosk_inventory",
+          "item_model": "economy:item/banking/orchard_direct_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "ORCHARD",
+            "DIRECT"
+          ],
+          "display_currency": "CAD"
+        }
+      },
+      {
+        "key": "tidecrest",
+        "currency": "CAD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/tidecrest_atm_front",
+            "shell": "economy:block/banking/tidecrest_atm_shell",
+            "trim": "economy:block/banking/tidecrest_atm_trim",
+            "metal": "economy:block/banking/tidecrest_atm_metal",
+            "dark": "economy:block/banking/tidecrest_atm_dark",
+            "keypad": "economy:block/banking/tidecrest_atm_keypad",
+            "slot": "economy:block/banking/tidecrest_atm_slot",
+            "vent": "economy:block/banking/tidecrest_atm_vent",
+            "screen": "economy:block/banking/tidecrest_atm_front",
+            "glass": "economy:block/banking/tidecrest_atm_front",
+            "chart": "economy:block/banking/tidecrest_atm_front",
+            "particle": "economy:block/banking/tidecrest_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/tidecrest_atm_0",
+            "economy:block/banking/tidecrest_atm_1",
+            "economy:block/banking/tidecrest_atm_2",
+            "economy:block/banking/tidecrest_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/tidecrest_atm_inventory",
+          "item_model": "economy:item/banking/tidecrest_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "TIDE",
+            "CREST"
+          ],
+          "display_currency": "CAD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/tidecrest_teller_front",
+            "shell": "economy:block/banking/tidecrest_teller_shell",
+            "trim": "economy:block/banking/tidecrest_teller_trim",
+            "metal": "economy:block/banking/tidecrest_teller_metal",
+            "dark": "economy:block/banking/tidecrest_teller_dark",
+            "keypad": "economy:block/banking/tidecrest_teller_keypad",
+            "slot": "economy:block/banking/tidecrest_teller_slot",
+            "vent": "economy:block/banking/tidecrest_teller_vent",
+            "screen": "economy:block/banking/tidecrest_teller_front",
+            "glass": "economy:block/banking/tidecrest_teller_front",
+            "chart": "economy:block/banking/tidecrest_teller_front",
+            "particle": "economy:block/banking/tidecrest_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/tidecrest_teller_0",
+            "economy:block/banking/tidecrest_teller_1",
+            "economy:block/banking/tidecrest_teller_2",
+            "economy:block/banking/tidecrest_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/tidecrest_teller_inventory",
+          "item_model": "economy:item/banking/tidecrest_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "TIDE",
+            "CREST"
+          ],
+          "display_currency": "CAD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/tidecrest_kiosk_front",
+            "shell": "economy:block/banking/tidecrest_kiosk_shell",
+            "trim": "economy:block/banking/tidecrest_kiosk_trim",
+            "metal": "economy:block/banking/tidecrest_kiosk_metal",
+            "dark": "economy:block/banking/tidecrest_kiosk_dark",
+            "keypad": "economy:block/banking/tidecrest_kiosk_keypad",
+            "slot": "economy:block/banking/tidecrest_kiosk_slot",
+            "vent": "economy:block/banking/tidecrest_kiosk_vent",
+            "screen": "economy:block/banking/tidecrest_kiosk_front",
+            "glass": "economy:block/banking/tidecrest_kiosk_front",
+            "chart": "economy:block/banking/tidecrest_kiosk_front",
+            "particle": "economy:block/banking/tidecrest_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/tidecrest_kiosk_0",
+            "economy:block/banking/tidecrest_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/tidecrest_kiosk_inventory",
+          "item_model": "economy:item/banking/tidecrest_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "TIDE",
+            "CREST"
+          ],
+          "display_currency": "CAD"
+        }
+      },
+      {
+        "key": "crosswind",
+        "currency": "USD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/crosswind_atm_front",
+            "shell": "economy:block/banking/crosswind_atm_shell",
+            "trim": "economy:block/banking/crosswind_atm_trim",
+            "metal": "economy:block/banking/crosswind_atm_metal",
+            "dark": "economy:block/banking/crosswind_atm_dark",
+            "keypad": "economy:block/banking/crosswind_atm_keypad",
+            "slot": "economy:block/banking/crosswind_atm_slot",
+            "vent": "economy:block/banking/crosswind_atm_vent",
+            "screen": "economy:block/banking/crosswind_atm_front",
+            "glass": "economy:block/banking/crosswind_atm_front",
+            "chart": "economy:block/banking/crosswind_atm_front",
+            "particle": "economy:block/banking/crosswind_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/crosswind_atm_0",
+            "economy:block/banking/crosswind_atm_1",
+            "economy:block/banking/crosswind_atm_2",
+            "economy:block/banking/crosswind_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/crosswind_atm_inventory",
+          "item_model": "economy:item/banking/crosswind_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "CROSS",
+            "WIND"
+          ],
+          "display_currency": "USD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/crosswind_teller_front",
+            "shell": "economy:block/banking/crosswind_teller_shell",
+            "trim": "economy:block/banking/crosswind_teller_trim",
+            "metal": "economy:block/banking/crosswind_teller_metal",
+            "dark": "economy:block/banking/crosswind_teller_dark",
+            "keypad": "economy:block/banking/crosswind_teller_keypad",
+            "slot": "economy:block/banking/crosswind_teller_slot",
+            "vent": "economy:block/banking/crosswind_teller_vent",
+            "screen": "economy:block/banking/crosswind_teller_front",
+            "glass": "economy:block/banking/crosswind_teller_front",
+            "chart": "economy:block/banking/crosswind_teller_front",
+            "particle": "economy:block/banking/crosswind_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/crosswind_teller_0",
+            "economy:block/banking/crosswind_teller_1",
+            "economy:block/banking/crosswind_teller_2",
+            "economy:block/banking/crosswind_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/crosswind_teller_inventory",
+          "item_model": "economy:item/banking/crosswind_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "CROSS",
+            "WIND"
+          ],
+          "display_currency": "USD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/crosswind_kiosk_front",
+            "shell": "economy:block/banking/crosswind_kiosk_shell",
+            "trim": "economy:block/banking/crosswind_kiosk_trim",
+            "metal": "economy:block/banking/crosswind_kiosk_metal",
+            "dark": "economy:block/banking/crosswind_kiosk_dark",
+            "keypad": "economy:block/banking/crosswind_kiosk_keypad",
+            "slot": "economy:block/banking/crosswind_kiosk_slot",
+            "vent": "economy:block/banking/crosswind_kiosk_vent",
+            "screen": "economy:block/banking/crosswind_kiosk_front",
+            "glass": "economy:block/banking/crosswind_kiosk_front",
+            "chart": "economy:block/banking/crosswind_kiosk_front",
+            "particle": "economy:block/banking/crosswind_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/crosswind_kiosk_0",
+            "economy:block/banking/crosswind_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/crosswind_kiosk_inventory",
+          "item_model": "economy:item/banking/crosswind_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "CROSS",
+            "WIND"
+          ],
+          "display_currency": "USD"
+        }
+      },
+      {
+        "key": "lantern_union",
+        "currency": "USD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/lantern_union_atm_front",
+            "shell": "economy:block/banking/lantern_union_atm_shell",
+            "trim": "economy:block/banking/lantern_union_atm_trim",
+            "metal": "economy:block/banking/lantern_union_atm_metal",
+            "dark": "economy:block/banking/lantern_union_atm_dark",
+            "keypad": "economy:block/banking/lantern_union_atm_keypad",
+            "slot": "economy:block/banking/lantern_union_atm_slot",
+            "vent": "economy:block/banking/lantern_union_atm_vent",
+            "screen": "economy:block/banking/lantern_union_atm_front",
+            "glass": "economy:block/banking/lantern_union_atm_front",
+            "chart": "economy:block/banking/lantern_union_atm_front",
+            "particle": "economy:block/banking/lantern_union_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/lantern_union_atm_0",
+            "economy:block/banking/lantern_union_atm_1",
+            "economy:block/banking/lantern_union_atm_2",
+            "economy:block/banking/lantern_union_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/lantern_union_atm_inventory",
+          "item_model": "economy:item/banking/lantern_union_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "LANTERN",
+            "UNION"
+          ],
+          "display_currency": "USD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/lantern_union_teller_front",
+            "shell": "economy:block/banking/lantern_union_teller_shell",
+            "trim": "economy:block/banking/lantern_union_teller_trim",
+            "metal": "economy:block/banking/lantern_union_teller_metal",
+            "dark": "economy:block/banking/lantern_union_teller_dark",
+            "keypad": "economy:block/banking/lantern_union_teller_keypad",
+            "slot": "economy:block/banking/lantern_union_teller_slot",
+            "vent": "economy:block/banking/lantern_union_teller_vent",
+            "screen": "economy:block/banking/lantern_union_teller_front",
+            "glass": "economy:block/banking/lantern_union_teller_front",
+            "chart": "economy:block/banking/lantern_union_teller_front",
+            "particle": "economy:block/banking/lantern_union_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/lantern_union_teller_0",
+            "economy:block/banking/lantern_union_teller_1",
+            "economy:block/banking/lantern_union_teller_2",
+            "economy:block/banking/lantern_union_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/lantern_union_teller_inventory",
+          "item_model": "economy:item/banking/lantern_union_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "LANTERN",
+            "UNION"
+          ],
+          "display_currency": "USD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/lantern_union_kiosk_front",
+            "shell": "economy:block/banking/lantern_union_kiosk_shell",
+            "trim": "economy:block/banking/lantern_union_kiosk_trim",
+            "metal": "economy:block/banking/lantern_union_kiosk_metal",
+            "dark": "economy:block/banking/lantern_union_kiosk_dark",
+            "keypad": "economy:block/banking/lantern_union_kiosk_keypad",
+            "slot": "economy:block/banking/lantern_union_kiosk_slot",
+            "vent": "economy:block/banking/lantern_union_kiosk_vent",
+            "screen": "economy:block/banking/lantern_union_kiosk_front",
+            "glass": "economy:block/banking/lantern_union_kiosk_front",
+            "chart": "economy:block/banking/lantern_union_kiosk_front",
+            "particle": "economy:block/banking/lantern_union_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/lantern_union_kiosk_0",
+            "economy:block/banking/lantern_union_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/lantern_union_kiosk_inventory",
+          "item_model": "economy:item/banking/lantern_union_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "LANTERN",
+            "UNION"
+          ],
+          "display_currency": "USD"
+        }
+      },
+      {
+        "key": "mesa_trail",
+        "currency": "USD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/mesa_trail_atm_front",
+            "shell": "economy:block/banking/mesa_trail_atm_shell",
+            "trim": "economy:block/banking/mesa_trail_atm_trim",
+            "metal": "economy:block/banking/mesa_trail_atm_metal",
+            "dark": "economy:block/banking/mesa_trail_atm_dark",
+            "keypad": "economy:block/banking/mesa_trail_atm_keypad",
+            "slot": "economy:block/banking/mesa_trail_atm_slot",
+            "vent": "economy:block/banking/mesa_trail_atm_vent",
+            "screen": "economy:block/banking/mesa_trail_atm_front",
+            "glass": "economy:block/banking/mesa_trail_atm_front",
+            "chart": "economy:block/banking/mesa_trail_atm_front",
+            "particle": "economy:block/banking/mesa_trail_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/mesa_trail_atm_0",
+            "economy:block/banking/mesa_trail_atm_1",
+            "economy:block/banking/mesa_trail_atm_2",
+            "economy:block/banking/mesa_trail_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/mesa_trail_atm_inventory",
+          "item_model": "economy:item/banking/mesa_trail_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "MESA",
+            "TRAIL"
+          ],
+          "display_currency": "USD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/mesa_trail_teller_front",
+            "shell": "economy:block/banking/mesa_trail_teller_shell",
+            "trim": "economy:block/banking/mesa_trail_teller_trim",
+            "metal": "economy:block/banking/mesa_trail_teller_metal",
+            "dark": "economy:block/banking/mesa_trail_teller_dark",
+            "keypad": "economy:block/banking/mesa_trail_teller_keypad",
+            "slot": "economy:block/banking/mesa_trail_teller_slot",
+            "vent": "economy:block/banking/mesa_trail_teller_vent",
+            "screen": "economy:block/banking/mesa_trail_teller_front",
+            "glass": "economy:block/banking/mesa_trail_teller_front",
+            "chart": "economy:block/banking/mesa_trail_teller_front",
+            "particle": "economy:block/banking/mesa_trail_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/mesa_trail_teller_0",
+            "economy:block/banking/mesa_trail_teller_1",
+            "economy:block/banking/mesa_trail_teller_2",
+            "economy:block/banking/mesa_trail_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/mesa_trail_teller_inventory",
+          "item_model": "economy:item/banking/mesa_trail_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "MESA",
+            "TRAIL"
+          ],
+          "display_currency": "USD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/mesa_trail_kiosk_front",
+            "shell": "economy:block/banking/mesa_trail_kiosk_shell",
+            "trim": "economy:block/banking/mesa_trail_kiosk_trim",
+            "metal": "economy:block/banking/mesa_trail_kiosk_metal",
+            "dark": "economy:block/banking/mesa_trail_kiosk_dark",
+            "keypad": "economy:block/banking/mesa_trail_kiosk_keypad",
+            "slot": "economy:block/banking/mesa_trail_kiosk_slot",
+            "vent": "economy:block/banking/mesa_trail_kiosk_vent",
+            "screen": "economy:block/banking/mesa_trail_kiosk_front",
+            "glass": "economy:block/banking/mesa_trail_kiosk_front",
+            "chart": "economy:block/banking/mesa_trail_kiosk_front",
+            "particle": "economy:block/banking/mesa_trail_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/mesa_trail_kiosk_0",
+            "economy:block/banking/mesa_trail_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/mesa_trail_kiosk_inventory",
+          "item_model": "economy:item/banking/mesa_trail_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "MESA",
+            "TRAIL"
+          ],
+          "display_currency": "USD"
+        }
+      },
+      {
+        "key": "asterbridge",
+        "currency": "GBP",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/asterbridge_atm_front",
+            "shell": "economy:block/banking/asterbridge_atm_shell",
+            "trim": "economy:block/banking/asterbridge_atm_trim",
+            "metal": "economy:block/banking/asterbridge_atm_metal",
+            "dark": "economy:block/banking/asterbridge_atm_dark",
+            "keypad": "economy:block/banking/asterbridge_atm_keypad",
+            "slot": "economy:block/banking/asterbridge_atm_slot",
+            "vent": "economy:block/banking/asterbridge_atm_vent",
+            "screen": "economy:block/banking/asterbridge_atm_front",
+            "glass": "economy:block/banking/asterbridge_atm_front",
+            "chart": "economy:block/banking/asterbridge_atm_front",
+            "particle": "economy:block/banking/asterbridge_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/asterbridge_atm_0",
+            "economy:block/banking/asterbridge_atm_1",
+            "economy:block/banking/asterbridge_atm_2",
+            "economy:block/banking/asterbridge_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/asterbridge_atm_inventory",
+          "item_model": "economy:item/banking/asterbridge_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "ASTER",
+            "BRIDGE"
+          ],
+          "display_currency": "GBP"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/asterbridge_teller_front",
+            "shell": "economy:block/banking/asterbridge_teller_shell",
+            "trim": "economy:block/banking/asterbridge_teller_trim",
+            "metal": "economy:block/banking/asterbridge_teller_metal",
+            "dark": "economy:block/banking/asterbridge_teller_dark",
+            "keypad": "economy:block/banking/asterbridge_teller_keypad",
+            "slot": "economy:block/banking/asterbridge_teller_slot",
+            "vent": "economy:block/banking/asterbridge_teller_vent",
+            "screen": "economy:block/banking/asterbridge_teller_front",
+            "glass": "economy:block/banking/asterbridge_teller_front",
+            "chart": "economy:block/banking/asterbridge_teller_front",
+            "particle": "economy:block/banking/asterbridge_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/asterbridge_teller_0",
+            "economy:block/banking/asterbridge_teller_1",
+            "economy:block/banking/asterbridge_teller_2",
+            "economy:block/banking/asterbridge_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/asterbridge_teller_inventory",
+          "item_model": "economy:item/banking/asterbridge_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "ASTER",
+            "BRIDGE"
+          ],
+          "display_currency": "GBP"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/asterbridge_kiosk_front",
+            "shell": "economy:block/banking/asterbridge_kiosk_shell",
+            "trim": "economy:block/banking/asterbridge_kiosk_trim",
+            "metal": "economy:block/banking/asterbridge_kiosk_metal",
+            "dark": "economy:block/banking/asterbridge_kiosk_dark",
+            "keypad": "economy:block/banking/asterbridge_kiosk_keypad",
+            "slot": "economy:block/banking/asterbridge_kiosk_slot",
+            "vent": "economy:block/banking/asterbridge_kiosk_vent",
+            "screen": "economy:block/banking/asterbridge_kiosk_front",
+            "glass": "economy:block/banking/asterbridge_kiosk_front",
+            "chart": "economy:block/banking/asterbridge_kiosk_front",
+            "particle": "economy:block/banking/asterbridge_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/asterbridge_kiosk_0",
+            "economy:block/banking/asterbridge_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/asterbridge_kiosk_inventory",
+          "item_model": "economy:item/banking/asterbridge_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "ASTER",
+            "BRIDGE"
+          ],
+          "display_currency": "GBP"
+        }
+      },
+      {
+        "key": "greenhaven",
+        "currency": "GBP",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/greenhaven_atm_front",
+            "shell": "economy:block/banking/greenhaven_atm_shell",
+            "trim": "economy:block/banking/greenhaven_atm_trim",
+            "metal": "economy:block/banking/greenhaven_atm_metal",
+            "dark": "economy:block/banking/greenhaven_atm_dark",
+            "keypad": "economy:block/banking/greenhaven_atm_keypad",
+            "slot": "economy:block/banking/greenhaven_atm_slot",
+            "vent": "economy:block/banking/greenhaven_atm_vent",
+            "screen": "economy:block/banking/greenhaven_atm_front",
+            "glass": "economy:block/banking/greenhaven_atm_front",
+            "chart": "economy:block/banking/greenhaven_atm_front",
+            "particle": "economy:block/banking/greenhaven_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/greenhaven_atm_0",
+            "economy:block/banking/greenhaven_atm_1",
+            "economy:block/banking/greenhaven_atm_2",
+            "economy:block/banking/greenhaven_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/greenhaven_atm_inventory",
+          "item_model": "economy:item/banking/greenhaven_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "GREEN",
+            "HAVEN"
+          ],
+          "display_currency": "GBP"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/greenhaven_teller_front",
+            "shell": "economy:block/banking/greenhaven_teller_shell",
+            "trim": "economy:block/banking/greenhaven_teller_trim",
+            "metal": "economy:block/banking/greenhaven_teller_metal",
+            "dark": "economy:block/banking/greenhaven_teller_dark",
+            "keypad": "economy:block/banking/greenhaven_teller_keypad",
+            "slot": "economy:block/banking/greenhaven_teller_slot",
+            "vent": "economy:block/banking/greenhaven_teller_vent",
+            "screen": "economy:block/banking/greenhaven_teller_front",
+            "glass": "economy:block/banking/greenhaven_teller_front",
+            "chart": "economy:block/banking/greenhaven_teller_front",
+            "particle": "economy:block/banking/greenhaven_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/greenhaven_teller_0",
+            "economy:block/banking/greenhaven_teller_1",
+            "economy:block/banking/greenhaven_teller_2",
+            "economy:block/banking/greenhaven_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/greenhaven_teller_inventory",
+          "item_model": "economy:item/banking/greenhaven_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "GREEN",
+            "HAVEN"
+          ],
+          "display_currency": "GBP"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/greenhaven_kiosk_front",
+            "shell": "economy:block/banking/greenhaven_kiosk_shell",
+            "trim": "economy:block/banking/greenhaven_kiosk_trim",
+            "metal": "economy:block/banking/greenhaven_kiosk_metal",
+            "dark": "economy:block/banking/greenhaven_kiosk_dark",
+            "keypad": "economy:block/banking/greenhaven_kiosk_keypad",
+            "slot": "economy:block/banking/greenhaven_kiosk_slot",
+            "vent": "economy:block/banking/greenhaven_kiosk_vent",
+            "screen": "economy:block/banking/greenhaven_kiosk_front",
+            "glass": "economy:block/banking/greenhaven_kiosk_front",
+            "chart": "economy:block/banking/greenhaven_kiosk_front",
+            "particle": "economy:block/banking/greenhaven_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/greenhaven_kiosk_0",
+            "economy:block/banking/greenhaven_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/greenhaven_kiosk_inventory",
+          "item_model": "economy:item/banking/greenhaven_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "GREEN",
+            "HAVEN"
+          ],
+          "display_currency": "GBP"
+        }
+      },
+      {
+        "key": "meridian_grove",
+        "currency": "EUR",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/meridian_grove_atm_front",
+            "shell": "economy:block/banking/meridian_grove_atm_shell",
+            "trim": "economy:block/banking/meridian_grove_atm_trim",
+            "metal": "economy:block/banking/meridian_grove_atm_metal",
+            "dark": "economy:block/banking/meridian_grove_atm_dark",
+            "keypad": "economy:block/banking/meridian_grove_atm_keypad",
+            "slot": "economy:block/banking/meridian_grove_atm_slot",
+            "vent": "economy:block/banking/meridian_grove_atm_vent",
+            "screen": "economy:block/banking/meridian_grove_atm_front",
+            "glass": "economy:block/banking/meridian_grove_atm_front",
+            "chart": "economy:block/banking/meridian_grove_atm_front",
+            "particle": "economy:block/banking/meridian_grove_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/meridian_grove_atm_0",
+            "economy:block/banking/meridian_grove_atm_1",
+            "economy:block/banking/meridian_grove_atm_2",
+            "economy:block/banking/meridian_grove_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/meridian_grove_atm_inventory",
+          "item_model": "economy:item/banking/meridian_grove_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "MERIDIAN",
+            "GROVE"
+          ],
+          "display_currency": "EUR"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/meridian_grove_teller_front",
+            "shell": "economy:block/banking/meridian_grove_teller_shell",
+            "trim": "economy:block/banking/meridian_grove_teller_trim",
+            "metal": "economy:block/banking/meridian_grove_teller_metal",
+            "dark": "economy:block/banking/meridian_grove_teller_dark",
+            "keypad": "economy:block/banking/meridian_grove_teller_keypad",
+            "slot": "economy:block/banking/meridian_grove_teller_slot",
+            "vent": "economy:block/banking/meridian_grove_teller_vent",
+            "screen": "economy:block/banking/meridian_grove_teller_front",
+            "glass": "economy:block/banking/meridian_grove_teller_front",
+            "chart": "economy:block/banking/meridian_grove_teller_front",
+            "particle": "economy:block/banking/meridian_grove_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/meridian_grove_teller_0",
+            "economy:block/banking/meridian_grove_teller_1",
+            "economy:block/banking/meridian_grove_teller_2",
+            "economy:block/banking/meridian_grove_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/meridian_grove_teller_inventory",
+          "item_model": "economy:item/banking/meridian_grove_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "MERIDIAN",
+            "GROVE"
+          ],
+          "display_currency": "EUR"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/meridian_grove_kiosk_front",
+            "shell": "economy:block/banking/meridian_grove_kiosk_shell",
+            "trim": "economy:block/banking/meridian_grove_kiosk_trim",
+            "metal": "economy:block/banking/meridian_grove_kiosk_metal",
+            "dark": "economy:block/banking/meridian_grove_kiosk_dark",
+            "keypad": "economy:block/banking/meridian_grove_kiosk_keypad",
+            "slot": "economy:block/banking/meridian_grove_kiosk_slot",
+            "vent": "economy:block/banking/meridian_grove_kiosk_vent",
+            "screen": "economy:block/banking/meridian_grove_kiosk_front",
+            "glass": "economy:block/banking/meridian_grove_kiosk_front",
+            "chart": "economy:block/banking/meridian_grove_kiosk_front",
+            "particle": "economy:block/banking/meridian_grove_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/meridian_grove_kiosk_0",
+            "economy:block/banking/meridian_grove_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/meridian_grove_kiosk_inventory",
+          "item_model": "economy:item/banking/meridian_grove_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "MERIDIAN",
+            "GROVE"
+          ],
+          "display_currency": "EUR"
+        }
+      },
+      {
+        "key": "slate_harbor",
+        "currency": "EUR",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/slate_harbor_atm_front",
+            "shell": "economy:block/banking/slate_harbor_atm_shell",
+            "trim": "economy:block/banking/slate_harbor_atm_trim",
+            "metal": "economy:block/banking/slate_harbor_atm_metal",
+            "dark": "economy:block/banking/slate_harbor_atm_dark",
+            "keypad": "economy:block/banking/slate_harbor_atm_keypad",
+            "slot": "economy:block/banking/slate_harbor_atm_slot",
+            "vent": "economy:block/banking/slate_harbor_atm_vent",
+            "screen": "economy:block/banking/slate_harbor_atm_front",
+            "glass": "economy:block/banking/slate_harbor_atm_front",
+            "chart": "economy:block/banking/slate_harbor_atm_front",
+            "particle": "economy:block/banking/slate_harbor_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/slate_harbor_atm_0",
+            "economy:block/banking/slate_harbor_atm_1",
+            "economy:block/banking/slate_harbor_atm_2",
+            "economy:block/banking/slate_harbor_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/slate_harbor_atm_inventory",
+          "item_model": "economy:item/banking/slate_harbor_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "SLATE",
+            "HARBOR"
+          ],
+          "display_currency": "EUR"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/slate_harbor_teller_front",
+            "shell": "economy:block/banking/slate_harbor_teller_shell",
+            "trim": "economy:block/banking/slate_harbor_teller_trim",
+            "metal": "economy:block/banking/slate_harbor_teller_metal",
+            "dark": "economy:block/banking/slate_harbor_teller_dark",
+            "keypad": "economy:block/banking/slate_harbor_teller_keypad",
+            "slot": "economy:block/banking/slate_harbor_teller_slot",
+            "vent": "economy:block/banking/slate_harbor_teller_vent",
+            "screen": "economy:block/banking/slate_harbor_teller_front",
+            "glass": "economy:block/banking/slate_harbor_teller_front",
+            "chart": "economy:block/banking/slate_harbor_teller_front",
+            "particle": "economy:block/banking/slate_harbor_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/slate_harbor_teller_0",
+            "economy:block/banking/slate_harbor_teller_1",
+            "economy:block/banking/slate_harbor_teller_2",
+            "economy:block/banking/slate_harbor_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/slate_harbor_teller_inventory",
+          "item_model": "economy:item/banking/slate_harbor_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "SLATE",
+            "HARBOR"
+          ],
+          "display_currency": "EUR"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/slate_harbor_kiosk_front",
+            "shell": "economy:block/banking/slate_harbor_kiosk_shell",
+            "trim": "economy:block/banking/slate_harbor_kiosk_trim",
+            "metal": "economy:block/banking/slate_harbor_kiosk_metal",
+            "dark": "economy:block/banking/slate_harbor_kiosk_dark",
+            "keypad": "economy:block/banking/slate_harbor_kiosk_keypad",
+            "slot": "economy:block/banking/slate_harbor_kiosk_slot",
+            "vent": "economy:block/banking/slate_harbor_kiosk_vent",
+            "screen": "economy:block/banking/slate_harbor_kiosk_front",
+            "glass": "economy:block/banking/slate_harbor_kiosk_front",
+            "chart": "economy:block/banking/slate_harbor_kiosk_front",
+            "particle": "economy:block/banking/slate_harbor_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/slate_harbor_kiosk_0",
+            "economy:block/banking/slate_harbor_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/slate_harbor_kiosk_inventory",
+          "item_model": "economy:item/banking/slate_harbor_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "SLATE",
+            "HARBOR"
+          ],
+          "display_currency": "EUR"
+        }
+      },
+      {
+        "key": "fjordlight",
+        "currency": "DKK",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/fjordlight_atm_front",
+            "shell": "economy:block/banking/fjordlight_atm_shell",
+            "trim": "economy:block/banking/fjordlight_atm_trim",
+            "metal": "economy:block/banking/fjordlight_atm_metal",
+            "dark": "economy:block/banking/fjordlight_atm_dark",
+            "keypad": "economy:block/banking/fjordlight_atm_keypad",
+            "slot": "economy:block/banking/fjordlight_atm_slot",
+            "vent": "economy:block/banking/fjordlight_atm_vent",
+            "screen": "economy:block/banking/fjordlight_atm_front",
+            "glass": "economy:block/banking/fjordlight_atm_front",
+            "chart": "economy:block/banking/fjordlight_atm_front",
+            "particle": "economy:block/banking/fjordlight_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/fjordlight_atm_0",
+            "economy:block/banking/fjordlight_atm_1",
+            "economy:block/banking/fjordlight_atm_2",
+            "economy:block/banking/fjordlight_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/fjordlight_atm_inventory",
+          "item_model": "economy:item/banking/fjordlight_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "FJORD",
+            "LIGHT"
+          ],
+          "display_currency": "DKK"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/fjordlight_teller_front",
+            "shell": "economy:block/banking/fjordlight_teller_shell",
+            "trim": "economy:block/banking/fjordlight_teller_trim",
+            "metal": "economy:block/banking/fjordlight_teller_metal",
+            "dark": "economy:block/banking/fjordlight_teller_dark",
+            "keypad": "economy:block/banking/fjordlight_teller_keypad",
+            "slot": "economy:block/banking/fjordlight_teller_slot",
+            "vent": "economy:block/banking/fjordlight_teller_vent",
+            "screen": "economy:block/banking/fjordlight_teller_front",
+            "glass": "economy:block/banking/fjordlight_teller_front",
+            "chart": "economy:block/banking/fjordlight_teller_front",
+            "particle": "economy:block/banking/fjordlight_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/fjordlight_teller_0",
+            "economy:block/banking/fjordlight_teller_1",
+            "economy:block/banking/fjordlight_teller_2",
+            "economy:block/banking/fjordlight_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/fjordlight_teller_inventory",
+          "item_model": "economy:item/banking/fjordlight_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "FJORD",
+            "LIGHT"
+          ],
+          "display_currency": "DKK"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/fjordlight_kiosk_front",
+            "shell": "economy:block/banking/fjordlight_kiosk_shell",
+            "trim": "economy:block/banking/fjordlight_kiosk_trim",
+            "metal": "economy:block/banking/fjordlight_kiosk_metal",
+            "dark": "economy:block/banking/fjordlight_kiosk_dark",
+            "keypad": "economy:block/banking/fjordlight_kiosk_keypad",
+            "slot": "economy:block/banking/fjordlight_kiosk_slot",
+            "vent": "economy:block/banking/fjordlight_kiosk_vent",
+            "screen": "economy:block/banking/fjordlight_kiosk_front",
+            "glass": "economy:block/banking/fjordlight_kiosk_front",
+            "chart": "economy:block/banking/fjordlight_kiosk_front",
+            "particle": "economy:block/banking/fjordlight_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/fjordlight_kiosk_0",
+            "economy:block/banking/fjordlight_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/fjordlight_kiosk_inventory",
+          "item_model": "economy:item/banking/fjordlight_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "FJORD",
+            "LIGHT"
+          ],
+          "display_currency": "DKK"
+        }
+      },
+      {
+        "key": "harbor_meridian",
+        "currency": "HKD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/harbor_meridian_atm_front",
+            "shell": "economy:block/banking/harbor_meridian_atm_shell",
+            "trim": "economy:block/banking/harbor_meridian_atm_trim",
+            "metal": "economy:block/banking/harbor_meridian_atm_metal",
+            "dark": "economy:block/banking/harbor_meridian_atm_dark",
+            "keypad": "economy:block/banking/harbor_meridian_atm_keypad",
+            "slot": "economy:block/banking/harbor_meridian_atm_slot",
+            "vent": "economy:block/banking/harbor_meridian_atm_vent",
+            "screen": "economy:block/banking/harbor_meridian_atm_front",
+            "glass": "economy:block/banking/harbor_meridian_atm_front",
+            "chart": "economy:block/banking/harbor_meridian_atm_front",
+            "particle": "economy:block/banking/harbor_meridian_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/harbor_meridian_atm_0",
+            "economy:block/banking/harbor_meridian_atm_1",
+            "economy:block/banking/harbor_meridian_atm_2",
+            "economy:block/banking/harbor_meridian_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/harbor_meridian_atm_inventory",
+          "item_model": "economy:item/banking/harbor_meridian_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "HARBOR",
+            "MERIDIAN"
+          ],
+          "display_currency": "HKD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/harbor_meridian_teller_front",
+            "shell": "economy:block/banking/harbor_meridian_teller_shell",
+            "trim": "economy:block/banking/harbor_meridian_teller_trim",
+            "metal": "economy:block/banking/harbor_meridian_teller_metal",
+            "dark": "economy:block/banking/harbor_meridian_teller_dark",
+            "keypad": "economy:block/banking/harbor_meridian_teller_keypad",
+            "slot": "economy:block/banking/harbor_meridian_teller_slot",
+            "vent": "economy:block/banking/harbor_meridian_teller_vent",
+            "screen": "economy:block/banking/harbor_meridian_teller_front",
+            "glass": "economy:block/banking/harbor_meridian_teller_front",
+            "chart": "economy:block/banking/harbor_meridian_teller_front",
+            "particle": "economy:block/banking/harbor_meridian_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/harbor_meridian_teller_0",
+            "economy:block/banking/harbor_meridian_teller_1",
+            "economy:block/banking/harbor_meridian_teller_2",
+            "economy:block/banking/harbor_meridian_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/harbor_meridian_teller_inventory",
+          "item_model": "economy:item/banking/harbor_meridian_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "HARBOR",
+            "MERIDIAN"
+          ],
+          "display_currency": "HKD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/harbor_meridian_kiosk_front",
+            "shell": "economy:block/banking/harbor_meridian_kiosk_shell",
+            "trim": "economy:block/banking/harbor_meridian_kiosk_trim",
+            "metal": "economy:block/banking/harbor_meridian_kiosk_metal",
+            "dark": "economy:block/banking/harbor_meridian_kiosk_dark",
+            "keypad": "economy:block/banking/harbor_meridian_kiosk_keypad",
+            "slot": "economy:block/banking/harbor_meridian_kiosk_slot",
+            "vent": "economy:block/banking/harbor_meridian_kiosk_vent",
+            "screen": "economy:block/banking/harbor_meridian_kiosk_front",
+            "glass": "economy:block/banking/harbor_meridian_kiosk_front",
+            "chart": "economy:block/banking/harbor_meridian_kiosk_front",
+            "particle": "economy:block/banking/harbor_meridian_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/harbor_meridian_kiosk_0",
+            "economy:block/banking/harbor_meridian_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/harbor_meridian_kiosk_inventory",
+          "item_model": "economy:item/banking/harbor_meridian_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "HARBOR",
+            "MERIDIAN"
+          ],
+          "display_currency": "HKD"
+        }
+      },
+      {
+        "key": "jade_terrace",
+        "currency": "CNY",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/jade_terrace_atm_front",
+            "shell": "economy:block/banking/jade_terrace_atm_shell",
+            "trim": "economy:block/banking/jade_terrace_atm_trim",
+            "metal": "economy:block/banking/jade_terrace_atm_metal",
+            "dark": "economy:block/banking/jade_terrace_atm_dark",
+            "keypad": "economy:block/banking/jade_terrace_atm_keypad",
+            "slot": "economy:block/banking/jade_terrace_atm_slot",
+            "vent": "economy:block/banking/jade_terrace_atm_vent",
+            "screen": "economy:block/banking/jade_terrace_atm_front",
+            "glass": "economy:block/banking/jade_terrace_atm_front",
+            "chart": "economy:block/banking/jade_terrace_atm_front",
+            "particle": "economy:block/banking/jade_terrace_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/jade_terrace_atm_0",
+            "economy:block/banking/jade_terrace_atm_1",
+            "economy:block/banking/jade_terrace_atm_2",
+            "economy:block/banking/jade_terrace_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/jade_terrace_atm_inventory",
+          "item_model": "economy:item/banking/jade_terrace_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "JADE",
+            "TERRACE"
+          ],
+          "display_currency": "CNY"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/jade_terrace_teller_front",
+            "shell": "economy:block/banking/jade_terrace_teller_shell",
+            "trim": "economy:block/banking/jade_terrace_teller_trim",
+            "metal": "economy:block/banking/jade_terrace_teller_metal",
+            "dark": "economy:block/banking/jade_terrace_teller_dark",
+            "keypad": "economy:block/banking/jade_terrace_teller_keypad",
+            "slot": "economy:block/banking/jade_terrace_teller_slot",
+            "vent": "economy:block/banking/jade_terrace_teller_vent",
+            "screen": "economy:block/banking/jade_terrace_teller_front",
+            "glass": "economy:block/banking/jade_terrace_teller_front",
+            "chart": "economy:block/banking/jade_terrace_teller_front",
+            "particle": "economy:block/banking/jade_terrace_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/jade_terrace_teller_0",
+            "economy:block/banking/jade_terrace_teller_1",
+            "economy:block/banking/jade_terrace_teller_2",
+            "economy:block/banking/jade_terrace_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/jade_terrace_teller_inventory",
+          "item_model": "economy:item/banking/jade_terrace_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "JADE",
+            "TERRACE"
+          ],
+          "display_currency": "CNY"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/jade_terrace_kiosk_front",
+            "shell": "economy:block/banking/jade_terrace_kiosk_shell",
+            "trim": "economy:block/banking/jade_terrace_kiosk_trim",
+            "metal": "economy:block/banking/jade_terrace_kiosk_metal",
+            "dark": "economy:block/banking/jade_terrace_kiosk_dark",
+            "keypad": "economy:block/banking/jade_terrace_kiosk_keypad",
+            "slot": "economy:block/banking/jade_terrace_kiosk_slot",
+            "vent": "economy:block/banking/jade_terrace_kiosk_vent",
+            "screen": "economy:block/banking/jade_terrace_kiosk_front",
+            "glass": "economy:block/banking/jade_terrace_kiosk_front",
+            "chart": "economy:block/banking/jade_terrace_kiosk_front",
+            "particle": "economy:block/banking/jade_terrace_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/jade_terrace_kiosk_0",
+            "economy:block/banking/jade_terrace_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/jade_terrace_kiosk_inventory",
+          "item_model": "economy:item/banking/jade_terrace_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "JADE",
+            "TERRACE"
+          ],
+          "display_currency": "CNY"
+        }
+      },
+      {
+        "key": "southern_arc",
+        "currency": "AUD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/southern_arc_atm_front",
+            "shell": "economy:block/banking/southern_arc_atm_shell",
+            "trim": "economy:block/banking/southern_arc_atm_trim",
+            "metal": "economy:block/banking/southern_arc_atm_metal",
+            "dark": "economy:block/banking/southern_arc_atm_dark",
+            "keypad": "economy:block/banking/southern_arc_atm_keypad",
+            "slot": "economy:block/banking/southern_arc_atm_slot",
+            "vent": "economy:block/banking/southern_arc_atm_vent",
+            "screen": "economy:block/banking/southern_arc_atm_front",
+            "glass": "economy:block/banking/southern_arc_atm_front",
+            "chart": "economy:block/banking/southern_arc_atm_front",
+            "particle": "economy:block/banking/southern_arc_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/southern_arc_atm_0",
+            "economy:block/banking/southern_arc_atm_1",
+            "economy:block/banking/southern_arc_atm_2",
+            "economy:block/banking/southern_arc_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/southern_arc_atm_inventory",
+          "item_model": "economy:item/banking/southern_arc_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "SOUTHERN",
+            "ARC"
+          ],
+          "display_currency": "AUD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/southern_arc_teller_front",
+            "shell": "economy:block/banking/southern_arc_teller_shell",
+            "trim": "economy:block/banking/southern_arc_teller_trim",
+            "metal": "economy:block/banking/southern_arc_teller_metal",
+            "dark": "economy:block/banking/southern_arc_teller_dark",
+            "keypad": "economy:block/banking/southern_arc_teller_keypad",
+            "slot": "economy:block/banking/southern_arc_teller_slot",
+            "vent": "economy:block/banking/southern_arc_teller_vent",
+            "screen": "economy:block/banking/southern_arc_teller_front",
+            "glass": "economy:block/banking/southern_arc_teller_front",
+            "chart": "economy:block/banking/southern_arc_teller_front",
+            "particle": "economy:block/banking/southern_arc_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/southern_arc_teller_0",
+            "economy:block/banking/southern_arc_teller_1",
+            "economy:block/banking/southern_arc_teller_2",
+            "economy:block/banking/southern_arc_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/southern_arc_teller_inventory",
+          "item_model": "economy:item/banking/southern_arc_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "SOUTHERN",
+            "ARC"
+          ],
+          "display_currency": "AUD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/southern_arc_kiosk_front",
+            "shell": "economy:block/banking/southern_arc_kiosk_shell",
+            "trim": "economy:block/banking/southern_arc_kiosk_trim",
+            "metal": "economy:block/banking/southern_arc_kiosk_metal",
+            "dark": "economy:block/banking/southern_arc_kiosk_dark",
+            "keypad": "economy:block/banking/southern_arc_kiosk_keypad",
+            "slot": "economy:block/banking/southern_arc_kiosk_slot",
+            "vent": "economy:block/banking/southern_arc_kiosk_vent",
+            "screen": "economy:block/banking/southern_arc_kiosk_front",
+            "glass": "economy:block/banking/southern_arc_kiosk_front",
+            "chart": "economy:block/banking/southern_arc_kiosk_front",
+            "particle": "economy:block/banking/southern_arc_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/southern_arc_kiosk_0",
+            "economy:block/banking/southern_arc_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/southern_arc_kiosk_inventory",
+          "item_model": "economy:item/banking/southern_arc_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "SOUTHERN",
+            "ARC"
+          ],
+          "display_currency": "AUD"
+        }
+      },
+      {
+        "key": "fernreach",
+        "currency": "NZD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/fernreach_atm_front",
+            "shell": "economy:block/banking/fernreach_atm_shell",
+            "trim": "economy:block/banking/fernreach_atm_trim",
+            "metal": "economy:block/banking/fernreach_atm_metal",
+            "dark": "economy:block/banking/fernreach_atm_dark",
+            "keypad": "economy:block/banking/fernreach_atm_keypad",
+            "slot": "economy:block/banking/fernreach_atm_slot",
+            "vent": "economy:block/banking/fernreach_atm_vent",
+            "screen": "economy:block/banking/fernreach_atm_front",
+            "glass": "economy:block/banking/fernreach_atm_front",
+            "chart": "economy:block/banking/fernreach_atm_front",
+            "particle": "economy:block/banking/fernreach_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/fernreach_atm_0",
+            "economy:block/banking/fernreach_atm_1",
+            "economy:block/banking/fernreach_atm_2",
+            "economy:block/banking/fernreach_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/fernreach_atm_inventory",
+          "item_model": "economy:item/banking/fernreach_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "FERN",
+            "REACH"
+          ],
+          "display_currency": "NZD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/fernreach_teller_front",
+            "shell": "economy:block/banking/fernreach_teller_shell",
+            "trim": "economy:block/banking/fernreach_teller_trim",
+            "metal": "economy:block/banking/fernreach_teller_metal",
+            "dark": "economy:block/banking/fernreach_teller_dark",
+            "keypad": "economy:block/banking/fernreach_teller_keypad",
+            "slot": "economy:block/banking/fernreach_teller_slot",
+            "vent": "economy:block/banking/fernreach_teller_vent",
+            "screen": "economy:block/banking/fernreach_teller_front",
+            "glass": "economy:block/banking/fernreach_teller_front",
+            "chart": "economy:block/banking/fernreach_teller_front",
+            "particle": "economy:block/banking/fernreach_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/fernreach_teller_0",
+            "economy:block/banking/fernreach_teller_1",
+            "economy:block/banking/fernreach_teller_2",
+            "economy:block/banking/fernreach_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/fernreach_teller_inventory",
+          "item_model": "economy:item/banking/fernreach_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "FERN",
+            "REACH"
+          ],
+          "display_currency": "NZD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/fernreach_kiosk_front",
+            "shell": "economy:block/banking/fernreach_kiosk_shell",
+            "trim": "economy:block/banking/fernreach_kiosk_trim",
+            "metal": "economy:block/banking/fernreach_kiosk_metal",
+            "dark": "economy:block/banking/fernreach_kiosk_dark",
+            "keypad": "economy:block/banking/fernreach_kiosk_keypad",
+            "slot": "economy:block/banking/fernreach_kiosk_slot",
+            "vent": "economy:block/banking/fernreach_kiosk_vent",
+            "screen": "economy:block/banking/fernreach_kiosk_front",
+            "glass": "economy:block/banking/fernreach_kiosk_front",
+            "chart": "economy:block/banking/fernreach_kiosk_front",
+            "particle": "economy:block/banking/fernreach_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/fernreach_kiosk_0",
+            "economy:block/banking/fernreach_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/fernreach_kiosk_inventory",
+          "item_model": "economy:item/banking/fernreach_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "FERN",
+            "REACH"
+          ],
+          "display_currency": "NZD"
+        }
+      },
+      {
+        "key": "cedar_parcel",
+        "currency": "JPY",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/cedar_parcel_atm_front",
+            "shell": "economy:block/banking/cedar_parcel_atm_shell",
+            "trim": "economy:block/banking/cedar_parcel_atm_trim",
+            "metal": "economy:block/banking/cedar_parcel_atm_metal",
+            "dark": "economy:block/banking/cedar_parcel_atm_dark",
+            "keypad": "economy:block/banking/cedar_parcel_atm_keypad",
+            "slot": "economy:block/banking/cedar_parcel_atm_slot",
+            "vent": "economy:block/banking/cedar_parcel_atm_vent",
+            "screen": "economy:block/banking/cedar_parcel_atm_front",
+            "glass": "economy:block/banking/cedar_parcel_atm_front",
+            "chart": "economy:block/banking/cedar_parcel_atm_front",
+            "particle": "economy:block/banking/cedar_parcel_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/cedar_parcel_atm_0",
+            "economy:block/banking/cedar_parcel_atm_1",
+            "economy:block/banking/cedar_parcel_atm_2",
+            "economy:block/banking/cedar_parcel_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/cedar_parcel_atm_inventory",
+          "item_model": "economy:item/banking/cedar_parcel_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "CEDAR",
+            "PARCEL"
+          ],
+          "display_currency": "JPY"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/cedar_parcel_teller_front",
+            "shell": "economy:block/banking/cedar_parcel_teller_shell",
+            "trim": "economy:block/banking/cedar_parcel_teller_trim",
+            "metal": "economy:block/banking/cedar_parcel_teller_metal",
+            "dark": "economy:block/banking/cedar_parcel_teller_dark",
+            "keypad": "economy:block/banking/cedar_parcel_teller_keypad",
+            "slot": "economy:block/banking/cedar_parcel_teller_slot",
+            "vent": "economy:block/banking/cedar_parcel_teller_vent",
+            "screen": "economy:block/banking/cedar_parcel_teller_front",
+            "glass": "economy:block/banking/cedar_parcel_teller_front",
+            "chart": "economy:block/banking/cedar_parcel_teller_front",
+            "particle": "economy:block/banking/cedar_parcel_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/cedar_parcel_teller_0",
+            "economy:block/banking/cedar_parcel_teller_1",
+            "economy:block/banking/cedar_parcel_teller_2",
+            "economy:block/banking/cedar_parcel_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/cedar_parcel_teller_inventory",
+          "item_model": "economy:item/banking/cedar_parcel_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "CEDAR",
+            "PARCEL"
+          ],
+          "display_currency": "JPY"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/cedar_parcel_kiosk_front",
+            "shell": "economy:block/banking/cedar_parcel_kiosk_shell",
+            "trim": "economy:block/banking/cedar_parcel_kiosk_trim",
+            "metal": "economy:block/banking/cedar_parcel_kiosk_metal",
+            "dark": "economy:block/banking/cedar_parcel_kiosk_dark",
+            "keypad": "economy:block/banking/cedar_parcel_kiosk_keypad",
+            "slot": "economy:block/banking/cedar_parcel_kiosk_slot",
+            "vent": "economy:block/banking/cedar_parcel_kiosk_vent",
+            "screen": "economy:block/banking/cedar_parcel_kiosk_front",
+            "glass": "economy:block/banking/cedar_parcel_kiosk_front",
+            "chart": "economy:block/banking/cedar_parcel_kiosk_front",
+            "particle": "economy:block/banking/cedar_parcel_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/cedar_parcel_kiosk_0",
+            "economy:block/banking/cedar_parcel_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/cedar_parcel_kiosk_inventory",
+          "item_model": "economy:item/banking/cedar_parcel_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "CEDAR",
+            "PARCEL"
+          ],
+          "display_currency": "JPY"
+        }
+      },
+      {
+        "key": "lakeward_cantonal",
+        "currency": "CHF",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/lakeward_cantonal_atm_front",
+            "shell": "economy:block/banking/lakeward_cantonal_atm_shell",
+            "trim": "economy:block/banking/lakeward_cantonal_atm_trim",
+            "metal": "economy:block/banking/lakeward_cantonal_atm_metal",
+            "dark": "economy:block/banking/lakeward_cantonal_atm_dark",
+            "keypad": "economy:block/banking/lakeward_cantonal_atm_keypad",
+            "slot": "economy:block/banking/lakeward_cantonal_atm_slot",
+            "vent": "economy:block/banking/lakeward_cantonal_atm_vent",
+            "screen": "economy:block/banking/lakeward_cantonal_atm_front",
+            "glass": "economy:block/banking/lakeward_cantonal_atm_front",
+            "chart": "economy:block/banking/lakeward_cantonal_atm_front",
+            "particle": "economy:block/banking/lakeward_cantonal_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/lakeward_cantonal_atm_0",
+            "economy:block/banking/lakeward_cantonal_atm_1",
+            "economy:block/banking/lakeward_cantonal_atm_2",
+            "economy:block/banking/lakeward_cantonal_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/lakeward_cantonal_atm_inventory",
+          "item_model": "economy:item/banking/lakeward_cantonal_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "LAKEWARD",
+            "CANTONAL"
+          ],
+          "display_currency": "CHF"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/lakeward_cantonal_teller_front",
+            "shell": "economy:block/banking/lakeward_cantonal_teller_shell",
+            "trim": "economy:block/banking/lakeward_cantonal_teller_trim",
+            "metal": "economy:block/banking/lakeward_cantonal_teller_metal",
+            "dark": "economy:block/banking/lakeward_cantonal_teller_dark",
+            "keypad": "economy:block/banking/lakeward_cantonal_teller_keypad",
+            "slot": "economy:block/banking/lakeward_cantonal_teller_slot",
+            "vent": "economy:block/banking/lakeward_cantonal_teller_vent",
+            "screen": "economy:block/banking/lakeward_cantonal_teller_front",
+            "glass": "economy:block/banking/lakeward_cantonal_teller_front",
+            "chart": "economy:block/banking/lakeward_cantonal_teller_front",
+            "particle": "economy:block/banking/lakeward_cantonal_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/lakeward_cantonal_teller_0",
+            "economy:block/banking/lakeward_cantonal_teller_1",
+            "economy:block/banking/lakeward_cantonal_teller_2",
+            "economy:block/banking/lakeward_cantonal_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/lakeward_cantonal_teller_inventory",
+          "item_model": "economy:item/banking/lakeward_cantonal_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "LAKEWARD",
+            "CANTONAL"
+          ],
+          "display_currency": "CHF"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/lakeward_cantonal_kiosk_front",
+            "shell": "economy:block/banking/lakeward_cantonal_kiosk_shell",
+            "trim": "economy:block/banking/lakeward_cantonal_kiosk_trim",
+            "metal": "economy:block/banking/lakeward_cantonal_kiosk_metal",
+            "dark": "economy:block/banking/lakeward_cantonal_kiosk_dark",
+            "keypad": "economy:block/banking/lakeward_cantonal_kiosk_keypad",
+            "slot": "economy:block/banking/lakeward_cantonal_kiosk_slot",
+            "vent": "economy:block/banking/lakeward_cantonal_kiosk_vent",
+            "screen": "economy:block/banking/lakeward_cantonal_kiosk_front",
+            "glass": "economy:block/banking/lakeward_cantonal_kiosk_front",
+            "chart": "economy:block/banking/lakeward_cantonal_kiosk_front",
+            "particle": "economy:block/banking/lakeward_cantonal_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/lakeward_cantonal_kiosk_0",
+            "economy:block/banking/lakeward_cantonal_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/lakeward_cantonal_kiosk_inventory",
+          "item_model": "economy:item/banking/lakeward_cantonal_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "LAKEWARD",
+            "CANTONAL"
+          ],
+          "display_currency": "CHF"
+        }
+      },
+      {
+        "key": "newhaven",
+        "currency": "CHF",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/newhaven_atm_front",
+            "shell": "economy:block/banking/newhaven_atm_shell",
+            "trim": "economy:block/banking/newhaven_atm_trim",
+            "metal": "economy:block/banking/newhaven_atm_metal",
+            "dark": "economy:block/banking/newhaven_atm_dark",
+            "keypad": "economy:block/banking/newhaven_atm_keypad",
+            "slot": "economy:block/banking/newhaven_atm_slot",
+            "vent": "economy:block/banking/newhaven_atm_vent",
+            "screen": "economy:block/banking/newhaven_atm_front",
+            "glass": "economy:block/banking/newhaven_atm_front",
+            "chart": "economy:block/banking/newhaven_atm_front",
+            "particle": "economy:block/banking/newhaven_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/newhaven_atm_0",
+            "economy:block/banking/newhaven_atm_1",
+            "economy:block/banking/newhaven_atm_2",
+            "economy:block/banking/newhaven_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/newhaven_atm_inventory",
+          "item_model": "economy:item/banking/newhaven_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "NEWHAVEN"
+          ],
+          "display_currency": "CHF"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/newhaven_teller_front",
+            "shell": "economy:block/banking/newhaven_teller_shell",
+            "trim": "economy:block/banking/newhaven_teller_trim",
+            "metal": "economy:block/banking/newhaven_teller_metal",
+            "dark": "economy:block/banking/newhaven_teller_dark",
+            "keypad": "economy:block/banking/newhaven_teller_keypad",
+            "slot": "economy:block/banking/newhaven_teller_slot",
+            "vent": "economy:block/banking/newhaven_teller_vent",
+            "screen": "economy:block/banking/newhaven_teller_front",
+            "glass": "economy:block/banking/newhaven_teller_front",
+            "chart": "economy:block/banking/newhaven_teller_front",
+            "particle": "economy:block/banking/newhaven_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/newhaven_teller_0",
+            "economy:block/banking/newhaven_teller_1",
+            "economy:block/banking/newhaven_teller_2",
+            "economy:block/banking/newhaven_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/newhaven_teller_inventory",
+          "item_model": "economy:item/banking/newhaven_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "NEWHAVEN"
+          ],
+          "display_currency": "CHF"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/newhaven_kiosk_front",
+            "shell": "economy:block/banking/newhaven_kiosk_shell",
+            "trim": "economy:block/banking/newhaven_kiosk_trim",
+            "metal": "economy:block/banking/newhaven_kiosk_metal",
+            "dark": "economy:block/banking/newhaven_kiosk_dark",
+            "keypad": "economy:block/banking/newhaven_kiosk_keypad",
+            "slot": "economy:block/banking/newhaven_kiosk_slot",
+            "vent": "economy:block/banking/newhaven_kiosk_vent",
+            "screen": "economy:block/banking/newhaven_kiosk_front",
+            "glass": "economy:block/banking/newhaven_kiosk_front",
+            "chart": "economy:block/banking/newhaven_kiosk_front",
+            "particle": "economy:block/banking/newhaven_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/newhaven_kiosk_0",
+            "economy:block/banking/newhaven_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/newhaven_kiosk_inventory",
+          "item_model": "economy:item/banking/newhaven_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "NEWHAVEN"
+          ],
+          "display_currency": "CHF"
+        }
+      },
+      {
+        "key": "atlas_reserve",
+        "currency": "USD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/atlas_reserve_atm_front",
+            "shell": "economy:block/banking/atlas_reserve_atm_shell",
+            "trim": "economy:block/banking/atlas_reserve_atm_trim",
+            "metal": "economy:block/banking/atlas_reserve_atm_metal",
+            "dark": "economy:block/banking/atlas_reserve_atm_dark",
+            "keypad": "economy:block/banking/atlas_reserve_atm_keypad",
+            "slot": "economy:block/banking/atlas_reserve_atm_slot",
+            "vent": "economy:block/banking/atlas_reserve_atm_vent",
+            "screen": "economy:block/banking/atlas_reserve_atm_front",
+            "glass": "economy:block/banking/atlas_reserve_atm_front",
+            "chart": "economy:block/banking/atlas_reserve_atm_front",
+            "particle": "economy:block/banking/atlas_reserve_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/atlas_reserve_atm_0",
+            "economy:block/banking/atlas_reserve_atm_1",
+            "economy:block/banking/atlas_reserve_atm_2",
+            "economy:block/banking/atlas_reserve_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/atlas_reserve_atm_inventory",
+          "item_model": "economy:item/banking/atlas_reserve_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "ATLAS",
+            "RESERVE"
+          ],
+          "display_currency": "USD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/atlas_reserve_teller_front",
+            "shell": "economy:block/banking/atlas_reserve_teller_shell",
+            "trim": "economy:block/banking/atlas_reserve_teller_trim",
+            "metal": "economy:block/banking/atlas_reserve_teller_metal",
+            "dark": "economy:block/banking/atlas_reserve_teller_dark",
+            "keypad": "economy:block/banking/atlas_reserve_teller_keypad",
+            "slot": "economy:block/banking/atlas_reserve_teller_slot",
+            "vent": "economy:block/banking/atlas_reserve_teller_vent",
+            "screen": "economy:block/banking/atlas_reserve_teller_front",
+            "glass": "economy:block/banking/atlas_reserve_teller_front",
+            "chart": "economy:block/banking/atlas_reserve_teller_front",
+            "particle": "economy:block/banking/atlas_reserve_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/atlas_reserve_teller_0",
+            "economy:block/banking/atlas_reserve_teller_1",
+            "economy:block/banking/atlas_reserve_teller_2",
+            "economy:block/banking/atlas_reserve_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/atlas_reserve_teller_inventory",
+          "item_model": "economy:item/banking/atlas_reserve_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "ATLAS",
+            "RESERVE"
+          ],
+          "display_currency": "USD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/atlas_reserve_kiosk_front",
+            "shell": "economy:block/banking/atlas_reserve_kiosk_shell",
+            "trim": "economy:block/banking/atlas_reserve_kiosk_trim",
+            "metal": "economy:block/banking/atlas_reserve_kiosk_metal",
+            "dark": "economy:block/banking/atlas_reserve_kiosk_dark",
+            "keypad": "economy:block/banking/atlas_reserve_kiosk_keypad",
+            "slot": "economy:block/banking/atlas_reserve_kiosk_slot",
+            "vent": "economy:block/banking/atlas_reserve_kiosk_vent",
+            "screen": "economy:block/banking/atlas_reserve_kiosk_front",
+            "glass": "economy:block/banking/atlas_reserve_kiosk_front",
+            "chart": "economy:block/banking/atlas_reserve_kiosk_front",
+            "particle": "economy:block/banking/atlas_reserve_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/atlas_reserve_kiosk_0",
+            "economy:block/banking/atlas_reserve_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/atlas_reserve_kiosk_inventory",
+          "item_model": "economy:item/banking/atlas_reserve_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "ATLAS",
+            "RESERVE"
+          ],
+          "display_currency": "USD"
+        }
+      },
+      {
+        "key": "obsidian_capital",
+        "currency": "EUR",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/obsidian_capital_atm_front",
+            "shell": "economy:block/banking/obsidian_capital_atm_shell",
+            "trim": "economy:block/banking/obsidian_capital_atm_trim",
+            "metal": "economy:block/banking/obsidian_capital_atm_metal",
+            "dark": "economy:block/banking/obsidian_capital_atm_dark",
+            "keypad": "economy:block/banking/obsidian_capital_atm_keypad",
+            "slot": "economy:block/banking/obsidian_capital_atm_slot",
+            "vent": "economy:block/banking/obsidian_capital_atm_vent",
+            "screen": "economy:block/banking/obsidian_capital_atm_front",
+            "glass": "economy:block/banking/obsidian_capital_atm_front",
+            "chart": "economy:block/banking/obsidian_capital_atm_front",
+            "particle": "economy:block/banking/obsidian_capital_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/obsidian_capital_atm_0",
+            "economy:block/banking/obsidian_capital_atm_1",
+            "economy:block/banking/obsidian_capital_atm_2",
+            "economy:block/banking/obsidian_capital_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/obsidian_capital_atm_inventory",
+          "item_model": "economy:item/banking/obsidian_capital_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "OBSIDIAN",
+            "CAPITAL"
+          ],
+          "display_currency": "EUR"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/obsidian_capital_teller_front",
+            "shell": "economy:block/banking/obsidian_capital_teller_shell",
+            "trim": "economy:block/banking/obsidian_capital_teller_trim",
+            "metal": "economy:block/banking/obsidian_capital_teller_metal",
+            "dark": "economy:block/banking/obsidian_capital_teller_dark",
+            "keypad": "economy:block/banking/obsidian_capital_teller_keypad",
+            "slot": "economy:block/banking/obsidian_capital_teller_slot",
+            "vent": "economy:block/banking/obsidian_capital_teller_vent",
+            "screen": "economy:block/banking/obsidian_capital_teller_front",
+            "glass": "economy:block/banking/obsidian_capital_teller_front",
+            "chart": "economy:block/banking/obsidian_capital_teller_front",
+            "particle": "economy:block/banking/obsidian_capital_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/obsidian_capital_teller_0",
+            "economy:block/banking/obsidian_capital_teller_1",
+            "economy:block/banking/obsidian_capital_teller_2",
+            "economy:block/banking/obsidian_capital_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/obsidian_capital_teller_inventory",
+          "item_model": "economy:item/banking/obsidian_capital_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "OBSIDIAN",
+            "CAPITAL"
+          ],
+          "display_currency": "EUR"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/obsidian_capital_kiosk_front",
+            "shell": "economy:block/banking/obsidian_capital_kiosk_shell",
+            "trim": "economy:block/banking/obsidian_capital_kiosk_trim",
+            "metal": "economy:block/banking/obsidian_capital_kiosk_metal",
+            "dark": "economy:block/banking/obsidian_capital_kiosk_dark",
+            "keypad": "economy:block/banking/obsidian_capital_kiosk_keypad",
+            "slot": "economy:block/banking/obsidian_capital_kiosk_slot",
+            "vent": "economy:block/banking/obsidian_capital_kiosk_vent",
+            "screen": "economy:block/banking/obsidian_capital_kiosk_front",
+            "glass": "economy:block/banking/obsidian_capital_kiosk_front",
+            "chart": "economy:block/banking/obsidian_capital_kiosk_front",
+            "particle": "economy:block/banking/obsidian_capital_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/obsidian_capital_kiosk_0",
+            "economy:block/banking/obsidian_capital_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/obsidian_capital_kiosk_inventory",
+          "item_model": "economy:item/banking/obsidian_capital_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "OBSIDIAN",
+            "CAPITAL"
+          ],
+          "display_currency": "EUR"
+        }
+      },
+      {
+        "key": "alpine_vault",
+        "currency": "CHF",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/alpine_vault_atm_front",
+            "shell": "economy:block/banking/alpine_vault_atm_shell",
+            "trim": "economy:block/banking/alpine_vault_atm_trim",
+            "metal": "economy:block/banking/alpine_vault_atm_metal",
+            "dark": "economy:block/banking/alpine_vault_atm_dark",
+            "keypad": "economy:block/banking/alpine_vault_atm_keypad",
+            "slot": "economy:block/banking/alpine_vault_atm_slot",
+            "vent": "economy:block/banking/alpine_vault_atm_vent",
+            "screen": "economy:block/banking/alpine_vault_atm_front",
+            "glass": "economy:block/banking/alpine_vault_atm_front",
+            "chart": "economy:block/banking/alpine_vault_atm_front",
+            "particle": "economy:block/banking/alpine_vault_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/alpine_vault_atm_0",
+            "economy:block/banking/alpine_vault_atm_1",
+            "economy:block/banking/alpine_vault_atm_2",
+            "economy:block/banking/alpine_vault_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/alpine_vault_atm_inventory",
+          "item_model": "economy:item/banking/alpine_vault_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "ALPINE",
+            "VAULT"
+          ],
+          "display_currency": "CHF"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/alpine_vault_teller_front",
+            "shell": "economy:block/banking/alpine_vault_teller_shell",
+            "trim": "economy:block/banking/alpine_vault_teller_trim",
+            "metal": "economy:block/banking/alpine_vault_teller_metal",
+            "dark": "economy:block/banking/alpine_vault_teller_dark",
+            "keypad": "economy:block/banking/alpine_vault_teller_keypad",
+            "slot": "economy:block/banking/alpine_vault_teller_slot",
+            "vent": "economy:block/banking/alpine_vault_teller_vent",
+            "screen": "economy:block/banking/alpine_vault_teller_front",
+            "glass": "economy:block/banking/alpine_vault_teller_front",
+            "chart": "economy:block/banking/alpine_vault_teller_front",
+            "particle": "economy:block/banking/alpine_vault_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/alpine_vault_teller_0",
+            "economy:block/banking/alpine_vault_teller_1",
+            "economy:block/banking/alpine_vault_teller_2",
+            "economy:block/banking/alpine_vault_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/alpine_vault_teller_inventory",
+          "item_model": "economy:item/banking/alpine_vault_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "ALPINE",
+            "VAULT"
+          ],
+          "display_currency": "CHF"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/alpine_vault_kiosk_front",
+            "shell": "economy:block/banking/alpine_vault_kiosk_shell",
+            "trim": "economy:block/banking/alpine_vault_kiosk_trim",
+            "metal": "economy:block/banking/alpine_vault_kiosk_metal",
+            "dark": "economy:block/banking/alpine_vault_kiosk_dark",
+            "keypad": "economy:block/banking/alpine_vault_kiosk_keypad",
+            "slot": "economy:block/banking/alpine_vault_kiosk_slot",
+            "vent": "economy:block/banking/alpine_vault_kiosk_vent",
+            "screen": "economy:block/banking/alpine_vault_kiosk_front",
+            "glass": "economy:block/banking/alpine_vault_kiosk_front",
+            "chart": "economy:block/banking/alpine_vault_kiosk_front",
+            "particle": "economy:block/banking/alpine_vault_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/alpine_vault_kiosk_0",
+            "economy:block/banking/alpine_vault_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/alpine_vault_kiosk_inventory",
+          "item_model": "economy:item/banking/alpine_vault_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "ALPINE",
+            "VAULT"
+          ],
+          "display_currency": "CHF"
+        }
+      },
+      {
+        "key": "kintsugi_trust",
+        "currency": "JPY",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/kintsugi_trust_atm_front",
+            "shell": "economy:block/banking/kintsugi_trust_atm_shell",
+            "trim": "economy:block/banking/kintsugi_trust_atm_trim",
+            "metal": "economy:block/banking/kintsugi_trust_atm_metal",
+            "dark": "economy:block/banking/kintsugi_trust_atm_dark",
+            "keypad": "economy:block/banking/kintsugi_trust_atm_keypad",
+            "slot": "economy:block/banking/kintsugi_trust_atm_slot",
+            "vent": "economy:block/banking/kintsugi_trust_atm_vent",
+            "screen": "economy:block/banking/kintsugi_trust_atm_front",
+            "glass": "economy:block/banking/kintsugi_trust_atm_front",
+            "chart": "economy:block/banking/kintsugi_trust_atm_front",
+            "particle": "economy:block/banking/kintsugi_trust_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/kintsugi_trust_atm_0",
+            "economy:block/banking/kintsugi_trust_atm_1",
+            "economy:block/banking/kintsugi_trust_atm_2",
+            "economy:block/banking/kintsugi_trust_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/kintsugi_trust_atm_inventory",
+          "item_model": "economy:item/banking/kintsugi_trust_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "KINTSUGI",
+            "TRUST"
+          ],
+          "display_currency": "JPY"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/kintsugi_trust_teller_front",
+            "shell": "economy:block/banking/kintsugi_trust_teller_shell",
+            "trim": "economy:block/banking/kintsugi_trust_teller_trim",
+            "metal": "economy:block/banking/kintsugi_trust_teller_metal",
+            "dark": "economy:block/banking/kintsugi_trust_teller_dark",
+            "keypad": "economy:block/banking/kintsugi_trust_teller_keypad",
+            "slot": "economy:block/banking/kintsugi_trust_teller_slot",
+            "vent": "economy:block/banking/kintsugi_trust_teller_vent",
+            "screen": "economy:block/banking/kintsugi_trust_teller_front",
+            "glass": "economy:block/banking/kintsugi_trust_teller_front",
+            "chart": "economy:block/banking/kintsugi_trust_teller_front",
+            "particle": "economy:block/banking/kintsugi_trust_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/kintsugi_trust_teller_0",
+            "economy:block/banking/kintsugi_trust_teller_1",
+            "economy:block/banking/kintsugi_trust_teller_2",
+            "economy:block/banking/kintsugi_trust_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/kintsugi_trust_teller_inventory",
+          "item_model": "economy:item/banking/kintsugi_trust_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "KINTSUGI",
+            "TRUST"
+          ],
+          "display_currency": "JPY"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/kintsugi_trust_kiosk_front",
+            "shell": "economy:block/banking/kintsugi_trust_kiosk_shell",
+            "trim": "economy:block/banking/kintsugi_trust_kiosk_trim",
+            "metal": "economy:block/banking/kintsugi_trust_kiosk_metal",
+            "dark": "economy:block/banking/kintsugi_trust_kiosk_dark",
+            "keypad": "economy:block/banking/kintsugi_trust_kiosk_keypad",
+            "slot": "economy:block/banking/kintsugi_trust_kiosk_slot",
+            "vent": "economy:block/banking/kintsugi_trust_kiosk_vent",
+            "screen": "economy:block/banking/kintsugi_trust_kiosk_front",
+            "glass": "economy:block/banking/kintsugi_trust_kiosk_front",
+            "chart": "economy:block/banking/kintsugi_trust_kiosk_front",
+            "particle": "economy:block/banking/kintsugi_trust_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/kintsugi_trust_kiosk_0",
+            "economy:block/banking/kintsugi_trust_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/kintsugi_trust_kiosk_inventory",
+          "item_model": "economy:item/banking/kintsugi_trust_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "KINTSUGI",
+            "TRUST"
+          ],
+          "display_currency": "JPY"
+        }
+      },
+      {
+        "key": "mariner_crest",
+        "currency": "AUD",
+        "atm": {
+          "textures": {
+            "front": "economy:block/banking/mariner_crest_atm_front",
+            "shell": "economy:block/banking/mariner_crest_atm_shell",
+            "trim": "economy:block/banking/mariner_crest_atm_trim",
+            "metal": "economy:block/banking/mariner_crest_atm_metal",
+            "dark": "economy:block/banking/mariner_crest_atm_dark",
+            "keypad": "economy:block/banking/mariner_crest_atm_keypad",
+            "slot": "economy:block/banking/mariner_crest_atm_slot",
+            "vent": "economy:block/banking/mariner_crest_atm_vent",
+            "screen": "economy:block/banking/mariner_crest_atm_front",
+            "glass": "economy:block/banking/mariner_crest_atm_front",
+            "chart": "economy:block/banking/mariner_crest_atm_front",
+            "particle": "economy:block/banking/mariner_crest_atm_shell"
+          },
+          "models": [
+            "economy:block/banking/mariner_crest_atm_0",
+            "economy:block/banking/mariner_crest_atm_1",
+            "economy:block/banking/mariner_crest_atm_2",
+            "economy:block/banking/mariner_crest_atm_3"
+          ],
+          "inventory_model": "economy:block/banking/mariner_crest_atm_inventory",
+          "item_model": "economy:item/banking/mariner_crest_atm",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "atm_right",
+            "atm",
+            "atm_upper_right",
+            "atm_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "MARINER",
+            "CREST"
+          ],
+          "display_currency": "AUD"
+        },
+        "teller": {
+          "textures": {
+            "front": "economy:block/banking/mariner_crest_teller_front",
+            "shell": "economy:block/banking/mariner_crest_teller_shell",
+            "trim": "economy:block/banking/mariner_crest_teller_trim",
+            "metal": "economy:block/banking/mariner_crest_teller_metal",
+            "dark": "economy:block/banking/mariner_crest_teller_dark",
+            "keypad": "economy:block/banking/mariner_crest_teller_keypad",
+            "slot": "economy:block/banking/mariner_crest_teller_slot",
+            "vent": "economy:block/banking/mariner_crest_teller_vent",
+            "screen": "economy:block/banking/mariner_crest_teller_front",
+            "glass": "economy:block/banking/mariner_crest_teller_front",
+            "chart": "economy:block/banking/mariner_crest_teller_front",
+            "particle": "economy:block/banking/mariner_crest_teller_shell"
+          },
+          "models": [
+            "economy:block/banking/mariner_crest_teller_0",
+            "economy:block/banking/mariner_crest_teller_1",
+            "economy:block/banking/mariner_crest_teller_2",
+            "economy:block/banking/mariner_crest_teller_3"
+          ],
+          "inventory_model": "economy:block/banking/mariner_crest_teller_inventory",
+          "item_model": "economy:item/banking/mariner_crest_teller",
+          "cells": 4,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "bank_teller_station_right",
+            "bank_teller_station",
+            "bank_teller_station_upper_right",
+            "bank_teller_station_upper"
+          ],
+          "placement_notes": "existing detailed 2x2 geometry; cell order right, base, upper_right, upper; preserve existing support and single-drop semantics",
+          "label": [
+            "MARINER",
+            "CREST"
+          ],
+          "display_currency": "AUD"
+        },
+        "kiosk": {
+          "textures": {
+            "front": "economy:block/banking/mariner_crest_kiosk_front",
+            "shell": "economy:block/banking/mariner_crest_kiosk_shell",
+            "trim": "economy:block/banking/mariner_crest_kiosk_trim",
+            "metal": "economy:block/banking/mariner_crest_kiosk_metal",
+            "dark": "economy:block/banking/mariner_crest_kiosk_dark",
+            "keypad": "economy:block/banking/mariner_crest_kiosk_keypad",
+            "slot": "economy:block/banking/mariner_crest_kiosk_slot",
+            "vent": "economy:block/banking/mariner_crest_kiosk_vent",
+            "screen": "economy:block/banking/mariner_crest_kiosk_front",
+            "glass": "economy:block/banking/mariner_crest_kiosk_front",
+            "chart": "economy:block/banking/mariner_crest_kiosk_front",
+            "particle": "economy:block/banking/mariner_crest_kiosk_shell"
+          },
+          "models": [
+            "economy:block/banking/mariner_crest_kiosk_0",
+            "economy:block/banking/mariner_crest_kiosk_1"
+          ],
+          "inventory_model": "economy:block/banking/mariner_crest_kiosk_inventory",
+          "item_model": "economy:item/banking/mariner_crest_kiosk",
+          "cells": 2,
+          "facing": "north-front; rotate all cells together with horizontal facing",
+          "geometry_sources": [
+            "original slender information totem"
+          ],
+          "placement_notes": "lower anchor and upper satellite; one wide, two high, one deep",
+          "label": [
+            "MARINER",
+            "CREST"
+          ],
+          "display_currency": "AUD"
+        }
+      }
+    ]
+  },
+  "agent": {
+    "texture": "economy:entity/banking/collection_agent",
+    "textureFile": "src/main/resources/assets/economy/textures/entity/banking/collection_agent.png",
+    "blueprint": "economy:banking/collection_agent_model.json",
+    "blueprintFile": "src/main/resources/assets/economy/banking/collection_agent_model.json",
+    "geometryJava": "src/main/java/dev/emily/economy/client/CollectionAgentGeometry.java",
+    "source": "tools/banking-assets/sources/agent/collection_agent_uv.svg",
+    "preview": "tools/banking-assets/previews/agent_views.png",
+    "textureSize": [
+      64,
+      64
+    ],
+    "parts": 9,
+    "registeredEntity": false,
+    "provenance": "Original project-authored pixel layout and cube geometry; CC0-1.0; no external art/fonts."
+  },
+  "localization": {
+    "bank.economy.crownstone": "Crownstone Bank",
+    "item.economy.crownstone_debit_t1": "Crownstone Bank Tier 1 Debit Card",
+    "item.economy.crownstone_credit_wayline_t1": "Crownstone Bank Tier 1 Wayline Credit Card",
+    "item.economy.crownstone_credit_orbit_t1": "Crownstone Bank Tier 1 Orbit Credit Card",
+    "item.economy.crownstone_debit_t2": "Crownstone Bank Tier 2 Debit Card",
+    "item.economy.crownstone_credit_wayline_t2": "Crownstone Bank Tier 2 Wayline Credit Card",
+    "item.economy.crownstone_credit_orbit_t2": "Crownstone Bank Tier 2 Orbit Credit Card",
+    "bank.economy.orchard_direct": "Orchard Direct",
+    "item.economy.orchard_direct_debit_t1": "Orchard Direct Tier 1 Debit Card",
+    "item.economy.orchard_direct_credit_orbit_t1": "Orchard Direct Tier 1 Orbit Credit Card",
+    "bank.economy.tidecrest": "Tidecrest Bank",
+    "item.economy.tidecrest_debit_t1": "Tidecrest Bank Tier 1 Debit Card",
+    "item.economy.tidecrest_credit_wayline_t1": "Tidecrest Bank Tier 1 Wayline Credit Card",
+    "bank.economy.crosswind": "Crosswind Bank",
+    "item.economy.crosswind_debit_t1": "Crosswind Bank Tier 1 Debit Card",
+    "item.economy.crosswind_credit_wayline_t1": "Crosswind Bank Tier 1 Wayline Credit Card",
+    "item.economy.crosswind_credit_ember_t1": "Crosswind Bank Tier 1 Ember Credit Card",
+    "bank.economy.lantern_union": "Lantern Union",
+    "item.economy.lantern_union_debit_t1": "Lantern Union Tier 1 Debit Card",
+    "item.economy.lantern_union_credit_orbit_t1": "Lantern Union Tier 1 Orbit Credit Card",
+    "item.economy.lantern_union_credit_keystone_t1": "Lantern Union Tier 1 Keystone Credit Card",
+    "item.economy.lantern_union_debit_t2": "Lantern Union Tier 2 Debit Card",
+    "item.economy.lantern_union_credit_orbit_t2": "Lantern Union Tier 2 Orbit Credit Card",
+    "item.economy.lantern_union_credit_keystone_t2": "Lantern Union Tier 2 Keystone Credit Card",
+    "bank.economy.mesa_trail": "Mesa Trail Bank",
+    "item.economy.mesa_trail_debit_t1": "Mesa Trail Bank Tier 1 Debit Card",
+    "item.economy.mesa_trail_credit_wayline_t1": "Mesa Trail Bank Tier 1 Wayline Credit Card",
+    "item.economy.mesa_trail_credit_ember_t1": "Mesa Trail Bank Tier 1 Ember Credit Card",
+    "bank.economy.asterbridge": "Asterbridge Bank",
+    "item.economy.asterbridge_debit_t1": "Asterbridge Bank Tier 1 Debit Card",
+    "item.economy.asterbridge_credit_orbit_t1": "Asterbridge Bank Tier 1 Orbit Credit Card",
+    "item.economy.asterbridge_credit_keystone_t1": "Asterbridge Bank Tier 1 Keystone Credit Card",
+    "item.economy.asterbridge_debit_t2": "Asterbridge Bank Tier 2 Debit Card",
+    "item.economy.asterbridge_credit_orbit_t2": "Asterbridge Bank Tier 2 Orbit Credit Card",
+    "item.economy.asterbridge_credit_keystone_t2": "Asterbridge Bank Tier 2 Keystone Credit Card",
+    "bank.economy.greenhaven": "Greenhaven Bank",
+    "item.economy.greenhaven_debit_t1": "Greenhaven Bank Tier 1 Debit Card",
+    "item.economy.greenhaven_credit_wayline_t1": "Greenhaven Bank Tier 1 Wayline Credit Card",
+    "bank.economy.meridian_grove": "Meridian Grove",
+    "item.economy.meridian_grove_debit_t1": "Meridian Grove Tier 1 Debit Card",
+    "item.economy.meridian_grove_credit_orbit_t1": "Meridian Grove Tier 1 Orbit Credit Card",
+    "item.economy.meridian_grove_credit_keystone_t1": "Meridian Grove Tier 1 Keystone Credit Card",
+    "item.economy.meridian_grove_debit_t2": "Meridian Grove Tier 2 Debit Card",
+    "item.economy.meridian_grove_credit_orbit_t2": "Meridian Grove Tier 2 Orbit Credit Card",
+    "item.economy.meridian_grove_credit_keystone_t2": "Meridian Grove Tier 2 Keystone Credit Card",
+    "bank.economy.slate_harbor": "Slate Harbor Bank",
+    "item.economy.slate_harbor_debit_t1": "Slate Harbor Bank Tier 1 Debit Card",
+    "item.economy.slate_harbor_credit_wayline_t1": "Slate Harbor Bank Tier 1 Wayline Credit Card",
+    "bank.economy.fjordlight": "Fjordlight Bank",
+    "item.economy.fjordlight_debit_t1": "Fjordlight Bank Tier 1 Debit Card",
+    "item.economy.fjordlight_credit_orbit_t1": "Fjordlight Bank Tier 1 Orbit Credit Card",
+    "bank.economy.harbor_meridian": "Harbor Meridian",
+    "item.economy.harbor_meridian_debit_t1": "Harbor Meridian Tier 1 Debit Card",
+    "item.economy.harbor_meridian_credit_wayline_t1": "Harbor Meridian Tier 1 Wayline Credit Card",
+    "item.economy.harbor_meridian_credit_keystone_t1": "Harbor Meridian Tier 1 Keystone Credit Card",
+    "item.economy.harbor_meridian_debit_t2": "Harbor Meridian Tier 2 Debit Card",
+    "item.economy.harbor_meridian_credit_wayline_t2": "Harbor Meridian Tier 2 Wayline Credit Card",
+    "item.economy.harbor_meridian_credit_keystone_t2": "Harbor Meridian Tier 2 Keystone Credit Card",
+    "bank.economy.jade_terrace": "Jade Terrace Bank",
+    "item.economy.jade_terrace_debit_t1": "Jade Terrace Bank Tier 1 Debit Card",
+    "item.economy.jade_terrace_credit_orbit_t1": "Jade Terrace Bank Tier 1 Orbit Credit Card",
+    "bank.economy.southern_arc": "Southern Arc Bank",
+    "item.economy.southern_arc_debit_t1": "Southern Arc Bank Tier 1 Debit Card",
+    "item.economy.southern_arc_credit_wayline_t1": "Southern Arc Bank Tier 1 Wayline Credit Card",
+    "bank.economy.fernreach": "Fernreach Bank",
+    "item.economy.fernreach_debit_t1": "Fernreach Bank Tier 1 Debit Card",
+    "item.economy.fernreach_credit_orbit_t1": "Fernreach Bank Tier 1 Orbit Credit Card",
+    "bank.economy.cedar_parcel": "Cedar Parcel Bank",
+    "item.economy.cedar_parcel_debit_t1": "Cedar Parcel Bank Tier 1 Debit Card",
+    "item.economy.cedar_parcel_credit_wayline_t1": "Cedar Parcel Bank Tier 1 Wayline Credit Card",
+    "bank.economy.lakeward_cantonal": "Lakeward Cantonal Bank",
+    "item.economy.lakeward_cantonal_debit_t1": "Lakeward Cantonal Bank Tier 1 Debit Card",
+    "item.economy.lakeward_cantonal_credit_wayline_t1": "Lakeward Cantonal Bank Tier 1 Wayline Credit Card",
+    "item.economy.lakeward_cantonal_credit_orbit_t1": "Lakeward Cantonal Bank Tier 1 Orbit Credit Card",
+    "bank.economy.newhaven": "Newhaven Bank",
+    "item.economy.newhaven_debit_t1": "Newhaven Bank Tier 1 Debit Card",
+    "item.economy.newhaven_credit_orbit_t1": "Newhaven Bank Tier 1 Orbit Credit Card",
+    "bank.economy.atlas_reserve": "Atlas Reserve",
+    "item.economy.atlas_reserve_debit_t2": "Atlas Reserve Tier 2 Debit Card",
+    "item.economy.atlas_reserve_credit_wayline_t2": "Atlas Reserve Tier 2 Wayline Credit Card",
+    "item.economy.atlas_reserve_credit_keystone_t2": "Atlas Reserve Tier 2 Keystone Credit Card",
+    "bank.economy.obsidian_capital": "Obsidian Capital Bank",
+    "item.economy.obsidian_capital_debit_t2": "Obsidian Capital Bank Tier 2 Debit Card",
+    "item.economy.obsidian_capital_credit_orbit_t2": "Obsidian Capital Bank Tier 2 Orbit Credit Card",
+    "item.economy.obsidian_capital_credit_keystone_t2": "Obsidian Capital Bank Tier 2 Keystone Credit Card",
+    "bank.economy.alpine_vault": "Alpine Vault",
+    "item.economy.alpine_vault_debit_t2": "Alpine Vault Tier 2 Debit Card",
+    "item.economy.alpine_vault_credit_wayline_t2": "Alpine Vault Tier 2 Wayline Credit Card",
+    "item.economy.alpine_vault_credit_keystone_t2": "Alpine Vault Tier 2 Keystone Credit Card",
+    "bank.economy.kintsugi_trust": "Kintsugi Trust",
+    "item.economy.kintsugi_trust_debit_t2": "Kintsugi Trust Tier 2 Debit Card",
+    "item.economy.kintsugi_trust_credit_orbit_t2": "Kintsugi Trust Tier 2 Orbit Credit Card",
+    "item.economy.kintsugi_trust_credit_keystone_t2": "Kintsugi Trust Tier 2 Keystone Credit Card",
+    "bank.economy.mariner_crest": "Mariner Crest",
+    "item.economy.mariner_crest_debit_t2": "Mariner Crest Tier 2 Debit Card",
+    "item.economy.mariner_crest_credit_wayline_t2": "Mariner Crest Tier 2 Wayline Credit Card",
+    "item.economy.mariner_crest_credit_keystone_t2": "Mariner Crest Tier 2 Keystone Credit Card",
+    "network.economy.keystone": "Keystone",
+    "network.economy.orbit": "Orbit",
+    "network.economy.wayline": "Wayline",
+    "network.economy.ember": "Ember",
+    "block.economy.crownstone_atm": "Crownstone Bank ATM (CAD)",
+    "block.economy.crownstone_teller": "Crownstone Bank Teller Station (CAD)",
+    "block.economy.crownstone_kiosk": "Crownstone Bank Branch Kiosk (CAD)",
+    "block.economy.orchard_direct_atm": "Orchard Direct ATM (CAD)",
+    "block.economy.orchard_direct_teller": "Orchard Direct Teller Station (CAD)",
+    "block.economy.orchard_direct_kiosk": "Orchard Direct Branch Kiosk (CAD)",
+    "block.economy.tidecrest_atm": "Tidecrest Bank ATM (CAD)",
+    "block.economy.tidecrest_teller": "Tidecrest Bank Teller Station (CAD)",
+    "block.economy.tidecrest_kiosk": "Tidecrest Bank Branch Kiosk (CAD)",
+    "block.economy.crosswind_atm": "Crosswind Bank ATM (USD)",
+    "block.economy.crosswind_teller": "Crosswind Bank Teller Station (USD)",
+    "block.economy.crosswind_kiosk": "Crosswind Bank Branch Kiosk (USD)",
+    "block.economy.lantern_union_atm": "Lantern Union ATM (USD)",
+    "block.economy.lantern_union_teller": "Lantern Union Teller Station (USD)",
+    "block.economy.lantern_union_kiosk": "Lantern Union Branch Kiosk (USD)",
+    "block.economy.mesa_trail_atm": "Mesa Trail Bank ATM (USD)",
+    "block.economy.mesa_trail_teller": "Mesa Trail Bank Teller Station (USD)",
+    "block.economy.mesa_trail_kiosk": "Mesa Trail Bank Branch Kiosk (USD)",
+    "block.economy.asterbridge_atm": "Asterbridge Bank ATM (GBP)",
+    "block.economy.asterbridge_teller": "Asterbridge Bank Teller Station (GBP)",
+    "block.economy.asterbridge_kiosk": "Asterbridge Bank Branch Kiosk (GBP)",
+    "block.economy.greenhaven_atm": "Greenhaven Bank ATM (GBP)",
+    "block.economy.greenhaven_teller": "Greenhaven Bank Teller Station (GBP)",
+    "block.economy.greenhaven_kiosk": "Greenhaven Bank Branch Kiosk (GBP)",
+    "block.economy.meridian_grove_atm": "Meridian Grove ATM (EUR)",
+    "block.economy.meridian_grove_teller": "Meridian Grove Teller Station (EUR)",
+    "block.economy.meridian_grove_kiosk": "Meridian Grove Branch Kiosk (EUR)",
+    "block.economy.slate_harbor_atm": "Slate Harbor Bank ATM (EUR)",
+    "block.economy.slate_harbor_teller": "Slate Harbor Bank Teller Station (EUR)",
+    "block.economy.slate_harbor_kiosk": "Slate Harbor Bank Branch Kiosk (EUR)",
+    "block.economy.fjordlight_atm": "Fjordlight Bank ATM (DKK)",
+    "block.economy.fjordlight_teller": "Fjordlight Bank Teller Station (DKK)",
+    "block.economy.fjordlight_kiosk": "Fjordlight Bank Branch Kiosk (DKK)",
+    "block.economy.harbor_meridian_atm": "Harbor Meridian ATM (HKD)",
+    "block.economy.harbor_meridian_teller": "Harbor Meridian Teller Station (HKD)",
+    "block.economy.harbor_meridian_kiosk": "Harbor Meridian Branch Kiosk (HKD)",
+    "block.economy.jade_terrace_atm": "Jade Terrace Bank ATM (CNY)",
+    "block.economy.jade_terrace_teller": "Jade Terrace Bank Teller Station (CNY)",
+    "block.economy.jade_terrace_kiosk": "Jade Terrace Bank Branch Kiosk (CNY)",
+    "block.economy.southern_arc_atm": "Southern Arc Bank ATM (AUD)",
+    "block.economy.southern_arc_teller": "Southern Arc Bank Teller Station (AUD)",
+    "block.economy.southern_arc_kiosk": "Southern Arc Bank Branch Kiosk (AUD)",
+    "block.economy.fernreach_atm": "Fernreach Bank ATM (NZD)",
+    "block.economy.fernreach_teller": "Fernreach Bank Teller Station (NZD)",
+    "block.economy.fernreach_kiosk": "Fernreach Bank Branch Kiosk (NZD)",
+    "block.economy.cedar_parcel_atm": "Cedar Parcel Bank ATM (JPY)",
+    "block.economy.cedar_parcel_teller": "Cedar Parcel Bank Teller Station (JPY)",
+    "block.economy.cedar_parcel_kiosk": "Cedar Parcel Bank Branch Kiosk (JPY)",
+    "block.economy.lakeward_cantonal_atm": "Lakeward Cantonal Bank ATM (CHF)",
+    "block.economy.lakeward_cantonal_teller": "Lakeward Cantonal Bank Teller Station (CHF)",
+    "block.economy.lakeward_cantonal_kiosk": "Lakeward Cantonal Bank Branch Kiosk (CHF)",
+    "block.economy.newhaven_atm": "Newhaven Bank ATM (CHF)",
+    "block.economy.newhaven_teller": "Newhaven Bank Teller Station (CHF)",
+    "block.economy.newhaven_kiosk": "Newhaven Bank Branch Kiosk (CHF)",
+    "block.economy.atlas_reserve_atm": "Atlas Reserve ATM (USD)",
+    "block.economy.atlas_reserve_teller": "Atlas Reserve Teller Station (USD)",
+    "block.economy.atlas_reserve_kiosk": "Atlas Reserve Branch Kiosk (USD)",
+    "block.economy.obsidian_capital_atm": "Obsidian Capital Bank ATM (EUR)",
+    "block.economy.obsidian_capital_teller": "Obsidian Capital Bank Teller Station (EUR)",
+    "block.economy.obsidian_capital_kiosk": "Obsidian Capital Bank Branch Kiosk (EUR)",
+    "block.economy.alpine_vault_atm": "Alpine Vault ATM (CHF)",
+    "block.economy.alpine_vault_teller": "Alpine Vault Teller Station (CHF)",
+    "block.economy.alpine_vault_kiosk": "Alpine Vault Branch Kiosk (CHF)",
+    "block.economy.kintsugi_trust_atm": "Kintsugi Trust ATM (JPY)",
+    "block.economy.kintsugi_trust_teller": "Kintsugi Trust Teller Station (JPY)",
+    "block.economy.kintsugi_trust_kiosk": "Kintsugi Trust Branch Kiosk (JPY)",
+    "block.economy.mariner_crest_atm": "Mariner Crest ATM (AUD)",
+    "block.economy.mariner_crest_teller": "Mariner Crest Teller Station (AUD)",
+    "block.economy.mariner_crest_kiosk": "Mariner Crest Branch Kiosk (AUD)",
+    "art.economy.preview_only": "Art preview only; usable cards require server issuance.",
+    "entity.economy.collection_agent": "Collection Agent",
+    "art.economy.tier1": "Tier 1",
+    "art.economy.tier2": "Tier 2",
+    "art.economy.action.accounts": "Accounts",
+    "art.economy.action.debit": "Debit",
+    "art.economy.action.credit": "Credit",
+    "art.economy.action.loan": "Loan",
+    "art.economy.action.replace": "Replace",
+    "art.economy.action.deposit": "Deposit",
+    "art.economy.action.withdraw": "Withdraw",
+    "art.economy.action.fx": "Fx",
+    "art.economy.action.history": "History",
+    "art.economy.action.tier2": "Tier2",
+    "art.economy.action.collections": "Collections",
+    "art.economy.action.branch": "Branch"
+  },
+  "legacy_card_ids": [
+    "summit_credit_card",
+    "meridian_credit_card",
+    "aurora_credit_card",
+    "obsidian_credit_card",
+    "harbor_bank_card",
+    "meadow_bank_card",
+    "tide_bank_card",
+    "ember_bank_card"
+  ]
+}

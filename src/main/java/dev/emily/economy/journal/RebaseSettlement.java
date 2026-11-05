@@ -97,14 +97,16 @@ public final class RebaseSettlement {
             if (expected.mappings().size() > MAX_PRIMARIES) return reject("REBASE_WRITE_BOUND");
             var rates = FxService.latest(reads);
             if (rates == null || !rates.updateId().equals(publication)) return reject("REBASE_STALE_RATES");
-            return prepare(reads, expected, rates);
+            return prepare(reads, world, expected, rates);
         });
     }
 
-    private static JournalEngine.Decision prepare(JournalEngine.ReadView reads, Plan plan,
+    private static JournalEngine.Decision prepare(JournalEngine.ReadView reads, WorldId world, Plan plan,
                                                   dev.emily.economy.fx.FxFacts.Publication rates) {
         var target = plan.intent().target();
         var source = plan.current().currency();
+        if (!rates.rates().containsKey(source) || !rates.rates().containsKey(target))
+            return reject("REBASE_MISSING_RATE");
         var legs = new ArrayList<PostingBatch.Leg>();
         var future = new HashMap<UUID, EconomyCurrency>();
         var facts = new ArrayList<Journal.Record>();
@@ -140,10 +142,16 @@ public final class RebaseSettlement {
             facts.addAll(accepted.records());
             postings = accepted.projections();
         }
+        var cardRevocations=new java.util.ArrayList<JournalEngine.Commit>();
+        for(var entry:plan.mappings())if(entry.collision()!=null) {
+            var revoked=dev.emily.economy.card.IssuedCards.invalidateAccount(reads,world,entry.collision().id()).orElse(null);
+            if(revoked!=null){facts.addAll(revoked.records());cardRevocations.add(revoked);}
+        }
         if (facts.size() > 64) return reject("REBASE_WRITE_BOUND");
         var projection = postings;
         return new JournalEngine.Commit(facts, new Journal.Result(1, "REBASED", ""), tx -> {
             projection.apply(tx);
+            for(var revoke:cardRevocations)revoke.projections().apply(tx);
             for (var entry : plan.mappings()) {
                 if (entry.collision() != null) retire(tx, entry.collision());
                 change(tx, entry.primary(), target);

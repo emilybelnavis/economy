@@ -8,7 +8,7 @@ public final class WithdrawalPlanner {
     public static final int MAX_NORMALIZED_AMOUNT = 100_000;
     public static final long MAX_WORK_CELLS = 2_000_000;
     public static final int MAX_ITEMS = 2_304;
-    public static final int MAX_DENOMINATIONS = 118;
+    public static final int MAX_DENOMINATIONS = 131;
     private static final int UNREACHABLE = MAX_ITEMS + 1;
     private static final Comparator<Denomination> ORDER =
             Comparator.comparingLong(Denomination::minorUnits).reversed().thenComparing(Denomination::id);

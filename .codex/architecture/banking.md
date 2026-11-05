@@ -37,3 +37,37 @@ Action text is at most 2048 UTF-8 bytes, action/page names are fixed/bounded, sn
 Startup keeps existing quarantine rules for restored cash/custody. Confirmed original outcomes do not authorize replay of physical delivery. Restored or uncertain originals may retain staging capacity until evidence resolution; there is no automatic compensation or speculative item creation. Production has no online world-backup feature. Verified offline backup/restore and deliberately skewed disposable fixture snapshots are distinct. Hardware power loss, arbitrary third-party inventory mutation and proof-based operator compensation through a new GUI are not claimed.
 
 [Acceptance evidence](../verification/A5-09.md).
+
+## CHF integration
+
+Account choices now filter published currency availability; settings place eleven currency toggles in six columns to avoid overlap. CHF-pair exchange inputs accept exact cents and previews match v2 settlement; legacy pairs retain whole-unit input. CHF deposit zero-credit messages use minor thresholds. New resources/catalog entries are additive and all existing session/menu/server authority and save/custody constraints remain. See [the current CHF contract](chf.md) and [verification](../verification/A6-03-01.md).
+
+
+## A6-03 current contract (2026-11-05)
+
+[Institution/provider contracts](institutions.md) supersede earlier lifecycle/cap references: schema V20, four total open BANK accounts including primary, version3 institution postings, explicit legacy provider migration, and sealed branch-only lifecycle admission. Live opening/closing/provider changes are unavailable until A6-05-01. Existing account services and original outcome lookup remain.
+
+
+## A6-04 current contract (2026-11-05)
+
+[Wealth, pricing and funded yield](wealth-pricing.md) defines schema V21, persisted required-source contracts, fresh qualification/fee witnesses, assigned-bank FX pricing and time-weighted bank-funded deposit yield. Production installs bounded accrual/payout providers at stage 1 and daily Tier reevaluation at stage 7; empty domains remain dormant. Source snapshots and unpaid receivables remain distinct from spendable funds. Live branch adapters, issued cards, lending and trading are still separate packages. Earlier no-product/default-Tier2-denial descriptions apply to their historical delivery checkpoints.
+
+## A6-05-01 current branch and cash admission
+
+[Branch hardware/session contract](branch-hardware.md) supersedes older teller-opening and automatic cash defaults. Protocol3 adds KIOSK access and owner brand selection. All fresh cash/terminal FX requires authoritative binding; withdrawal cash currency comes from bank metadata. Exact-bank kiosk proofs gate lifecycle. Generic card/teller lifecycle bypasses remain closed. Replacement/applications are unavailable.
+
+## A6-06 issued-card menus
+
+[Issued debit cards](issued-cards.md) add protocol4 owner card views/lost reporting and issuer-kiosk issuance/replacement/funding/combined-fee review. Kiosks collect protected card claims. Generic cards retain independent access; new issued items need worker validation on entry/actions and final FX mutation. Credit/loan applications remain unavailable.
+
+## A6-07 profile/history views
+
+[Credit profile contract](credit-profiles.md) adds protocol5 read-only owner views and exclusive history pages. Reads, login and debit issuance create no credit profile. Credit/loan applications remain unavailable; there is no client score initializer/recalculator. Separate operator APIs use audited inspection authority.
+
+## A6-08-01 extension
+
+A6-08-01 exposes funded credit origination/increase/draw/payment APIs through owner grants and sealed branch/physical-card admission. Existing read access recognizes both debit and credit token appearances. No product mutation packet or integrated application/payment screen is added; see [credit facilities](credit-facilities.md).
+
+## A6-08-02 diagnostics
+
+Protocol 6 adds read-only owner credit facility/details/frozen-statement navigation on ATM/teller/kiosk/card surfaces, with offered IDs and bounded per-menu cursors. No application, draw, payment or editing packet is installed. See [credit diagnostics](credit-diagnostics.md).

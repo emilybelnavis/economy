@@ -86,3 +86,25 @@ invalidate stale plans. Retire a collision before changing its primary's
 currency within the same transaction so uniqueness remains enforced.
 Authorize and validate postings and denomination effects in that same
 transaction. This planner has no apply operation.
+
+## CHF availability
+
+The registry now declares eleven currencies. Published-rate membership filters opening choices, and authoritative AccountLifecycle opening rejects CHF before its effective publication. A fresh CHF world initializes a protected CHF primary; legacy activation never changes world denomination/primary. Explicit rebase/secondary collision logic remains, including controlled missing-rate rejection. The account cap remains3 here; A6-03 owns the later four-account/provider lifecycle. See [the current CHF contract](chf.md) and [verification](../verification/A6-03-01.md).
+
+
+## A6-03 current contract (2026-11-05)
+
+[Institution/provider contracts](institutions.md) supersede earlier lifecycle/cap references: schema V20, four total open BANK accounts including primary, version3 institution postings, explicit legacy provider migration, and sealed branch-only lifecycle admission. Live opening/closing/provider changes are unavailable until A6-05-01. Existing account services and original outcome lookup remain.
+
+
+## A6-04 current contract (2026-11-05)
+
+[Wealth, pricing and funded yield](wealth-pricing.md) defines schema V21, persisted required-source contracts, fresh qualification/fee witnesses, assigned-bank FX pricing and time-weighted bank-funded deposit yield. Production installs bounded accrual/payout providers at stage 1 and daily Tier reevaluation at stage 7; empty domains remain dormant. Source snapshots and unpaid receivables remain distinct from spendable funds. Live branch adapters, issued cards, lending and trading are still separate packages. Earlier no-product/default-Tier2-denial descriptions apply to their historical delivery checkpoints.
+
+## A6-05-01 live kiosks
+
+[Live branch sessions](branch-hardware.md) now admit the existing four-account/native-currency provider lifecycle, including permanent primary onboarding, legacy assignment, two-branch switching and protected closure. Owner/operator machine rights never substitute for customer/Tier authority. Old generic lifecycle handlers stay fail-closed.
+
+## A6-06 debit linkage
+
+[Issued cards](issued-cards.md) are separate authoritative owner/account/provider-epoch records, with one active debit token per BANK account. Provider changes/closure and rebase collision retirement revoke retired tokens; permanent primary rebase retains the account/token exception. No extra account slots, score or debt are created.

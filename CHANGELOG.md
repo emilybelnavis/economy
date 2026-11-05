@@ -5,6 +5,76 @@ Project changes are recorded in reverse chronological order, with the most recen
 
 
 
+## 2026-11-05 — A6-08-03 credit foundation acceptance
+
+- Accepted numerical, offline and crash/recovery behavior across draw, interest, statements and repayment.
+- Gated new production credit issuance, increases and draws pending downstream default/reporting safety, while preserving original outcomes and protected debt actions.
+- Fixed credit API owner binding and published a bounded immutable lifecycle source with a V27 index for future consumers.
+
+## 2026-11-05 — A6-08-02 credit diagnostics
+
+- Added owner facility, APR/bucket/minimum/due and frozen-statement views with bounded paging.
+- Added separately audited operator diagnostics for historical daily inputs, payment allocations, reconciliation and schedule backlog, including catch-up inspection.
+- Added immutable prospective servicing receipts and schema V26 diagnostic indexes; older records explicitly identify unavailable detail. No financial editing controls were added.
+
+## 2026-11-05 — A6-08-01 credit facility foundation
+
+- Added funded credit facilities, separate network credit tokens, once-only starter issuance, underwritten increases, closure and replacement APIs.
+- Added separate purchase/advance interest, immutable 28-day statements and minimums, balanced draws and same-currency/explicit-FX repayments.
+- Added schema V25, bounded daily/statement scheduling and authoritative credit liabilities in net worth. Product screens, autopay, default/reporting and collections remain later-package work.
+
+## 2026-11-05 — A6-07 credit profile foundation
+
+- Added deterministic 300–900 scoring and approved underwriting ceilings/APRs, with exact time-weighted utilization and correction-aware inputs.
+- Added schema V24 profiles, immutable score history and cross-issuer inquiry grouping, plus owner profile/history views and audited operator read APIs.
+- Reserved atomic 650/2,500 first-credit issuance for the future credit backend. Debit cards and failed applications create no profile; production recurring scoring stays dormant until reporting is installed.
+
+## 2026-11-05 — A6-06 issued debit cards
+
+- Added 28 bank/Tier debit designs with server-owned token linkage, expiry, lost reporting and issuer-kiosk issuance/replacement.
+- Added free first issuance and renewal window, combined 25-world-unit replacement fee/FX preview, atomic old-token revocation and protected item claims.
+- Added schema V23 and bounded card recovery. Copies share status; provider changes/closure revoke old tokens. Legacy collectibles stay unchanged; no score, credit facility or debt is created.
+
+## 2026-11-05 — A6-05-01 branded branch hardware
+
+- Added bank selection for all 23 ATM/teller/kiosk designs and a craftable two-cell branch kiosk. Native-currency cash settings preserve ATM bill and teller coin distinctions.
+- Added in-person account opening, protected closure, legacy provider assignment and two-branch provider switching. Generic cards, tellers and commands cannot perform restricted account lifecycle actions.
+- Added schema V22 with explicit unbound legacy migration, preserved settings/custody, owner-confirmed bank binding and read-only operator inspection. Existing colored IDs remain; ATM dye recipes are retired.
+- Card replacement and loan/credit applications remain unavailable pending their service packages.
+
+## 2026-11-05 — A6-05 original banking artwork
+
+- Added original marks for 23 banks and four networks, 74 approved debit/credit card designs, Tier 2 treatments and 12 menu icons.
+- Added matching native-currency ATM/teller resources, distinct branch kiosk models and civilian Collection Agent art, with editable sources and CC0 provenance.
+- Preserved legacy collectibles and existing physical machines. Physical binding, card issuance and agent behavior remain in their later packages.
+
+## 2026-11-05 — A6-04 qualification, pricing and deposit yield
+
+- Added authoritative net-worth qualification at 100M world-currency units, including unpaid liabilities and earned ledger receivables, with explicit unavailable-source handling.
+- Added bank-owned Tier 1 FX fees and zero Tier 2 FX fees, captured quote inputs, protected closure budgets and explicit cash-exchange previews. Legacy unassigned accounts retain their transitional behavior.
+- Added time-weighted deposit yield, funded monthly payout promises, deferred distress and retained claims across provider/currency changes; closure settles earned amounts without minting money.
+- Added future-day prime configuration and securities/trading-fee provider APIs; actual lending/trading and live branch adapters remain outside this package.
+- Schema 21 requires the existing stopped-world upgrade backup procedure.
+
+## 2026-11-05 — A6-03 institution accounts
+
+- Added the 23-bank catalog, persistent provider attribution, bounded legacy migration and a one-time 28B world-currency capital allocation across banks and the two service institutions.
+- Raised the total open bank-account limit to four while preserving primary protection, currency uniqueness, balances and history.
+- Added server-side branch admission and provider switching contracts. Live opening, closing and provider changes remain unavailable until branch kiosks are delivered; existing account services remain available.
+- Schema 20 requires the stopped-world upgrade backup procedure for existing worlds.
+
+## 2026-11-05 — A6-03-01 CHF currency and cash
+
+- Added CHF accounts/FX support and thirteen original notes and coins, with a CHF creative tab; existing cash and card identities remain intact.
+- Added future-only CHF FX activation for existing worlds using the approved 1 CHF = 1.60 CAD game calibration, preserving earlier publications and world currency.
+- Added exact CHF cent settlement, cash representability checks and versioned ledger replay/history, including fractional balances created by CHF conversion.
+- Schema 19 includes both posting versions in account history; existing worlds require the stopped-world upgrade backup procedure.
+
+## 2026-11-05 — A6-02-02 financial calendar diagnostics
+
+- Added console/operator calendar diagnostics with UTC origin, elapsed periods, retained targets, policy versions, next boundaries and active work cursors.
+- Added bounded registry pages and timestamped cached reports during catch-up, clock waits and storage pressure; distinguished fixed backlog from the domain pending-event indicator.
+
 ## 2026-11-04 — Banking interface fixes
 
 - Replaced manual account and collection numbers with selectable accounts and item batches; My accounts opens transaction history directly.

@@ -103,7 +103,7 @@ monotonic high-water target (SQL integer cast avoids scalar max's TEXT compariso
 jumps create reported debt. Backward jumps do not reverse/repeat work; wait until wall time can reach
 the retained target/frontier. Even an erroneous forward jump is not silently erased by rolling time
 back. Sleep and /time never enter this API. An integrated-server pause stops new tick scheduling,
-but elapsed UTC is caught up after resume/restart. Future domain phases supply actual systems and any proven equivalent aggregation rules.
+but elapsed UTC is caught up after resume/restart. A6 now also supplies an [arbitrary-deadline calendar dispatcher](financial-calendar.md); future products register adapters without changing existing fixed-system identities or FX cadence.
 
 ## Ongoing catch-up
 
@@ -185,3 +185,11 @@ join inventories and SQLite. Exactly-once physical delivery is NOT claimed. A5 m
 serial/reservation/save evidence, ambiguity quarantine/manual recovery policy, and achievable
 redelivery/compensation guarantees before exposing cash/shops. Do not invent a second operation ID
 to bypass an unknown financial outcome.
+
+## A6 calendar dispatch
+
+Production activates the version-one [financial calendar](financial-calendar.md) once after migration. FoundationRuntime merges arbitrary events with fixed intervals, preserves fixed publication priority at equal instants, and includes both debt sources in startup/write admission. Each worker turn commits at most one child or event completion. Startup final projection validation compares journal sequence so domain-only facts cannot be missed. Domain progress is separate from the fixed-only economic sequence.
+
+## CHF historical first version
+
+A6-03-01 adds an optional historical InitialVersion reader to DeferredSystem, retaining its prior two-argument constructor. FX reads the earliest immutable publication to retain v1 for legacy openings and start v2 for fresh CHF-capable openings. After legacy catch-up, production schedules the CHF implementation only at a strictly future UTC boundary. Existing origins/cadences/v1 fingerprints and past completions remain unchanged; see [CHF compatibility](chf.md).

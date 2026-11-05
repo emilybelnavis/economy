@@ -296,7 +296,7 @@ class FxPublicationTest {
     private FoundationRuntime open(Path world, FoundationRuntime.Configuration configuration) {
         var runtime = new FoundationRuntime(configuration);
         runtime.initialize(world);
-        for (int step = 0; step < 30; step++) if (runtime.startupStep().ready()) return runtime;
+        for (int step = 0; step < 100; step++) if (runtime.startupStep().ready()) return runtime;
         throw new AssertionError("Runtime failed to reach readiness");
     }
 

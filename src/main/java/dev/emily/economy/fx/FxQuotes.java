@@ -23,7 +23,12 @@ public final class FxQuotes {
     }
 
     public record Quote(UUID id, PlayerId actor, WorldId world, Pair pair, Side side, Money requested,
-                        UUID publication, int pricingVersion, Instant expires, Money fee, Money debit, Money credit) {}
+                        UUID publication, int pricingVersion, Instant expires, Money fee, Money debit, Money credit, dev.emily.economy.pricing.ServicePricing.Quote pricing) {
+        public Quote(UUID id, PlayerId actor, WorldId world, Pair pair, Side side, Money requested,
+                     UUID publication,int pricingVersion,Instant expires,Money fee,Money debit,Money credit) {
+            this(id,actor,world,pair,side,requested,publication,pricingVersion,expires,fee,debit,credit,null);
+        }
+    }
 
     private static final int CAPACITY = 1024;
     static final int PRICING_VERSION = 1;
@@ -47,6 +52,9 @@ public final class FxQuotes {
         var target = exactDebit ? pair.target() : pair.source();
         if (requested.currency() != source) throw new IllegalArgumentException("FX_INVALID_QUOTE");
 
+        if (!publication.rates().containsKey(pair.source()) || !publication.rates().containsKey(pair.target()))
+            throw new IllegalArgumentException("FX_RATE_UNAVAILABLE");
+
         quotes.values().removeIf(quote -> !fresh(quote, publication, PRICING_VERSION, now));
         if (quotes.size() >= CAPACITY) throw new IllegalStateException("FX_QUOTE_OVERLOAD");
 
@@ -63,6 +71,14 @@ public final class FxQuotes {
         return quote;
     }
 
+    public Quote price(Quote original, dev.emily.economy.pricing.ServicePricing.Quote pricing) {
+        if (!original.equals(quotes.get(original.id())) || !pricing.principal().equals(original.debit()))
+            throw new IllegalArgumentException("FX_PRICING_PRINCIPAL");
+        var priced=new Quote(original.id(),original.actor(),original.world(),original.pair(),original.side(),original.requested(),
+                original.publication(),2,pricing.expires(),pricing.fee(),original.debit(),original.credit(),pricing);
+        quotes.put(priced.id(),priced);return priced;
+    }
+
     /** Call inside A4 authoritative preparation, after original-operation lookup. */
     public Quote requireFresh(UUID id, PlayerId actor, WorldId requestWorld, FxFacts.Publication publication,
                               int currentPricingVersion, Instant processingStart) {
@@ -76,6 +92,6 @@ public final class FxQuotes {
 
     private static boolean fresh(Quote quote, FxFacts.Publication publication, int pricing, Instant now) {
         return publication != null && quote.publication().equals(publication.updateId())
-                && quote.pricingVersion() == pricing && now.isBefore(quote.expires());
+                && quote.pricingVersion() == (quote.pricing() == null ? pricing : 2) && now.isBefore(quote.expires());
     }
 }

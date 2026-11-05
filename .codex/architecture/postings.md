@@ -113,3 +113,17 @@ page limit is 63 plus one lookahead. Reconciliation is an audited, bounded
 current-currency comparison. Histories exceeding the page limit yield an
 incomplete result. Transaction IDs correlate related entries without exposing
 the other account's history.
+
+## Version-two minor postings
+
+Legacy v1 posting amounts remain whole-major and rejectCHF. V2 has the same five payload fields with exact nonzero minor units. CHF legs or explicit trusted precision=minor-v2 composition select v2 without relaxing role, funds/hold, sign, overflow or per-currency balance checks. CHF holds/FX use strict v2 facts; legacy nonCHF transfer/hold/exchange rules remain. Newly fractional legacy-currency balances may fully drain at account closure or world rebase via v2; rebase target-payout rounding remains the existing whole-major policy. Projection rebuild/history fold both versions through the V19 history index. See [the current CHF contract](chf.md) and [verification](../verification/A6-03-01.md).
+
+
+## A6-03 current contract (2026-11-05)
+
+[Institution/provider contracts](institutions.md) supersede earlier lifecycle/cap references: schema V20, four total open BANK accounts including primary, version3 institution postings, explicit legacy provider migration, and sealed branch-only lifecycle admission. Live opening/closing/provider changes are unavailable until A6-05-01. Existing account services and original outcome lookup remain.
+
+
+## A6-04 current contract (2026-11-05)
+
+[Wealth, pricing and funded yield](wealth-pricing.md) defines schema V21, persisted required-source contracts, fresh qualification/fee witnesses, assigned-bank FX pricing and time-weighted bank-funded deposit yield. Production installs bounded accrual/payout providers at stage 1 and daily Tier reevaluation at stage 7; empty domains remain dormant. Source snapshots and unpaid receivables remain distinct from spendable funds. Live branch adapters, issued cards, lending and trading are still separate packages. Earlier no-product/default-Tier2-denial descriptions apply to their historical delivery checkpoints.

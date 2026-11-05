@@ -79,6 +79,9 @@ public final class FxSettlement {
         if (!reads.query("SELECT quote_id FROM ledger_fx_quotes WHERE quote_id=?", List.of(quoteId.toString()), 1).isEmpty()) {
             return reject("FX_QUOTE_CONSUMED");
         }
+        var binding=dev.emily.economy.institution.BankProviders.find(reads,source.id()).orElse(null);
+        if(binding!=null&&!binding.bankKey().equals(dev.emily.economy.institution.BankProviders.UNASSIGNED_PROVIDER)
+                &&(quote.pricing()==null||!quote.pricing().institution().key().equals(binding.bankKey())))return reject("FX_PRICING_REQUIRED");
         var from = quote.pair().source();
         var to = quote.pair().target();
         if (!source.owner().world().equals(world) || !target.owner().world().equals(world)
@@ -93,9 +96,13 @@ public final class FxSettlement {
         long debit = quote.debit().minorUnits();
         long fee = quote.fee().minorUnits();
         long rawCredit = quote.credit().minorUnits();
-        long credit = rawCredit - rawCredit % to.minorUnitsPerMajor();
-        long remainder = debit % from.minorUnitsPerMajor();
-        if (fee % from.minorUnitsPerMajor() != 0
+        boolean minorSettlement = quote.pricing() != null || from == EconomyCurrency.CHF || to == EconomyCurrency.CHF
+                || drain && debit % from.minorUnitsPerMajor() != 0;
+        long debitQuantum = minorSettlement ? 1 : from.minorUnitsPerMajor();
+        long creditQuantum = minorSettlement ? 1 : to.minorUnitsPerMajor();
+        long credit = rawCredit - rawCredit % creditQuantum;
+        long remainder = debit % debitQuantum;
+        if (fee % debitQuantum != 0
                 || (quote.side() == FxQuotes.Side.EXACT_DEBIT && remainder != 0)
                 || (quote.side() == FxQuotes.Side.EXACT_CREDIT && (rawCredit != credit || drain))) {
             return reject("FX_QUOTE_AMOUNT");
@@ -103,7 +110,7 @@ public final class FxSettlement {
 
         long total;
         try {
-            if (remainder != 0) debit = Math.addExact(debit, from.minorUnitsPerMajor() - remainder);
+            if (remainder != 0) debit = Math.addExact(debit, debitQuantum - remainder);
             total = Math.addExact(debit, fee);
         } catch (ArithmeticException overflow) {
             return reject("POSTING_OVERFLOW");
@@ -113,26 +120,40 @@ public final class FxSettlement {
         }
 
         var legs = new ArrayList<PostingBatch.Leg>();
-        legs.add(leg(source.id().value(), ACCOUNT, from, -total));
+        legs.add(leg(source.id().value(), ACCOUNT, from, quote.pricing() == null ? -total : -debit));
         legs.add(leg(Settlement.clearingAccount(from), CLEARING, from, debit));
-        if (fee != 0) legs.add(leg(Settlement.feeAccount(from), FEE, from, fee));
+        if (fee != 0 && quote.pricing() == null) legs.add(leg(Settlement.feeAccount(from), FEE, from, fee));
         if (credit != 0) {
             legs.add(leg(Settlement.clearingAccount(to), CLEARING, to, -credit));
             legs.add(leg(target.id().value(), ACCOUNT, to, credit));
         }
-        var settlement = Settlement.prepare(reads, legs, PostingBatch.Authority.FX, null);
+        var settlement = minorSettlement ? Settlement.prepareMinor(reads, legs, PostingBatch.Authority.FX, null)
+                : Settlement.prepare(reads, legs, PostingBatch.Authority.FX, null);
         if (!(settlement instanceof JournalEngine.Commit commit)) return settlement;
-        var facts = new ArrayList<>(commit.records());
-        facts.add(new Journal.Record(FACT, 1, String.join("|", quoteId.toString(), quote.publication().toString(),
+        if (quote.pricing() != null) {
+            var charged=FeeSettlement.composeCash(reads,commit,List.of(new dev.emily.economy.pricing.CashPricing.Quote(
+                    quote.pricing(),debit,quote.fee(),source.id().value())));
+            if (!(charged instanceof JournalEngine.Commit priced)) return charged;
+            commit=priced;
+        }
+        var financial=commit;
+        var facts = new ArrayList<>(financial.records());
+        facts.add(new Journal.Record(FACT, quote.pricing() != null ? 3 : minorSettlement ? 2 : 1, String.join("|", quoteId.toString(), quote.publication().toString(),
                 Integer.toString(quote.pricingVersion()), from.name(), to.name(), quote.side().name(),
                 Long.toString(debit), Long.toString(fee), Long.toString(rawCredit), Long.toString(credit))));
         return new JournalEngine.Commit(facts, new Journal.Result(1, "FX_SETTLED", ""), tx -> {
-            commit.projections().apply(tx);
+            financial.projections().apply(tx);
             tx.execute("INSERT INTO ledger_fx_quotes(quote_id) VALUES(?)", List.of(quoteId.toString()));
         });
     }
 
-    public static void validateFact(String payload) {
+    public static void validateFact(String payload) { validateFact(payload, false, false); }
+
+    public static void validateFactV2(String payload) { validateFact(payload, true, false); }
+
+    public static void validateFactV3(String payload) { validateFact(payload,true,true); }
+
+    private static void validateFact(String payload, boolean minorChf, boolean priced) {
         var fields = payload.split("\\|", -1);
         if (fields.length != 10) throw new IllegalArgumentException("FX fact fields");
         id(fields[0]);
@@ -143,11 +164,24 @@ public final class FxSettlement {
         long fee = Long.parseLong(fields[7]);
         long rawCredit = Long.parseLong(fields[8]);
         long credit = Long.parseLong(fields[9]);
+        boolean chfPair = pair.source() == EconomyCurrency.CHF || pair.target() == EconomyCurrency.CHF;
+        boolean fractionalDrain = debit % pair.source().minorUnitsPerMajor() != 0 && side == FxQuotes.Side.EXACT_DEBIT;
+        if (!priced && (minorChf ? !chfPair && !fractionalDrain : chfPair))
+            throw new IllegalArgumentException("FX fact currency/version mismatch");
+        long debitQuantum = minorChf ? 1 : pair.source().minorUnitsPerMajor();
+        long creditQuantum = minorChf ? 1 : pair.target().minorUnitsPerMajor();
         if (Integer.parseInt(fields[2]) < 1 || debit <= 0 || fee < 0 || rawCredit < 0 || credit < 0
-                || debit % pair.source().minorUnitsPerMajor() != 0 || fee % pair.source().minorUnitsPerMajor() != 0
-                || credit != rawCredit - rawCredit % pair.target().minorUnitsPerMajor()
+                || debit % debitQuantum != 0 || fee % debitQuantum != 0
+                || credit != rawCredit - rawCredit % creditQuantum
                 || (side == FxQuotes.Side.EXACT_CREDIT && rawCredit != credit)) {
             throw new IllegalArgumentException("FX fact amounts");
+        }
+        if (minorChf) {
+            Math.addExact(debit, fee);
+            if (!Integer.toString(Integer.parseInt(fields[2])).equals(fields[2])
+                    || !Long.toString(debit).equals(fields[6]) || !Long.toString(fee).equals(fields[7])
+                    || !Long.toString(rawCredit).equals(fields[8]) || !Long.toString(credit).equals(fields[9]))
+                throw new IllegalArgumentException("Noncanonical FX fact amounts");
         }
     }
 

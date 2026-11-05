@@ -34,6 +34,24 @@ public final class FundedClosure {
 
     public record Claims(boolean restricted, boolean unresolvedObligation) {}
 
+    /** Trusted branch adapter entry. Proof and all quote/destination fields are bound to one lease. */
+    public static JournalEngine.Registration registrationAtBranch(PartyRef owner, Instruction instruction,
+            FxSettlement.QuoteReader quotes, ClaimsReader claims,
+            dev.emily.economy.institution.BranchAdmission.Proof proof,
+            BiPredicate<Journal.Intent, JournalEngine.ReadView> authority) {
+        var player = (PartyRef.Player) owner.owner();
+        var close = instruction.close();
+        return AccountLifecycle.closingAtBranch(owner, close, (reads, source) -> claims.read(reads, source).map(state ->
+                new AccountLifecycle.ClosureState(Settlement.posted(reads, source.id().value(), source.currency()),
+                        Holds.hasActiveClaim(reads, source.id().value()), state.restricted(), state.unresolvedObligation())),
+                proof, instruction.request(), authority, (intent, reads) -> {
+                    if (instruction.quoteId() == null) return new JournalEngine.Reject(new Journal.Result(1, "FX_QUOTE_REQUIRED", ""));
+                    var source = AccountCatalog.find(reads, owner, close.source()).orElseThrow();
+                    var destination = AccountCatalog.find(reads, owner, close.destination()).orElseThrow();
+                    return FxSettlement.prepare(reads, quotes, instruction.quoteId(), player.id(), owner.world(), source, destination, true);
+                });
+    }
+
     /** Bind with ServerServices.submitOwned using the account closure kind. */
     public static JournalEngine.Registration registration(PartyRef owner, Instruction instruction,
                                                           FxSettlement.QuoteReader quotes, ClaimsReader claims,

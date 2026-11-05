@@ -112,6 +112,7 @@ public final class JournalEngine {
             return tx.query(sql, parameters, maxRows);
         };
         Decision decision = Objects.requireNonNull(registration.handler().prepare(intent, reads));
+        if (decision instanceof Commit commit) decision = Objects.requireNonNull(store.decorateCommit(intent, reads, commit));
         if (decision instanceof Decline declined)
             return new Outcome(intent.operationId(), intent.requestId(), Status.NOT_ACCEPTED, null, null, declined.result());
         if (decision instanceof Retry deferred) {

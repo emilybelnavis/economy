@@ -109,7 +109,7 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
                 var accounts = choices("account_close_preview");
                 for (int i = 0; i < accounts.size(); i++) {
                     var account = accounts.get(i);
-                    var close = button(204, 74 + i * 24, 102, text("action.account_close_preview"),
+                    var close = button(204, 74 + i * 21, 102, text("action.account_close_preview"),
                             () -> send("account_close_preview", account.value()));
                     close.active = !menu.busy() && account.selected();
                     if (!account.selected()) close.setTooltip(Tooltip.create(Component.literal("This account cannot be closed here.")));
@@ -122,6 +122,26 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
                 selector.active = !menu.busy() && !currencies.isEmpty();
                 var open = button(192, 164, 114, text("action.account_open"), () -> send("account_open", currency));
                 open.active = !menu.busy() && !currencies.isEmpty();
+            }
+            case "branch", "branch_targets", "brands", "branch_products", "cards", "card_funding" -> {
+                buildRows(menu.choices(), false);
+                button(10, 188, 136, Component.literal(menu.access() == BankingMenu.Access.ADMIN
+                        ? "Back to settings" : "Back to branch"), () -> send(menu.access() == BankingMenu.Access.ADMIN
+                        ? "settings" : "manage_accounts", ""));
+            }
+            case "credit_facilities" -> {
+                buildRows(menu.choices(), false);
+                button(10,188,144,Component.literal("Back to credit profile"),()->send("credit_profile",""));
+            }
+            case "credit_profile", "credit_history", "credit_facility", "credit_statements" -> {
+                int control=0;for(var choice:menu.choices()) {
+                    var c=choice;button(10+control++*152,188,144,Component.literal(c.label()),()->send(c.action(),c.value()));
+                }
+            }
+            case "brand_review", "card_review" -> {
+                for (var choice : menu.choices())
+                    button(160, 188, 146, Component.literal(choice.label()), () -> send(choice.action(), choice.value()));
+                button(10, 188, 136, Component.literal(menu.page().equals("card_review")?"Back to cards":"Back to settings"), () -> send(menu.page().equals("card_review")?"cards":"settings", ""));
             }
             case "claims" -> {
                 buildRows(choices("collect"), false);
@@ -137,7 +157,7 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
                             .map(BankingNetwork.Choice::label).findFirst().orElse("Choose account");
                     button(160, 74, 146, Component.literal("To: " + label + " ▾"), () -> openChooser("destination"));
                 }
-                if (!deposit) amountBox(10, 108, 136, fx ? "Whole amount to exchange" : "Amount to withdraw", fx ? "10" : "60.00");
+                if (!deposit) amountBox(10, 108, 136, fx ? "Amount (CHF pairs accept cents)" : "Amount to withdraw", fx ? "10" : "60.00");
                 primaryAction = menu.page() + "_preview";
                 if (fx) primaryAction = "exchange_preview";
                 primary = button(deposit ? 184 : 160, deposit ? 188 : 108, deposit ? 122 : 146, Component.empty(), this::performPrimary);
@@ -149,8 +169,8 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
             }
             case "close" -> {
                 button(10, 188, 136, Component.literal("Back to management"), () -> send("manage_accounts", ""));
-                if (!choices("account_close_confirm").isEmpty())
-                    button(160, 188, 146, text("action.account_close_confirm"), () -> send("account_close_confirm", ""));
+                for (var choice : choices("account_close_confirm"))
+                    button(160, 188, 146, Component.literal(choice.label()), () -> send(choice.action(), choice.value()));
             }
             case "setup" -> {
                 if (menu.worldSetup()) {
@@ -160,30 +180,17 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
             }
             case "settings" -> {
                 button(10, 188, 136, Component.literal("Use terminal"), () -> send("banking", ""));
+                if (!choices("brand_preview").isEmpty())
+                    button(10, 76, 296, Component.literal("Choose bank brand ▾"), () -> openChooser("brand_preview"));
                 if (!choices("configure").isEmpty()) {
-                    button(10, 76, 296, Component.literal("Services: " + serviceLabel()), () -> {
+                    button(10, 104, 296, Component.literal("Services: " + serviceLabel()), () -> {
                         serviceMode = switch (serviceMode) {
                             case "BOTH" -> "DEPOSIT";
                             case "DEPOSIT" -> "WITHDRAW";
                             case "WITHDRAW" -> "DISABLED";
                             default -> "BOTH";
                         };
-                        if (!serviceMode.equals("DISABLED") && acceptedCurrencies.isEmpty())
-                            EconomyCurrency.all().forEach(value -> acceptedCurrencies.add(value.code()));
                         rebuild();
-                    });
-                    var currencies = EconomyCurrency.all();
-                    for (int i = 0; i < currencies.size(); i++) {
-                        String code = currencies.get(i).code();
-                        var control = button(10 + i % 5 * 60, 110 + i / 5 * 20, 56,
-                                Component.literal((acceptedCurrencies.contains(code) ? "✓ " : "") + code), () -> {
-                                    if (!acceptedCurrencies.remove(code)) acceptedCurrencies.add(code);
-                                    rebuild();
-                                });
-                        control.active = !menu.busy() && !serviceMode.equals("DISABLED");
-                    }
-                    button(10, 154, 136, Component.literal("All currencies"), () -> {
-                        EconomyCurrency.all().forEach(value -> acceptedCurrencies.add(value.code())); rebuild();
                     });
                     var save = button(160, 188, 146, text("action.configure"),
                             () -> send("configure", serviceMode + ";" + String.join(",", acceptedCurrencies) + ";all"));
@@ -202,13 +209,14 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
             default -> { }
         }
         if (needsRetry()) button(menu.page().equals("deposit") ? 184 : 10, menu.page().equals("deposit") ? 166 : 188, menu.page().equals("deposit") ? 122 : 136, text("retry"),
-                () -> send(Set.of("setup", "accounts", "manage", "history", "fx", "settings", "close").contains(menu.page()) ? "bank_retry" : "retry", ""));
+                () -> send(Set.of("setup", "accounts", "manage", "history", "fx", "settings", "close", "branch", "branch_targets", "brands", "brand_review", "branch_products", "cards", "card_funding", "card_review", "credit_profile", "credit_history", "credit_facilities", "credit_facility", "credit_statements").contains(menu.page()) ? "bank_retry" : "retry", ""));
         updatePrimary();
     }
     private String[] homePages() {
         return switch (menu.access()) {
-            case ATM, TELLER -> new String[]{"accounts", "deposit", "withdraw", "fx", "claims"};
-            case CARD -> new String[]{"accounts", "fx", "claims"};
+            case ATM, TELLER -> new String[]{"accounts", "deposit", "withdraw", "fx", "claims", "cards", "credit_profile", "credit_facilities"};
+            case KIOSK -> new String[]{"manage_accounts"};
+            case CARD -> new String[]{"accounts", "fx", "claims", "cards", "credit_profile", "credit_facilities"};
             case REGISTER -> new String[]{"shop", "claims"};
             case ADMIN -> new String[]{"settings"};
             case WORLD_SETUP -> new String[0];
@@ -295,13 +303,15 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
         boolean deposit = menu.page().equals("deposit");
         int x = deposit ? 164 : 10, y = deposit ? 98 : Set.of("fx", "withdraw").contains(menu.page()) ? 134 : 76;
         int bottom = deposit ? 136 : Set.of("settings", "shop", "setup").contains(menu.page()) ? 154 : 184;
-        boolean rowPage = menu.page().equals("accounts") || menu.page().equals("claims");
+        boolean rowPage = Set.of("accounts", "claims", "branch", "branch_targets", "brands", "branch_products", "cards", "card_funding", "credit_facilities").contains(menu.page());
+        if (rowPage && !menu.lines().isEmpty())
+            g.drawString(font, font.plainSubstrByWidth(menu.lines().getFirst(), 296), 10, 57, MUTED, false);
         boolean configurationForm = menu.page().equals("settings") && !choices("configure").isEmpty();
         if (menu.page().equals("manage")) {
             var accounts = choices("account_close_preview");
             for (int i = 0; i < accounts.size(); i++)
-                g.drawString(font, font.plainSubstrByWidth(accounts.get(i).label(), 186), 10, 79 + i * 24, TEXT, false);
-            String label = accounts.size() >= 3 ? "" : "Open another account";
+                g.drawString(font, font.plainSubstrByWidth(accounts.get(i).label(), 186), 10, 79 + i * 21, TEXT, false);
+            String label = "";
             g.drawString(font, label, 10, 151, MUTED, false);
         } else if (menu.page().equals("home")) {
             // The home page consists of action buttons.
@@ -313,7 +323,12 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
             g.fill(10, 103, 306, 104, 0xff335b5a);
             drawLines(g, hasHeading ? menu.lines().subList(Math.min(2, menu.lines().size()), menu.lines().size())
                     : menu.lines(), 10, 112, 296, 184);
-        } else if (configurationForm) g.drawString(font, "Accepted currencies", 10, 99, MUTED, false);
+        } else if (menu.page().equals("settings")) {
+            if (configurationForm) {
+                g.drawString(font, "Cash currency: " + String.join(", ", acceptedCurrencies), 10, 132, MUTED, false);
+                g.drawString(font, "Bank binding controls accepted cash.", 10, 146, MUTED, false);
+            } else drawLines(g, menu.lines(), 10, 104, 296, 184);
+        }
         else if (!rowPage || menu.choices().isEmpty()) drawLines(g, menu.lines(), x, y, 306 - x, bottom);
         if (rowPage) scrollbar(g, menu.choices().size());
         if (input != null) {
@@ -348,7 +363,7 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
     @Override public void removed() { menu.setDepositSlotsVisible(true); super.removed(); }
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
         if (mouseX >= leftPos + 8 && mouseX < leftPos + 308 && mouseY >= topPos + 72 && mouseY < topPos + 184) {
-            if (!chooser.isEmpty() || Set.of("accounts", "claims").contains(menu.page())) {
+            if (!chooser.isEmpty() || Set.of("accounts", "claims", "branch", "branch_targets", "brands", "branch_products", "cards", "card_funding", "credit_facilities").contains(menu.page())) {
                 int count = chooser.isEmpty() ? menu.choices().size() : choices(chooser).size();
                 scroll = Math.clamp(scroll + (vertical > 0 ? -1 : 1), 0, Math.max(0, count - 6)); rebuild();
             } else if (!menu.page().equals("deposit") || mouseX >= leftPos + 164) scroll = Math.max(0, scroll + (vertical > 0 ? -1 : 1));

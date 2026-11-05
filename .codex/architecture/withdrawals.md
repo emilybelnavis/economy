@@ -69,3 +69,7 @@ outcomes before attempting delivery.
 
 
 Current player-facing integration is delivered in [A5-09 banking menus](banking.md); that contract supersedes earlier statements here that menus are pending. Existing subsystem safety and save-evidence requirements still apply.
+
+## CHF exact cash settlement
+
+CHF cash/account previews bind CHF_MINOR_V2 and emit withdrawal factv2, preserving account cents while requiring exact physical representability. Teller uses notes/coins; ATM notes only;1.02CHF rejects. Old nonCHF quantum/serialization remain. Deterministic lots, full-batch capacity, saved delivery, custody and original-ID recovery are unchanged. Catalog bound becomes131; all solver/item/work budgets remain. See [the current CHF contract](chf.md) and [verification](../verification/A6-03-01.md).

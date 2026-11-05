@@ -1,9 +1,9 @@
 # Cash and cards
 
-CashCatalog restores the 118 original cash IDs and eight card IDs from
-75fd816. All 126 item models and textures are byte-identical to that source.
+CashCatalog preserves the118 original cash IDs and eight card IDs from
+75fd816, and adds13 original CHF cash items under [the CHF contract](chf.md). All 126 item models and textures are byte-identical to that source.
 Face values use A2 currency minor units. Both Canadian bill artworks retain
-their distinct original item IDs. There are twelve original tab identities.
+their distinct original item IDs. The twelve original tab identities remain, plus the new CHF tab.
 The main Economy tab currently provides a cash/card overview while terminal
 items await their own package. Collectibles retain their recipe-free behavior.
 
@@ -55,3 +55,11 @@ lot remains exhausted and cannot be redeemed again.
 LedgerService.cashIssuance binds trusted admission, catalog validation, live
 authority, evidence and financial composition. Deposit and withdrawal gameplay
 are later packages and remain gated by their custody integration checks.
+
+## CHF extension
+
+The current catalog has131 cash items/eight cards and13 tabs. CHF notes10/20/50/100/200/1000 and coins0.05/0.10/0.20/0.50/1/2/5 use100 minor units/major. Editable original64px pixel art/provenance is in tools/chf-assets. All old item artwork/IDs remain unchanged. Actual registered CHF item/component serialization and vanilla splitting are checked; financial issuance/redemption retains the existing world/lot/custody/save authority. New CHF settlement uses strict v2 facts; unmarked cash remains the existing operator-created-cash trust boundary. See [CHF precision and versioning](chf.md).
+
+## A6-06 issued debit tokens
+
+[Issued-card lifecycle and custody](issued-cards.md) adds28 distinct debit items while preserving all eight generic collectibles. Token items carry world/token references only; issuer/owner/account/status/expiry/provider checks are authoritative. First issuance/renewal/replacement use issuer kiosks and A5 protected delivery; debit never establishes credit or a score.

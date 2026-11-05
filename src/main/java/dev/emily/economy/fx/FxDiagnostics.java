@@ -13,7 +13,11 @@ import java.util.UUID;
 /** Detached operational state from one storage-worker read transaction. */
 public record FxDiagnostics(Instant sampledAt, EconomyCurrency reference, LocalDate lastDay,
                             UUID effectivePolicy, LocalDate nextDay, long backlog, boolean waitingForWall,
-                            PendingPolicy pending) {
+                            PendingPolicy pending, boolean chfAvailable, LocalDate chfScheduledDay) {
+    public FxDiagnostics(Instant sampledAt, EconomyCurrency reference, LocalDate lastDay, UUID effectivePolicy,
+                         LocalDate nextDay, long backlog, boolean waitingForWall, PendingPolicy pending) {
+        this(sampledAt, reference, lastDay, effectivePolicy, nextDay, backlog, waitingForWall, pending, false, null);
+    }
     public record PendingPolicy(LocalDate day, UUID id) {}
 
     public static FxDiagnostics read(FoundationStore.Transaction tx, Instant now) {
@@ -40,6 +44,8 @@ public record FxDiagnostics(Instant sampledAt, EconomyCurrency reference, LocalD
         var pending = FxService.nextPolicy(tx::query, lastDay);
         return new FxDiagnostics(now, publication.reference(), lastDay, publication.policyId(),
                 lastDay.plusDays(1), backlog, waiting,
-                pending == null ? null : new PendingPolicy(pending.effectiveDay(), pending.id()));
+                pending == null ? null : new PendingPolicy(pending.effectiveDay(), pending.id()),
+                publication.rates().containsKey(EconomyCurrency.CHF),
+                FxService.chfActivationDay(tx::query));
     }
 }

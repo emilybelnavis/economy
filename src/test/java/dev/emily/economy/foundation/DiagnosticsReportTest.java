@@ -31,7 +31,7 @@ class DiagnosticsReportTest {
                 "/private-failure", CORRELATION, null));
         assertTrue(report.contains("Storage unknown, world " + WORLD + ", schema 1, last committed sequence 12"));
         assertTrue(report.contains("projection rebuild, checkpoint 3, target 9"));
-        assertTrue(report.contains("frontier 5, backlog 2, observed rate unavailable"));
+        assertTrue(report.contains("frontier 5, pending work units 2, observed rate unavailable"));
         assertTrue(report.contains("oldest active 6000 ms, possible stall"));
         assertTrue(report.contains("Unresolved at shutdown 4"));
         assertTrue(report.contains("Last failure unknown, correlation " + CORRELATION));
@@ -54,7 +54,7 @@ class DiagnosticsReportTest {
         var current = fx(healthy, null);
         assertEquals("FX current.", current.getFirst());
         assertTrue(current.get(1).contains("effective policy " + WORLD));
-        assertTrue(current.get(3).contains("pending policy " + CORRELATION));
+        assertTrue(current.get(4).contains("pending policy " + CORRELATION));
         assertEquals("FX catch-up due.", fx(overdue, null).getFirst());
         assertTrue(fx(overdue, null).get(2).contains("backlog 2"));
         assertEquals("FX waiting for UTC wall clock.", fx(waiting, null).getFirst());

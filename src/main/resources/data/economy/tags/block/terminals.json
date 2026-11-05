@@ -35,6 +35,7 @@
     "economy:green_register",
     "economy:red_register",
     "economy:black_register",
-    "economy:teller"
+    "economy:teller",
+    "economy:branch_kiosk"
   ]
 }

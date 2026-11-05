@@ -22,12 +22,33 @@ class BankingAccountManagementTest {
         assertThrows(UnsupportedOperationException.class, () -> available.add(CAD));
     }
 
-    @Test void primaryAccountCountsTowardTheThreeAccountCap() {
+    @Test void chfOpeningIsOfferedOnlyFromAPublishedRateSnapshot() {
+        var primary = bank(CAD, true, AccountIdentity.Status.OPEN);
+        var legacy = EnumSet.allOf(EconomyCurrency.class);
+        legacy.remove(CHF);
+        assertFalse(BankingAccounts.availableCurrencies(List.of(primary), legacy).contains(CHF));
+        assertTrue(BankingAccounts.availableCurrencies(List.of(primary), EnumSet.allOf(EconomyCurrency.class)).contains(CHF));
+        var secondary = bank(CHF, false, AccountIdentity.Status.OPEN);
+        assertFalse(BankingAccounts.availableCurrencies(List.of(primary, secondary), EnumSet.allOf(EconomyCurrency.class)).contains(CHF));
+        assertEquals(4, AccountIdentity.MAX_OPEN_BANK_ACCOUNTS, "The total includes the permanent primary");
+    }
+
+    @Test void chfExchangeInputsPreserveExactMinorUnitsWithoutChangingLegacyInputRules() {
+        assertEquals(new Money(CHF, 5), BankingAccounts.exchangeAmount(CHF, CAD, "0.05"));
+        assertEquals(new Money(CAD, 8), BankingAccounts.exchangeAmount(CAD, CHF, "0.08"));
+        assertEquals(new Money(CAD, 100), BankingAccounts.exchangeAmount(CAD, USD, "1"));
+        assertThrows(NumberFormatException.class, () -> BankingAccounts.exchangeAmount(CAD, USD, "0.08"));
+        assertThrows(IllegalArgumentException.class, () -> BankingAccounts.exchangeAmount(CHF, CAD, "0.001"));
+        assertThrows(ArithmeticException.class, () -> BankingAccounts.exchangeAmount(JPY, CHF, "0.05"));
+        assertThrows(ArithmeticException.class, () -> BankingAccounts.exchangeAmount(CHF, CAD, "92233720368547758.08"));
+    }
+
+    @Test void primaryAccountCountsTowardTheFourAccountCap() {
         var primary = bank(CAD, true, AccountIdentity.Status.OPEN);
         var usd = bank(USD, false, AccountIdentity.Status.OPEN);
         var euro = bank(EUR, false, AccountIdentity.Status.OPEN);
         assertFalse(BankingAccounts.availableCurrencies(List.of(primary, usd)).isEmpty());
-        assertTrue(BankingAccounts.availableCurrencies(List.of(primary, usd, euro)).isEmpty());
+        assertFalse(BankingAccounts.availableCurrencies(List.of(primary, usd, euro)).isEmpty());
         assertTrue(BankingAccounts.availableCurrencies(List.of(primary, usd, euro, bank(GBP, false, AccountIdentity.Status.OPEN))).isEmpty());
     }
 

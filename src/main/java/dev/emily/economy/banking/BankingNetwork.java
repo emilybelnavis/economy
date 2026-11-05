@@ -16,7 +16,7 @@ public final class BankingNetwork {
     public static final Set<String> ACTIONS = Set.of("home", "manage_accounts", "setup", "accounts", "accounts_next", "account_select", "account_open", "account_close_preview", "account_close_confirm",
             "history", "history_next", "fx", "exchange_preview", "exchange_confirm", "bank_retry", "deposit",
             "deposit_preview", "deposit_confirm", "withdraw", "withdraw_preview", "withdraw_confirm", "shop",
-            "buy_preview", "buy_confirm", "claims", "claims_next", "collect", "settings", "configure", "banking", "price", "retry", "cancel");
+            "buy_preview", "buy_confirm", "claims", "claims_next", "collect", "settings", "configure", "banking", "price", "retry", "cancel", "branch_open", "branch_assign", "branch_switch", "branch_accept", "branch_close", "branch_products", "brand_preview", "brand_confirm", "cards", "card_select", "card_preview", "card_confirm", "card_lost", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next");
     private BankingNetwork() {}
     public record Action(int menuId, UUID session, long revision, String action, String value) implements CustomPacketPayload {
         public static final Type<Action> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("economy", "banking_action"));
@@ -102,12 +102,12 @@ public final class BankingNetwork {
     }
     public static void initialize(IEventBus bus) { bus.addListener(BankingNetwork::register); }
     private static void register(RegisterPayloadHandlersEvent event) {
-        var registrar = event.registrar("2");
+        var registrar = event.registrar("6");
         registrar.playToServer(Action.TYPE, Action.CODEC, (request, context) -> context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player && player.containerMenu instanceof BankingMenu menu
                     && menu.containerId == request.menuId()
                     && menu.acceptAction(player, request.session(), request.revision(), request.action()))
-                BankingController.action(player, menu, request.action(), request.value());
+                BankingController.checkedAction(player, menu, request.action(), request.value());
         }));
         registrar.playToClient(Snapshot.TYPE, Snapshot.CODEC, (snapshot, context) -> context.enqueueWork(() -> {
             if (context.player().containerMenu instanceof BankingMenu menu && menu.containerId == snapshot.menuId()

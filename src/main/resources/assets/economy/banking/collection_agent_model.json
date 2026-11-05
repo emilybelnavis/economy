@@ -1,0 +1,214 @@
+{
+  "schema": "economy:humanoid-art-v1",
+  "version": 1,
+  "license": "CC0-1.0",
+  "name": "Waystone Recovery Collection Agent",
+  "texture": "economy:entity/banking/collection_agent",
+  "texture_width": 64,
+  "texture_height": 64,
+  "parts": [
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "box": [
+        -4,
+        -8,
+        -4,
+        8,
+        8,
+        8
+      ],
+      "uv": [
+        0,
+        0
+      ],
+      "material": "skin"
+    },
+    {
+      "name": "hat",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "box": [
+        -4,
+        -8,
+        -4,
+        8,
+        8,
+        8
+      ],
+      "uv": [
+        32,
+        0
+      ],
+      "deformation": 0.25,
+      "material": "cap"
+    },
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "box": [
+        -4,
+        0,
+        -2,
+        8,
+        12,
+        4
+      ],
+      "uv": [
+        16,
+        16
+      ],
+      "material": "coat"
+    },
+    {
+      "name": "right_arm",
+      "parent": "root",
+      "pivot": [
+        -5,
+        2,
+        0
+      ],
+      "box": [
+        -3,
+        -2,
+        -2,
+        4,
+        12,
+        4
+      ],
+      "uv": [
+        40,
+        16
+      ],
+      "material": "sleeve"
+    },
+    {
+      "name": "left_arm",
+      "parent": "root",
+      "pivot": [
+        5,
+        2,
+        0
+      ],
+      "box": [
+        -1,
+        -2,
+        -2,
+        4,
+        12,
+        4
+      ],
+      "uv": [
+        32,
+        48
+      ],
+      "material": "sleeve"
+    },
+    {
+      "name": "right_leg",
+      "parent": "root",
+      "pivot": [
+        -1.9,
+        12,
+        0
+      ],
+      "box": [
+        -2,
+        0,
+        -2,
+        4,
+        12,
+        4
+      ],
+      "uv": [
+        0,
+        32
+      ],
+      "material": "trousers"
+    },
+    {
+      "name": "left_leg",
+      "parent": "root",
+      "pivot": [
+        1.9,
+        12,
+        0
+      ],
+      "box": [
+        -2,
+        0,
+        -2,
+        4,
+        12,
+        4
+      ],
+      "uv": [
+        16,
+        32
+      ],
+      "material": "trousers"
+    },
+    {
+      "name": "satchel",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "box": [
+        3,
+        7,
+        1,
+        4,
+        5,
+        2
+      ],
+      "uv": [
+        48,
+        34
+      ],
+      "material": "satchel"
+    },
+    {
+      "name": "folio",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "box": [
+        -3,
+        4,
+        -3,
+        6,
+        5,
+        1
+      ],
+      "uv": [
+        32,
+        32
+      ],
+      "material": "paper"
+    }
+  ],
+  "authority": "Presentation only. No entity, item, spawning, interaction or financial registration.",
+  "future_owner": "A6-11",
+  "geometry_factory": "dev.emily.economy.client.CollectionAgentGeometry.create",
+  "uv_layout": "Minecraft CubeListBuilder box UV layout; transparent cap overlay below top band."
+}

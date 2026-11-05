@@ -65,3 +65,7 @@ scan limits are reported separately from missing evidence or a mismatched
 snapshot. Observation cannot change case state. Audit correlation includes
 the immutable journaled case snapshot so later reconciliation cannot overwrite
 the evidence associated with the original operation.
+
+## A6-06 card-specific recovery
+
+[Issued-card delivery](issued-cards.md) composes a COMMITTED obligation in the financial issue transaction. Bounded startup reconciliation strictly verifies token/case/immutable outcome before retaining known card claims/delivered cases or converting never-attempted COMMITTED card delivery to an owner claim. Ambiguous attempts and legacy cases retain quarantine behavior. Inventory and SQLite remain non-atomic; replay never materializes another card.

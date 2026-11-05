@@ -1,6 +1,6 @@
 # A6 missing-policy review
 
-Status: **approved by the user on 2026-11-04**. The user directed: “quadruple the bank funding to 28 billion. remaining proposed policy set approved as well.” All allocations below are four times the reviewed values; all other policies are approved unchanged. This record and the three linked detailed contracts are normative additions to the A6 specification. No remaining policy-approval blockers are recorded; A6-01 contract/interface work is still not started or verified.
+Status: **approved by the user on 2026-11-04**. The user directed: “quadruple the bank funding to 28 billion. remaining proposed policy set approved as well.” All allocations below are four times the reviewed values; all other policies are approved unchanged. This record and the three linked detailed contracts are normative additions to the A6 specification. No remaining policy-approval blockers are recorded; A6-01 contract/interface document checkpoint is delivered in [CONTRACT.md](CONTRACT.md); no runtime behavior is implemented or verified.
 
 ## Approved policy set
 
@@ -44,6 +44,6 @@ Where a detailed contract overlaps another: Servicing owns deadline, payment, de
 
 ## Execution handoff after approval
 
-All D01–D17 policy inputs in this set are approved. A6-01 now applies these contracts, inventories current upstream behavior, assigns shared identifiers/state vocabulary and plans persistent facts/migration/interfaces. It does not need another approval for these choices. Policy approval is not evidence that A6-01 or a downstream implementation is complete.
+All D01–D17 policy inputs in this set are approved. A6-01 applied these contracts in [CONTRACT.md](CONTRACT.md), with current upstream inventory, shared identifiers/state vocabulary and persistent fact/migration/interface boundaries. It does not need another approval for these choices. Policy approval is not evidence that A6-01 or a downstream implementation is complete.
 
 Execute one package at a time under the existing phase approval, with actual prerequisite evidence and its scoped checks. Preserve the approved calendar, APRs, starter entitlement, roster, four-account cap, kiosk visit requirements and all balances/worlds. Material newly discovered incompatibilities must be reported with a concrete proposed resolution; do not resurrect superseded draft blockers.

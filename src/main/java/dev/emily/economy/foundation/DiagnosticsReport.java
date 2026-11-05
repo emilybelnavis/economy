@@ -22,7 +22,7 @@ public final class DiagnosticsReport {
         String availability = switch (state) {
             case INITIALIZING -> "Economy is starting (" + phase + ").";
             case READY -> metrics.economy().ready() ? "Economy is available."
-                    : "Economy is catching up (" + metrics.economy().outstandingIntervals() + " intervals pending).";
+                    : "Economy is catching up (scheduled work pending).";
             case UNAVAILABLE -> "Economy is unavailable.";
             case STOPPING -> "Economy is stopping.";
             case STOPPED -> "Economy is stopped.";
@@ -45,7 +45,7 @@ public final class DiagnosticsReport {
         var economy = metrics.economy();
         String rate = intervalsPerSecond != null && Double.isFinite(intervalsPerSecond) && intervalsPerSecond >= 0
                 ? String.format(Locale.ROOT, "%.2f intervals/s", intervalsPerSecond) : "unavailable";
-        lines.add("Economic frontier " + economy.completedSequence() + ", backlog " + economy.outstandingIntervals()
+        lines.add("Economic frontier " + economy.completedSequence() + ", pending work units " + economy.outstandingIntervals()
                 + ", observed rate " + rate + (economy.waitingForWall() ? ", waiting for wall clock" : "") + ".");
         lines.add(queue("Storage", metrics.storage()));
         lines.add(queue("Calculation", metrics.calculation()));
@@ -76,11 +76,16 @@ public final class DiagnosticsReport {
         } else {
             lines.add(snapshot.backlog() == 0 ? "FX current." : "FX catch-up due.");
         }
+        if (snapshot != null && snapshot.reference() == null)
+            lines.add("CHF catalog 13 denominations (6 notes, 7 coins); two-decimal ledger; FX unavailable until world currency selection.");
         if (snapshot != null && snapshot.reference() != null) {
             lines.add("FX sample " + snapshot.sampledAt() + ", reference " + snapshot.reference().code()
                     + ", last committed UTC day " + snapshot.lastDay() + ", effective policy "
                     + snapshot.effectivePolicy() + ".");
             lines.add("FX next due UTC day " + snapshot.nextDay() + ", backlog " + snapshot.backlog() + ".");
+            lines.add("CHF catalog 13 denominations (6 notes, 7 coins); two-decimal ledger; FX "
+                    + (snapshot.chfAvailable() ? "available in committed publication" : "unavailable before activation")
+                    + (snapshot.chfScheduledDay() == null ? "" : (snapshot.chfAvailable() ? ", effective UTC day " : ", scheduled UTC day ") + snapshot.chfScheduledDay()) + ".");
             var pending = snapshot.pending();
             lines.add(pending == null ? "FX pending policy none." : "FX pending policy " + pending.id()
                     + ", scheduled UTC day " + pending.day() + ".");
@@ -104,7 +109,7 @@ public final class DiagnosticsReport {
         if (phase == null) return "unknown";
         if (phase.startsWith("projection:")) return "projection rebuild";
         return switch (phase) {
-            case "storage", "storage-ready", "journal-validation", "ready", "catch-up", "waiting-for-wall-clock", "projection-final-validation", "custody-reconciliation", "cash-reconciliation", "deposit-reconciliation", "deposit-return-reconciliation", "withdrawal-reconciliation", "register-reconciliation" -> phase;
+            case "storage", "storage-ready", "journal-validation", "ready", "catch-up", "waiting-for-wall-clock", "projection-final-validation", "bank-provider-migration", "valuation-source-registration", "pricing-activation", "custody-reconciliation", "cash-reconciliation", "deposit-reconciliation", "deposit-return-reconciliation", "withdrawal-reconciliation", "register-reconciliation" -> phase;
             default -> "unknown";
         };
     }
@@ -116,7 +121,7 @@ public final class DiagnosticsReport {
         };
     }
 
-    private static String failure(String value) {
+    static String failure(String value) {
         for (var kind : StorageException.Kind.values()) {
             if (value.equals("STORAGE_" + kind.name())) return value;
         }

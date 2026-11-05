@@ -67,13 +67,14 @@ class DepositsTest {
             assertEquals(Status.COMMITTED, change(store, Deposits.Action.COMMIT, skippedId, "saved", "confirm").status());
             assertEquals(64, lot(store, eur).remaining());
             assertEquals(1, store.transaction(tx -> DepositReturns.list(tx::query, owner, skippedId)).size());
-            var mixed = preview(store, List.of(slot(store, 0, cad, 4), slot(store, 1, eur, 1)));
+            assertThrows(IllegalArgumentException.class,()->preview(store,List.of(slot(store,0,cad,4),slot(store,1,eur,1))));
+            var mixed = preview(store, List.of(slot(store, 0, cad, 4)));
             assertEquals(100L, mixed.credit().minorUnits());
-            assertEquals(1, mixed.returned().size());
+            assertEquals(1, skipped.returned().size());
             var id = reserve(store, mixed);
             change(store, Deposits.Action.SAVED, id, "saved", "confirm");
             assertEquals(Status.COMMITTED, change(store, Deposits.Action.COMMIT, id, "saved", "confirm").status());
-            var returns = store.transaction(tx -> DepositReturns.list(tx::query, owner, id));
+            var returns = store.transaction(tx -> DepositReturns.list(tx::query, owner, skippedId));
             assertEquals("original-components-" + eur, returns.getFirst().components());
             assertEquals(1, returns.getFirst().count());
             assertEquals(60, lot(store, cad).remaining());
@@ -167,11 +168,11 @@ class DepositsTest {
             accountRevision = 2;
             var second = reserve(store, preview(store, List.of(slot(store, 0, cad, 4))));
             change(store, Deposits.Action.SAVED, second, "saved", "confirm");
-            store.transaction(tx -> tx.execute("UPDATE terminal_settings SET revision=3", List.of()));
+            store.transaction(tx -> tx.execute("UPDATE terminal_settings SET revision=4", List.of()));
             assertEquals(Status.DURABLY_REJECTED, change(store, Deposits.Action.COMMIT, second, "saved", "confirm").status());
             assertEquals(Status.COMMITTED, change(store, Deposits.Action.CANCEL, second, "held", "page-change").status());
             store.transaction(tx -> tx.execute("""
-                    UPDATE terminal_settings SET revision=2,terminal_kind='ATM',currencies='CAD',
+                    UPDATE terminal_settings SET revision=3,terminal_kind='ATM',currencies='CAD',
                     denominations='economy:cad_bill_5'
                     """, List.of()));
             assertThrows(IllegalArgumentException.class, () -> preview(store, List.of(slot(store, 0, cad, 4))));
@@ -269,13 +270,15 @@ class DepositsTest {
                     "economy:cad_bill_20", 1), "creative-bill", true);
             var coin = new Deposits.Slot(1, new CashIssuance.Claim(store.snapshot().worldId(), UUID.randomUUID(),
                     "economy:cad_coin_25", 4), "creative-coins", true);
-            var preview = preview(store, List.of(bill, coin));
+            assertEquals("DEPOSIT_MODE",assertThrows(IllegalArgumentException.class,()->preview(store,List.of(bill,coin))).getMessage());
+            var preview = new Deposits.Preview(new Deposits.Binding(account,accountRevision,CAD,anchor,generation,3,fxRevision),List.of(bill,coin),
+                    List.of(new Deposits.Group(CAD,5,new Money(CAD,2100),new Money(CAD,2100),false)),new Money(CAD,2100),List.of(bill,coin),List.of());
             assertEquals(new Money(CAD, 2100), preview.credit());
-            var id = reserve(store, preview);
+            var id = historicalReserve(store, preview);
             assertEquals(Status.COMMITTED, change(store, Deposits.Action.SAVED, id, "saved", "confirm").status());
             assertEquals(Status.COMMITTED, change(store, Deposits.Action.COMMIT, id, "saved", "confirm").status());
             assertEquals(2100, balance(store));
-            assertEquals("DISABLED", store.transaction(tx -> tx.query("SELECT mode FROM terminal_settings", List.of(), 1)).getFirst().get("mode"));
+            assertEquals("DISABLED", store.transaction(tx -> tx.query("SELECT mode FROM terminal_settings WHERE dimension=? AND x=? AND y=? AND z=?", List.of(anchor.dimension(),Integer.toString(anchor.x()),Integer.toString(anchor.y()),Integer.toString(anchor.z())), 1)).getFirst().get("mode"));
         } finally { store.close(); }
     }
 
@@ -305,7 +308,11 @@ class DepositsTest {
         var store = open();
         try {
             seed(store);
-            var id = reserve(store, preview(store, List.of(slot(store, 0, cad, 4), slot(store, 1, eur, 1))));
+            var cadSlot=slot(store,0,cad,4);var eurSlot=slot(store,1,eur,1);
+            var legacy = new Deposits.Preview(new Deposits.Binding(account,accountRevision,CAD,anchor,generation,3,fxRevision),List.of(cadSlot,eurSlot),
+                    List.of(new Deposits.Group(CAD,4,new Money(CAD,100),new Money(CAD,100),false),new Deposits.Group(EUR,1,new Money(EUR,1),new Money(CAD,0),true)),
+                    new Money(CAD,100),List.of(cadSlot),List.of(eurSlot));
+            var id=historicalReserve(store,legacy);
             change(store, Deposits.Action.SAVED, id, "saved", "confirm");
             store.transaction(tx -> tx.execute("""
                     INSERT INTO deposit_returns(deposit_id,slot,world_id,lot_id,item_id,count,components,state,revision)
@@ -358,6 +365,26 @@ class DepositsTest {
         } finally { store.close(); }
     }
 
+    private TerminalPolicy.Anchor terminal(EconomyCurrency currency) { return currency==CAD?anchor:new TerminalPolicy.Anchor(anchor.dimension(),anchor.x()+8,anchor.y(),anchor.z()); }
+    private UUID physicalGeneration(EconomyCurrency currency) { return currency==CAD?generation:UUID.nameUUIDFromBytes((generation+"EUR").getBytes(java.nio.charset.StandardCharsets.UTF_8)); }
+    /** Frozen pre-A6 pending row: new mixed/disabled reservations are denied, but original cash must reconcile. */
+    private UUID historicalReserve(SqliteStorage store,Deposits.Preview preview) {
+        var fields=Deposits.reserveRequest(preview).fields();
+        var slots=fields.entrySet().stream().filter(e->e.getKey().startsWith("slot_")).sorted(java.util.Comparator.comparingInt(e->Integer.parseInt(e.getKey().substring(5)))).map(Map.Entry::getValue).collect(java.util.stream.Collectors.joining("\n"));
+        var payable=preview.payable().stream().map(s->Integer.toString(s.index())).collect(java.util.stream.Collectors.joining(","));
+        var encoded=pack(fields.get("binding"))+";"+fields.get("credit")+";"+pack(fields.get("groups"))+";"+pack(slots)+";"+payable;
+        if(fields.containsKey("settlement"))encoded+=";"+fields.get("settlement");
+        var id=UUID.randomUUID();var frozen=encoded;
+        store.transaction(tx->{
+            tx.execute("UPDATE terminal_bank_bindings SET bank_key='',catalog_revision=0,native_currency='',migration_state='UNBOUND_BANK'",List.of());
+            tx.execute("INSERT INTO deposits VALUES(?,?,'RESERVED',?,'pending','legacy fixture',1)",List.of(id.toString(),Journal.actorKey(owner),frozen));
+            var counts=new HashMap<UUID,Integer>();for(var slot:preview.slots())if(!slot.unmarked())counts.merge(slot.claim().lot(),slot.claim().count(),Integer::sum);
+            counts.forEach((lot,count)->tx.execute("INSERT INTO deposit_cash_reservations VALUES(?,?,?,'ACTIVE')",List.of(id.toString(),lot.toString(),Integer.toString(count))));
+            return null;
+        });
+        return id;
+    }
+    private static String pack(String value) { return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(java.nio.charset.StandardCharsets.UTF_8)); }
     private SqliteStorage open() throws Exception {
         var store = new SqliteStorage(); store.initialize(world.toRealPath()); return store;
     }
@@ -369,7 +396,8 @@ class DepositsTest {
                 lot.equals(cad) ? "economy:cad_coin_25" : "economy:eur_coin_1", count), "original-components-" + lot);
     }
     private Deposits.Preview preview(SqliteStorage store, List<Deposits.Slot> slots) {
-        var binding = new Deposits.Binding(account, accountRevision, CAD, anchor, generation, 2, fxRevision);
+        var currency=catalog.get(slots.getFirst().claim().item()).currency();
+        var binding = new Deposits.Binding(account, accountRevision, CAD, terminal(currency), physicalGeneration(currency), 3, fxRevision);
         return store.transaction(tx -> Deposits.preview(tx::query, store.snapshot().worldId(), owner, binding, slots, catalog, this::fx));
     }
     private UUID reserve(SqliteStorage store, Deposits.Preview preview) {
@@ -414,19 +442,20 @@ class DepositsTest {
                             id.equals(cad) ? "economy:cad_coin_25" : "economy:eur_coin_1", "64", "64"));
             return null;
         });
-        Map<String, TerminalPolicy.Denomination> terminalCatalog = Map.of(
-                "economy:cad_coin_25", new TerminalPolicy.Denomination(CAD, false),
-                "economy:eur_coin_1", new TerminalPolicy.Denomination(EUR, false),
-                "economy:cad_bill_20", new TerminalPolicy.Denomination(CAD, true));
-        for (var action : List.of(TerminalPolicy.Action.PLACE, TerminalPolicy.Action.CONFIGURE)) {
-            var registration = TerminalPolicy.registration(action, store.snapshot().worldId(), terminalCatalog,
-                    (a, intent, current, reads) -> true, (actor, reads) -> false);
-            var request = action == TerminalPolicy.Action.PLACE
-                    ? TerminalPolicy.placeRequest(anchor, generation, owner, TerminalPolicy.Kind.TELLER, null, 0)
-                    : TerminalPolicy.configureRequest(anchor, generation, 1, TerminalPolicy.defaultSettings(TerminalPolicy.Kind.TELLER, terminalCatalog));
-            var engine = new JournalEngine(store, (actor, kind) -> true, Map.of(action.kind(), registration));
-            assertEquals(Status.COMMITTED, engine.submit(new Intent(new OperationId(UUID.randomUUID()),
-                    new RequestId(UUID.randomUUID()), owner, action.kind(), request, null, null)).status());
+        var terminalCatalog=new HashMap<String,TerminalPolicy.Denomination>();
+        catalog.forEach((id,d)->terminalCatalog.put(id,new TerminalPolicy.Denomination(d.currency(),d.bill())));
+        for(var currency:List.of(CAD,EUR)) {
+            var at=terminal(currency);var physicalGeneration=physicalGeneration(currency);
+            var place=TerminalPolicy.Action.PLACE;
+            assertEquals(Status.COMMITTED,new JournalEngine(store,(a,k)->true,Map.of(place.kind(),TerminalPolicy.registration(place,store.snapshot().worldId(),terminalCatalog,(a,i,c,r)->true,(a,r)->false)))
+                    .submit(new Intent(new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),owner,place.kind(),TerminalPolicy.placeRequest(at,physicalGeneration,owner,TerminalPolicy.Kind.TELLER,null,0),null,null)).status());
+            var bank=new dev.emily.economy.institution.InstitutionCatalog.InstitutionId("economy:bank/"+(currency==CAD?"crownstone":"meridian_grove"));
+            assertEquals(Status.COMMITTED,new JournalEngine(store,(a,k)->true,Map.of(TerminalBanking.BIND,TerminalBanking.registration(store.snapshot().worldId(),terminalCatalog,(a,i,c,r)->true,(a,r)->false)))
+                    .submit(new Intent(new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),owner,TerminalBanking.BIND,TerminalBanking.bindRequest(at,physicalGeneration,1,bank,true),null,null)).status());
+            var current=store.transaction(tx->TerminalPolicy.find(tx::query,store.snapshot().worldId(),at,owner,false)).orElseThrow();
+            var configure=TerminalPolicy.Action.CONFIGURE;
+            assertEquals(Status.COMMITTED,new JournalEngine(store,(a,k)->true,Map.of(configure.kind(),TerminalPolicy.registration(configure,store.snapshot().worldId(),terminalCatalog,(a,i,c,r)->true,(a,r)->false)))
+                    .submit(new Intent(new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),owner,configure.kind(),TerminalPolicy.configureRequest(at,physicalGeneration,2,TerminalBanking.settings(current,TerminalPolicy.Mode.BOTH,terminalCatalog)),null,null)).status());
         }
     }
 }

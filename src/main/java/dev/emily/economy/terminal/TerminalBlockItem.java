@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 
-/** Atomic four-cell placement; item NBT never supplies placement identity or satellite state. */
+/** Guarded multiblock placement; item NBT never supplies placement identity or satellite state. */
 public final class TerminalBlockItem extends BlockItem {
     public TerminalBlockItem(Block block, Properties properties) { super(block, properties); }
     @Override public InteractionResult place(BlockPlaceContext original) {
@@ -37,13 +37,13 @@ public final class TerminalBlockItem extends BlockItem {
         if (!(getBlock() instanceof WideTerminalBlock wide)) return super.placeBlock(context, state);
         if (!wide.canPlaceAll(context, state)) return false;
         var level = context.getLevel(); var anchor = context.getClickedPos();
-        var cells = TerminalGeometry.cells(anchor, state.getValue(WideTerminalBlock.FACING));
+        var cells = TerminalGeometry.cells(anchor, state);
         var before = cells.stream().map(level::getBlockState).toList();
         WideTerminalBlock.beginPlacement(level, anchor);
         boolean placed = false;
         try {
-            for (int cell = 0; cell < 4; cell++) {
-                if (!level.setBlock(cells.get(cell), state.setValue(WideTerminalBlock.CELL, cell), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE)) {
+            for (int cell = 0; cell < wide.cellCount(); cell++) {
+                if (!level.setBlock(cells.get(cell), state.setValue(wide.cellProperty(), cell), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE)) {
                     for (int restore = cell; restore >= 0; restore--) level.setBlock(cells.get(restore), before.get(restore), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
                     return false;
                 }

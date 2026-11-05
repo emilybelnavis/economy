@@ -1,0 +1,114 @@
+package dev.emily.economy.terminal;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import dev.emily.economy.institution.InstitutionCatalog;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+/** Resource-level compatibility checks require no Minecraft bootstrap or disposable world. */
+class BrandedHardwareResourcesTest {
+    private static final Path RESOURCES = Path.of("src/main/resources");
+    private static final Path ASSETS = RESOURCES.resolve("assets/economy");
+    private static final List<String> DYES = List.of("white", "orange", "magenta", "light_blue", "yellow", "lime",
+            "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black");
+    private static final List<String> FACING = List.of("north", "east", "south", "west");
+
+    @Test void everyLegacyIdentityHasEveryApprovedBrandFacingAndCell() throws IOException {
+        verifyStates("atm", "atm", 4);
+        verifyStates("teller", "teller", 4);
+        for (String dye : DYES) verifyStates(dye + "_atm", "atm", 4);
+        verifyStates("branch_kiosk", "kiosk", 2);
+    }
+
+    private static void verifyStates(String id, String kind, int cells) throws IOException {
+        assertTrue(Files.isRegularFile(ASSETS.resolve("models/item/" + id + ".json")), id);
+        var variants = json(ASSETS.resolve("blockstates/" + id + ".json")).getAsJsonObject("variants");
+        assertEquals(24 * cells * 4, variants.size(), id);
+        for (int bank = 0; bank <= 23; bank++) {
+            for (int cell = 0; cell < cells; cell++) {
+                for (int facing = 0; facing < FACING.size(); facing++) {
+                    String key = "bank=" + bank + ",cell=" + cell + ",facing=" + FACING.get(facing);
+                    assertTrue(variants.has(key), id + " " + key);
+                    var value = variants.getAsJsonObject(key);
+                    assertEquals(facing * 90, value.get("y").getAsInt(), id + " " + key);
+                    String model = value.get("model").getAsString();
+                    if (bank > 0) {
+                        String issuer = InstitutionCatalog.banks().get(bank - 1).id().key().substring("economy:bank/".length());
+                        assertEquals("economy:block/banking/" + issuer + "_" + kind + "_" + cell, model);
+                    }
+                    verifyModel(model);
+                }
+            }
+        }
+    }
+
+    private static void verifyModel(String id) throws IOException {
+        assertTrue(id.startsWith("economy:"));
+        var model = json(ASSETS.resolve("models/" + id.substring("economy:".length()) + ".json"));
+        if (model.has("parent") && model.get("parent").getAsString().startsWith("economy:"))
+            verifyModel(model.get("parent").getAsString());
+        if (model.has("textures")) for (var entry : model.getAsJsonObject("textures").entrySet()) {
+            String texture = entry.getValue().getAsString();
+            if (texture.startsWith("economy:"))
+                assertTrue(Files.isRegularFile(ASSETS.resolve("textures/" + texture.substring("economy:".length()) + ".png")), texture);
+        }
+    }
+
+    @Test void brandedAtmAndTellerKeepTheirExactLegacyGeometry() throws IOException {
+        for (var bank : InstitutionCatalog.banks()) {
+            String key = bank.id().key().substring("economy:bank/".length());
+            for (String kind : List.of("atm", "teller")) {
+                String base = kind.equals("atm") ? "atm" : "bank_teller_station";
+                List<String> originals = List.of(base + "_right", base, base + "_upper_right", base + "_upper");
+                for (int cell = 0; cell < 4; cell++) {
+                    var original = json(ASSETS.resolve("models/block/" + originals.get(cell) + ".json"));
+                    var branded = json(ASSETS.resolve("models/block/banking/" + key + "_" + kind + "_" + cell + ".json"));
+                    assertEquals(original.get("elements"), branded.get("elements"), key + " " + kind + " " + cell);
+                }
+            }
+        }
+    }
+
+    @Test void acquisitionIsNeutralAndDyeCannotSelectABank() throws IOException {
+        var recipe = json(RESOURCES.resolve("data/economy/recipe/branch_kiosk.json"));
+        assertEquals("minecraft:crafting_shaped", recipe.get("type").getAsString());
+        assertEquals(JsonParser.parseString("[\"IGI\",\"IRI\",\"ICI\"]"), recipe.get("pattern"));
+        var ingredients = recipe.getAsJsonObject("key");
+        assertEquals("minecraft:iron_ingot", ingredients.getAsJsonObject("I").get("item").getAsString());
+        assertEquals("minecraft:glass", ingredients.getAsJsonObject("G").get("item").getAsString());
+        assertEquals("minecraft:redstone", ingredients.getAsJsonObject("R").get("item").getAsString());
+        assertEquals("minecraft:chest", ingredients.getAsJsonObject("C").get("item").getAsString());
+        assertEquals(JsonParser.parseString("{\"id\":\"economy:branch_kiosk\",\"count\":1}"), recipe.get("result"));
+        for (String dye : DYES) assertFalse(Files.exists(RESOURCES.resolve("data/economy/recipe/" + dye + "_atm.json")), dye);
+        assertTrue(Files.isRegularFile(RESOURCES.resolve("data/economy/recipe/atm.json")));
+        assertTrue(Files.isRegularFile(RESOURCES.resolve("data/economy/recipe/teller.json")));
+        // Multiblock teardown owns the unique drop; vanilla loot must not create another.
+        for (String id : List.of("atm", "teller", "branch_kiosk"))
+            assertEquals(0, json(RESOURCES.resolve("data/economy/loot_table/blocks/" + id + ".json")).getAsJsonArray("pools").size());
+    }
+
+    @Test void cosmeticKioskDropsResolveEveryBankWithoutEmbeddingAuthority() throws IOException {
+        var overrides = json(ASSETS.resolve("models/item/branch_kiosk.json")).getAsJsonArray("overrides");
+        assertEquals(23, overrides.size());
+        for (int bank = 1; bank <= 23; bank++) {
+            var override = overrides.get(bank - 1).getAsJsonObject();
+            assertEquals(bank, override.getAsJsonObject("predicate").get("custom_model_data").getAsInt());
+            String issuer = InstitutionCatalog.banks().get(bank - 1).id().key().substring("economy:bank/".length());
+            assertEquals("economy:item/banking/" + issuer + "_kiosk", override.get("model").getAsString());
+            verifyModel(override.get("model").getAsString());
+        }
+        for (String tag : List.of("data/economy/tags/item/terminals.json", "data/economy/tags/block/terminals.json",
+                "data/minecraft/tags/block/mineable/pickaxe.json"))
+            assertTrue(json(RESOURCES.resolve(tag)).getAsJsonArray("values").contains(JsonParser.parseString("\"economy:branch_kiosk\"")), tag);
+        assertTrue(json(ASSETS.resolve("lang/en_us.json")).has("block.economy.branch_kiosk"));
+    }
+
+    private static JsonObject json(Path path) throws IOException {
+        return JsonParser.parseString(Files.readString(path)).getAsJsonObject();
+    }
+}

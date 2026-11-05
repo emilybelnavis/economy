@@ -1,10 +1,12 @@
 # A6 — Banks, credit and debt
 
-**Status: all 23 prompts approved for execution on 2026-11-04; implementation not started.** [Execution preparation and approval record](EXECUTION.md) gives the queue, missing-input checklist and first-package launch instructions. Select one package, finish its acceptance/handoff, then stop; no repeated prompt approval is needed.
+**Status: all 23 prompts approved for execution on 2026-11-04; A6-01 through A6-02-03 and A6-03-01/A6-03/A6-04 complete in their recorded scopes; later runtime products not started.** [Execution preparation and approval record](EXECUTION.md) gives the queue, missing-input checklist and first-package launch instructions. Select one package, finish its acceptance/handoff, then stop; no repeated prompt approval is needed.
 
 The user selected **elapsed UTC, 20 real minutes per financial day**, including downtime, and **APR/13 with thirteen monthly loan payments per year**. Other user rules and remaining unspecified inputs are recorded separately in [the specification](SPECIFICATION.md). Use the approved [original bank/network names and art scope](BRANDING.md) during asset implementation.
 
 The expansion adds **CHF cash and FX**, **23 banks** (18 Tier 1 including five hybrids; five Tier 2 specialists), **four open BANK accounts total**, bank-branded ATMs/tellers and a new **branch kiosk** for institution-specific opening/closing/replacement and credit-card/loan applications. Existing prompt IDs remain stable; the two new bounded packages bring the sequence to **23 prompts**.
+
+Shared implementation contract: [CONTRACT.md](CONTRACT.md). It defines stable identities, service boundaries, states, journal families, accounting/clock extensions and migration/package ownership.
 
 ## Ordered deployment prompts
 
@@ -42,4 +44,4 @@ Start with A6-01, then calendar A6-02-01 →02-02 →02-03. CHF registry/cash A6
 
 Current feature coverage and deliberate changes: [specification coverage ledger](SPECIFICATION.md#feature-coverage-and-later-handoffs). A7 owns later prime/economic simulation; B2/B4 owns future securities valuation/trading and fee application; B6 receives margin/collateral capabilities only. Shared API boundaries can be delivered now; downstream integrations require their own invocation.
 
-All D01–D17 policies, branding and CHF denominations are approved, including the user-adjusted **28-billion** finite institution seed. [The approved policy set](POLICY-REVIEW.md) and its three owner contracts are normative; no policy-input blockers remain. A6-01 remains the first package to execute for shared contracts/interfaces and migration planning; no A6 implementation or verification is claimed.
+All D01–D17 policies, branding and CHF denominations are approved, including the user-adjusted **28-billion** finite institution seed. [The approved policy set](POLICY-REVIEW.md) and its three owner contracts are normative; no policy-input blockers remain. A6-01 is complete as a document/source-review checkpoint; A6-02-01/02 deliver calendar scheduling and diagnostics, with [A6-02-03 acceptance](../../.codex/A6-02-03.md). [A6-03-01 CHF](../../.codex/A6-03-01.md) is verified. [A6-03 institutions/accounts](../../.codex/A6-03.md) is verified with live branch adapters deferred. [A6-04 qualification/pricing/yield](../../.codex/A6-04.md) is verified in scope. Next select A6-05 (original assets). Later bank/debt products remain unimplemented.

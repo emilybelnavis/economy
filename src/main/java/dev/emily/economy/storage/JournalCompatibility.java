@@ -67,6 +67,9 @@ public final class JournalCompatibility {
                             var entry = new Journal.Entry(record.getInt("position"), record.getString("record_type"), record.getInt("record_version"), record.getString("payload"));
                             bytes += entry.payload().getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
                             catalog.validate(entry.type(), entry.version(), entry.payload());
+                            if (entry.type().equals(dev.emily.economy.fx.FxFacts.PUBLICATION))
+                                dev.emily.economy.fx.FxFacts.Publication.decode(entry.payload(), entry.version());
+                            dev.emily.economy.clock.DeadlineDispatcher.validateStored(entry.type(), entry.payload(), connection);
                             if (entry.type().equals(dev.emily.economy.clock.EconomicRecord.TYPE)) {
                                 validateEconomic(entry.payload(), tx);
                                 economic = dev.emily.economy.clock.EconomicRecord.decode(entry.payload());

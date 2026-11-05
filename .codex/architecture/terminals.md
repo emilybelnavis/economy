@@ -64,3 +64,7 @@ The shop price command now requires a ready physical register and rechecks its c
 
 
 Current player-facing integration is delivered in [A5-09 banking menus](banking.md); that contract supersedes earlier statements here that menus are pending. Existing subsystem safety and save-evidence requirements still apply.
+
+## A6-05-01 current hardware
+
+[Branded hardware and branch sessions](branch-hardware.md) supersedes generic defaults above: V22 explicit bank bindings, native-only cash, disabled/unbound placement and legacy migration, two-cell kiosk, owner branding, immutable-after-enable binding, protocol3 and read-only inspection. Legacy IDs and existing A5 custody remain intact.

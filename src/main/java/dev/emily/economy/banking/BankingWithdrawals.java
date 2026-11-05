@@ -91,9 +91,9 @@ public final class BankingWithdrawals {
             if (!live(player, menu, session, revision)) return;
             if (error != null || !usable(context, menu)) { unavailable(player, menu); return; }
             final Parsed parsed;
-            try { parsed = parse(context.account().currency().code() + " " + value.trim()); }
+            try { parsed = parse(cashCurrency(context.terminal()).code() + " " + value.trim()); }
             catch (IllegalArgumentException | ArithmeticException invalid) {
-                show(player, menu, List.of("Enter a positive amount in " + context.account().currency().code() + ".", "Nothing was taken from your account."), "Check the amount and try again");
+                show(player, menu, List.of("Enter a positive cash amount in " + cashCurrency(context.terminal()).code() + ".", "Nothing was taken from your account."), "Check the amount and try again");
                 return;
             }
             state.world = context.world();
@@ -109,6 +109,10 @@ public final class BankingWithdrawals {
                 state.preview = quote;
                 var lines = new ArrayList<String>();
                 lines.add("Cash: " + money(quote.cash())); lines.add("Bank debit: " + money(quote.debit()));
+                if(quote.pricing()!=null) {
+                    var price=quote.pricing().split("\\|",-1);
+                    lines.add("FX principal: "+money(new Money(quote.debit().currency(),Long.parseLong(price[1])))+"; fee: "+money(new Money(quote.debit().currency(),Long.parseLong(price[3]))));
+                }
                 for (var line : quote.plan().lines()) lines.add(line.count() + " × " + money(new Money(quote.cash().currency(), line.denomination().minorUnits())));
                 lines.add("The entire batch needs " + stacks(quote) + " free inventory slots.");
                 lines.add("Choose Confirm withdrawal to debit and receive this exact batch.");
@@ -117,11 +121,17 @@ public final class BankingWithdrawals {
             });
         });
     }
+    static EconomyCurrency cashCurrency(TerminalPolicy.Snapshot terminal) {
+        if(terminal==null || terminal.binding()==null || !terminal.binding().bound())throw new IllegalArgumentException("UNBOUND_BANK");
+        return terminal.binding().nativeCurrency();
+    }
     private static boolean usable(LedgerService.BankingContext context, BankingMenu menu) {
         return context != null && context.account() != null && context.account().purpose() == AccountIdentity.Purpose.BANK
                 && context.account().status() == AccountIdentity.Status.OPEN && context.terminal() != null && context.fx() != null
                 && context.terminal().active() && context.terminal().generation().equals(menu.generation())
-                && context.terminal().kind() != TerminalPolicy.Kind.REGISTER && context.terminal().settings().mode().withdrawals();
+                && context.terminal().binding()!=null && context.terminal().binding().bound()
+                && context.terminal().kind() != TerminalPolicy.Kind.REGISTER && context.terminal().kind()!=TerminalPolicy.Kind.KIOSK
+                && context.terminal().settings().mode().withdrawals();
     }
     private static void confirm(ServerPlayer player, BankingMenu menu, State state) {
         if (state.preview == null || !menu.page().equals("withdraw") || menu.revision() != state.previewRevision

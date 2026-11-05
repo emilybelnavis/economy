@@ -15,7 +15,9 @@ class MonetaryTypesTest {
         var rates = Map.of("CAD", "1", "EUR", "1.5582", "GBP", "1.8699",
                 "AUD", "0.9813", "NZD", "0.7865", "USD", "1.3960", "HKD", "0.1779",
                 "JPY", "0.008870", "CNY", "0.2098", "DKK", "0.20881622293");
-        assertEquals(rates.size(), EconomyCurrency.all().size());
+        assertEquals(rates.size() + 1, EconomyCurrency.all().size());
+        assertEquals(new BigDecimal("1.600000000000"), CHF.historicalCadRate());
+        assertEquals(100, CHF.minorUnitsPerMajor());
         rates.forEach((code, rate) -> {
             EconomyCurrency currency = EconomyCurrency.fromCode(code);
             assertEquals(code, currency.code());
@@ -23,7 +25,7 @@ class MonetaryTypesTest {
             assertEquals(currency == JPY ? 1 : 100, currency.minorUnitsPerMajor());
         });
         assertThrows(UnsupportedOperationException.class, () -> EconomyCurrency.all().clear());
-        assertThrows(IllegalArgumentException.class, () -> EconomyCurrency.fromCode("CHF"));
+        assertEquals(CHF, EconomyCurrency.fromCode("CHF"));
         assertThrows(IllegalArgumentException.class, () -> EconomyCurrency.fromCode("cad"));
         assertThrows(IllegalArgumentException.class, () -> EconomyCurrency.fromCode(null));
     }
@@ -59,6 +61,7 @@ class MonetaryTypesTest {
     void displayUsesLocaleAndScaleWithoutLosingPrecision() {
         assertEquals("1.234,05 CAD", MoneyFormatter.format(new Money(CAD, 123405), Locale.GERMANY));
         assertEquals("1,234 JPY", MoneyFormatter.format(new Money(JPY, 1234), Locale.JAPAN));
+        assertEquals("0.01 CHF", MoneyFormatter.format(new Money(CHF, 1), Locale.ROOT));
         assertEquals("1.00 CAD", MoneyFormatter.format(new Money(CAD, 100), null));
         assertEquals("1.00 USD", MoneyFormatter.format(new Money(USD, 100), Locale.ROOT));
         assertEquals("1.00", MoneyFormatter.format(new Money(USD, 100), Locale.CANADA, false));

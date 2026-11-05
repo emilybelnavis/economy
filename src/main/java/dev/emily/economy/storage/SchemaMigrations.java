@@ -8,7 +8,7 @@ import java.util.UUID;
 /** Ordered trusted SQL; the complete pending chain shares one transaction. */
 final class SchemaMigrations {
     static final int MINIMUM_SUPPORTED = 1;
-    static final int CURRENT = 17;
+    static final int CURRENT = 27;
     static final int APPLICATION_ID = 0x45434F4E;
     record Migration(int version, String name, List<String> statements) {
         Migration { statements = List.copyOf(statements); }
@@ -42,7 +42,35 @@ final class SchemaMigrations {
                     java.util.stream.Stream.concat(DepositSchema.statements().stream(),
                             DepositReturnSchema.statements().stream()).toList()),
             new Migration(16, "exact withdrawals and committed delivery intents", WithdrawalSchema.statements()),
-            new Migration(17, "owner-priced register sales and stock custody", RegisterSalesSchema.statements()));
+            new Migration(17, "owner-priced register sales and stock custody", RegisterSalesSchema.statements()),
+            new Migration(18, "financial calendar and paged domain deadlines", FinancialCalendarSchema.statements()),
+            new Migration(19, "minor-unit CHF posting history", List.of("DROP INDEX ledger_posting_account", LedgerHistorySchema.V2_INDEX)),
+            new Migration(20, "institution capital and branch-bound account providers", institutionStatements()),
+            new Migration(21,"wealth pricing and funded deposit yield",pricingStatements()),
+            new Migration(22,"explicit bank terminal binding and legacy migration",TerminalBankingSchema.statements()),
+            new Migration(23,"owner-bound issued debit card lifecycle",dev.emily.economy.card.CardSchema.statements()),
+            new Migration(24,"dormant credit profiles and score policy history",dev.emily.economy.credit.CreditProfileSchema.statements()),
+            new Migration(25,"funded credit facilities and immutable statements",dev.emily.economy.credit.CreditFacilitySchema.statements()),
+            new Migration(26,"bounded credit diagnostics and immutable servicing witnesses",dev.emily.economy.credit.CreditAuditFacts.statements()),
+            new Migration(27,"ordered immutable credit lifecycle event source",List.of(dev.emily.economy.credit.CreditEvents.INDEX)));
+
+    private static List<String> pricingStatements() {
+        var sql=new java.util.ArrayList<String>();
+        sql.addAll(dev.emily.economy.pricing.PricingSchema.statements());
+        sql.addAll(dev.emily.economy.interest.InterestSchema.statements());
+        return List.copyOf(sql);
+    }
+
+    private static List<String> institutionStatements() {
+        var sql = new java.util.ArrayList<String>();
+        sql.addAll(dev.emily.economy.institution.InstitutionSchema.statements());
+        sql.addAll(dev.emily.economy.institution.ProviderSchema.statements());
+        sql.add("DROP TRIGGER account_insert_guard");
+        sql.add(AccountSchema.fourAccountGuard());
+        sql.add("DROP INDEX ledger_posting_account");
+        sql.add(LedgerHistorySchema.V3_INDEX);
+        return List.copyOf(sql);
+    }
 
     static void apply(Connection connection, UUID worldId, int from, int target, List<Migration> registry) {
         int expected = 1;

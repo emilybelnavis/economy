@@ -7,7 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** Four cells, ordered lower-left, lower-right, upper-left, upper-right from the front. */
+/** Geometry helpers preserve existing four-cell terminals and the vertical two-cell kiosk. */
 public final class TerminalGeometry {
     private TerminalGeometry() {}
     public static BlockPos cell(BlockPos anchor, Direction facing, int cell) {
@@ -17,10 +17,16 @@ public final class TerminalGeometry {
     public static List<BlockPos> cells(BlockPos anchor, Direction facing) {
         return List.of(cell(anchor, facing, 0), cell(anchor, facing, 1), cell(anchor, facing, 2), cell(anchor, facing, 3));
     }
+    public static List<BlockPos> cells(BlockPos anchor, BlockState state) {
+        if (!(state.getBlock() instanceof WideTerminalBlock wide)) return List.of(anchor.immutable());
+        var result = new java.util.ArrayList<BlockPos>(wide.cellCount());
+        for (int cell = 0; cell < wide.cellCount(); cell++)
+            result.add(wide.cellPosition(anchor, state.getValue(WideTerminalBlock.FACING), cell));
+        return List.copyOf(result);
+    }
     public static BlockPos anchor(BlockPos position, BlockState state) {
-        if (!(state.getBlock() instanceof WideTerminalBlock)) return position.immutable();
-        int cell = state.getValue(WideTerminalBlock.CELL);
-        return position.relative(state.getValue(WideTerminalBlock.FACING).getClockWise(), cell & 1).below(cell >> 1);
+        return state.getBlock() instanceof WideTerminalBlock wide
+                ? wide.anchorPosition(position, state) : position.immutable();
     }
     public static BlockPos resolveAnchor(LevelReader level, BlockPos position) {
         return anchor(position, level.getBlockState(position));
@@ -30,14 +36,14 @@ public final class TerminalGeometry {
                 || !entity.generation().equals(generation) || !entity.validIdentity()) return false;
         var state = level.getBlockState(anchor);
         if (state.getBlock() instanceof RegisterBlock) return true;
-        if (!(state.getBlock() instanceof WideTerminalBlock) || state.getValue(WideTerminalBlock.CELL) != 0) return false;
+        if (!(state.getBlock() instanceof WideTerminalBlock wide) || state.getValue(wide.cellProperty()) != 0) return false;
         var facing = state.getValue(WideTerminalBlock.FACING);
-        for (int cell = 0; cell < 4; cell++) {
-            var position = cell(anchor, facing, cell);
+        for (int cell = 0; cell < wide.cellCount(); cell++) {
+            var position = wide.cellPosition(anchor, facing, cell);
             if (!level.hasChunkAt(position)) return false;
             var part = level.getBlockState(position);
             if (part.getBlock() != state.getBlock() || part.getValue(WideTerminalBlock.FACING) != facing
-                    || part.getValue(WideTerminalBlock.CELL) != cell) return false;
+                    || part.getValue(wide.cellProperty()) != cell) return false;
         }
         return true;
     }

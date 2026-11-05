@@ -1,10 +1,19 @@
 package dev.emily.economy.recovery;
 
 import dev.emily.economy.clock.EconomicClock;
+import dev.emily.economy.clock.DeadlineDispatcher;
+import dev.emily.economy.clock.FinancialCalendar;
 import dev.emily.economy.foundation.SchedulingConfig;
 import dev.emily.economy.fx.FxService;
 import dev.emily.economy.fx.FxDiagnostics;
 import dev.emily.economy.storage.*;
+import dev.emily.economy.institution.BankProviders;
+import dev.emily.economy.institution.InstitutionCapital;
+import dev.emily.economy.journal.CapitalPosting;
+import dev.emily.economy.journal.Journal;
+import dev.emily.economy.journal.JournalEngine;
+import dev.emily.economy.api.Identifiers.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.*;
@@ -12,15 +21,34 @@ import java.util.*;
 /** Storage recovery -> compatibility/migrations -> projections -> catch-up -> consistent publication. */
 public final class FoundationRuntime implements FoundationStore {
     public record Configuration(RecordCatalog records,List<ProjectionManager.Definition> projections,List<EconomicClock.SystemDefinition> systems,Clock wall,
-                                Map<String, EconomicClock.DeferredSystem> deferredSystems) {
+                                Map<String, EconomicClock.DeferredSystem> deferredSystems,
+                                boolean financialCalendar, List<DeadlineDispatcher.Provider> deadlineProviders,
+                                FinancialCalendar.Config calendarConfig, dev.emily.economy.pricing.WealthValuation valuation) {
         public Configuration(RecordCatalog records, List<ProjectionManager.Definition> projections,
                              List<EconomicClock.SystemDefinition> systems, Clock wall) {
             this(records, projections, systems, wall, Map.of());
         }
-        public Configuration { Objects.requireNonNull(records); projections=List.copyOf(projections); systems=List.copyOf(systems); Objects.requireNonNull(wall); deferredSystems=Map.copyOf(deferredSystems); }
+        public Configuration(RecordCatalog records, List<ProjectionManager.Definition> projections,
+                             List<EconomicClock.SystemDefinition> systems, Clock wall,
+                             Map<String, EconomicClock.DeferredSystem> deferredSystems) {
+            this(records, projections, systems, wall, deferredSystems, false, List.of(), FinancialCalendar.Config.defaults());
+        }
+        public Configuration(RecordCatalog records,List<ProjectionManager.Definition> projections,List<EconomicClock.SystemDefinition> systems,Clock wall,
+                Map<String,EconomicClock.DeferredSystem> deferredSystems,boolean financialCalendar,
+                List<DeadlineDispatcher.Provider> deadlineProviders,FinancialCalendar.Config calendarConfig) {
+            this(records,projections,systems,wall,deferredSystems,financialCalendar,deadlineProviders,calendarConfig,dev.emily.economy.pricing.PricingRuntime.wealth());
+        }
+        public Configuration { Objects.requireNonNull(records); projections=List.copyOf(projections); systems=List.copyOf(systems); Objects.requireNonNull(wall); deferredSystems=Map.copyOf(deferredSystems); deadlineProviders=List.copyOf(deadlineProviders); Objects.requireNonNull(calendarConfig); Objects.requireNonNull(valuation); if (!financialCalendar && !deadlineProviders.isEmpty()) throw new IllegalArgumentException("Deadline providers require calendar activation"); }
         public static Configuration production(Clock wall) {
-            return new Configuration(RecordCatalog.core(), List.of(), List.of(FxService.definition()), wall,
-                    Map.of(FxService.SYSTEM, FxService.deferred()));
+            return production(wall, FinancialCalendar.Config.defaults());
+        }
+        public static Configuration production(Clock wall, FinancialCalendar.Config config) {
+            return production(wall,config,List.of());
+        }
+        public static Configuration production(Clock wall,FinancialCalendar.Config config,List<dev.emily.economy.pricing.WealthValuation.Source> sources) {
+            var valuation=dev.emily.economy.pricing.PricingRuntime.wealth(sources);
+            return new Configuration(RecordCatalog.core(),List.of(),List.of(FxService.definition()),wall,
+                    Map.of(FxService.SYSTEM,FxService.deferred()),true,java.util.stream.Stream.concat(dev.emily.economy.pricing.PricingRuntime.providers(valuation).stream(),dev.emily.economy.credit.CreditRuntime.providers().stream()).toList(),config,valuation);
         }
         public static Configuration core() { return new Configuration(RecordCatalog.core(),List.of(),List.of(),Clock.systemUTC()); }
     }
@@ -28,8 +56,13 @@ public final class FoundationRuntime implements FoundationStore {
     private final SqliteStorage store;
     private ProjectionManager projections;
     private EconomicClock clock;
+    private DeadlineDispatcher deadlines;
+    private InstitutionCapital capital;
+    private dev.emily.economy.interest.DepositYield depositYield;
+    private boolean providersMigrated;
     private int phase;
     private boolean ready;
+    private boolean valuationSourcesReady;
     private boolean economicProjectionsPending;
     private Path world;
     private volatile WorldShutdown.Evidence closedEvidence;
@@ -50,22 +83,48 @@ public final class FoundationRuntime implements FoundationStore {
             store.cleanShutdownEligible(false);
             projections=new ProjectionManager(store,configuration.projections());
             clock=new EconomicClock(store,configuration.wall(),configuration.systems(),configuration.deferredSystems());
+            if (!configuration.financialCalendar() && !store.transaction(tx -> tx.query(
+                    "SELECT singleton FROM financial_calendar", List.of(), 1)).isEmpty())
+                throw new StorageException(StorageException.Kind.SCHEMA, "Installed financial calendar requires its scheduler");
+            if (configuration.financialCalendar()) deadlines = new DeadlineDispatcher(store, configuration.wall(),
+                    configuration.deadlineProviders(), configuration.calendarConfig().pageSize());
+            if (configuration.financialCalendar() && configuration.deferredSystems().containsKey(FxService.SYSTEM))
+                capital = new InstitutionCapital(store, systemActor("institution-capital"), CapitalPosting.poster());
+            if (configuration.deadlineProviders().stream().anyMatch(p->p.id().equals(dev.emily.economy.pricing.TierReevaluation.PROVIDER))) {
+                depositYield=dev.emily.economy.pricing.PricingRuntime.yield(store.snapshot().worldId(),configuration.valuation());
+                store.commitObserver((intent,reads,commit)->{
+                    long effective=effectiveMillis(commit);
+                    var admission=dev.emily.economy.pricing.PricingAdmission.check(intent,reads,commit,store.snapshot().worldId(),java.time.Instant.ofEpochMilli(effective),configuration.valuation());
+                    return admission instanceof dev.emily.economy.journal.JournalEngine.Commit accepted?depositYield.observe(intent,reads,accepted,effective):admission;
+                });
+            }
             phase=1;
+        }
+        if (!providersMigrated) {
+            if (!migrateProviders()) return new Progress("bank-provider-migration", 0, 1, false);
+            providersMigrated = true;
+        }
+        if(depositYield!=null&&!valuationSourcesReady) {
+            if(!dev.emily.economy.pricing.ValuationSources.prepare(store,configuration.valuation()))return new Progress("valuation-source-registration",0,1,false);
+            valuationSourcesReady=true;
         }
         if(phase==1 || phase==3) {
             var progress=projections.step(16);
             if(!progress.ready()) return new Progress("projection:"+progress.name(),progress.applied(),progress.target(),false);
             if(phase==3) {
-                long before=store.transaction(tx->Long.parseLong(tx.query("SELECT global_sequence FROM economic_metadata",List.of(),1).getFirst().get("global_sequence")));
-                var finalClock=clock.runBatch(16);
+                long before=store.lastCommittedSequence();
+                var finalClock=advanceScheduled();
                 if(!finalClock.ready()) {phase=2;return new Progress("catch-up",finalClock.completedSequence(),finalClock.outstandingIntervals(),false);}
-                if(before!=finalClock.completedSequence())return new Progress("projection-final-validation",0,1,false);
+                if (configuration.deferredSystems().containsKey(FxService.SYSTEM))
+                    FxService.prepareChfActivation(store, clock, configuration.wall());
+                if(before!=store.lastCommittedSequence())return new Progress("projection-final-validation",0,1,false);
+                if (!activatePricing()) return new Progress("pricing-activation",0,1,false);
                 ready=true;store.cleanShutdownEligible(true);phase=4;return new Progress("ready",1,1,true);
             }
-            clock.prepare();phase=2;
+            clock.prepare(); if (deadlines != null) deadlines.prepare(); phase=2;
         }
         if(phase==2) {
-            var progress=clock.runBatch(16);
+            var progress=advanceScheduled();
             if(!progress.ready()) return new Progress(progress.waitingForWall()?"waiting-for-wall-clock":"catch-up",progress.completedSequence(),progress.outstandingIntervals(),false);
             phase=3;return new Progress("projection-final-validation",0,1,false);
         }
@@ -73,42 +132,162 @@ public final class FoundationRuntime implements FoundationStore {
     }
     @Override
     public boolean schedulesEconomy() {
-        return !configuration.systems().isEmpty();
+        return !configuration.systems().isEmpty() || configuration.financialCalendar();
     }
 
     @Override
     public void requireEconomicCurrent() {
-        if (schedulesEconomy() && (!clock.observeCurrentDebt().ready() || economicProjectionsPending)) {
+        if (schedulesEconomy() && (!scheduledProgress(true).ready() || economicProjectionsPending)) {
             throw new StorageException(StorageException.Kind.ECONOMIC_CATCH_UP, "Economic catch-up is in progress");
         }
     }
 
     @Override
     public EconomicStep<EconomicClock.Output> prepareEconomicStep() {
+        // Domain planning and effects are bounded worker-only work; one journal child per turn.
+        // Existing fixed simulations retain their detached calculation pipeline.
+        if (baseScheduledProgress(true).ready() && capitalPending()) {
+            capital.advance(configuration.wall().instant());
+            economicProjectionsPending = true;
+            return new EconomicStep<>(economicProgress(scheduledProgress(true)), null, null);
+        }
+        if (domainFirst()) {
+            deadlines.advance();
+            economicProjectionsPending = true;
+            return new EconomicStep<>(economicProgress(scheduledProgress(true)), null, null);
+        }
         var prepared = clock.prepareStep();
         var work = prepared.work();
-        var progress = economicProgress(prepared.progress());
+        var progress = economicProgress(scheduledProgress(true));
         if (work == null) return new EconomicStep<>(progress, null, null);
         return new EconomicStep<>(progress, work::calculate, output -> {
+            if (domainFirst()) return economicProgress(scheduledProgress(true));
             economicProjectionsPending = true;
-            return economicProgress(clock.commit(work, output));
+            clock.commit(work, output);
+            return economicProgress(scheduledProgress(true));
         });
     }
 
     private EconomicProgress economicProgress(EconomicClock.Progress progress) {
         if (progress.ready() && economicProjectionsPending) {
             economicProjectionsPending = !projections.step(16).ready();
-            progress = clock.currentProgress();
+            progress = scheduledProgress(false);
         }
         return new EconomicProgress(progress.completedSequence(), progress.outstandingIntervals(),
                 progress.waitingForWall(), progress.ready() && !economicProjectionsPending);
     }
 
+    private boolean domainFirst() {
+        if (deadlines == null) return false;
+        var event = deadlines.nextEvent();
+        Long fixed = clock.nextDueMillis();
+        // All existing fixed systems publish at stage zero. Preserve their dependency order and IDs.
+        return event != null && event.effectiveMillis() <= configuration.wall().millis()
+                && (fixed == null || event.effectiveMillis() < fixed);
+    }
+
+    private EconomicClock.Progress scheduledProgress(boolean observe) {
+        var progress = baseScheduledProgress(observe);
+        boolean pending = capitalPending();
+        return new EconomicClock.Progress(progress.completedSequence(),
+                Math.addExact(progress.outstandingIntervals(), pending ? 1 : 0),
+                progress.waitingForWall(), progress.ready() && !pending);
+    }
+
+    private EconomicClock.Progress baseScheduledProgress(boolean observe) {
+        var fixed = observe ? clock.observeCurrentDebt() : clock.currentProgress();
+        if (deadlines == null) return fixed;
+        var domain = observe ? deadlines.observeCurrentDebt() : deadlines.progress();
+        return new EconomicClock.Progress(fixed.completedSequence(),
+                Math.addExact(fixed.outstandingIntervals(), domain.outstandingEvents()),
+                fixed.waitingForWall() || domain.waitingForWall(), fixed.ready() && domain.ready());
+    }
+
+    private EconomicClock.Progress advanceScheduled() {
+        if (baseScheduledProgress(true).ready() && capitalPending()) capital.advance(configuration.wall().instant());
+        else if (domainFirst()) deadlines.advance();
+        else clock.runBatch(1);
+        return scheduledProgress(true);
+    }
+
+    private long effectiveMillis(dev.emily.economy.journal.JournalEngine.Commit commit) {
+        for(var record:commit.records()) {
+            if(record.type().equals(dev.emily.economy.clock.EconomicRecord.TYPE))return dev.emily.economy.clock.EconomicRecord.decode(record.payload()).endMillis();
+            if(record.type().equals(DeadlineDispatcher.PROGRESS)||record.type().equals(DeadlineDispatcher.COMPLETION))return Long.parseLong(record.payload().split("\\|",-1)[3]);
+        }
+        return configuration.wall().millis();
+    }
+    private boolean activatePricing() {
+        if(depositYield==null)return true;
+        var rows=store.transaction(tx->tx.query("SELECT start_ms FROM pricing_activation WHERE singleton=1",List.of(),1));
+        if(rows.isEmpty()) {
+            activate(dev.emily.economy.pricing.TierReevaluation.ACTIVATE,dev.emily.economy.pricing.TierReevaluation.activation(configuration.wall()),new dev.emily.economy.journal.Journal.CanonicalRequest(1,Map.of()));
+            return false;
+        }
+        if(store.transaction(tx->tx.query("SELECT singleton FROM deposit_yield_activation",List.of(),1)).isEmpty()) {
+            var instant=java.time.Instant.ofEpochMilli(Long.parseLong(rows.getFirst().get("start_ms")));
+            activate(dev.emily.economy.interest.DepositYield.ACTIVATE,depositYield.activation(instant),new dev.emily.economy.journal.Journal.CanonicalRequest(1,Map.of("effective",Long.toString(instant.toEpochMilli()))));
+            return false;
+        }
+        return true;
+    }
+    private void activate(dev.emily.economy.journal.Journal.Kind kind,dev.emily.economy.journal.JournalEngine.Registration handler,dev.emily.economy.journal.Journal.CanonicalRequest request) {
+        var actor=systemActor("pricing-activation");
+        var id=UUID.nameUUIDFromBytes((store.snapshot().worldId()+"|"+kind.operationType()).getBytes(StandardCharsets.UTF_8));
+        var engine=new dev.emily.economy.journal.JournalEngine(store,(a,k)->a.equals(actor)&&k.equals(kind),Map.of(kind,handler));
+        var outcome=engine.submit(new dev.emily.economy.journal.Journal.Intent(new OperationId(id),new RequestId(id),actor,kind,request,null,null));
+        if(outcome.status()!=dev.emily.economy.journal.Journal.Status.COMMITTED)throw new StorageException(StorageException.Kind.MIGRATION,"Pricing activation failed");
+    }
+
+    private boolean capitalPending() {
+        if (capital == null) return false;
+        var state = capital.prepare(configuration.wall().instant()).state();
+        return state == InstitutionCapital.State.READY || state == InstitutionCapital.State.ALLOCATING;
+    }
+
+    /** Missing denomination/FX is dormant; once funding starts its captured publication survives catch-up. */
+    public InstitutionCapital.Status readInstitutionCapitalStatus() {
+        return capital == null ? null : capital.prepare(configuration.wall().instant());
+    }
+
+    private SystemActorId systemActor(String purpose) {
+        return new SystemActorId(UUID.nameUUIDFromBytes(("economy:runtime:v1|" + store.snapshot().worldId().value()
+                + "|" + purpose).getBytes(StandardCharsets.UTF_8)));
+    }
+
+    /** Read at most one page; no account is assigned an invented historical provider. */
+    private boolean migrateProviders() {
+        var cursor = store.transaction(tx -> tx.query("SELECT cursor FROM bank_provider_migration WHERE singleton=1", List.of(), 1).getFirst().get("cursor"));
+        boolean empty = store.transaction(tx -> tx.query("SELECT account_id FROM account_catalog WHERE purpose='BANK' AND account_id>? AND NOT EXISTS (SELECT 1 FROM bank_account_providers p WHERE p.account_id=account_catalog.account_id) ORDER BY account_id LIMIT 1", List.of(cursor), 1).isEmpty());
+        if (empty) return true;
+        var actor = systemActor("bank-provider-migration");
+        var operation = UUID.nameUUIDFromBytes(("economy:provider-migration:v1|" + store.snapshot().worldId().value()
+                + "|" + cursor).getBytes(StandardCharsets.UTF_8));
+        var engine = new JournalEngine(store, (candidate, kind) -> candidate.equals(actor) && kind.equals(BankProviders.MIGRATE),
+                Map.of(BankProviders.MIGRATE, BankProviders.migrateStep()));
+        var outcome = engine.submit(new Journal.Intent(new OperationId(operation), new RequestId(operation), actor,
+                BankProviders.MIGRATE, new Journal.CanonicalRequest(1, Map.of()), null, null));
+        if (outcome.status() != Journal.Status.COMMITTED)
+            throw new StorageException(StorageException.Kind.MIGRATION, "Bank provider migration could not commit a page");
+        return false;
+    }
+
+    /** Read-only worker sample, also available during bounded startup catch-up. */
+    public dev.emily.economy.clock.CalendarDiagnostics readCalendarDiagnostics() {
+        if (clock == null) return null;
+        return store.transaction(tx -> dev.emily.economy.clock.CalendarDiagnostics.read(tx,
+                configuration.wall().instant(), deadlines == null ? reads -> null : deadlines::readNextEvent));
+    }
+
     public FxDiagnostics readFxDiagnostics() {
-        if (!configuration.deferredSystems().containsKey(FxService.SYSTEM)) return null;
+        if (clock == null || !configuration.deferredSystems().containsKey(FxService.SYSTEM)) return null;
         return store.transaction(tx -> FxDiagnostics.read(tx, configuration.wall().instant()));
     }
 
+    @Override public dev.emily.economy.journal.JournalEngine.Decision decorateCommit(
+            dev.emily.economy.journal.Journal.Intent intent, dev.emily.economy.journal.JournalEngine.ReadView reads,
+            dev.emily.economy.journal.JournalEngine.Commit commit) { return store.decorateCommit(intent,reads,commit); }
+    public dev.emily.economy.pricing.WealthValuation valuation() { return configuration.valuation(); }
     public RecordCatalog recordCatalog() { return configuration.records(); }
     public Snapshot snapshot() { return store.snapshot(); }
     public long lastCommittedSequence() { return store.lastCommittedSequence(); }

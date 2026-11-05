@@ -8,21 +8,47 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
-/** Operator shortcut to the terminal settings screen; ATM placers also have empty-hand access. */
+/** Operator shortcut to the terminal settings screen; owners also have sneak/empty-hand access. */
 public final class AdminConfigCommands {
     private AdminConfigCommands() {}
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("economy").then(Commands.literal("admin")
                 .requires(EconomyCommands::privileged)
-                .then(Commands.literal("config").executes(context -> open(context.getSource())))));
+                .then(Commands.literal("config").executes(context -> open(context.getSource())))
+                .then(Commands.literal("binding").executes(context -> inspect(context.getSource())))));
+    }
+
+    private static int inspect(CommandSourceStack source) {
+        var player=source.getPlayer();
+        if(player==null || source.source!=player || !(player.pick(6,0,false) instanceof BlockHitResult hit)
+                || hit.getType()!=HitResult.Type.BLOCK)return 0;
+        var level=player.serverLevel();
+        var anchor=dev.emily.economy.terminal.TerminalGeometry.resolveAnchor(level,hit.getBlockPos());
+        if(!level.hasChunkAt(anchor) || !(level.getBlockEntity(anchor) instanceof dev.emily.economy.terminal.TerminalBlockEntity entity))return 0;
+        var services=dev.emily.economy.Economy.serverServices(player.server);
+        if(services==null || services.state()!=ServerServices.State.READY)return 0;
+        var generation=entity.generation();
+        var key=new dev.emily.economy.journal.TerminalPolicy.Anchor(level.dimension().location().toString(),anchor.getX(),anchor.getY(),anchor.getZ());
+        services.ledger().terminalInspection(new dev.emily.economy.api.Identifiers.PlayerId(player.getUUID()),(actor,reads)->true,key).whenComplete((found,error)->{
+            if(player.server.getPlayerList().getPlayer(player.getUUID())!=player || !player.hasPermissions(2))return;
+            if(error!=null || found.isEmpty()){source.sendFailure(Component.literal("Terminal inspection unavailable."));return;}
+            var report=found.orElseThrow();var terminal=report.terminal();var binding=terminal.binding();
+            boolean geometry=dev.emily.economy.terminal.TerminalGeometry.matches(level,anchor,generation);
+            source.sendSuccess(()->Component.literal("Terminal "+key+" kind="+terminal.kind()+" generation="+terminal.generation()+" revision="+terminal.revision()+" geometry="+geometry),false);
+            source.sendSuccess(()->Component.literal("Bank="+(binding==null||!binding.bound()?"UNBOUND_BANK":binding.institution().key())
+                    +" currency="+(binding==null?"unbound":binding.nativeCurrency())+" catalog="+(binding==null?0:binding.catalogRevision())
+                    +" migration="+(binding==null?"UNBOUND_BANK":binding.migrationState())+" cash="+terminal.settings().mode()
+                    +" denial="+(report.pendingCash()?"TERMINAL_BANK_PENDING":!geometry?"GEOMETRY_UNAVAILABLE":binding==null||!binding.bound()?"UNBOUND_BANK":"none")),false);
+        });
+        return 1;
     }
 
     private static int open(CommandSourceStack source) {
         var player = source.getPlayer();
         if (player == null || source.source != player || !(player.pick(5, 0, false) instanceof BlockHitResult hit)
                 || hit.getType() != HitResult.Type.BLOCK || !BankingController.openAdmin(player, hit.getBlockPos())) {
-            source.sendFailure(Component.literal("Look at a ready ATM, teller, or register within five blocks."));
+            source.sendFailure(Component.literal("Look at a ready ATM, teller, kiosk, or register within five blocks."));
             return 0;
         }
         return 1;

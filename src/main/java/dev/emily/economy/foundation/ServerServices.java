@@ -80,6 +80,9 @@ public final class ServerServices {
     private volatile DiagnosticsReport.StorageDetails storageDetails;
     private record FxSample(FxDiagnostics snapshot, String readFailure) {}
     private volatile FxSample fxSample = new FxSample(null, null);
+    private record CalendarSample(dev.emily.economy.clock.CalendarDiagnostics snapshot, String readFailure) {}
+    private volatile CalendarSample calendarSample = new CalendarSample(null, null);
+    private long nextStartupDiagnosticsSample;
     private String economicRetry;
     private long nextDiagnosticsSample;
     private long nextPaymentExpiry;
@@ -117,6 +120,11 @@ public final class ServerServices {
     }
 
     public ServerServices(Path worldDirectory, StorageLifecycle storage, SchedulingConfig config) {
+        this(worldDirectory,storage,config,new dev.emily.economy.pricing.ServicePricing(storage instanceof FoundationRuntime runtime?runtime.valuation():dev.emily.economy.pricing.PricingRuntime.wealth()));
+    }
+    public ServerServices(Path worldDirectory, StorageLifecycle storage, SchedulingConfig config,
+                          dev.emily.economy.pricing.ServicePricing servicePricing) {
+        this.servicePricing=java.util.Objects.requireNonNull(servicePricing);
         this.worldDirectory = worldDirectory.toAbsolutePath().normalize();
         this.storage = storage;
         this.config = config;
@@ -171,6 +179,8 @@ public final class ServerServices {
                 } : publisher);
     }
 
+    private final dev.emily.economy.pricing.ServicePricing servicePricing;
+    public dev.emily.economy.pricing.ServicePricing servicePricing() { checkOwner(); return servicePricing; }
     public WorldId worldId() { return partyWorld(); }
 
     WorldId partyWorld() {
@@ -218,6 +228,71 @@ public final class ServerServices {
             PartyAuthorization.Grant grant, OperationId operationId, RequestId requestId) {
         var operation = accountInitialization(grant, operationId, requestId, AccountIdentity.Purpose.TRADING);
         return partyJournal(operation, null).lookup(operation.intent());
+    }
+
+    /** Immutable catalog metadata; provider ownership still requires an authenticated grant. */
+    public java.util.List<dev.emily.economy.institution.InstitutionCatalog.Entry> institutionCatalog() {
+        checkOwner();
+        return dev.emily.economy.institution.InstitutionCatalog.banks();
+    }
+
+    public CompletionStage<Optional<dev.emily.economy.institution.BankProviders.Binding>> accountProvider(
+            PartyAuthorization.Grant grant, AccountId account) {
+        return readAccounts(grant, false, reads -> dev.emily.economy.institution.BankProviders.find(reads, grant.target(), account));
+    }
+
+    public CompletionStage<dev.emily.economy.institution.InstitutionCapital.Status> institutionCapitalStatus() {
+        checkOwner();
+        return storage(() -> storage instanceof FoundationRuntime runtime ? runtime.readInstitutionCapitalStatus() : null);
+    }
+
+    public CompletionStage<Optional<dev.emily.economy.pricing.WealthValuation.Snapshot>> wealthSnapshot(PartyAuthorization.Grant grant) {
+        return readAccounts(grant,false,reads->grant.target().owner() instanceof PartyRef.Player player
+                ? Optional.of(servicePricing.valuation().snapshot(reads,grant.target().world(),player.id(),java.time.Instant.now())):Optional.empty());
+    }
+    public CompletionStage<Optional<dev.emily.economy.pricing.TierReevaluation.Status>> serviceTierStatus(PartyAuthorization.Grant grant) {
+        return readAccounts(grant,false,reads->grant.target().owner() instanceof PartyRef.Player player
+                ? dev.emily.economy.pricing.TierReevaluation.status(reads,player.id()):Optional.empty());
+    }
+    /** Earned receivables are displayed independently of the spendable AccountFunds balance. */
+    public CompletionStage<Optional<List<dev.emily.economy.api.Money>>> depositYieldReceivables(PartyAuthorization.Grant grant) {
+        return readAccounts(grant,false,reads->grant.target().owner() instanceof PartyRef.Player player
+                ? Optional.of(dev.emily.economy.interest.DepositYield.receivables(reads,grant.target().world(),player.id())):Optional.empty());
+    }
+    public JournalService.Submission settleDepositYield(PartyAuthorization.Grant grant,AccountId source,
+            dev.emily.economy.institution.InstitutionCatalog.InstitutionId bank,dev.emily.economy.api.EconomyCurrency currency,
+            AccountId destination,OperationId operationId,RequestId requestId,JournalService.Publisher publisher) {
+        checkOwner();
+        var player=(PartyRef.Player)grant.target().owner();
+        var domain=dev.emily.economy.pricing.PricingRuntime.yield(grant.target().world());
+        var handler=domain.settlement(player.id(),source,bank,currency,destination,()->java.time.Instant.now().toEpochMilli(),false);
+        var request=dev.emily.economy.interest.DepositYield.settlementRequest(source,bank,currency,destination,false);
+        var kind=dev.emily.economy.interest.DepositYield.SETTLE;
+        var session=sessionId(); var world=grant.target().world();
+        return journal((actor,k)->grant.allows(world,session,actor,k),Map.of(kind,handler),publisher).submit(
+                new Journal.Intent(operationId,requestId,grant.actor(),kind,request,null,null));
+    }
+
+    /** Trusted branch adapter SPI. No live issuer is installed in this package. */
+    public JournalService.Submission bankLifecycle(PartyAuthorization.Grant grant, OperationId operationId,
+            RequestId requestId, dev.emily.economy.institution.BankProviders.Request request,
+            JournalService.Publisher publisher) {
+        checkOwner();
+        var action = request.proof().context().action();
+        var kind = switch(action) {
+            case PRIMARY -> dev.emily.economy.institution.BankProviders.PRIMARY;
+            case SECONDARY -> dev.emily.economy.institution.BankProviders.SECONDARY;
+            case ASSIGN -> dev.emily.economy.institution.BankProviders.ASSIGN;
+            case SWITCH_SOURCE -> dev.emily.economy.institution.BankProviders.SWITCH_SOURCE;
+            case SWITCH_TARGET -> dev.emily.economy.institution.BankProviders.SWITCH_TARGET;
+            case CARD_ISSUE, CARD_REPLACE, CREDIT_ISSUE, CREDIT_INCREASE, CREDIT_REPLACE -> throw new IllegalArgumentException("Use issued-card service");
+            case CLOSE -> throw new IllegalArgumentException("Use protected funded closure composition");
+        };
+        var fields = new java.util.HashMap<>(request.request().fields());
+        fields.remove("economy:owner");
+        var handler = dev.emily.economy.institution.BankProviders.lifecycle(grant.target(), request,
+                servicePricing.valuation().tierEligibility(grant.target().world(), java.time.Clock.systemUTC()), () -> java.time.Instant.now().toEpochMilli());
+        return submitOwned(grant, kind, operationId, requestId, new Journal.CanonicalRequest(1, fields), handler, publisher);
     }
 
     /** Trusted owner lookup. Missing and unauthorized IDs have the same result. */
@@ -296,6 +371,22 @@ public final class ServerServices {
             }
             if (!live.getAsBoolean()) return CompletableFuture.completedStage(Optional.empty());
             return readAccounts(grant, true, query).thenApply(result -> live.getAsBoolean() ? result : Optional.empty());
+        });
+    }
+
+    /** Inspection-only audit can be committed while scheduled finance catches up; it cannot post money. */
+    <T> CompletionStage<Optional<T>> inspectAccountsDuringCatchup(
+            PartyAuthorization.Grant grant,Map<String,String> scope,BooleanSupplier live,
+            Function<JournalEngine.ReadView,Optional<T>> query) {
+        checkOwner();requireReady();
+        if(!(storage instanceof FoundationStore store))throw new IllegalStateException("Inspection requires foundation storage");
+        if(!allowsAccountRead(grant,partyWorld(),true)||!live.getAsBoolean())return CompletableFuture.completedStage(Optional.empty());
+        var operation=PartyOperation.inspection(grant,new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),scope);
+        // This sealed operation can only produce InspectionAudit records, and retains original-ID recovery.
+        return storage(grant.actor(),()->operation.engine(store,sessionId).submit(operation.intent())).thenCompose(outcome->{
+            if(outcome.status()!=Journal.Status.COMMITTED)return CompletableFuture.failedStage(new IllegalStateException("Inspection audit unavailable"));
+            if(!live.getAsBoolean())return CompletableFuture.completedStage(Optional.empty());
+            return readAccounts(grant,true,query).thenApply(result->live.getAsBoolean()?result:Optional.empty());
         });
     }
 
@@ -399,7 +490,25 @@ public final class ServerServices {
         String reason = state == State.UNAVAILABLE ? failureCode(failure)
                 : storageWorker.getQueue().size() >= config.storageQueueCapacity() || pending.size() >= publicationCapacity
                 ? "STORAGE_OVERLOAD" : economicRetry != null ? economicRetry : sample.readFailure();
-        return DiagnosticsReport.withFx(lines, state, sample.snapshot(), reason);
+        var withFx = DiagnosticsReport.withFx(lines, state, sample.snapshot(), reason);
+        var calendar = calendarSample;
+        String calendarReason = inspectionReason(calendar.readFailure());
+        var combined = new java.util.ArrayList<>(withFx);
+        combined.addAll(CalendarReport.summary(calendar.snapshot(), state, calendarReason, metrics()));
+        return List.copyOf(combined);
+    }
+
+    /** Command admission uses EconomyCommands' live console/operator check; returns cached data only. */
+    public List<String> calendarDiagnostics(String after) {
+        checkOwner();
+        var sample = calendarSample;
+        return CalendarReport.render(sample.snapshot(), state, inspectionReason(sample.readFailure()), metrics(), after);
+    }
+
+    private String inspectionReason(String readFailure) {
+        return state == State.UNAVAILABLE ? failureCode(failure)
+                : storageWorker.getQueue().size() >= config.storageQueueCapacity() || pending.size() >= publicationCapacity
+                ? "STORAGE_OVERLOAD" : economicRetry != null ? economicRetry : readFailure;
     }
 
     public static String failureCode(Throwable error) {
@@ -425,7 +534,11 @@ public final class ServerServices {
             if (!CashIssuance.reconcileBatch(store))
                 return new StorageLifecycle.Progress("cash-reconciliation", 0, -1, false);
         }
-        if (step.ready()) sampleDiagnosticsOnWorker();
+        long now = System.nanoTime();
+        if (step.ready() || nextStartupDiagnosticsSample == 0 || now - nextStartupDiagnosticsSample >= 0) {
+            nextStartupDiagnosticsSample = now + TimeUnit.SECONDS.toNanos(1);
+            sampleDiagnosticsOnWorker();
+        }
         return step;
     }
 
@@ -451,6 +564,11 @@ public final class ServerServices {
                 fxSample = new FxSample(runtime.readFxDiagnostics(), null);
             } catch (RuntimeException error) {
                 fxSample = new FxSample(fxSample.snapshot(), failureCode(error));
+            }
+            try {
+                calendarSample = new CalendarSample(runtime.readCalendarDiagnostics(), null);
+            } catch (RuntimeException error) {
+                calendarSample = new CalendarSample(calendarSample.snapshot(), failureCode(error));
             }
         }
     }

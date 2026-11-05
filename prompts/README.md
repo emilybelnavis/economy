@@ -9,7 +9,7 @@ Select one exact prompt or ID. Reading a prompt, reference or index never author
 | [A3 accounts identity](A3-accounts-identity/README.md) | A1; A2 currency contracts before integration | Planning only |
 | [A4 ledger transactions](A4-ledger-transactions/README.md) | A1–A3 | Planning only |
 | [A5 payments commerce](A5-payments-commerce/README.md) | A4 | Planning only |
-| [A6 banks, credit and debt](A6-credit-debt/README.md) | Verified A1–A5; execute A6 prerequisites in order | 23 prompts approved; execution prepared; start A6-01 |
+| [A6 banks, credit and debt](A6-credit-debt/README.md) | Verified A1–A5; execute A6 prerequisites in order | A6-01 contract complete; next A6-02-01 (or independent A6-03-01) |
 | [A7 economic simulation](A7-economic-simulation/README.md) | A2, A6; A1 clock and A4 accounting | Planning only |
 | [A8 core integration](A8-core-integration/README.md) | A1–A7 | Planning only |
 | [B1 market registries](B1-market-registries/README.md) | A1, A2 | Planning only |

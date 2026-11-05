@@ -10,6 +10,13 @@ public interface FoundationStore extends StorageLifecycle {
     record Snapshot(WorldId worldId, int schemaVersion, String journalMode, int synchronous,
                     boolean foreignKeys, int busyTimeoutMillis) {}
     Snapshot snapshot();
+    @FunctionalInterface interface CommitObserver {
+        dev.emily.economy.journal.JournalEngine.Decision prepare(dev.emily.economy.journal.Journal.Intent intent,
+                dev.emily.economy.journal.JournalEngine.ReadView reads, dev.emily.economy.journal.JournalEngine.Commit commit);
+    }
+    default dev.emily.economy.journal.JournalEngine.Decision decorateCommit(dev.emily.economy.journal.Journal.Intent intent,
+            dev.emily.economy.journal.JournalEngine.ReadView reads, dev.emily.economy.journal.JournalEngine.Commit commit) { return commit; }
+
     /** Read-only checkpoint from the owned connection, outside any write transaction. */
     long lastCommittedSequence();
     default dev.emily.economy.recovery.RecordCatalog recordCatalog() { return dev.emily.economy.recovery.RecordCatalog.core(); }

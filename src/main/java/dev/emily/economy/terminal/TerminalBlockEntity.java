@@ -31,6 +31,24 @@ public final class TerminalBlockEntity extends BlockEntity {
     public UUID placementOperation() { return placementOperation; }
     public long policyRevision() { return policyRevision; }
     public void setPolicyRevision(long revision) { policyRevision = revision; setChanged(); }
+    /** Informational visual cache, refreshed only from authoritative worker snapshots. */
+    public void applyPolicy(dev.emily.economy.journal.TerminalPolicy.Snapshot snapshot) {
+        if (!snapshot.generation().equals(generation) || level == null || level.isClientSide) return;
+        setPolicyRevision(snapshot.revision());
+        if (getBlockState().getBlock() instanceof WideTerminalBlock) {
+            int brand = 0;
+            if (snapshot.binding() != null && snapshot.binding().bound()) {
+                var banks = dev.emily.economy.institution.InstitutionCatalog.banks();
+                for (int i=0;i<banks.size();i++) if(banks.get(i).id().equals(snapshot.binding().institution())) brand=i+1;
+            }
+            for (var position : TerminalGeometry.cells(worldPosition,getBlockState())) {
+                if (!level.hasChunkAt(position)) return;
+                var state=level.getBlockState(position);
+                if (state.getBlock()!=getBlockState().getBlock()) return;
+                level.setBlock(position,state.setValue(WideTerminalBlock.BANK,brand),net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+            }
+        }
+    }
     public boolean validIdentity() { return valid; }
     public void setOwner(UUID value) { owner = value; setChanged(); }
     public void newPlacement(UUID value) {

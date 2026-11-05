@@ -1,0 +1,389 @@
+{
+  "version": 1,
+  "license": "CC0-1.0",
+  "banks": [
+    {
+      "key": "crownstone",
+      "name": "Crownstone Bank",
+      "currency": "CAD",
+      "tier": "HYBRID",
+      "networks": [
+        "WAYLINE",
+        "ORBIT"
+      ],
+      "primary": "#263B50",
+      "accent": "#D4A84C",
+      "label": [
+        "CROWN",
+        "STONE"
+      ]
+    },
+    {
+      "key": "orchard_direct",
+      "name": "Orchard Direct",
+      "currency": "CAD",
+      "tier": "TIER1",
+      "networks": [
+        "ORBIT"
+      ],
+      "primary": "#E79768",
+      "accent": "#202C3E",
+      "label": [
+        "ORCHARD",
+        "DIRECT"
+      ]
+    },
+    {
+      "key": "tidecrest",
+      "name": "Tidecrest Bank",
+      "currency": "CAD",
+      "tier": "TIER1",
+      "networks": [
+        "WAYLINE"
+      ],
+      "primary": "#7FCBB8",
+      "accent": "#51324F",
+      "label": [
+        "TIDE",
+        "CREST"
+      ]
+    },
+    {
+      "key": "crosswind",
+      "name": "Crosswind Bank",
+      "currency": "USD",
+      "tier": "TIER1",
+      "networks": [
+        "WAYLINE",
+        "EMBER"
+      ],
+      "primary": "#A34F39",
+      "accent": "#F4E6CE",
+      "label": [
+        "CROSS",
+        "WIND"
+      ]
+    },
+    {
+      "key": "lantern_union",
+      "name": "Lantern Union",
+      "currency": "USD",
+      "tier": "HYBRID",
+      "networks": [
+        "ORBIT",
+        "KEYSTONE"
+      ],
+      "primary": "#3C386B",
+      "accent": "#BC815B",
+      "label": [
+        "LANTERN",
+        "UNION"
+      ]
+    },
+    {
+      "key": "mesa_trail",
+      "name": "Mesa Trail Bank",
+      "currency": "USD",
+      "tier": "TIER1",
+      "networks": [
+        "WAYLINE",
+        "EMBER"
+      ],
+      "primary": "#D9BB84",
+      "accent": "#266D71",
+      "label": [
+        "MESA",
+        "TRAIL"
+      ]
+    },
+    {
+      "key": "asterbridge",
+      "name": "Asterbridge Bank",
+      "currency": "GBP",
+      "tier": "HYBRID",
+      "networks": [
+        "ORBIT",
+        "KEYSTONE"
+      ],
+      "primary": "#68557F",
+      "accent": "#CCD3DD",
+      "label": [
+        "ASTER",
+        "BRIDGE"
+      ]
+    },
+    {
+      "key": "greenhaven",
+      "name": "Greenhaven Bank",
+      "currency": "GBP",
+      "tier": "TIER1",
+      "networks": [
+        "WAYLINE"
+      ],
+      "primary": "#526B45",
+      "accent": "#DE977F",
+      "label": [
+        "GREEN",
+        "HAVEN"
+      ]
+    },
+    {
+      "key": "meridian_grove",
+      "name": "Meridian Grove",
+      "currency": "EUR",
+      "tier": "HYBRID",
+      "networks": [
+        "ORBIT",
+        "KEYSTONE"
+      ],
+      "primary": "#244D91",
+      "accent": "#D6A546",
+      "label": [
+        "MERIDIAN",
+        "GROVE"
+      ]
+    },
+    {
+      "key": "slate_harbor",
+      "name": "Slate Harbor Bank",
+      "currency": "EUR",
+      "tier": "TIER1",
+      "networks": [
+        "WAYLINE"
+      ],
+      "primary": "#303B45",
+      "accent": "#BDCB6E",
+      "label": [
+        "SLATE",
+        "HARBOR"
+      ]
+    },
+    {
+      "key": "fjordlight",
+      "name": "Fjordlight Bank",
+      "currency": "DKK",
+      "tier": "TIER1",
+      "networks": [
+        "ORBIT"
+      ],
+      "primary": "#A1C9D7",
+      "accent": "#A65142",
+      "label": [
+        "FJORD",
+        "LIGHT"
+      ]
+    },
+    {
+      "key": "harbor_meridian",
+      "name": "Harbor Meridian",
+      "currency": "HKD",
+      "tier": "HYBRID",
+      "networks": [
+        "WAYLINE",
+        "KEYSTONE"
+      ],
+      "primary": "#245864",
+      "accent": "#D9BC68",
+      "label": [
+        "HARBOR",
+        "MERIDIAN"
+      ]
+    },
+    {
+      "key": "jade_terrace",
+      "name": "Jade Terrace Bank",
+      "currency": "CNY",
+      "tier": "TIER1",
+      "networks": [
+        "ORBIT"
+      ],
+      "primary": "#50866F",
+      "accent": "#F1ECD6",
+      "label": [
+        "JADE",
+        "TERRACE"
+      ]
+    },
+    {
+      "key": "southern_arc",
+      "name": "Southern Arc Bank",
+      "currency": "AUD",
+      "tier": "TIER1",
+      "networks": [
+        "WAYLINE"
+      ],
+      "primary": "#C69B48",
+      "accent": "#243B59",
+      "label": [
+        "SOUTHERN",
+        "ARC"
+      ]
+    },
+    {
+      "key": "fernreach",
+      "name": "Fernreach Bank",
+      "currency": "NZD",
+      "tier": "TIER1",
+      "networks": [
+        "ORBIT"
+      ],
+      "primary": "#603D60",
+      "accent": "#A0B9A0",
+      "label": [
+        "FERN",
+        "REACH"
+      ]
+    },
+    {
+      "key": "cedar_parcel",
+      "name": "Cedar Parcel Bank",
+      "currency": "JPY",
+      "tier": "TIER1",
+      "networks": [
+        "WAYLINE"
+      ],
+      "primary": "#845B42",
+      "accent": "#EEE3C7",
+      "label": [
+        "CEDAR",
+        "PARCEL"
+      ]
+    },
+    {
+      "key": "lakeward_cantonal",
+      "name": "Lakeward Cantonal Bank",
+      "currency": "CHF",
+      "tier": "TIER1",
+      "networks": [
+        "WAYLINE",
+        "ORBIT"
+      ],
+      "primary": "#306F94",
+      "accent": "#D6D3BC",
+      "label": [
+        "LAKEWARD",
+        "CANTONAL"
+      ]
+    },
+    {
+      "key": "newhaven",
+      "name": "Newhaven Bank",
+      "currency": "CHF",
+      "tier": "TIER1",
+      "networks": [
+        "ORBIT"
+      ],
+      "primary": "#70384B",
+      "accent": "#E8DED4",
+      "label": [
+        "NEWHAVEN"
+      ]
+    },
+    {
+      "key": "atlas_reserve",
+      "name": "Atlas Reserve",
+      "currency": "USD",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "WAYLINE",
+        "KEYSTONE"
+      ],
+      "primary": "#3C4149",
+      "accent": "#BB876B",
+      "label": [
+        "ATLAS",
+        "RESERVE"
+      ]
+    },
+    {
+      "key": "obsidian_capital",
+      "name": "Obsidian Capital Bank",
+      "currency": "EUR",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "ORBIT",
+        "KEYSTONE"
+      ],
+      "primary": "#302F39",
+      "accent": "#DDD9CF",
+      "label": [
+        "OBSIDIAN",
+        "CAPITAL"
+      ]
+    },
+    {
+      "key": "alpine_vault",
+      "name": "Alpine Vault",
+      "currency": "CHF",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "WAYLINE",
+        "KEYSTONE"
+      ],
+      "primary": "#584358",
+      "accent": "#C7CDD4",
+      "label": [
+        "ALPINE",
+        "VAULT"
+      ]
+    },
+    {
+      "key": "kintsugi_trust",
+      "name": "Kintsugi Trust",
+      "currency": "JPY",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "ORBIT",
+        "KEYSTONE"
+      ],
+      "primary": "#253748",
+      "accent": "#B58B58",
+      "label": [
+        "KINTSUGI",
+        "TRUST"
+      ]
+    },
+    {
+      "key": "mariner_crest",
+      "name": "Mariner Crest",
+      "currency": "AUD",
+      "tier": "TIER2_ONLY",
+      "networks": [
+        "WAYLINE",
+        "KEYSTONE"
+      ],
+      "primary": "#195866",
+      "accent": "#ECE5CE",
+      "label": [
+        "MARINER",
+        "CREST"
+      ]
+    }
+  ],
+  "networks": [
+    {
+      "key": "keystone",
+      "name": "Keystone",
+      "primary": "#4C5771",
+      "accent": "#E0C99B"
+    },
+    {
+      "key": "orbit",
+      "name": "Orbit",
+      "primary": "#406D76",
+      "accent": "#D4DCBE"
+    },
+    {
+      "key": "wayline",
+      "name": "Wayline",
+      "primary": "#606C50",
+      "accent": "#E2D5AE"
+    },
+    {
+      "key": "ember",
+      "name": "Ember",
+      "primary": "#7F4B49",
+      "accent": "#F1BC78"
+    }
+  ]
+}

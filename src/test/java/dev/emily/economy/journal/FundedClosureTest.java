@@ -49,29 +49,31 @@ class FundedClosureTest {
             });
             var ledger = new JournalEngine(store, (actor, kind) -> true,
                     SameCurrency.registrations(worldId, (intent, instruction, reads) -> true));
-            var amount = new Money(JPY, 1);
+            var amount = new Money(JPY, 2);
             var credit = new SameCurrency.Adjustment(ACTOR, new SameCurrency.Revision(source, 1), amount);
             assertEquals(Journal.Status.COMMITTED, ledger.submit(intent(SameCurrency.CREDIT, credit.request())).status());
             var quotes = new FxQuotes(worldId);
-            var quote = store.transaction(tx -> quotes.issue(ACTOR, new FxQuotes.Pair(JPY, CAD),
-                    FxQuotes.Side.EXACT_DEBIT, amount, FxService.latest(tx::query), now, Duration.ofSeconds(60)));
-
+            var proof = dev.emily.economy.institution.BranchFixtures.closure(store, owner, source);
+            var pricing = new dev.emily.economy.pricing.ServicePricing(dev.emily.economy.pricing.PricingRuntime.wealth());
+            var principal = new Money(JPY,1); // Two-yen budget: one principal plus one rounded source fee.
+            var raw = store.transaction(tx -> quotes.issue(ACTOR,new FxQuotes.Pair(JPY,CAD),FxQuotes.Side.EXACT_DEBIT,principal,FxService.latest(tx::query),now,Duration.ofSeconds(60)));
+            var fee = store.transaction(tx -> pricing.quote(tx::query,worldId,ACTOR,proof.context().bank(),dev.emily.economy.pricing.ServicePricing.Service.PROTECTED_CLOSURE_FX,principal,now,raw.expires()));
+            var quote = quotes.price(raw,fee);
             var request = new FundedClosure.Instruction(new AccountLifecycle.Close(source, 1, destination, 1L), quote.id());
-            var registration = FundedClosure.registration(owner, request,
+            var registration = FundedClosure.registrationAtBranch(owner, request,
                     (id, actor, world, reads) -> quotes.requireFresh(id, actor, world, FxService.latest(reads),
                             quote.pricingVersion(), now),
-                    BankingClosureClaims::read,
+                    BankingClosureClaims::read, proof,
                     (intent, reads) -> true);
-            var engine = new JournalEngine(store, (actor, kind) -> true, Map.of(AccountLifecycle.CLOSE, registration));
-            var fields = new HashMap<>(request.request().fields());
-            fields.put("economy:owner", Journal.actorKey(ACTOR));
-            var operation = intent(AccountLifecycle.CLOSE, new Journal.CanonicalRequest(1, fields));
+            var engine = new JournalEngine(store, (actor, kind) -> true, Map.of(dev.emily.economy.institution.BankProviders.CLOSE, registration));
+            var fields = new dev.emily.economy.institution.BankProviders.Request(proof, 0, request.request().fields()).request().fields();
+            var operation = intent(dev.emily.economy.institution.BankProviders.CLOSE, new Journal.CanonicalRequest(1, fields));
             var closed = engine.submit(operation);
             assertEquals(Journal.Status.COMMITTED, closed.status(), closed.result().code());
             assertEquals(closed, engine.submit(operation));
             var envelope = engine.readAfter(0, 10).getLast();
             assertEquals(closed.transactionId(), envelope.transactionId());
-            assertEquals(2, envelope.records().stream().filter(record -> record.type().equals("economy:posting")).count());
+            assertEquals(6, envelope.records().stream().filter(record -> record.type().equals("economy:posting")).count());
             assertTrue(envelope.records().stream().anyMatch(record -> record.type().equals("economy:bank-lifecycle")));
             store.transaction(tx -> {
                 assertEquals(0, Settlement.posted(tx::query, source.value(), JPY));

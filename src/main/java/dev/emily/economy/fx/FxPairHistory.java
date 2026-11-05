@@ -23,7 +23,8 @@ public final class FxPairHistory {
         }
     }
     /** The exact directed rate is target units per source unit, expressed as a ratio. */
-    public record Day(LocalDate date, BigDecimal numerator, BigDecimal denominator) {
+    public record Day(LocalDate date, BigDecimal numerator, BigDecimal denominator, boolean currencyUnavailable) {
+        public Day(LocalDate date, BigDecimal numerator, BigDecimal denominator) { this(date, numerator, denominator, false); }
         public boolean missing() { return numerator == null; }
     }
     public record Page(List<Day> days, Cursor next) {
@@ -31,14 +32,16 @@ public final class FxPairHistory {
 
         /** Every date in a page is within the committed publication range. */
         public List<LocalDate> unexpectedMissingDays() {
-            return days.stream().filter(Day::missing).map(Day::date).toList();
+            return days.stream().filter(day -> day.missing() && !day.currencyUnavailable()).map(Day::date).toList();
         }
     }
 
     public static Day day(JournalEngine.ReadView reads, FxQuotes.Pair pair, LocalDate date) {
         var publication = FxService.publication(reads, date);
-        return publication == null ? new Day(date, null, null)
-                : new Day(date, publication.rates().get(pair.source()), publication.rates().get(pair.target()));
+        if (publication == null) return new Day(date, null, null);
+        if (!publication.rates().containsKey(pair.source()) || !publication.rates().containsKey(pair.target()))
+            return new Day(date, null, null, true);
+        return new Day(date, publication.rates().get(pair.source()), publication.rates().get(pair.target()));
     }
 
     /** Call with one consistent read transaction and a server-derived world identity. */

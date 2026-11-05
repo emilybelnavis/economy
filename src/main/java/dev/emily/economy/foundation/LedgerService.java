@@ -35,12 +35,244 @@ public final class LedgerService {
 
     private final ServerServices services;
     private final FxRequests quotes;
+    private final CardReplacementPricing cardFees = new CardReplacementPricing();
+    private final CreditReplacementPricing creditCardFees = new CreditReplacementPricing();
     private final FoundationStore store;
+    private final dev.emily.economy.pricing.ServicePricing pricing;
 
     LedgerService(ServerServices services, FoundationStore store) {
         this.services = services;
         this.store = store;
+        this.pricing = services.servicePricing();
         this.quotes = new FxRequests(services, store, Clock.systemUTC());
+    }
+
+    public record CreditProfileView(Optional<dev.emily.economy.credit.CreditProfiles.Profile> profile,
+            Optional<dev.emily.economy.credit.CreditProfiles.History> latest,boolean recurringScoringActive,String reason) {}
+    /** A missing profile is unestablished; this read never initializes credit or schedules work. */
+    public CompletionStage<Optional<CreditProfileView>> creditProfile(PartyAuthorization.Grant grant) {
+        requireOwner(grant);
+        return services.readAccounts(grant,false,reads->Optional.of(new CreditProfileView(
+                dev.emily.economy.credit.CreditProfiles.find(reads,grant.target()),dev.emily.economy.credit.CreditProfiles.latestHistory(reads,grant.target()),false,dev.emily.economy.credit.CreditScoring.PRODUCTION_STATUS)));
+    }
+    public CompletionStage<Optional<dev.emily.economy.credit.CreditProfiles.HistoryPage>> creditHistory(
+            PartyAuthorization.Grant grant,long after,int limit) {
+        requireOwner(grant);
+        if(after<0 || limit<1 || limit>16)throw new IllegalArgumentException("Credit history page bounds");
+        return services.readAccounts(grant,false,reads->Optional.of(dev.emily.economy.credit.CreditProfiles.history(reads,grant.target(),after,limit)));
+    }
+    /** Separate audited operator capability; an owner grant cannot enter this inspection route. */
+    public CompletionStage<Optional<CreditProfileView>> inspectCreditProfile(PartyAuthorization.Grant inspection,
+            java.util.function.BooleanSupplier live) {
+        return services.inspectAccounts(inspection,Map.of("domain","credit-profile"),live,reads->Optional.of(new CreditProfileView(
+                dev.emily.economy.credit.CreditProfiles.find(reads,inspection.target()),dev.emily.economy.credit.CreditProfiles.latestHistory(reads,inspection.target()),false,dev.emily.economy.credit.CreditScoring.PRODUCTION_STATUS)));
+    }
+    public CompletionStage<Optional<dev.emily.economy.credit.CreditProfiles.HistoryPage>> inspectCreditHistory(
+            PartyAuthorization.Grant inspection,long after,int limit,java.util.function.BooleanSupplier live) {
+        if(after<0 || limit<1 || limit>16)throw new IllegalArgumentException("Credit history page bounds");
+        return services.inspectAccounts(inspection,Map.of("domain","credit-history","after",Long.toString(after),"limit",Integer.toString(limit)),live,
+                reads->Optional.of(dev.emily.economy.credit.CreditProfiles.history(reads,inspection.target(),after,limit)));
+    }
+
+    public CompletionStage<Optional<dev.emily.economy.credit.CreditDiagnostics.FacilityPage>> creditFacilityPage(
+            PartyAuthorization.Grant grant,UUID after,int limit) {
+        requireOwner(grant);
+        if(limit<1 || limit>16)throw new IllegalArgumentException("Facility diagnostic page bounds");
+        return services.readAccounts(grant,false,reads->Optional.of(dev.emily.economy.credit.CreditDiagnostics.ownerPage(reads,grant.target(),after,limit,System.currentTimeMillis())));
+    }
+    public CompletionStage<Optional<dev.emily.economy.credit.CreditDiagnostics.FacilityView>> creditFacilityView(
+            PartyAuthorization.Grant grant,UUID facility) {
+        requireOwner(grant);
+        return services.readAccounts(grant,false,reads->dev.emily.economy.credit.CreditDiagnostics.facility(reads,grant.target(),facility,System.currentTimeMillis()));
+    }
+    /** Audits every operator page before any private facility data is read. */
+    public CompletionStage<Optional<dev.emily.economy.credit.CreditDiagnostics.OperatorView>> inspectCreditFacility(
+            PartyAuthorization.Grant inspection,UUID facility,dev.emily.economy.credit.CreditDiagnostics.EventCursor after,int limit,
+            java.util.function.BooleanSupplier live) {
+        if(limit<1 || limit>16)throw new IllegalArgumentException("Credit inspection page bounds");
+        var cursor=after==null?dev.emily.economy.credit.CreditDiagnostics.EventCursor.start():after;
+        return services.inspectAccountsDuringCatchup(inspection,Map.of("domain","credit-facility","facility",facility.toString(),
+                "after",after==null?"":after.toString(),"limit",Integer.toString(limit)),live,
+                reads->dev.emily.economy.credit.CreditDiagnostics.inspect(reads,inspection.target(),facility,System.currentTimeMillis(),cursor,limit));
+    }
+
+    /** PartyOperation restores this same owner field from the grant; retain the original canonical bytes. */
+    private Journal.CanonicalRequest unboundCreditRequest(PartyAuthorization.Grant grant,Journal.CanonicalRequest request){
+        var fields=new java.util.TreeMap<>(request.fields());
+        var owner=Journal.actorKey(((PartyRef.Player)grant.target().owner()).id());
+        if(!owner.equals(fields.remove("economy:owner"))||!grant.target().world().value().toString().equals(fields.get("world")))throw new IllegalArgumentException("Credit request owner/world");
+        return new Journal.CanonicalRequest(request.version(),fields);
+    }
+
+    /** Facility reads and payments remain available without possession of a token. */
+    public CompletionStage<Optional<List<dev.emily.economy.credit.CreditFacilities.Facility>>> creditFacilities(
+            PartyAuthorization.Grant grant,UUID after,int limit) {
+        requireOwner(grant);
+        if(limit<1 || limit>16)throw new IllegalArgumentException("Facility page bounds");
+        return services.readAccounts(grant,false,reads->Optional.of(dev.emily.economy.credit.CreditFacilities.history(reads,grant.target(),after,limit)));
+    }
+    public CompletionStage<Optional<dev.emily.economy.credit.CreditFacilities.StatementPage>> creditStatements(
+            PartyAuthorization.Grant grant,UUID facility,long afterClosedAt,int limit) {
+        requireOwner(grant);
+        if(afterClosedAt<0 || limit<1 || limit>16)throw new IllegalArgumentException("Statement page bounds");
+        return services.readAccounts(grant,false,reads->Optional.of(dev.emily.economy.credit.CreditFacilities.statements(reads,grant.target(),facility,afterClosedAt,limit)));
+    }
+    private dev.emily.economy.credit.CreditFacilities.Inputs creditInputs(JournalEngine.ReadView reads,PartyRef owner,long now) {
+        var publication=dev.emily.economy.credit.CreditTreasury.publication(reads,now);
+        if(publication==null)return new dev.emily.economy.credit.CreditFacilities.Inputs(new dev.emily.economy.credit.CreditUnderwriting.FxSnapshot(new UUID(0,0),now,now,Map.of(),false),false,false,0);
+        var fx=new dev.emily.economy.credit.CreditUnderwriting.FxSnapshot(publication.updateId(),
+                publication.day().atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli(),now,publication.rates(),true);
+        // This package installs the first live debt product. Later loan/collection adapters extend this source.
+        var player=((PartyRef.Player)owner.owner()).id();
+        boolean reconciled=new dev.emily.economy.credit.CreditLiabilities().read(reads,owner.world(),player,java.time.Instant.ofEpochMilli(now)).available();
+        var tier=pricing.valuation().tierEligibility(owner.world(),Clock.systemUTC()).current(reads,owner);
+        return new dev.emily.economy.credit.CreditFacilities.Inputs(fx,reconciled,false,0,tier.available()&&tier.eligible());
+    }
+    public JournalService.Submission issueCreditFacility(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,
+            dev.emily.economy.credit.CreditFacilities.IssueRequest request) {
+        requireOwner(grant);
+        var handler=dev.emily.economy.credit.CreditFacilities.issuance(grant.target(),request,
+                pricing.valuation().tierEligibility(grant.target().world(),Clock.systemUTC()),this::creditInputs,System::currentTimeMillis);
+        return services.submitOwned(grant,dev.emily.economy.credit.CreditFacilities.ISSUE,operation,attempt,unboundCreditRequest(grant,request.request()),dev.emily.economy.credit.CreditSafety.production(handler),null);
+    }
+    public JournalService.Submission increaseCreditFacility(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,
+            dev.emily.economy.credit.CreditFacilities.IncreaseRequest request) {
+        requireOwner(grant);
+        var handler=dev.emily.economy.credit.CreditFacilities.increase(grant.target(),request,
+                pricing.valuation().tierEligibility(grant.target().world(),Clock.systemUTC()),this::creditInputs,System::currentTimeMillis);
+        return services.submitOwned(grant,dev.emily.economy.credit.CreditFacilities.INCREASE,operation,attempt,unboundCreditRequest(grant,request.request()),dev.emily.economy.credit.CreditSafety.production(handler),null);
+    }
+    /** Only a sealed server-thread physical card/terminal proof can authorize a new draw. */
+    public JournalService.Submission drawCredit(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,
+            dev.emily.economy.credit.CreditFacilities.DrawRequest request,dev.emily.economy.credit.CreditDrawAdmission.Proof proof) {
+        requireOwner(grant);
+        var handler=dev.emily.economy.credit.CreditFacilities.draw(grant.target(),request,this::creditInputs,proof,System::currentTimeMillis);
+        return services.submitOwned(grant,dev.emily.economy.credit.CreditFacilities.DRAW,operation,attempt,unboundCreditRequest(grant,request.request()),dev.emily.economy.credit.CreditSafety.production(handler),null);
+    }
+    public CompletionStage<Optional<dev.emily.economy.credit.CreditFacilities.RepaymentRequest>> quoteCreditRepayment(
+            PartyAuthorization.Grant grant,UUID facility,AccountId funding,long amountMinor) {
+        var actor=requireOwner(grant);
+        return services.readAccounts(grant,false,reads->{
+            var f=dev.emily.economy.credit.CreditFacilities.find(reads,facility).filter(v->v.party().equals(grant.target())).orElseThrow();
+            var a=AccountCatalog.find(reads,grant.target(),funding).orElseThrow();
+            if(a.currency()!=f.currency() || amountMinor<=0 || amountMinor>f.owedMinor())throw new IllegalArgumentException("Fresh repayment amount/currency required");
+            long now=System.currentTimeMillis();long expires=Math.min(Math.addExact(now,30_000),Math.min(f.nextDay(),f.nextStatement()));
+            return Optional.of(new dev.emily.economy.credit.CreditFacilities.RepaymentRequest(grant.target().world(),actor,facility,funding,amountMinor,
+                    f.revision(),a.revision(),dev.emily.economy.pricing.WealthValuation.ledgerRevision(reads,funding.value()),UUID.randomUUID(),expires));
+        });
+    }
+    public CompletionStage<dev.emily.economy.credit.CreditRepaymentFx.Quote> quoteCreditRepaymentFx(
+            PartyAuthorization.Grant grant,UUID facility,AccountId funding,long amountMinor) {
+        var actor=requireOwner(grant);
+        record Source(dev.emily.economy.credit.CreditFacilities.Facility facility,AccountIdentity funding) {}
+        return services.readAccounts(grant,false,reads->Optional.of(new Source(
+                dev.emily.economy.credit.CreditFacilities.find(reads,facility).filter(f->f.party().equals(grant.target())).orElseThrow(),
+                AccountCatalog.find(reads,grant.target(),funding).orElseThrow())))
+            .thenCompose(found->{var source=found.orElseThrow();
+                return quotes.quote(new RequestContext(actor.value(),services.sessionId(),UUID.randomUUID()),
+                        new FxQuotes.Pair(source.funding().currency(),source.facility().currency()),FxQuotes.Side.EXACT_CREDIT,
+                        new Money(source.facility().currency(),amountMinor))
+                    .thenCompose(fx->services.readAccounts(grant,false,reads->Optional.of(dev.emily.economy.credit.CreditRepaymentFx.capture(
+                            reads,grant.target(),source.facility(),source.funding(),amountMinor,fx,System.currentTimeMillis()))))
+                    .thenApply(Optional::orElseThrow);
+            });
+    }
+    public JournalService.Submission repayCreditFx(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,
+            dev.emily.economy.credit.CreditRepaymentFx.Quote quote) {
+        requireOwner(grant);
+        return services.submitOwned(grant,dev.emily.economy.credit.CreditFacilities.REPAY,operation,attempt,unboundCreditRequest(grant,quote.canonical()),
+                dev.emily.economy.credit.CreditRepaymentFx.registration(grant.target(),quote,quotes::requireFresh,System::currentTimeMillis),null);
+    }
+    public JournalService.Submission repayCredit(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,
+            dev.emily.economy.credit.CreditFacilities.RepaymentRequest request) {
+        requireOwner(grant);
+        return services.submitOwned(grant,dev.emily.economy.credit.CreditFacilities.REPAY,operation,attempt,unboundCreditRequest(grant,request.request()),
+                dev.emily.economy.credit.CreditFacilities.repayment(grant.target(),request,System::currentTimeMillis),null);
+    }
+    public JournalService.Submission revokeCreditCard(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,UUID token,long revision) {
+        var actor=requireOwner(grant);
+        var request=dev.emily.economy.credit.CreditFacilities.revokeRequest(grant.target().world(),actor,token,revision);
+        return services.submitOwned(grant,dev.emily.economy.credit.CreditFacilities.REVOKE,operation,attempt,unboundCreditRequest(grant,request),
+                dev.emily.economy.credit.CreditFacilities.revocation(grant.target(),token,revision),null);
+    }
+
+    public JournalService.Submission closeCreditFacility(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,UUID facility,long revision) {
+        var actor=requireOwner(grant);
+        var request=dev.emily.economy.credit.CreditFacilities.closeRequest(grant.target().world(),actor,facility,revision);
+        return services.submitOwned(grant,dev.emily.economy.credit.CreditFacilities.CLOSE,operation,attempt,unboundCreditRequest(grant,request),
+                dev.emily.economy.credit.CreditFacilities.closure(grant.target(),facility,revision,System::currentTimeMillis),null);
+    }
+    public CompletionStage<dev.emily.economy.card.IssuedCards.FeeQuote> quoteCreditCardReplacement(
+            PartyAuthorization.Grant grant,UUID facility,AccountId funding) {
+        var actor=requireOwner(grant);
+        record Source(dev.emily.economy.credit.CreditFacilities.Facility facility,AccountIdentity funding,EconomyCurrency worldCurrency) {}
+        return services.readAccounts(grant,false,reads->Optional.of(new Source(
+                dev.emily.economy.credit.CreditFacilities.find(reads,facility).filter(f->f.party().equals(grant.target())).orElseThrow(),
+                AccountCatalog.find(reads,grant.target(),funding).orElseThrow(),RebaseSettlement.denomination(reads).orElseThrow().currency())))
+            .thenCompose(found->{var source=found.orElseThrow();
+                CompletionStage<FxQuotes.Quote> fx=source.funding().currency()==source.worldCurrency()?CompletableFuture.completedFuture(null):
+                    quotes.quote(new RequestContext(actor.value(),services.sessionId(),UUID.randomUUID()),new FxQuotes.Pair(source.funding().currency(),source.worldCurrency()),FxQuotes.Side.EXACT_CREDIT,
+                            new Money(source.worldCurrency(),Math.multiplyExact(25L,source.worldCurrency().minorUnitsPerMajor())));
+                return fx.thenCompose(quote->services.readAccounts(grant,false,reads->Optional.of(creditCardFees.capture(reads,grant.target(),source.facility().issuer(),facility,source.funding(),quote,System.currentTimeMillis())))).thenApply(Optional::orElseThrow);
+            });
+    }
+    public JournalService.Submission replaceCreditCard(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,
+            dev.emily.economy.credit.CreditFacilities.ReplacementRequest request) {
+        requireOwner(grant);
+        var handler=dev.emily.economy.credit.CreditFacilities.replacement(grant.target(),request,
+                (intent,fee,reads)->creditCardFees.prepare(intent,fee,reads,fx->quotes.requireFresh(fx.id(),(PlayerId)intent.actor(),grant.target().world(),reads),System.currentTimeMillis()),System::currentTimeMillis);
+        return services.submitOwned(grant,dev.emily.economy.credit.CreditFacilities.REPLACE,operation,attempt,unboundCreditRequest(grant,request.request()),handler,null);
+    }
+
+    public record CardFeeSource(dev.emily.economy.institution.InstitutionCatalog.InstitutionId issuer,
+            AccountIdentity funding,EconomyCurrency worldCurrency) {}
+    public CompletionStage<dev.emily.economy.card.IssuedCards.FeeQuote> quoteCardReplacement(
+            PartyAuthorization.Grant grant,AccountId account,AccountId funding) {
+        var actor=requireOwner(grant);
+        return services.readAccounts(grant,false,reads->{
+            var source=AccountCatalog.find(reads,grant.target(),funding).orElseThrow();
+            var provider=dev.emily.economy.institution.BankProviders.find(reads,grant.target(),account).orElseThrow();
+            var issuer=dev.emily.economy.institution.InstitutionCatalog.require(new dev.emily.economy.institution.InstitutionCatalog.InstitutionId(provider.bankKey())).id();
+            return Optional.of(new CardFeeSource(issuer,source,RebaseSettlement.denomination(reads).orElseThrow().currency()));
+        }).thenCompose(found->{
+            var source=found.orElseThrow();
+            CompletionStage<FxQuotes.Quote> fx=source.funding().currency()==source.worldCurrency()
+                    ?CompletableFuture.completedFuture(null):quotes.quote(new RequestContext(actor.value(),services.sessionId(),UUID.randomUUID()),
+                        new FxQuotes.Pair(source.funding().currency(),source.worldCurrency()),FxQuotes.Side.EXACT_CREDIT,
+                        new Money(source.worldCurrency(),Math.multiplyExact(25L,source.worldCurrency().minorUnitsPerMajor())));
+            return fx.thenCompose(quote->services.readAccounts(grant,false,reads->Optional.of(cardFees.capture(reads,grant.target(),source.issuer(),account,
+                    source.funding(),quote,System.currentTimeMillis())))).thenApply(Optional::orElseThrow);
+        });
+    }
+    public JournalService.Submission issueCard(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,
+            dev.emily.economy.card.IssuedCards.Request request) {
+        requireOwner(grant);
+        var handler=dev.emily.economy.card.IssuedCards.registration(grant.target(),request,
+                pricing.valuation().tierEligibility(grant.target().world(),Clock.systemUTC()),System::currentTimeMillis,
+                (intent,fee,reads)->cardFees.prepare(intent,fee,reads,fx->quotes.requireFresh(fx.id(),(PlayerId)intent.actor(),grant.target().world(),reads),System.currentTimeMillis()));
+        return services.submitOwned(grant,dev.emily.economy.card.IssuedCards.ISSUE,operation,attempt,request.request(),handler,null);
+    }
+    public CompletionStage<Optional<dev.emily.economy.card.IssuedCards.Token>> accountCard(PartyAuthorization.Grant grant,AccountId account) {
+        requireOwner(grant);
+        return services.readAccounts(grant,false,reads->dev.emily.economy.card.IssuedCards.forAccount(reads,grant.target(),account));
+    }
+    public CompletionStage<Optional<dev.emily.economy.card.IssuedCards.Token>> usableCard(PlayerId actor,WorldId world,UUID token) {
+        return services.storage(actor,()->store.transaction(tx->{
+            if(!store.snapshot().worldId().equals(world))return Optional.empty();
+            return dev.emily.economy.card.IssuedCards.usable(tx::query,world,actor,token,System.currentTimeMillis());
+        }));
+    }
+    public CompletionStage<Optional<dev.emily.economy.card.CardAccess>> usableCardAccess(PlayerId actor,WorldId world,UUID token) {
+        return services.storage(actor,()->store.transaction(tx->{
+            if(!store.snapshot().worldId().equals(world))return Optional.empty();
+            return dev.emily.economy.card.CardAccess.usable(tx::query,world,actor,token,System.currentTimeMillis());
+        }));
+    }
+    public JournalService.Submission revokeCard(PartyAuthorization.Grant grant,OperationId operation,RequestId attempt,UUID token,long revision) {
+        var actor=requireOwner(grant);
+        var request=dev.emily.economy.card.IssuedCards.revokeRequest(token,revision,actor);
+        return services.submitOwned(grant,dev.emily.economy.card.IssuedCards.REVOKE,operation,attempt,request,
+                dev.emily.economy.card.IssuedCards.revocation(grant.target()),null);
     }
 
     public record PrimaryFunds(AccountIdentity account, AccountFunds funds) {}
@@ -52,12 +284,38 @@ public final class LedgerService {
             var owner = new PartyRef(world, new PartyRef.Player(actor));
             var account = selected == null ? AccountCatalog.primary(tx::query, owner).orElse(null)
                     : AccountCatalog.find(tx::query, owner, selected).orElse(null);
-            var terminal = TerminalPolicy.find(tx::query, world, anchor, actor, true)
-                    .map(value -> TerminalPolicy.effective(value, terminalCatalog())).orElse(null);
+            var terminal = TerminalPolicy.find(tx::query, world, anchor, actor, true).orElse(null);
             return new BankingContext(world, account, terminal, depositFx(tx::query),
                     RegisterSales.price(tx::query, world, anchor).orElse(null));
         }));
     }
+    public record BranchContext(TerminalPolicy.Snapshot terminal, AccountIdentity primary, AccountIdentity account,
+            dev.emily.economy.institution.BankProviders.Binding provider,
+            dev.emily.economy.account.AccountRebasePlanner.Denomination denomination,
+            dev.emily.economy.institution.BankProviders.TierSnapshot tier) {}
+    public CompletionStage<Optional<BranchContext>> branchContext(PartyAuthorization.Grant grant,
+            TerminalPolicy.Anchor anchor, AccountId selected) {
+        return services.readAccounts(grant, false, reads -> {
+            var player = requireOwner(grant);
+            var primary = AccountCatalog.primary(reads, grant.target()).orElse(null);
+            var account = selected == null ? null : AccountCatalog.find(reads, grant.target(), selected).orElse(null);
+            var terminal = TerminalPolicy.find(reads, grant.target().world(), anchor, player, true).orElse(null);
+            var provider = account == null ? null : dev.emily.economy.institution.BankProviders.find(reads, grant.target(), account.id()).orElse(null);
+            var denomination = RebaseSettlement.denomination(reads).orElse(null);
+            var tier = pricing.valuation().tierEligibility(grant.target().world(), Clock.systemUTC()).current(reads, grant.target());
+            return Optional.of(new BranchContext(terminal, primary, account, provider, denomination, tier));
+        });
+    }
+    public JournalService.Submission closeAtBranch(PartyAuthorization.Grant grant, OperationId operation, RequestId attempt,
+            FundedClosure.Instruction instruction, FundedClosure.ClaimsReader claims,
+            dev.emily.economy.institution.BranchAdmission.Proof proof) {
+        requireOwner(grant);
+        var handler = FundedClosure.registrationAtBranch(grant.target(), instruction, quotes::requireFresh, claims, proof,
+                (intent, reads) -> proof.valid(intent, reads));
+        var request = new dev.emily.economy.institution.BankProviders.Request(proof, 0, instruction.request().fields()).request();
+        return services.submitOwned(grant, dev.emily.economy.institution.BankProviders.CLOSE, operation, attempt, request, handler, null);
+    }
+
     public CompletionStage<Optional<Deposits.Reservation>> deposit(PlayerId actor, UUID id) {
         return services.storage(actor, () -> store.transaction(tx -> Deposits.find(tx::query, actor, id)));
     }
@@ -157,11 +415,21 @@ public final class LedgerService {
         return quotes.quote(new RequestContext(player.value(), services.sessionId(), attempt.value()), pair, side, amount);
     }
 
+    public CompletionStage<FxQuotes.Quote> quoteClosure(PartyAuthorization.Grant grant,RequestId attempt,
+            FxQuotes.Pair pair,Money budget) {
+        var player=requireOwner(grant);
+        return quotes.quoteForClosure(new RequestContext(player.value(),services.sessionId(),attempt.value()),pair,budget);
+    }
+
     public JournalService.Submission exchange(PartyAuthorization.Grant grant, OperationId operation,
                                                RequestId attempt, FxSettlement.Exchange exchange) {
+        return exchange(grant, operation, attempt, exchange, (intent, reads) -> true);
+    }
+    public JournalService.Submission exchange(PartyAuthorization.Grant grant, OperationId operation, RequestId attempt,
+            FxSettlement.Exchange exchange, BiPredicate<Journal.Intent, JournalEngine.ReadView> authority) {
         if (!requireOwner(grant).equals(exchange.owner())) throw new IllegalArgumentException("Exchange owner");
         var intent = new Journal.Intent(operation, attempt, grant.actor(), FxSettlement.EXCHANGE, exchange.request(), null, null);
-        var handler = FxSettlement.registration(grant.target().world(), quotes::requireFresh, (request, decoded, reads) -> true);
+        var handler = FxSettlement.registration(grant.target().world(), quotes::requireFresh, (request, decoded, reads) -> authority.test(request, reads));
         return ownedJournal(grant, intent, handler).submit(intent);
     }
 
@@ -304,11 +572,27 @@ public final class LedgerService {
                 TerminalPolicy.registration(action, services.partyWorld(), catalog, authority, operators), publisher);
     }
 
+    public JournalService terminalBanking(JournalEngine.AccessPolicy admission, TerminalPolicy.Authority authority,
+            TerminalPolicy.Operators operators) {
+        return trustedJournal(TerminalBanking.BIND, admission,
+                TerminalBanking.registration(services.partyWorld(), terminalCatalog(), authority, operators), null);
+    }
+
     public CompletionStage<Optional<TerminalPolicy.Snapshot>> terminalSettings(ActorId actor,
             TerminalPolicy.Operators operators, TerminalPolicy.Anchor anchor) {
         return services.storage(actor, () -> store.transaction(tx ->
                 TerminalPolicy.find(tx::query, store.snapshot().worldId(), anchor, actor,
-                        operators.allows(actor, tx::query)).map(value -> TerminalPolicy.effective(value, terminalCatalog()))));
+                        operators.allows(actor, tx::query))));
+    }
+
+    public record TerminalInspection(TerminalPolicy.Snapshot terminal, boolean pendingCash) {}
+    public CompletionStage<Optional<TerminalInspection>> terminalInspection(ActorId actor,
+            TerminalPolicy.Operators operators, TerminalPolicy.Anchor anchor) {
+        return services.storage(actor, () -> store.transaction(tx -> {
+            if(!operators.allows(actor,tx::query))return Optional.empty();
+            return TerminalPolicy.find(tx::query,store.snapshot().worldId(),anchor,actor,true)
+                    .map(value->new TerminalInspection(value,TerminalBanking.hasPending(tx::query,value.world(),value.generation())));
+        }));
     }
 
     private static Map<String, TerminalPolicy.Denomination> terminalCatalog() {
@@ -329,6 +613,16 @@ public final class LedgerService {
                 publication.day() + "/" + publication.updateId() + "/" + publication.policyId(), publication.conversionRates());
     }
 
+    private Deposits.FxSnapshot depositFx(JournalEngine.ReadView reads,PlayerId actor,UUID account) {
+        var fx=depositFx(reads);
+        return fx==null?null:new Deposits.FxSnapshot(fx.revision(),fx.rates(),account==null?null:
+                new dev.emily.economy.pricing.CashPricing.Context(pricing,store.snapshot().worldId(),actor,account,java.time.Instant.now()));
+    }
+    private Withdrawals.FxSnapshot withdrawalFx(JournalEngine.ReadView reads,PlayerId actor,UUID account) {
+        var fx=depositFx(reads,actor,account);
+        return fx==null?null:new Withdrawals.FxSnapshot(fx.revision(),fx.rates(),fx.pricing());
+    }
+
     public CompletionStage<Deposits.Preview> previewDeposit(PlayerId actor, Deposits.Binding binding,
             List<Deposits.Slot> slots, java.util.function.BiPredicate<Deposits.Binding, JournalEngine.ReadView> admission) {
         var catalog = depositCatalog();
@@ -336,14 +630,24 @@ public final class LedgerService {
         return services.economicWrite(actor, () -> store.transaction(tx -> {
             if (!admission.test(binding, tx::query)) throw new IllegalArgumentException("DEPOSIT_ACCESS");
             return Deposits.preview(tx::query, store.snapshot().worldId(), actor, binding, originals, catalog,
-                    LedgerService::depositFx);
+                    reads -> depositFx(reads,actor,binding.account()));
         }));
     }
 
     public JournalService deposits(Deposits.Action action, JournalEngine.AccessPolicy admission,
             Deposits.Authority authority, Deposits.EvidenceVerifier evidence, JournalService.Publisher publisher) {
-        return trustedJournal(action.kind(), admission, Deposits.registration(action, services.partyWorld(),
-                depositCatalog(), LedgerService::depositFx, authority, evidence), publisher);
+        var world=services.partyWorld();
+        var handler=new JournalEngine.Registration(1,(intent,reads)->{
+            UUID account=null;
+            try {
+                if(action==Deposits.Action.RESERVE)account=UUID.fromString(intent.request().fields().get("binding").split("\\|",-1)[0]);
+                else account=Deposits.find(reads,intent.actor(),UUID.fromString(intent.request().fields().get("reservation")))
+                        .map(r->r.preview().binding().account()).orElse(null);
+            } catch(IllegalArgumentException|NullPointerException malformed) { return new JournalEngine.Reject(new Journal.Result(1,"DEPOSIT_REQUEST","")); }
+            final UUID selected=account;
+            return Deposits.registration(action,world,depositCatalog(),r->depositFx(r,(PlayerId)intent.actor(),selected),authority,evidence).handler().prepare(intent,reads);
+        });
+        return trustedJournal(action.kind(),admission,handler,publisher);
     }
 
     public JournalService depositReturns(DepositReturns.Action action, JournalEngine.AccessPolicy admission,
@@ -377,7 +681,7 @@ public final class LedgerService {
         return services.economicWrite(actor, () -> store.transaction(tx -> {
             if (!admission.test(binding, tx::query)) throw new IllegalArgumentException("WITHDRAWAL_ACCESS");
             var preview = Withdrawals.preview(tx::query, store.snapshot().worldId(), actor, binding, cash,
-                    edits, catalog, LedgerService::withdrawalFx);
+                    edits, catalog, reads -> withdrawalFx(reads,actor,binding.account()));
             if (!capacity.test(preview, tx::query)) throw new IllegalArgumentException("WITHDRAWAL_CAPACITY");
             return preview;
         }));
@@ -385,8 +689,18 @@ public final class LedgerService {
 
     public JournalService withdrawals(Withdrawals.Action action, JournalEngine.AccessPolicy admission,
             Withdrawals.Authority authority, Withdrawals.Capacity capacity, JournalService.Publisher publisher) {
-        return trustedJournal(action.kind(), admission, Withdrawals.registration(action, services.partyWorld(),
-                withdrawalCatalog(), LedgerService::withdrawalFx, authority, capacity, WithdrawalDelivery::prepare), publisher);
+        var world=services.partyWorld();
+        var handler=new JournalEngine.Registration(1,(intent,reads)->{
+            UUID account=null;
+            try {
+                if(action==Withdrawals.Action.RESERVE)account=UUID.fromString(intent.request().fields().get("binding").split("\\|",-1)[0]);
+                else account=Withdrawals.find(reads,intent.actor(),UUID.fromString(intent.request().fields().get("reservation")))
+                        .map(r->r.preview().binding().account()).orElse(null);
+            } catch(IllegalArgumentException|NullPointerException malformed) { return new JournalEngine.Reject(new Journal.Result(1,"WITHDRAWAL_REQUEST","")); }
+            final UUID selected=account;
+            return Withdrawals.registration(action,world,withdrawalCatalog(),r->withdrawalFx(r,(PlayerId)intent.actor(),selected),authority,capacity,WithdrawalDelivery::prepare).handler().prepare(intent,reads);
+        });
+        return trustedJournal(action.kind(),admission,handler,publisher);
     }
 
     public CompletionStage<Optional<Withdrawals.Reservation>> withdrawal(PlayerId actor, UUID reservation) {

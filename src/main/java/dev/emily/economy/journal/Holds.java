@@ -153,12 +153,20 @@ public final class Holds {
                 Integer.toString(limit)), limit).stream().map(Holds::read).toList();
     }
 
-    public static void validateFact(String payload) {
+    public static void validateFact(String payload) { validateFact(payload, false); }
+
+    public static void validateFactV2(String payload) { validateFact(payload, true); }
+
+    private static void validateFact(String payload, boolean minorChf) {
         var fields = payload.split("\\|", -1);
         if (fields.length != 5) throw new IllegalArgumentException("Hold fact fields");
         parseId(fields[0]);
         parseId(fields[1]);
-        parseAmount(fields[2], fields[3]);
+        var amount = parseAmount(fields[2], fields[3]);
+        if ((amount.currency() == EconomyCurrency.CHF) != minorChf)
+            throw new IllegalArgumentException("Hold fact currency/version mismatch");
+        if (minorChf && !Long.toString(amount.minorUnits()).equals(fields[3]))
+            throw new IllegalArgumentException("Noncanonical hold fact amount");
         State.valueOf(fields[4]);
     }
 
@@ -177,7 +185,7 @@ public final class Holds {
     private static Money parseAmount(String currency, String units) {
         if (currency == null || units == null) throw new IllegalArgumentException("Missing hold amount");
         var amount = new Money(EconomyCurrency.valueOf(currency), Long.parseLong(units));
-        if (amount.minorUnits() <= 0 || amount.minorUnits() % amount.currency().minorUnitsPerMajor() != 0) {
+        if (amount.minorUnits() <= 0 || amount.minorUnits() % (amount.currency() == EconomyCurrency.CHF ? 1 : amount.currency().minorUnitsPerMajor()) != 0) {
             throw new IllegalArgumentException("Invalid hold amount");
         }
         return amount;
@@ -196,7 +204,7 @@ public final class Holds {
     private static JournalEngine.Commit commit(Hold hold, List<Journal.Record> postings,
                                                 JournalEngine.Projection projection) {
         var records = new ArrayList<>(postings);
-        records.add(new Journal.Record(FACT, 1, hold.id() + "|" + hold.account() + "|"
+        records.add(new Journal.Record(FACT, hold.amount().currency() == EconomyCurrency.CHF ? 2 : 1, hold.id() + "|" + hold.account() + "|"
                 + hold.amount().currency().name() + "|" + hold.amount().minorUnits() + "|" + hold.state().name()));
         return new JournalEngine.Commit(records, new Journal.Result(1, "HOLD_" + hold.state().name(), ""), projection);
     }

@@ -36,12 +36,16 @@ public final class EconomicClock {
         }
     }
     /** Trusted storage readers for an economic system whose origin is set by a committed domain event. */
-    public record DeferredSystem(Origin origin, Prepare prepare) {
+    public record DeferredSystem(Origin origin, Prepare prepare, InitialVersion initialVersion) {
+        public DeferredSystem(Origin origin, Prepare prepare) { this(origin, prepare, null); }
         public DeferredSystem {
             Objects.requireNonNull(origin);
             Objects.requireNonNull(prepare);
         }
     }
+
+    /** Historical opening facts select a first implementation without rewriting legacy schedules. */
+    @FunctionalInterface public interface InitialVersion { int read(Queries reads); }
 
     @FunctionalInterface public interface Origin {
         /** Null means that the system is not active and has no debt. */
@@ -109,7 +113,7 @@ public final class EconomicClock {
                     continue;
                 }
                 if (existing.isEmpty()) {
-                    register(tx, definition, origin, deferred.containsKey(definition.id()));
+                    register(tx, definition, origin, deferred.containsKey(definition.id()), initialVersion(definition, tx::query));
                 } else {
                     var row = existing.getFirst();
                     if ((row.get("active_observed_ms") != null) != deferred.containsKey(definition.id())) {
@@ -122,7 +126,7 @@ public final class EconomicClock {
                     } else if (num(row,"frontier_ms") != num(latest.getFirst(),"interval_end_ms") || num(row,"last_sequence") != num(latest.getFirst(),"economic_sequence")) throw failure("Clock checkpoint disagrees with completion");
                 }
                 var versions = tx.query("SELECT * FROM economic_versions WHERE system_id=? ORDER BY effective_end_ms", List.of(definition.id()), 16);
-                if (Integer.parseInt(versions.getFirst().get("version")) != definition.initialVersion() || num(versions.getFirst(),"effective_end_ms") != Math.addExact(origin,definition.cadenceMillis())) throw failure("Initial version schedule changed");
+                if (Integer.parseInt(versions.getFirst().get("version")) != initialVersion(definition, tx::query) || num(versions.getFirst(),"effective_end_ms") != Math.addExact(origin,definition.cadenceMillis())) throw failure("Initial version schedule changed");
                 for (var version : versions) {
                     long boundary=num(version,"effective_end_ms");
                     if(boundary<=origin||(boundary-origin)%definition.cadenceMillis()!=0)throw failure("Invalid simulation effective boundary");
@@ -137,6 +141,14 @@ public final class EconomicClock {
             return null;
         });
     }
+    private int initialVersion(SystemDefinition definition, Queries reads) {
+        var system = deferred.get(definition.id());
+        int version = system == null || system.initialVersion() == null ? definition.initialVersion()
+                : system.initialVersion().read(reads);
+        if (!definition.versions().containsKey(version)) throw failure("Missing initial historical implementation");
+        return version;
+    }
+
     private Long effectiveOrigin(SystemDefinition definition, Queries reads) {
         DeferredSystem system = deferred.get(definition.id());
         if (system == null) return definition.originMillis();
@@ -148,12 +160,12 @@ public final class EconomicClock {
         return origin;
     }
 
-    private static void register(FoundationStore.Transaction tx, SystemDefinition definition, long origin, boolean deferred) {
+    private static void register(FoundationStore.Transaction tx, SystemDefinition definition, long origin, boolean deferred, int initialVersion) {
         tx.execute("INSERT INTO economic_systems(system_id,cadence_ms,origin_ms,frontier_ms,last_sequence,active_observed_ms) "
                         + "VALUES(?,?,?,?,0,?)",
                 Arrays.asList(definition.id(), str(definition.cadenceMillis()), str(origin), str(origin),
                         deferred ? str(origin) : null));
-        var version = definition.versions().get(definition.initialVersion());
+        var version = definition.versions().get(initialVersion);
         tx.execute("INSERT INTO economic_versions VALUES(?,?,?,?)",
                 List.of(definition.id(), str(version.number()), signature(definition, version, origin),
                         str(Math.addExact(origin, definition.cadenceMillis()))));
@@ -164,7 +176,7 @@ public final class EconomicClock {
             if (!tx.query("SELECT system_id FROM economic_systems WHERE system_id=?", List.of(id), 1).isEmpty()) continue;
             var definition = definitions.get(id);
             Long origin = effectiveOrigin(definition, tx::query);
-            if (origin != null) register(tx, definition, origin, deferred.containsKey(definition.id()));
+            if (origin != null) register(tx, definition, origin, deferred.containsKey(definition.id()), initialVersion(definition, tx::query));
         }
     }
 
@@ -261,6 +273,15 @@ public final class EconomicClock {
         UUID update = stable("update|" + store.snapshot().worldId().value() + "|" + system + "|" + end + "|" + version);
         return new Journal.Intent(new OperationId(stable("operation|"+update)), new RequestId(UUID.randomUUID()), actor(system), KIND,
                 new Journal.CanonicalRequest(1, Map.of("system",system,"start",next.get("frontier_ms"),"end",str(end),"version",str(version))), update, null);
+    }
+
+    /** Earliest installed fixed-system boundary, including future work. Worker-only merge hook. */
+    public Long nextDueMillis() {
+        return store.transaction(tx -> {
+            activateOpenedSystems(tx);
+            return tx.query("SELECT * FROM economic_systems", List.of(), 64).stream()
+                    .map(this::nextEnd).min(Long::compareTo).orElse(null);
+        });
     }
 
     private long nextEnd(Map<String, String> row) {

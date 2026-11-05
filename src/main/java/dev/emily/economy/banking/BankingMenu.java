@@ -18,23 +18,24 @@ import net.minecraft.world.item.ItemStack;
 /** Server-issued identity and bounded snapshot for one live physical terminal session. */
 public final class BankingMenu extends AbstractContainerMenu {
     public enum Access {
-        ATM, TELLER, REGISTER, CARD, ADMIN, WORLD_SETUP;
+        ATM, TELLER, KIOSK, REGISTER, CARD, ADMIN, WORLD_SETUP;
 
         private static final Set<String> BANKING = Set.of("home", "manage_accounts", "setup", "accounts", "accounts_next", "account_select", "account_open", "account_close_preview", "account_close_confirm",
                 "history", "history_next", "fx", "exchange_preview", "exchange_confirm", "bank_retry", "deposit",
                 "deposit_preview", "deposit_confirm", "withdraw", "withdraw_preview", "withdraw_confirm", "claims",
-                "claims_next", "collect", "retry", "cancel");
+                "claims_next", "collect", "retry", "cancel", "cards", "card_select", "card_lost", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next");
         private static final Set<String> CARD_ACTIONS = Set.of("home", "manage_accounts", "setup", "accounts", "accounts_next", "account_select",
                 "history", "history_next", "fx", "exchange_preview", "exchange_confirm", "bank_retry", "claims",
-                "claims_next", "collect", "retry", "cancel");
+                "claims_next", "collect", "retry", "cancel", "cards", "card_select", "card_lost", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next");
         private static final Set<String> REGISTER_ACTIONS = Set.of("home", "shop", "buy_preview", "buy_confirm", "price", "claims",
                 "claims_next", "collect", "retry", "cancel");
-        private static final Set<String> ADMIN_ACTIONS = Set.of("settings", "configure", "bank_retry", "cancel", "banking");
+        private static final Set<String> ADMIN_ACTIONS = Set.of("settings", "configure", "bank_retry", "cancel", "banking", "brand_preview", "brand_confirm");
 
         public boolean allows(String action) {
             return switch (this) {
-                case ATM -> BANKING.contains(action) && !action.startsWith("account_close_");
-                case TELLER -> BANKING.contains(action);
+                case ATM -> BANKING.contains(action) && !action.startsWith("account_close_") && !action.equals("account_open") && !action.equals("setup");
+                case TELLER -> BANKING.contains(action) && !action.startsWith("account_close_") && !action.equals("account_open") && !action.equals("setup");
+                case KIOSK -> Set.of("home", "manage_accounts", "accounts", "accounts_next", "account_select", "history", "history_next", "bank_retry", "cancel", "branch_open", "branch_assign", "branch_switch", "branch_accept", "branch_close", "account_close_confirm", "branch_products", "cards", "card_select", "card_preview", "card_confirm", "card_lost", "claims", "claims_next", "collect", "retry", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next").contains(action);
                 case REGISTER -> REGISTER_ACTIONS.contains(action);
                 case CARD -> CARD_ACTIONS.contains(action);
                 case ADMIN -> ADMIN_ACTIONS.contains(action);
@@ -48,6 +49,9 @@ public final class BankingMenu extends AbstractContainerMenu {
     private final UUID session;
     private final Access access;
     private final SimpleContainer inputs = new SimpleContainer(24);
+    private UUID issuedToken;
+    public UUID issuedToken(){return issuedToken;}
+    public void setIssuedToken(UUID token){if(!remote())throw new IllegalStateException("Remote card menu required");issuedToken=Objects.requireNonNull(token);}
     private long revision;
     private long lastActionTick = -10;
     private String page = "home";
@@ -123,12 +127,14 @@ public final class BankingMenu extends AbstractContainerMenu {
     public Player player() { return inventory.player; }
 
     public boolean valid(ServerPlayer player) {
-        if (player != inventory.player || player.containerMenu != this || !player.isAlive()) return false;
+        if (player != inventory.player || player.containerMenu != this || !player.isAlive()
+                || player.server.getPlayerList().getPlayer(player.getUUID()) != player) return false;
         if (worldSetup()) return Economy.canChooseWorld(player, generation);
         if (remote()) {
             var services = Economy.serverServices(player.serverLevel().getServer());
             return services != null && services.state() == ServerServices.State.READY
-                    && (CashCatalog.hasBankingCard(player.getMainHandItem()) || CashCatalog.hasBankingCard(player.getOffhandItem()));
+                    && (issuedToken==null?(CashCatalog.hasBankingCard(player.getMainHandItem()) || CashCatalog.hasBankingCard(player.getOffhandItem()))
+                        :java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(stack->dev.emily.economy.card.CardStackIdentity.mark(stack,services.worldId()).filter(mark->mark.token().equals(issuedToken)).isPresent()));
         }
         if (!player.serverLevel().dimension().location().toString().equals(anchor.dimension())) return false;
         var position = new BlockPos(anchor.x(), anchor.y(), anchor.z());
@@ -186,6 +192,7 @@ public final class BankingMenu extends AbstractContainerMenu {
         slot.onTake(player, original); return copy;
     }
     @Override public void removed(Player player) {
+        dev.emily.economy.institution.KioskAdmission.closed(this);
         if (player instanceof ServerPlayer serverPlayer) BankingController.closed(serverPlayer, this);
         super.removed(player); // Vanilla carried player item only; deposit inputs remain under controller custody.
     }

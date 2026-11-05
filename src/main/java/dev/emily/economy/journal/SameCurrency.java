@@ -142,8 +142,8 @@ public final class SameCurrency {
         var owner = new PlayerId(UUID.fromString(required(fields, "owner")));
         var amountFields = pair(required(fields, "amount"));
         var amount = new Money(EconomyCurrency.valueOf(amountFields[0]), Long.parseLong(amountFields[1]));
-        if (amount.minorUnits() <= 0 || amount.minorUnits() % amount.currency().minorUnitsPerMajor() != 0) {
-            throw new IllegalArgumentException("Whole positive amount required");
+        if (amount.minorUnits() <= 0 || amount.minorUnits() % (amount.currency() == EconomyCurrency.CHF ? 1 : amount.currency().minorUnitsPerMajor()) != 0) {
+            throw new IllegalArgumentException("Positive amount at the currency settlement quantum required");
         }
         if (intent.kind().equals(PAY)) {
             return new Payment(owner, revision(fields, "debit"),
