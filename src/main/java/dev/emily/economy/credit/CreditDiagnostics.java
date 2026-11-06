@@ -73,6 +73,28 @@ public final class CreditDiagnostics {
         requirePlayer(owner);bounds(limit);
         return CreditFacilities.statements(reads,owner,id,afterClosedAt,limit);
     }
+    public static Optional<PaymentPage> ownerPayments(JournalEngine.ReadView reads,PartyRef owner,UUID id,EventCursor after,int limit) {
+        bounds(limit);requirePlayer(owner);Objects.requireNonNull(after);
+        var facility=CreditFacilities.find(reads,Objects.requireNonNull(id)).filter(f->f.party().equals(owner)).orElse(null);
+        if(facility==null)return Optional.empty();
+        var page=payments(reads,facility,after,limit,frontier(reads));
+        for(var receipt:page.entries()) {
+            var snapshots=reads.query("SELECT record_version,payload FROM journal_records WHERE sequence=? AND record_type=? ORDER BY position LIMIT 64",
+                List.of(Long.toString(receipt.sequence()),CreditFacilities.FACT),64);
+            boolean bound=false;
+            for(var row:snapshots) {
+                if(!row.get("record_version").equals("1"))throw new IllegalArgumentException("Unsupported credit snapshot version");
+                var source=CreditFacilities.decodeSnapshot(row.get("payload"));
+                if(source.id().equals(id)) {
+                    if(!source.party().equals(owner)||source.currency()!=facility.currency()||!source.issuer().equals(facility.issuer()))
+                        throw new IllegalArgumentException("Credit payment owner binding");
+                    bound=true;
+                }
+            }
+            if(!bound)throw new IllegalArgumentException("Credit payment source unavailable");
+        }
+        return Optional.of(page);
+    }
     public static Optional<OperatorView> inspect(JournalEngine.ReadView reads,PartyRef owner,UUID id,long now,EventCursor after,int limit) {
         instant(now);bounds(limit);requirePlayer(owner);Objects.requireNonNull(after);
         var f=CreditFacilities.find(reads,Objects.requireNonNull(id)).filter(v->v.party().equals(owner)).orElse(null);

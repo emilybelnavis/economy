@@ -1,0 +1,36 @@
+# Bank and credit menus and integration
+
+A6-12 extends the authenticated A5 banking menu with protocol 7. `FinanceActions` is a finite allowlist with physical-surface restrictions. Existing menu ID, session, revision, player-instance, dimension, reach and terminal generation checks remain on every packet. New application, increase and replacement actions require a kiosk. The existing sealed issuer-specific proof rechecks bank, binding, base currency and captured economic revisions at settlement. A broken or rebranded terminal invalidates the proof.
+
+`CreditMenus` owns application, limit, token/lost/replacement and native/FX repayment views. `LoanMenus` owns fixed bank/subprime offers, bounded original schedules/installments and native/FX payments/payoff. `FinanceCollections` owns bounded cases and remote native/FX payments. `FinanceReports` supplies wealth/tier and original report views. Readers retain owner grants. Operator inspection remains a separate audited path. The client sends offered choices or bounded amount text. Rates, score, tier, dates, ownership, fees and debt come from server services.
+
+The client shows finance terms as scrollable text. Its Actions chooser displays server-offered selections and confirmations. An offered amount action adds an amount field and review control. Loan applications accept principal and integer years. Each financial confirmation displays its approved rates, amounts, dates, fees and consequences before the confirm choice is offered. Statement, schedule and collection/report pages use bounded exclusive server-retained cursors. Future trading, variable-rate and collateral products are labeled unavailable.
+
+## Transaction and recovery boundaries
+
+Finance actions use `FinanceMenuSupport` and the existing `BankingAccounts` pending pipeline. Before admission, verified player saving retains the original owner/world, operation/request IDs, kind and canonical fields in `economy_banking_pending`. Its existing cash-operation exclusion applies. Terminal outcomes clear the pointer. An uncertain result retains it for ordered owner-scoped original-outcome lookup. A confirmed absent finance operation requires a fresh reviewed request. A disconnected or replaced player object cannot save over the current login. Menu closure cancels audience publication without reversing a committed financial result.
+
+A held active owned credit token selects credit funding at a register preview. Ordinary account-funded register sales retain their currency restrictions. The optional v1 reserve field `credit_funding=true` allows a credit-funded quote to retain the buyer primary identity/revision when its currency differs. The exact COMMIT canonical variant adds bounded `credit_request`, a sorted representation of the frozen v1 draw fields. Other request extras reject. The ordinary debit composer rejects that variant, preventing fallback to account debit.
+
+At COMMIT, the register checks exact saved stock, price, terminal, source, capacity and evidence. The trusted credit composer binds the original draw, creates a DRAW child intent with the same operation/actor, and validates the sealed current held-card proof and credit readiness. Credit reserve-to-seller posting, borrower liability, facility revision, draw facts, protected goods custody and register state commit in one existing SQLite journal transaction. There is no second financial submission. Original-outcome replay bypasses the composer and does not repeat item delivery. Physical stock removal, observed chunk saving and goods insertion retain the separate A5 custody protocol, known-undelivered claims and ambiguous-effect quarantine.
+
+Approved advances credit a selected owned open same-currency BANK account at an ATM/teller with the held active token. Their draw has its own saved operation and no physical cash side effect. A subsequent separately confirmed A5 withdrawal delivers cash through existing custody. An ambiguous cash delivery cannot repeat the advance. The outstanding-principal 20% sublimit and overall credit ceiling remain authoritative backend checks.
+
+## Public contract
+
+`LedgerService` implements `api.BankingIntegration` version 1. Prime returns the existing effective/versioned `PricingPolicy.Policy`. Owner valuation returns the existing policy, denomination, FX publication and time-stamped `WealthValuation.Snapshot`, including explicit unavailability. Fee quotes retain the existing owner, institution, principal/fee, tier, policy, revision, expiry and valuation witness. Trading quote requests reject while the product is unavailable. Physically authorized advance submission and the atomic register composer retain sealed server proof requirements. No new unrestricted purchase draw is exposed. Capability reporting reuses `Loans.Capabilities`, with fixed unsecured available and variable/secured awaiting their future adapters.
+
+Never-attempted COMMITTED issued-card deliveries now appear in the owner collection page immediately. Startup card recovery validates both debit and credit issuance/replacement provenance before converting a never-attempted delivery to a claim. Attempted or uncertain delivery retains quarantine behavior.
+
+There are no new persisted entities, schema versions, journal fact families or record decoders. Existing v1 credit/loan/debt facts and A5 sale/custody facts are composed. Schema remains V34. Protocol 7 and optional exact v1 reserve/commit request variants are the new transport/service contracts. Existing canonical requests and persisted reservations retain their previous meaning. The first-account branch read captures authorization on the server thread before dispatching detached worker reads.
+
+[Verification](../verification/A6-12.md) records exercised paths and remaining acceptance coverage. [Prior banking rules](banking.md), [credit facilities](credit-facilities.md), [loans](loans.md), [debt lifecycle](debt-lifecycle.md) and [Collection Agent](collection-agent.md) retain their financial policies and storage ownership.
+
+## A6-13 acceptance corrections
+
+Debit issuance, lost-card revocation and branch closure now remove the already validated canonical owner before the shared service binds it once. Their final request bytes, handlers and original lookup identity are preserved. Client amount labels use the actual field description, issued credit cards have localized names, longer terms show scroll guidance and text batches flush at clipping transitions. The [qualified phase acceptance](../A6-13.md) and [downstream contracts](a6-downstream.md) record scope and the outstanding D15 automatic-payment runtime.
+
+
+## D15 automatic-payment extension
+
+Banking protocol8 adds the finite `auto_*` configuration actions and `finance_autopay` page. The Bank and credit hub exposes reviewed named-source consent on owner-authorized banking surfaces. Public owner configuration uses `LedgerService.autopay` and `configureAutopay`. Integration API1 remains unchanged. Existing accounting and original-outcome lookup are reused. See [automatic-payment contracts](autopay.md) and [final acceptance](../verification/A6-13.md).

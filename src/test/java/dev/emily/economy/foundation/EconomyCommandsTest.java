@@ -83,6 +83,19 @@ class EconomyCommandsTest {
         }
     }
 
+    @Test void debtCommandsRejectConsoleAutomationAndUnauthenticatedSources() {
+        var dispatcher=new CommandDispatcher<CommandSourceStack>();
+        DebtCommands.register(dispatcher,server->fail("Unauthenticated caller reached debt service"));
+        String id="665cb020-9894-4c09-a41c-b6fc4e63d03d";
+        for(var source:List.of(new TestSource(CommandSource.NULL,0),new TestSource(CommandSource.NULL,2),new TestSource(new RconConsoleSource(null),2))) {
+            for(String command:List.of("economy debt cases","economy debt reports","economy debt history "+id,
+                    "economy debt inspect loan "+id+" "+id,"economy debt inspect_reports "+id,
+                    "economy debt inspect_history "+id+" "+id,"economy debt payments loan "+id))
+                assertThrows(CommandSyntaxException.class,()->dispatcher.execute(command,source));
+            assertTrue(source.messages.isEmpty());
+        }
+    }
+
     private static final class TestSource extends CommandSourceStack {
         private final List<String> messages = new ArrayList<>();
 

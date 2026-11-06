@@ -25,6 +25,8 @@ public final class BankingController {
         long depositRevision;
         long saleRevision;
         RegisterSales.Quote quote;
+        LedgerService.CreditDrawQuote credit;
+        dev.emily.economy.credit.CreditDrawAdmission.Proof creditProof;
         RegisterInventory.Snapshot stock;
         UUID reservation;
         Runnable retry;
@@ -170,7 +172,7 @@ public final class BankingController {
         }
         if (player.getPersistentData().getCompound(PENDING).hasUUID("operation")
                 || player.getPersistentData().getCompound("economy_banking_pending").hasUUID("operation")) {
-            if (!Set.of("retry", "bank_retry", "home", "accounts", "manage_accounts", "history", "fx", "claims", "claims_next", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next").contains(action)) {
+            if (!Set.of("auto_home", "auto_cards", "auto_loans", "auto_next", "auto_select", "finance_home", "finance_wealth", "finance_report", "finance_report_next", "finance_cases", "finance_cases_next", "finance_debt_home", "finance_debt_next", "finance_debt_case", "finance_loan_home", "finance_loan_next", "finance_loan_view", "finance_loan_schedule", "finance_loan_sched_next", "finance_loan_inst", "finance_loan_inst_next", "retry", "bank_retry", "home", "accounts", "manage_accounts", "history", "fx", "claims", "claims_next", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next").contains(action)) {
                 report(menu, menu.page(), menu.lines(), "Resolve the original pending operation with Retry before another mutation."); return;
             }
         }
@@ -178,6 +180,38 @@ public final class BankingController {
             var prior = FLOWS.get(menu);
             if (prior != null && prior.reservation != null) { report(menu, "deposit", menu.lines(), "Resolve the current reservation first."); return; }
             returnInputs(player, menu);
+        }
+        if (FinanceActions.handles(action)) {
+            if (!menu.busy() && menu.page().equals("deposit")) {
+                var prior = FLOWS.get(menu);
+                if (prior != null && prior.reservation != null) return;
+                returnInputs(player, menu);
+            }
+            if (action.equals("finance_home")) {
+                var choices = new ArrayList<BankingNetwork.Choice>();
+                choices.add(new BankingNetwork.Choice("credit_profile", "", "Credit profile", false));
+                choices.add(new BankingNetwork.Choice("credit_facilities", "", "Credit facilities and statements", false));
+                choices.add(new BankingNetwork.Choice("finance_credit_pay", "", "Repay credit card", false));
+                choices.add(new BankingNetwork.Choice("finance_credit_cards", "", "Credit tokens", false));
+                choices.add(new BankingNetwork.Choice("finance_loan_home", "", "Loans and repayments", false));
+                choices.add(new BankingNetwork.Choice("auto_home", "", "Automatic payments", false));
+                choices.add(new BankingNetwork.Choice("finance_wealth", "", "Net worth and tier", false));
+                choices.add(new BankingNetwork.Choice("finance_report", "", "Credit report", false));
+                choices.add(new BankingNetwork.Choice("finance_debt_home", "", "Collection payments", false));
+                if (menu.allows("credit_advance")) choices.add(new BankingNetwork.Choice("credit_advance", "", "Credit cash advance", false));
+                if (menu.access() == BankingMenu.Access.KIOSK) {
+                    choices.add(new BankingNetwork.Choice("finance_credit_apply", "", "Apply for credit", false));
+                    choices.add(new BankingNetwork.Choice("finance_loan_apply", "", "Apply for a loan", false));
+                    choices.add(new BankingNetwork.Choice("finance_credit_raise", "", "Request credit limit increase", false));
+                }
+                menu.publish("finance_home", List.of("Choose a service. Applications and card replacement require the issuer branch."), "Bank and credit services", choices);
+            } else if (AutopayMenus.handles(action)) AutopayMenus.action(player,menu,action,value);
+            else if (CreditMenus.handles(action)) CreditMenus.action(player, menu, action, value);
+            else if (LoanMenus.handles(action)) LoanMenus.action(player, menu, action, value);
+            else if (FinanceCollections.handles(action)) FinanceCollections.action(player, menu, action, value);
+            else if (FinanceReports.handles(action)) FinanceReports.action(player, menu, action, value);
+            else CreditUse.action(player, menu, action, value);
+            return;
         }
         if (BankingAccounts.handles(action)) { BankingAccounts.action(player, menu, action, value); return; }
         if (BankingWithdrawals.handles(action)) { BankingWithdrawals.action(player, menu, action, value); return; }
@@ -224,6 +258,8 @@ public final class BankingController {
     private static String shortText(String value, int maximum) { return value == null ? "Unavailable" : value.substring(0, Math.min(maximum, value.length())); }
     static void fail(BankingMenu menu, Throwable error) {
         var cause = error; while (cause.getCause() != null) cause = cause.getCause();
+        com.mojang.logging.LogUtils.getLogger().warn("event=BANKING_REQUEST_FAILED session={} reason={}",
+                menu.session(), shortText(cause.getMessage(), 128));
         var player = menu.player() instanceof ServerPlayer serverPlayer ? serverPlayer : null;
         String status = player != null && services(player).debugGui()
                 ? shortText(cause.getMessage(), 200) : menu.page().equals("deposit") ? depositProblem(cause)
@@ -528,12 +564,32 @@ public final class BankingController {
             flow.stock = RegisterInventory.snapshot(player.server, menu.anchor().dimension(), position(menu), template, context.price().batch());
             var source = source(flow.stock); boolean live = menu.valid(player);
             services(player).ledger().quoteSale(actor(player), menu.anchor(), menu.generation(), context.terminal().revision(),
-                    (below, item, reads) -> source, (anchor, reads) -> live).whenComplete((quote, error) -> {
+                    (below, item, reads) -> source, (anchor, reads) -> live, dev.emily.economy.foundation.CreditUse.heldToken(player, context.world()) != null).whenComplete((quote, error) -> {
                 if (error != null) { fail(menu, error); return; }
                 if (!menu.valid(player)) return;
                 flow.quote = quote;
-                report(menu, "shop", List.of("Product: " + template.getHoverName().getString(), "Batch: " + quote.price().batch(), "Price: " + money(quote.price().amount()), "Available: " + source.quantity()), "Review the full batch, then Confirm");
-                flow.saleRevision = menu.revision();
+                var lines = new ArrayList<>(List.of("Product " + template.getHoverName().getString(), "Batch " + quote.price().batch(), "Price " + money(quote.price().amount()), "Available " + source.quantity()));
+                flow.credit = null; flow.creditProof = null;
+                var token = dev.emily.economy.foundation.CreditUse.heldToken(player, context.world());
+                if (token == null) {
+                    report(menu, "shop", lines, "Review the full batch, then Confirm");
+                    flow.saleRevision = menu.revision();
+                } else {
+                    var audience = dev.emily.economy.foundation.FinanceMenuSupport.audience(player, menu);
+                    var grant = dev.emily.economy.foundation.FinanceMenuSupport.grant(player, services(player));
+                    menu.setBusy(true);
+                    services(player).ledger().quoteCreditDraw(grant, token, menu.anchor(), menu.generation(), null, 0, true).whenComplete((credit, failure) -> {
+                        if (!audience.live()) return;
+                        if (failure != null || credit.isEmpty()) { fail(menu, failure == null ? new IllegalArgumentException("Credit unavailable") : failure); return; }
+                        flow.credit = credit.orElseThrow();
+                        lines.add("Pay using held credit card. Purchase APR " + flow.credit.facility().purchase().apr().multiply(new java.math.BigDecimal("100")).toPlainString() + "%");
+                        lines.add("Interest accrues daily. Statement every 28 days, minimum due 14 days later.");
+                        lines.add("Minimum is 2% of principal plus period interest, capped by debt. No fixed floor.");
+                        lines.add("Missed requirements may default after 84 days. No purchase fee.");
+                        report(menu, "shop", lines, "Review credit purchase, then Confirm");
+                        flow.saleRevision = menu.revision();
+                    });
+                }
             });
         });
     }
@@ -544,7 +600,8 @@ public final class BankingController {
         var quote = Objects.requireNonNull(flow.quote, "Preview this sale first.");
         if (!menu.page().equals("shop") || menu.revision() != flow.saleRevision || flow.reservation != null)
             throw new IllegalStateException("This sale preview expired. Preview again.");
-        var reserve = intent(player, RegisterSales.Action.RESERVE.kind(), RegisterSales.reserveRequest(quote));
+        if (flow.credit != null) flow.creditProof = dev.emily.economy.credit.CreditDrawAdmission.capture(player, menu, flow.credit.request(), flow.credit.terminal());
+        var reserve = intent(player, RegisterSales.Action.RESERVE.kind(), RegisterSales.reserveRequest(quote, flow.credit != null));
         flow.reservation = reserve.operationId().value();
         submit(player, menu, reserve, () -> saleJournal(player, menu, flow, RegisterSales.Action.RESERVE, false, false), outcome -> {
             if (outcome.status() != Journal.Status.COMMITTED) { flow.reservation = null; report(menu, "shop", menu.lines(), outcome.result().code()); return; }
@@ -560,7 +617,13 @@ public final class BankingController {
                     submit(player, menu, saved, () -> saleJournal(player, menu, flow, RegisterSales.Action.SAVED, true, true), savedOutcome -> {
                         if (savedOutcome.status() != Journal.Status.COMMITTED) { quarantineSale(player, menu, flow); return; }
                         if (!menu.valid(player)) { cancelSale(player, menu, flow); return; }
-                        var commit = intent(player, RegisterSales.Action.COMMIT.kind(), RegisterSales.request(flow.reservation, proof.token(), "confirmed exact stock"));
+                        var request = RegisterSales.request(flow.reservation, proof.token(), "confirmed exact stock");
+                        if (flow.credit != null) {
+                            var fields = new java.util.TreeMap<>(request.fields());
+                            fields.put("credit_request", new java.util.TreeMap<>(flow.credit.request().request().fields()).toString());
+                            request = new Journal.CanonicalRequest(request.version(), fields);
+                        }
+                        var commit = intent(player, RegisterSales.Action.COMMIT.kind(), request);
                         submit(player, menu, commit, () -> saleJournal(player, menu, flow, RegisterSales.Action.COMMIT, false, true), committed -> {
                             if (committed.status() == Journal.Status.COMMITTED) deliver(player, menu, flow.context.world(), flow.reservation);
                             else cancelSale(player, menu, flow);
@@ -579,7 +642,9 @@ public final class BankingController {
         return services(player).ledger().registerSales(action, (who, kind) -> who.equals(owner),
                 (a, i, current, reads) -> live && i.actor().equals(owner), (who, reads) -> false,
                 (a, i, current, reads) -> fits, (below, template, reads) -> observed,
-                (a, i, current, evidence, reads) -> proof, null);
+                (a, i, current, evidence, reads) -> proof, null,
+                flow.credit == null || action != RegisterSales.Action.COMMIT ? RegisterSaleSettlement::checkout
+                    : services(player).ledger().creditCheckout(dev.emily.economy.foundation.FinanceMenuSupport.grant(player, services(player)), flow.credit.request(), flow.creditProof));
     }
     private static void cancelSale(ServerPlayer player, BankingMenu menu, Flow flow) {
         // Known held originals become an owner-bound seller claim; no speculative source insertion.
@@ -796,7 +861,7 @@ public final class BankingController {
         if (!ids.isEmpty()) BankingReturns.create(player, menu, world, ids);
     }
     public static void closed(ServerPlayer player, BankingMenu menu) {
-        BankingAccounts.closed(menu); BankingWithdrawals.closed(menu);
+        BankingAccounts.closed(menu); BankingWithdrawals.closed(menu); AutopayMenus.closed(menu); CreditMenus.closed(menu); LoanMenus.closed(menu); FinanceReports.closed(menu); FinanceCollections.closed(menu); CreditUse.closed(menu);
         if (player.server.getPlayerList().getPlayer(player.getUUID()) != player) return;
         var flow = FLOWS.get(menu);
         if (flow == null || !flow.ownsInputs) {

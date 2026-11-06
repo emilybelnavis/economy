@@ -217,6 +217,53 @@ class RegisterSalesTest {
     private SqliteStorage open() throws Exception {
         var store = new SqliteStorage(); store.initialize(world.toRealPath()); return store;
     }
+    @Test void creditCommitHasAnExactBindingAndCannotFallBackToAccountDebit() throws Exception {
+        var store = open();
+        try {
+            seed(store);
+            var sale = reserve(store);
+            saved(store, sale);
+            var request = RegisterSales.creditRequest(sale, "source saved", "credit purchase", "frozen-credit-v1");
+            var intent = intent(RegisterSales.Action.COMMIT, buyer, request);
+            assertEquals("SALE_CREDIT_COMPOSER_REQUIRED", engine(store, RegisterSales.Action.COMMIT).submit(intent).result().code());
+            assertEquals(1000, balance(store, buyerAccount));
+            assertEquals(RegisterSales.State.SAVED, store.transaction(tx -> RegisterSales.find(tx::query, buyer, sale)).orElseThrow().state());
+            assertThrows(IllegalArgumentException.class, () -> RegisterSales.creditRequest(sale, "proof", "purchase", ""));
+            assertThrows(IllegalArgumentException.class, () -> RegisterSales.creditRequest(sale, "proof", "purchase", "x".repeat(2049)));
+        } finally { store.close(); }
+    }
+    @Test void matchingFacilityCurrencyCanQuoteAndReserveAcrossDifferentBuyerPrimaryCurrency() throws Exception {
+        var store = open();
+        try {
+            sellerCurrency = CHF;
+            seed(store);
+            assertThrows(IllegalArgumentException.class, () -> quote(store));
+            var quote = store.transaction(tx -> RegisterSales.quote(tx::query, store.snapshot().worldId(), buyer,
+                    anchor, generation, 1, (below, requested, reads) -> source, true));
+            var request = intent(RegisterSales.Action.RESERVE, buyer, RegisterSales.reserveRequest(quote, true));
+            assertEquals(Status.COMMITTED, engine(store, RegisterSales.Action.RESERVE).submit(request).status());
+            saved(store, request.operationId().value());
+            var called = new java.util.concurrent.atomic.AtomicBoolean();
+            var action = RegisterSales.Action.COMMIT;
+            var registration = RegisterSales.registration(action, store.snapshot().worldId(),
+                    (a, i, current, reads) -> true, (a, reads) -> false, (a, i, current, reads) -> true,
+                    (below, item, reads) -> source, (a, i, current, proof, reads) -> true,
+                    (i, current, reads) -> {
+                        assertEquals("frozen-credit-v1", i.request().fields().get("credit_request"));
+                        called.set(true);
+                        return Custody.committedDelivery(i, current.id(), buyer, RegisterSaleSettlement.items(current), "fixture-credit-stock", Journal.actorKey(buyer), reads);
+                    }, (i, current, uncertain, reads) -> null);
+            var engine = new JournalEngine(store, (actor, kind) -> true, Map.of(action.kind(), registration));
+            var commit = intent(action, buyer, RegisterSales.creditRequest(request.operationId().value(), "proof", "credit", "frozen-credit-v1"));
+            var result = engine.submit(commit);
+            assertEquals(Status.COMMITTED, result.status());
+            assertTrue(called.get());
+            called.set(false);
+            assertEquals(result, engine.submit(commit));
+            assertFalse(called.get());
+        } finally { store.close(); }
+    }
+
     private RegisterSales.Quote quote(SqliteStorage store) {
         return store.transaction(tx -> RegisterSales.quote(tx::query, store.snapshot().worldId(), buyer, anchor,
                 generation, 1, (below, requested, reads) -> source));

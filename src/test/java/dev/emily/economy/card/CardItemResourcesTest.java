@@ -36,6 +36,15 @@ class CardItemResourcesTest {
         assertThrows(IllegalArgumentException.class,()->CardDesigns.id(new InstitutionCatalog.InstitutionId("economy:bank/atlas_reserve"),1));
         assertThrows(IllegalArgumentException.class,()->CardDesigns.id(new InstitutionCatalog.InstitutionId("economy:bank/crownstone"),3));
     }
+    @Test void issuedCreditCardsHavePlayerFacingNames() throws Exception {
+        var lang = JsonParser.parseString(Files.readString(ASSETS.resolve("lang/en_us.json"))).getAsJsonObject();
+        for (var design : CreditCardDesigns.all()) {
+            var key = "item.economy." + design.id().substring("economy:".length());
+            assertTrue(lang.has(key), key);
+            assertFalse(lang.get(key).getAsString().isBlank(), key);
+        }
+    }
+
     @Test void markerParsingIsCanonicalBoundedAndContainsNoPrivateAuthority() {
         var world=new WorldId(UUID.randomUUID());var token=UUID.fromString("abcdef12-abcd-abcd-abcd-abcdef123456");
         var marker=new CompoundTag();marker.putString("world",world.value().toString());marker.putString("token",token.toString());

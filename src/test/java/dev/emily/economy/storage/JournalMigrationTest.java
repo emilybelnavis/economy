@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JournalMigrationTest {
     @TempDir Path temporary;
     @ParameterizedTest
-    @ValueSource(ints = {2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30})
+    @ValueSource(ints = {2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34})
     void upgradeRequiresBackupAndPreservesFoundationIdentityAndHistory(int schema) throws Exception {
         Path world = temporary.toRealPath(); Path directory = Files.createDirectory(world.resolve("economy")); UUID id = UUID.randomUUID();
         String historicalUtc;

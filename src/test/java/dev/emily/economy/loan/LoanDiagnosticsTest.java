@@ -52,6 +52,12 @@ class LoanDiagnosticsTest {
             f.clock.addAndGet(Loans.MONTH/2);
             var quote=f.store.transaction(tx->Loans.quote(tx::query,f.owner,loan.id(),f.account,10000,false,f.clock.get()));
             var outcome=f.submit(Loans.REPAY,Loans.repayment(f.owner,quote,f.clock::get),f.intent(Loans.REPAY,quote.request().request()));assertEquals("LOAN_REPAID",outcome.result().code());
+            var ownerFirst=f.store.transaction(tx->LoanDiagnostics.ownerPayments(tx::query,f.owner,loan.id(),LoanDiagnostics.EventCursor.start(),1).orElseThrow());
+            assertTrue(ownerFirst.entries().isEmpty());assertNotNull(ownerFirst.nextCursor());
+            var ownerNext=f.store.transaction(tx->LoanDiagnostics.ownerPayments(tx::query,f.owner,loan.id(),ownerFirst.nextCursor(),1).orElseThrow());
+            assertEquals(10000,ownerNext.entries().getFirst().payment().amountMinor());
+            var other=new PartyRef(f.owner.world(),new PartyRef.Player(new PlayerId(UUID.randomUUID())));
+            assertTrue(f.store.transaction(tx->LoanDiagnostics.ownerPayments(tx::query,other,loan.id(),LoanDiagnostics.EventCursor.start(),1)).isEmpty());
             var page=inspect(f,loan.id(),1);assertNotNull(page.events().nextCursor());
             var next=f.store.transaction(tx->LoanDiagnostics.inspect(tx::query,f.owner,loan.id(),f.clock.get(),page.events().nextCursor(),1).orElseThrow());
             var payment=next.events().entries().getFirst().payment();assertEquals(10000,payment.amountMinor());assertTrue(payment.journalMatches());assertEquals(payment.amountMinor(),payment.principalMinor()+payment.interestMinor());

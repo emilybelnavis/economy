@@ -153,3 +153,16 @@ V30 appends loan_event_feed over sequence and position for existing loan and ins
 ## A6-10-01 shared lifecycle
 
 V31 adds nine lifecycle/witness tables, twelve indexes and five claim-maintenance triggers. The institution financial-account table is copied with the ALLOWANCE role and its original IDs. New allowance-account facts use v2. Main/offline validators and complete-world backup support V31. Bounded bootstrap rejects unsafe historical backdating. See [exact lifecycle storage and records](debt-lifecycle.md).
+
+## Debt diagnostic indexes
+
+V32 adds `debt_diagnostic_obligations`, `debt_accounting_history` and `debt_sale_diagnostic_history` for bounded owner/operator reads. Existing lifecycle entities and fact encodings retain their versions. Online validation, offline inspection and backup manifests support V32. See [diagnostic read and authority contracts](debt-diagnostics.md).
+
+V33 adds six debt/reporting cursor/source/daily-area tables and five indexes. Five new v1 record families support bounded legacy replay, utilization sources and resumable score folds. Online/offline validation and backup compatibility support V33. See [accepted persistence and replay contracts](debt-acceptance.md).
+
+V34 adds one Collection Agent presentation-state table and an eligible-case partial index. Its v1 presentation facts share the immutable journal. Online/offline validation and backup compatibility support V34. See [presentation and cooldown contracts](collection-agent.md).
+
+
+## V35 automatic payments
+
+V35 adds per-facility consent, immutable due-window progress, latest statement payment-adjusted targets and a bounded source-bootstrap cursor. Exact schema/index validation and canonical projection validation run at storage/offline inspection. Version1 settings/window/bootstrap decoders are registered. Existing journal facts and versions retain their meaning. Current schema is35, stopped-world upgrade backups are required for1–34 and clean restore manifests support4–35. See [automatic payments](autopay.md).

@@ -59,3 +59,7 @@ quoteCollectionPayment and repayCollection provide native protected repayment fr
 A6-10-02 owns owner/operator lifecycle diagnostics. A6-10-03 owns broad lifecycle acceptance, production score activation and remaining restart/crash/abuse/performance probes. A6-11 can use demands(case,now) for debtor-only collection presentation and reportVisible/bureauStatus for independent bureau state. The current package supplies server/worker financial APIs for those integrations.
 
 [Credit foundation](credit-acceptance.md), [loan foundation](loan-acceptance.md) and [verification](../verification/A6-10-01.md) record the related contracts and measured coverage.
+
+A6-10-02 adds [bounded owner history and audited operator explanations](debt-diagnostics.md) through schema32 diagnostic indexes. The lifecycle facts and scheduling providers described above retain their contracts.
+
+A6-10-03 accepts [the reporting/scoring dependency and A6-11 payment handoff](debt-acceptance.md). Safe bounded legacy replay now reconstructs original reports and verifies tracked history. Historical monetary defaults or incomplete tracked provenance retain precise readiness rejections. Production includes the stage6 score provider and current reporting admission.

@@ -93,7 +93,7 @@ if (providers.gradleProperty('custodyInventoryProbe').isPresent()) {
         doLast {
             def failure = new File(probeWorld, 'inventory-probe-failed.txt')
             def success = new File(probeWorld, restartProbe ? 'inventory-probe-passed.txt' : 'inventory-probe.properties')
-            if (!providers.gradleProperty('terminalGeometryProbe').isPresent() && !providers.gradleProperty('bankingProbe').isPresent() && !providers.gradleProperty('bankingRecovery').isPresent() && (failure.exists() || !success.exists())) {
+            if (!providers.gradleProperty('terminalGeometryProbe').isPresent() && !providers.gradleProperty('bankingProbe').isPresent() && !providers.gradleProperty('bankingRecovery').isPresent() && !providers.gradleProperty('collectionProbe').isPresent() && !providers.gradleProperty('financeProbe').isPresent() && !providers.gradleProperty('branchReleaseProbe').isPresent() && !providers.gradleProperty('collectionBankingProbe').isPresent() && (failure.exists() || !success.exists())) {
                 throw new GradleException('Minecraft custody inventory persistence fixture did not pass')
             }
         }
@@ -145,6 +145,65 @@ if (providers.gradleProperty('bankingRecovery').isPresent()) {
             def root = file(providers.gradleProperty('economyRunRoot').get() + '/server/world')
             if (new File(root, 'banking-recovery-failed.txt').exists() || !new File(root, 'banking-recovery-passed.txt').exists())
                 throw new GradleException('Banking crash/restore recovery did not pass')
+        }
+    }
+}
+
+// Opt-in Collection Agent acceptance in a disposable development world.
+if (providers.gradleProperty('collectionProbe').isPresent()) {
+    def collectionRoot=file(providers.gradleProperty('economyRunRoot').get()+'/server/world')
+    def collectionRestart=new File(collectionRoot,'collection-probe-passed.txt').exists()
+    tasks.named('runServer') {
+        systemProperty 'economy.collectionProbe', 'true'
+        doLast {
+            def passed=new File(collectionRoot,collectionRestart?'collection-probe-restart-passed.txt':'collection-probe-passed.txt')
+            if(new File(collectionRoot,'collection-probe-failed.txt').exists()||!passed.exists())
+                throw new GradleException('Collection Agent acceptance did not pass')
+        }
+    }
+}
+
+// Opt-in finance menu acceptance in a disposable development world.
+if (providers.gradleProperty('financeProbe').isPresent()) {
+    tasks.named('runServer') {
+        systemProperty 'economy.financeProbe', 'true'
+        doLast {
+            def fixtureWorld = file(providers.gradleProperty('economyRunRoot').get() + '/server/world')
+            if (new File(fixtureWorld, 'finance-probe-failed.txt').exists() || !new File(fixtureWorld, 'finance-probe-passed.txt').exists())
+                throw new GradleException('Finance menu acceptance did not pass')
+        }
+    }
+}
+
+// Opt-in missing A6 release witnesses, each confined to a disposable fixture.
+if (providers.gradleProperty('branchReleaseProbe').isPresent()) {
+    tasks.named('runServer') {
+        systemProperty 'economy.branchReleaseProbe', 'true'
+        doLast {
+            def root = file(providers.gradleProperty('economyRunRoot').get() + '/server/world')
+            if (new File(root, 'branch-release-failed.txt').exists() || !new File(root, 'branch-release-passed.txt').exists())
+                throw new GradleException('Branch release acceptance did not pass')
+        }
+    }
+}
+if (providers.gradleProperty('collectionBankingProbe').isPresent()) {
+    tasks.named('runServer') {
+        systemProperty 'economy.collectionProbe', 'true'
+        systemProperty 'economy.collectionBankingProbe', 'true'
+        doLast {
+            def root = file(providers.gradleProperty('economyRunRoot').get() + '/server/world')
+            if (new File(root, 'collection-probe-failed.txt').exists() || !new File(root, 'collection-banking-passed.txt').exists())
+                throw new GradleException('Remote collection banking acceptance did not pass')
+        }
+    }
+}
+if (providers.gradleProperty('financeWorld').isPresent()) {
+    tasks.named('runClient') {
+        systemProperty 'economy.financeWorld', providers.gradleProperty('financeWorld').get()
+        doLast {
+            def root = file(providers.gradleProperty('economyRunRoot').get() + '/client/saves/' + providers.gradleProperty('financeWorld').get())
+            if (new File(root, 'finance-client-failed.txt').exists() || !new File(root, 'finance-client-passed.txt').exists())
+                throw new GradleException('Integrated finance client acceptance did not pass')
         }
     }
 }

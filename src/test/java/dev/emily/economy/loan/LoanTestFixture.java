@@ -23,7 +23,7 @@ class LoanTestFixture implements AutoCloseable {
     static final InstitutionCatalog.InstitutionId BANK=new InstitutionCatalog.InstitutionId("economy:bank/crownstone");
     final Path path;
 
-        final SqliteStorage store=new SqliteStorage();final PlayerId actor=new PlayerId(UUID.randomUUID());final AccountId account=new AccountId(UUID.randomUUID());
+        SqliteStorage store=new SqliteStorage();final PlayerId actor=new PlayerId(UUID.randomUUID());final AccountId account=new AccountId(UUID.randomUUID());
         final AtomicLong clock=new AtomicLong(NOW.toEpochMilli());final PartyRef owner;
         LoanTestFixture(Path testPath)throws Exception{
             this.path=testPath;
@@ -48,6 +48,9 @@ class LoanTestFixture implements AutoCloseable {
         Loans.Contract get(UUID id){return store.transaction(tx->Loans.find(tx::query,id).orElseThrow());}
         Loans.Contract originate(){var a=application(CreditUnderwriting.Product.BANK_LOAN,100000,1);assertEquals("LOAN_ORIGINATED",apply(a,intent(Loans.APPLY,a.request())).result().code());return get(a.loan());}
         long amount(InstitutionCatalog.InstitutionId lender,FinancialAccounts.Role role){return store.transaction(tx->Settlement.posted(tx::query,FinancialAccounts.id(owner.world(),lender,role,EconomyCurrency.CAD),EconomyCurrency.CAD));}
+        void reopen()throws Exception {
+            store.close();store=new SqliteStorage();store.initialize(path.toRealPath());
+        }
         @Override public void close()throws Exception{store.close();}
     
 }

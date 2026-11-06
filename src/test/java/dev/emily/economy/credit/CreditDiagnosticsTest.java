@@ -28,7 +28,7 @@ class CreditDiagnosticsTest {
             var advance=CardServicing.empty(CardServicing.Kind.ADVANCE,new BigDecimal("0.2199"));
             facility=new CreditFacilities.Facility(owner.world(),id,ownerId,BANK,InstitutionCatalog.Network.ORBIT,EconomyCurrency.CAD,250000,1,ANCHOR,
                 ANCHOR+41*CreditFacilities.DAY,CLOSE,3,CreditFacilities.Status.ACTIVE,CreditFacilities.Access.ENABLED,purchase,advance,
-                List.of(new CardServicing.Requirement("old-statement",CLOSE,DUE,280,100)),List.of());
+                List.of(new CardServicing.Requirement("b9cb9371-4f7b-49e4-a5f4-9e4abc767915",CLOSE,DUE,280,100)),List.of());
             store.transaction(tx->{
                 CreditFacilities.write(tx,facility);
                 var borrower=new InstitutionCatalog.InstitutionId("economy:borrower/"+ownerId.value());
@@ -114,6 +114,19 @@ class CreditDiagnosticsTest {
                 var facts=new ArrayList<Journal.Record>();for(int n=0;n<32;n++){facts.add(posting(borrower,-1));facts.add(posting(issuer,1));}f.record(facts);
             }
             var bounded=f.inspect().reconciliation();assertFalse(bounded.ownerJournalComplete());assertFalse(bounded.issuerJournalComplete());assertFalse(bounded.ownerJournalMatches());
+        }
+    }
+    @Test void ownerPaymentHistoryRequiresBoundSameTransactionAndRejectsOtherOwners()throws Exception {
+        try(var f=new Fixture()) {
+            var payment=CardServicing.repay(EconomyCurrency.CAD,List.of(f.facility.purchase(),f.facility.advance()),f.facility.requirements(),f.facility.slices(),100,DUE+1);
+            var fact=CreditAuditFacts.payment(f.facility,DUE+1,100,93,7,payment);
+            f.record(List.of(CreditFacilities.fact(f.facility),fact));
+            var page=f.store.transaction(tx->CreditDiagnostics.ownerPayments(tx::query,f.owner,f.id,CreditDiagnostics.EventCursor.start(),1).orElseThrow());
+            assertEquals(100,page.entries().getFirst().witness().amountMinor());assertNull(page.nextCursor());
+            var other=new PartyRef(f.owner.world(),new PartyRef.Player(new PlayerId(UUID.randomUUID())));
+            assertTrue(f.store.transaction(tx->CreditDiagnostics.ownerPayments(tx::query,other,f.id,CreditDiagnostics.EventCursor.start(),1)).isEmpty());
+            f.record(List.of(fact));
+            assertThrows(IllegalArgumentException.class,()->f.store.transaction(tx->CreditDiagnostics.ownerPayments(tx::query,f.owner,f.id,CreditDiagnostics.EventCursor.start(),4)));
         }
     }
     @Test void allocationWitnessUsesFrozenPaymentAmountsAndOutstandingFacilityBoundsAreExplicit()throws Exception{

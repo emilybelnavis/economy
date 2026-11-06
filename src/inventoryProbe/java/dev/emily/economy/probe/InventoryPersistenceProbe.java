@@ -32,10 +32,47 @@ public final class InventoryPersistenceProbe {
     }
 
     private void tick(ServerTickEvent.Post event) {
-        if (ran) return;
+        if (ran || System.getProperty("economy.financeWorld") != null) return;
         var server = event.getServer();
         var services = Economy.serverServices(server);
         if (services == null || services.state() != ServerServices.State.READY) return;
+        if (Boolean.getBoolean("economy.branchReleaseProbe")) {
+            try {
+                if (BranchReleaseProbe.tick(server)) { ran = true; server.halt(false); }
+            } catch (Exception failure) {
+                failure.printStackTrace();
+                try {
+                    var trace = new java.io.StringWriter(); failure.printStackTrace(new java.io.PrintWriter(trace));
+                    Files.writeString(server.getWorldPath(LevelResource.ROOT).resolve("branch-release-failed.txt"), trace.toString());
+                } catch (Exception ignored) { }
+                ran = true; server.halt(false);
+            }
+            return;
+        }
+        if (Boolean.getBoolean("economy.financeProbe")) {
+            try {
+                if (FinanceAcceptanceProbe.tick(server)) { ran = true; server.halt(false); }
+            } catch (Exception failure) {
+                failure.printStackTrace();
+                try {
+                    var trace = new java.io.StringWriter();
+                    failure.printStackTrace(new java.io.PrintWriter(trace));
+                    Files.writeString(server.getWorldPath(LevelResource.ROOT).resolve("finance-probe-failed.txt"), trace.toString());
+                } catch (Exception ignored) { }
+                ran = true; server.halt(false);
+            }
+            return;
+        }
+        if (Boolean.getBoolean("economy.collectionProbe")) {
+            try {
+                if (CollectionAcceptanceProbe.tick(server)) { ran=true;server.halt(false); }
+            } catch(Exception failure) {
+                failure.printStackTrace();
+                try { var trace=new java.io.StringWriter();failure.printStackTrace(new java.io.PrintWriter(trace));Files.writeString(server.getWorldPath(LevelResource.ROOT).resolve("collection-probe-failed.txt"),trace.toString()); }catch(Exception ignored) {}
+                ran=true;server.halt(false);
+            }
+            return;
+        }
         if (Boolean.getBoolean("economy.bankingRecovery")) {
             try {
                 if (BankingRecoveryProbe.tick(server)) { ran = true; server.halt(false); }

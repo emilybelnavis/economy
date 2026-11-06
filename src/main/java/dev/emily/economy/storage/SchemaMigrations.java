@@ -8,7 +8,7 @@ import java.util.UUID;
 /** Ordered trusted SQL; the complete pending chain shares one transaction. */
 final class SchemaMigrations {
     static final int MINIMUM_SUPPORTED = 1;
-    static final int CURRENT = 31;
+    static final int CURRENT = 35;
     static final int APPLICATION_ID = 0x45434F4E;
     record Migration(int version, String name, List<String> statements) {
         Migration { statements = List.copyOf(statements); }
@@ -56,7 +56,18 @@ final class SchemaMigrations {
             new Migration(28,"funded fixed loans and monthly schedules",dev.emily.economy.loan.LoanSchema.statements()),
             new Migration(29,"bounded immutable loan diagnostics",List.of(dev.emily.economy.loan.LoanDiagnosticSchema.INDEX)),
             new Migration(30,"ordered immutable loan obligation source",List.of(dev.emily.economy.loan.LoanEvents.INDEX)),
-            new Migration(31,"shared debt obligations reporting and collection clocks",dev.emily.economy.debt.DebtLifecycleSchema.statements()));
+            new Migration(31,"shared debt obligations reporting and collection clocks",dev.emily.economy.debt.DebtLifecycleSchema.statements()),
+            new Migration(32,"bounded debt diagnostics",dev.emily.economy.debt.DebtDiagnosticSchema.statements()),
+            new Migration(33,"accepted debt reporting and recurring score sources",debtAcceptanceStatements()),
+            new Migration(34,"collection presentation leases and death cooldowns",dev.emily.economy.collection.CollectionPresenceSchema.statements()),
+            new Migration(35,"consented automatic payments and exact statement targets",dev.emily.economy.autopay.AutopaySchema.statements()));
+
+    private static List<String> debtAcceptanceStatements() {
+        var statements=new java.util.ArrayList<String>();
+        statements.addAll(dev.emily.economy.debt.DebtLegacySchema.statements());
+        statements.addAll(dev.emily.economy.credit.CreditReportingSchema.statements());
+        return List.copyOf(statements);
+    }
 
     private static List<String> pricingStatements() {
         var sql=new java.util.ArrayList<String>();

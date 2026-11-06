@@ -5,6 +5,48 @@ Project changes are recorded in reverse chronological order, with the most recen
 
 
 
+## 2026-11-06 — D15 automatic payments and A6-13 acceptance
+
+- Added default-OFF automatic payments with reviewed per-facility consent and one named owned same-currency bank account.
+- Added card minimum, statement-after-payments and fresh full-payoff targets, plus loan due-installment payments.
+- Added atomic all-or-nothing payments, two daily retries, persistent original targets and replay-safe offline recovery before same-instant delinquency and reporting.
+- Added schema 35 migration and bounded historical statement/payment reconstruction. Banking protocol 8 includes the consent screens.
+- Completed A6-13 acceptance with automatic-payment scenarios and actual client enable/disable verification. Broader multiplayer and combined gameplay coverage remains in the recorded A8 handoff.
+
+## 2026-11-06 — A6-13 integrated acceptance fixes
+
+- Fixed debit-card issuance, lost-card reporting and branch closure failing before admission because the authenticated owner was bound twice.
+- Added release acceptance coverage for native bank lifecycle and remote CHF-funded collection payments, plus actual client finance controls and rendered screens.
+- Corrected finance amount labels and issued-credit-card names, and added discoverable scrolling for longer terms.
+- Updated schema 34 upgrade/restore instructions and published downstream integration handoffs.
+- Recorded automatic payments as an outstanding approved feature. A6 phase closure remains qualified by that gap.
+
+## 2026-11-06 — A6-12 bank and credit menus
+
+- Added issuer-kiosk credit applications, limit increases, credit-token replacement and fixed bank/subprime loan applications.
+- Added remote credit, loan and collection repayment menus, loan payoff and schedules, credit reports and net-worth explanations.
+- Connected held-credit-card register purchases to atomic charge and protected goods delivery. Added advance-to-account review before separate cash withdrawal.
+- Published the version-one server banking integration contract and preserved saved original-operation recovery across finance menus.
+
+## 2026-11-05 — A6-11 Collection Agent
+
+- Added the original nonhostile Collection Agent with bounded loaded-chunk spawning and debtor-only follow behaviour.
+- Added private case/funding selection and reviewed partial/full payments, including explicit FX fees and original receipt recovery.
+- Added durable presentation leases and seven-financial-day death cooldowns in schema34.
+
+## 2026-11-05 — A6-10-03 reporting and lifecycle acceptance
+
+- Activated resumable 28-day credit scoring after due-date reports, with exact daily utilization and captured historical FX.
+- Added safe historical obligation/report reconstruction and precise rejection for histories needing corrective accounting.
+- Accepted debt boundaries, collection expiry, offline replay and process recovery. Production borrowing APIs now require the installed, current lifecycle dependency.
+- Added schema33 source, daily-area and migration checkpoints. Existing history and balances are preserved.
+
+## 2026-11-05 — A6-10-02 debt diagnostics
+
+- Added private collection-clock, report-revision and collection accounting-history commands.
+- Added audited operator explanations for original arrears, cure, sale, independent expiry clocks and creditor reconciliation.
+- Added indexed bounded history reads in schema32.
+
 ## 2026-11-05 — A6-10-01 shared debt lifecycle
 
 - Added original-obligation late reporting, cure revisions, exact default boundaries and independent collection/report clocks for cards and loans.

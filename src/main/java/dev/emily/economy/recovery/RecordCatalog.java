@@ -31,8 +31,12 @@ public final class RecordCatalog {
         var catalog = new RecordCatalog(Map.of(new Key(EconomicRecord.TYPE, 1), EconomicRecord::decode));
         catalog = dev.emily.economy.clock.DeadlineDispatcher.register(InspectionAudit.register(FxFacts.register(catalog)));
         catalog = dev.emily.economy.pricing.ValuationSources.register(dev.emily.economy.pricing.ServicePricing.register(dev.emily.economy.interest.DepositYield.register(catalog)));
+        catalog=dev.emily.economy.autopay.Autopay.register(catalog);
         catalog=dev.emily.economy.card.IssuedCards.register(catalog);
         catalog=dev.emily.economy.credit.CreditProfiles.register(catalog);
+        catalog=dev.emily.economy.collection.CollectionPresence.register(catalog);
+        catalog=dev.emily.economy.credit.CreditReporting.register(catalog);
+        catalog=dev.emily.economy.debt.DebtLegacyReconciliation.register(catalog);
         catalog=dev.emily.economy.debt.DebtPayments.register(dev.emily.economy.debt.DebtLifecycle.register(catalog));
         catalog=dev.emily.economy.loan.Loans.register(dev.emily.economy.loan.LoanTreasury.register(dev.emily.economy.loan.LoanDisbursementFx.register(dev.emily.economy.loan.LoanRepaymentFx.register(catalog))));
         catalog=dev.emily.economy.credit.CreditAuditFacts.register(catalog);

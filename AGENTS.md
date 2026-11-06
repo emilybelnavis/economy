@@ -2,7 +2,7 @@
 
 - Pin Minecraft 1.21.1, NeoForge 21.1.252 and Java 21.
 - Keep working `runClient` and `runServer` tasks, register the mod's main source set, and include required development runtime dependencies.
-- Before delivering a runnable mod, run `./gradlew build`, `./gradlew help --task runClient`, and `./gradlew runClient --dry-run`. See [.codex/VERIFICATION.md](.codex/VERIFICATION.md) for scoped checks.
+- For an ordinary runnable package delivery, run `./gradlew build -x test`, `./gradlew help --task runClient`, and `./gradlew runClient --dry-run` once, plus at most one focused test invocation where useful. Run the full suite only for a concrete need that focused checks cannot address, or an explicit user request; completing a sub-task, phase or release does not automatically require it. See [.codex/VERIFICATION.md](.codex/VERIFICATION.md).
 - Keep code readable and assets original or appropriately licensed. Provide an API for separate integration mods; add specific integrations only on request.
 - Keep README user-facing. Preserve the root changelog; update it for usable releases and user-facing release changes, not routine internal tasks.
 - The one-time reset is complete. Preserve existing code, worlds and backups.
@@ -21,5 +21,9 @@
 
 ## Verification scope
 
+- These rules apply project-wide to every current and future module, phase, package and sub-task, including delegated work. Carry them into new prompts, templates, module instructions and worker assignments. Do not reintroduce automatic test runs or full-suite completion gates in those files; older conflicting checklists are superseded.
 - For routine changes, run at most one targeted check if it adds confidence. For prose-only changes, review the diff.
-- Run required release checks once per runnable delivery. If a check fails, fix the issue and rerun only the affected check.
+- Select named test classes for changed behavior; do not run whole packages or the full suite for each sub-task. Reuse prior evidence for unchanged behavior.
+- Run tests sparingly. No test run is required merely to mark a sub-task complete. Before a full-suite run, state the concrete reason and why narrower checks are insufficient.
+- Add tests only for meaningful behavior or a concrete regression. Prefer existing real-service/SQLite fixtures; do not add mock-heavy tests, implementation-mirroring assertions or duplicate coverage to satisfy a checklist.
+- Run required delivery checks once. If a check fails, fix the issue and rerun only the affected check. Historical package commands and broad prompt checklists do not override this scope.

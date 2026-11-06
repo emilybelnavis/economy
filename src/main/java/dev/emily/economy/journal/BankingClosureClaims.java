@@ -12,7 +12,8 @@ public final class BankingClosureClaims {
     public static Optional<FundedClosure.Claims> read(JournalEngine.ReadView reads, AccountIdentity account) {
         if (!(account.owner().owner() instanceof PartyRef.Player player)) return Optional.empty();
         String id = account.id().value().toString(), owner = Journal.actorKey(player.id());
-        boolean pending = !reads.query("""
+        boolean pending = dev.emily.economy.autopay.Autopay.linked(reads,account.id());
+        pending |= !reads.query("""
                 SELECT id FROM payment_invoices
                 WHERE (source=? OR target=?) AND state IN ('OPEN','AUTHORIZED','CAPTURED') LIMIT 1
                 """, List.of(id, id), 1).isEmpty();

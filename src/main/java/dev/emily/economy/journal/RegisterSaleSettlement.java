@@ -10,6 +10,8 @@ public final class RegisterSaleSettlement {
 
     public static JournalEngine.Decision checkout(Journal.Intent intent, RegisterSales.Reservation sale,
                                                   JournalEngine.ReadView reads) throws Exception {
+        if (intent.request().fields().containsKey("credit_request"))
+            return new JournalEngine.Reject(new Journal.Result(1, "SALE_CREDIT_COMPOSER_REQUIRED", ""));
         var quote = sale.quote();
         var payment = MerchantPayments.checkout(intent, sale.id(), quote.price().owner(), quote.buyerAccount(),
                 quote.price().sellerAccount(), quote.price().amount(), reads, Clock.systemUTC());

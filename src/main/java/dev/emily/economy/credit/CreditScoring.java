@@ -6,9 +6,10 @@ import dev.emily.economy.journal.*;
 import java.util.*;
 import static dev.emily.economy.journal.JournalEngine.*;
 
-/** Future reporting-stage composition only. No provider is installed or scheduled by A6-07. */
+/** Versioned score settlement shared by the accepted reporting provider and detached adapters. */
 public final class CreditScoring {
     public static final Journal.Kind RECALCULATE=new Journal.Kind("economy:credit-profile","economy:score-cycle");
+    /** Fallback when the accepted reporting dependency is absent. */
     public static final String PRODUCTION_STATUS="DORMANT_REPORTING_UNAVAILABLE";
     private CreditScoring() {}
     public record Request(long expectedProfileRevision,long origin,long boundary,int policyVersion,
@@ -34,7 +35,7 @@ public final class CreditScoring {
         /** Supplied only by A6-10's actual completed due+2 report snapshot; never a missing-data-as-zero source. */
         Optional<ReportedScore> capture(ReadView reads,PartyRef owner,long origin,long boundary);
     }
-    /** Production remains explicitly unavailable; never register this as a recurring deadline provider. */
+    /** Detached adapter that deliberately supplies no reports. */
     public static Registration dormant(PartyRef owner,Request request) {
         return futureRegistration(owner,request,(reads,target,origin,boundary)->Optional.empty());
     }
@@ -44,7 +45,7 @@ public final class CreditScoring {
     public static Registration futureRegistration(PartyRef owner,Request request,ReportSource source) {
         return futureRegistration(owner,request,source,(actor,target,reads)->target.owner() instanceof PartyRef.Player p&&p.id().equals(actor));
     }
-    /** Future scheduler supplies its narrow registered system authority; no production caller is installed here. */
+    /** The registered reporting scheduler supplies its narrow system authority. */
     public static Registration futureRegistration(PartyRef owner,Request request,ReportSource source,ScoreAuthority authority) {
         Objects.requireNonNull(source);Objects.requireNonNull(authority);
         return new Registration(1,(intent,reads)->{

@@ -46,6 +46,7 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
     }
     @Override protected void init() { super.init(); rebuild(); }
     private List<BankingNetwork.Choice> choices(String action) {
+        if (action.equals("finance_choices")) return menu.choices().stream().filter(c -> !FinanceActions.input(c.action()) || !c.value().isEmpty()).toList();
         return menu.choices().stream().filter(choice -> choice.action().equals(action)).toList();
     }
     private String selectedLabel() {
@@ -206,7 +207,24 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
                 primaryAction = "buy_preview";
                 primary = button(160, 188, 146, Component.empty(), this::performPrimary);
             }
-            default -> { }
+            default -> {
+                if (menu.page().startsWith("finance_") || menu.page().equals("credit_advance")) {
+                    var editable = menu.choices().stream().filter(c -> FinanceActions.input(c.action()) && c.value().isEmpty()).findFirst();
+                    button(10, 188, 136, Component.literal("Actions"), () -> openChooser("finance_choices"));
+                    if (editable.isPresent()) {
+                        var choice = editable.orElseThrow();
+                        String label = switch (choice.action()) {
+                            case "finance_loan_preview" -> "Principal and years";
+                            case "finance_credit_preview", "finance_credit_limit" -> "Credit limit (whole units)";
+                            case "credit_adv_preview" -> "Advance amount";
+                            default -> "Payment in debt currency";
+                        };
+                        amountBox(10, 164, 136, label, choice.action().equals("finance_loan_preview") ? "1000 2"
+                                : Set.of("finance_credit_preview", "finance_credit_limit").contains(choice.action()) ? "2500" : "100.00");
+                        button(160, 188, 146, Component.literal(choice.label()), () -> send(choice.action(), draft));
+                    }
+                }
+            }
         }
         if (needsRetry()) button(menu.page().equals("deposit") ? 184 : 10, menu.page().equals("deposit") ? 166 : 188, menu.page().equals("deposit") ? 122 : 136, text("retry"),
                 () -> send(Set.of("setup", "accounts", "manage", "history", "fx", "settings", "close", "branch", "branch_targets", "brands", "brand_review", "branch_products", "cards", "card_funding", "card_review", "credit_profile", "credit_history", "credit_facilities", "credit_facility", "credit_statements").contains(menu.page()) ? "bank_retry" : "retry", ""));
@@ -214,9 +232,9 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
     }
     private String[] homePages() {
         return switch (menu.access()) {
-            case ATM, TELLER -> new String[]{"accounts", "deposit", "withdraw", "fx", "claims", "cards", "credit_profile", "credit_facilities"};
+            case ATM, TELLER -> new String[]{"accounts", "deposit", "withdraw", "fx", "claims", "cards", "credit_profile", "finance_home"};
             case KIOSK -> new String[]{"manage_accounts"};
-            case CARD -> new String[]{"accounts", "fx", "claims", "cards", "credit_profile", "credit_facilities"};
+            case CARD -> new String[]{"accounts", "fx", "claims", "cards", "credit_profile", "finance_home"};
             case REGISTER -> new String[]{"shop", "claims"};
             case ADMIN -> new String[]{"settings"};
             case WORLD_SETUP -> new String[0];
@@ -302,7 +320,7 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
         if (!chooser.isEmpty()) { scrollbar(g, choices(chooser).size()); return; }
         boolean deposit = menu.page().equals("deposit");
         int x = deposit ? 164 : 10, y = deposit ? 98 : Set.of("fx", "withdraw").contains(menu.page()) ? 134 : 76;
-        int bottom = deposit ? 136 : Set.of("settings", "shop", "setup").contains(menu.page()) ? 154 : 184;
+        int bottom = (menu.page().startsWith("finance_") || menu.page().equals("credit_advance")) ? (input == null ? 180 : 148) : deposit ? 136 : Set.of("settings", "shop", "setup").contains(menu.page()) ? 154 : 184;
         boolean rowPage = Set.of("accounts", "claims", "branch", "branch_targets", "brands", "branch_products", "cards", "card_funding", "credit_facilities").contains(menu.page());
         if (rowPage && !menu.lines().isEmpty())
             g.drawString(font, font.plainSubstrByWidth(menu.lines().getFirst(), 296), 10, 57, MUTED, false);
@@ -332,8 +350,7 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
         else if (!rowPage || menu.choices().isEmpty()) drawLines(g, menu.lines(), x, y, 306 - x, bottom);
         if (rowPage) scrollbar(g, menu.choices().size());
         if (input != null) {
-            String label = menu.page().equals("fx") ? "Amount (whole source units)" : menu.page().equals("withdraw") ? "Amount in account currency"
-                    : menu.page().equals("settings") ? "Cash services" : "Price for held items";
+            String label = input.getMessage().getString();
             g.drawString(font, font.plainSubstrByWidth(label, 296), input.getX() - leftPos, input.getY() - topPos - 10, MUTED, false);
         }
         if (deposit) g.drawString(font, Component.translatable("container.inventory"), 12, 134, MUTED, false);
@@ -346,9 +363,13 @@ public final class BankingScreen extends AbstractContainerScreen<BankingMenu> {
         boolean body = y != 212 && y != 144;
         int start = body ? Math.clamp(scroll, 0, Math.max(0, wrapped.size() - visible)) : 0;
         if (body) scroll = start;
+        g.flush();
         g.enableScissor(leftPos + x, topPos + y, leftPos + x + width, topPos + bottom);
         for (int i = start; i < Math.min(wrapped.size(), start + visible); i++) g.drawString(font, wrapped.get(i), x, y + (i - start) * 10, TEXT, false);
+        g.flush();
         g.disableScissor();
+        if (body && wrapped.size() > visible && (menu.page().startsWith("finance_") || menu.page().equals("credit_advance")))
+            g.drawString(font, "Scroll for more", 160, input == null ? 176 : 170, MUTED, false);
     }
     private void scrollbar(GuiGraphics g, int count) {
         if (count <= 6) return;

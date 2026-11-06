@@ -304,7 +304,10 @@ public final class Custody {
     public static Page claims(ReadView reads, ActorId actor, UUID after, int limit) {
         if (limit < 1 || limit > MAX_PAGE_SIZE) throw new IllegalArgumentException("Custody page size");
         var rows = reads.query("""
-                SELECT * FROM custody_cases WHERE owner=? AND state='CLAIM' AND id>? ORDER BY id LIMIT ?
+                SELECT * FROM custody_cases WHERE owner=? AND id>? AND state IN ('CLAIM','COMMITTED')
+                    AND (state='CLAIM' OR (state='COMMITTED' AND items LIKE 'issued-card-v1%'
+                        AND delivery_attempt IS NULL AND acknowledgment IS NULL AND delivery_witness IS NULL))
+                    ORDER BY id LIMIT ?
                 """, List.of(actorKey(actor), after == null ? "" : after.toString(), Integer.toString(limit + 1)), limit + 1);
         var cases = rows.stream().limit(limit).map(Custody::read).toList();
         return new Page(cases, rows.size() > limit ? cases.getLast().id() : null);
@@ -324,22 +327,29 @@ public final class Custody {
         var world=store.snapshot().worldId();
         java.util.function.BiPredicate<Case,ReadView> verifiedCard=(current,reads)-> {
             try {
-                var token=dev.emily.economy.card.IssuedCards.find(reads,world,current.id()).orElse(null);
-                if(token==null || !token.custodyId().equals(current.id()) || !token.owner().equals(current.terms().owner())
-                        || !token.id().equals(current.reservationOperation()) || !token.id().equals(current.financialOperation())
-                        || !current.terms().items().equals(dev.emily.economy.card.IssuedCards.deliveryItems(token))
-                        || !current.terms().source().equals("issued-card:"+token.id())
-                        || !current.terms().destination().equals(actorKey(token.owner())))return false;
+                var debit=dev.emily.economy.card.IssuedCards.find(reads,world,current.id()).orElse(null);
+                var credit=debit==null?dev.emily.economy.credit.CreditFacilities.token(reads,world,current.id()).orElse(null):null;
+                if(debit==null && credit==null)return false;
+                var id=debit!=null?debit.id():credit.id();
+                var owner=debit!=null?debit.owner():credit.owner();
+                var custody=debit!=null?debit.custodyId():credit.custodyId();
+                var items=debit!=null?dev.emily.economy.card.IssuedCards.deliveryItems(debit):dev.emily.economy.credit.CreditFacilities.deliveryItems(credit);
+                if(!custody.equals(current.id()) || !owner.equals(current.terms().owner())
+                        || !id.equals(current.reservationOperation()) || !id.equals(current.financialOperation())
+                        || !current.terms().items().equals(items)
+                        || !current.terms().source().equals("issued-card:"+id)
+                        || !current.terms().destination().equals(actorKey(owner)))return false;
                 var outcome=reads.query("""
                         SELECT actor,service,operation_type,canonical_request,status FROM operation_outcomes
                         WHERE world_id=? AND operation_id=?
-                        """,List.of(world.value().toString(),token.id().toString()),1);
+                        """,List.of(world.value().toString(),id.toString()),1);
                 if(outcome.isEmpty())return false;
                 var original=outcome.getFirst();
-                return original.get("status").equals("COMMITTED") && original.get("actor").equals(actorKey(token.owner()))
-                        && original.get("service").equals(dev.emily.economy.card.IssuedCards.ISSUE.service())
-                        && original.get("operation_type").equals(dev.emily.economy.card.IssuedCards.ISSUE.operationType())
-                        && current.terms().financialIntent().equals(token.id()+"\n"+original.get("actor")+"\n"
+                var kind=new Kind(original.get("service"),original.get("operation_type"));
+                boolean issuance=debit!=null?kind.equals(dev.emily.economy.card.IssuedCards.ISSUE)
+                        :Set.of(dev.emily.economy.credit.CreditFacilities.ISSUE,dev.emily.economy.credit.CreditFacilities.REPLACE).contains(kind);
+                return issuance && original.get("status").equals("COMMITTED") && original.get("actor").equals(actorKey(owner))
+                        && current.terms().financialIntent().equals(id+"\n"+original.get("actor")+"\n"
                                 +original.get("service")+"\n"+original.get("operation_type")+"\n"+original.get("canonical_request"));
             } catch(IllegalArgumentException malformed) {return false;}
         };

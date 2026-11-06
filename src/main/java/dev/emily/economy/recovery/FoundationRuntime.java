@@ -48,7 +48,7 @@ public final class FoundationRuntime implements FoundationStore {
         public static Configuration production(Clock wall,FinancialCalendar.Config config,List<dev.emily.economy.pricing.WealthValuation.Source> sources) {
             var valuation=dev.emily.economy.pricing.PricingRuntime.wealth(sources);
             return new Configuration(RecordCatalog.core(),List.of(),List.of(FxService.definition()),wall,
-                    Map.of(FxService.SYSTEM,FxService.deferred()),true,java.util.stream.Stream.of(dev.emily.economy.pricing.PricingRuntime.providers(valuation),dev.emily.economy.credit.CreditRuntime.providers(),java.util.List.of(dev.emily.economy.loan.LoanRuntime.provider()),dev.emily.economy.debt.DebtRuntime.providers()).flatMap(java.util.Collection::stream).toList(),config,valuation);
+                    Map.of(FxService.SYSTEM,FxService.deferred()),true,java.util.stream.Stream.of(dev.emily.economy.pricing.PricingRuntime.providers(valuation),dev.emily.economy.credit.CreditRuntime.providers(),java.util.List.of(dev.emily.economy.loan.LoanRuntime.provider(),dev.emily.economy.autopay.AutopayRuntime.provider()),dev.emily.economy.debt.DebtRuntime.providers(),dev.emily.economy.credit.CreditScoreRuntime.providers()).flatMap(java.util.Collection::stream).toList(),config,valuation);
         }
         public static Configuration core() { return new Configuration(RecordCatalog.core(),List.of(),List.of(),Clock.systemUTC()); }
     }
@@ -61,6 +61,10 @@ public final class FoundationRuntime implements FoundationStore {
     private dev.emily.economy.interest.DepositYield depositYield;
     private boolean providersMigrated;
     private boolean debtMigrated;
+    private boolean legacyDebtReconciled;
+    private boolean scoreSourcesMigrated;
+    private boolean historicalScoresMigrated;
+    private boolean autopayMigrated;
     private int phase;
     private boolean ready;
     private boolean valuationSourcesReady;
@@ -105,9 +109,27 @@ public final class FoundationRuntime implements FoundationStore {
             if (!migrateProviders()) return new Progress("bank-provider-migration", 0, 1, false);
             providersMigrated = true;
         }
+        if (!legacyDebtReconciled && configuration.deadlineProviders().stream().anyMatch(p->p.id().equals("economy:a6/debt-default"))) {
+            if (!dev.emily.economy.debt.DebtLegacyReconciliation.step(store)) return new Progress("debt-history-reconciliation",0,1,false);
+            legacyDebtReconciled=true;
+        }
         if (!debtMigrated && configuration.deadlineProviders().stream().anyMatch(p->p.id().equals("economy:a6/debt-default"))) {
             if (!dev.emily.economy.debt.DebtLifecycle.bootstrap(store)) return new Progress("debt-obligation-migration",0,1,false);
             debtMigrated=true;
+        }
+        if (configuration.deadlineProviders().stream().anyMatch(p->p.id().equals(dev.emily.economy.credit.CreditScoreRuntime.PROVIDER))) {
+            if (!scoreSourcesMigrated) {
+                if (!dev.emily.economy.credit.CreditReporting.bootstrap(store)) return new Progress("score-source-migration",0,1,false);
+                scoreSourcesMigrated=true;
+            }
+            if (!historicalScoresMigrated) {
+                if (!dev.emily.economy.credit.CreditScoreRuntime.bootstrap(store)) return new Progress("score-history-reconciliation",0,1,false);
+                historicalScoresMigrated=true;
+            }
+        }
+        if(!autopayMigrated && configuration.deadlineProviders().stream().anyMatch(p->p.id().equals(dev.emily.economy.autopay.AutopayRuntime.PROVIDER))) {
+            if(!dev.emily.economy.autopay.Autopay.bootstrap(store))return new Progress("autopay-statement-history",0,1,false);
+            autopayMigrated=true;
         }
         if(depositYield!=null&&!valuationSourcesReady) {
             if(!dev.emily.economy.pricing.ValuationSources.prepare(store,configuration.valuation()))return new Progress("valuation-source-registration",0,1,false);

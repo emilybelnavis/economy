@@ -11,6 +11,8 @@ public final class EconomyClient {
     public EconomyClient(net.neoforged.bus.api.IEventBus modBus) {
         BankingScreen.initialize(modBus);
         BankingArtModels.initialize(modBus);
+        CollectionAgentRenderer.initialize(modBus);
+        CollectionScreen.initialize(modBus);
         LogUtils.getLogger().info("Economy client entry point loaded");
     }
 }

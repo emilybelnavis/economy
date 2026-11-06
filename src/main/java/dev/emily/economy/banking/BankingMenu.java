@@ -32,6 +32,7 @@ public final class BankingMenu extends AbstractContainerMenu {
         private static final Set<String> ADMIN_ACTIONS = Set.of("settings", "configure", "bank_retry", "cancel", "banking", "brand_preview", "brand_confirm");
 
         public boolean allows(String action) {
+            if (FinanceActions.handles(action)) return FinanceActions.allowed(this, action);
             return switch (this) {
                 case ATM -> BANKING.contains(action) && !action.startsWith("account_close_") && !action.equals("account_open") && !action.equals("setup");
                 case TELLER -> BANKING.contains(action) && !action.startsWith("account_close_") && !action.equals("account_open") && !action.equals("setup");

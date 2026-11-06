@@ -9,3 +9,5 @@ ATM/teller geometry and UVs match the original detailed four-cell sources exactl
 The Collection Agent has a 64×64 skin and `CollectionAgentGeometry.create()` humanoid layer definition, standard bones plus body-attached folio/satchel. A6-11 owns renderer/model-layer/entity registration, animation and behavior. The current package spawns nothing.
 
 No schema, journal, service packets, worker/lifecycle, financial authorization or settlement contract changes. A resource identifier cannot establish an institution relationship, issued card, account, facility or permission. Legacy collectible IDs and resources stay intact.
+
+A6-11 registers the existing Collection Agent mesh/skin through [its civilian renderer and gameplay](collection-agent.md). Original resources retain their paths and provenance.

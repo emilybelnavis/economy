@@ -61,6 +61,19 @@ class CreditFacilitiesTest {
             assertEquals(2,f.store.transaction(tx->CreditFacilities.owned(tx::query,f.owner)).size());
         }
     }
+    @Test void committedCreditCardIsCollectibleBeforeRestartAndRecoverableWithoutMaterializing() throws Exception {
+        try (var f = new Fixture()) {
+            var line = f.issue();
+            var token = f.token(line.id());
+            assertEquals(token.id(), f.store.transaction(tx -> Custody.claims(tx::query, f.actor, null, 8)).cases().getFirst().id());
+            while (!Custody.reconcileBatch(f.store)) { }
+            var card = f.store.transaction(tx -> Custody.find(tx::query, f.actor, token.id(), false)).orElseThrow();
+            assertEquals(Custody.State.CLAIM, card.state());
+            assertNull(card.deliveryAttempt());
+            assertEquals(0, f.cash());
+        }
+    }
+
     @Test void advancesUseOutstandingTwentyPercentSublimitAndRepaymentRestoresReservation()throws Exception {
         try(var f=new Fixture()) {
             var line=f.issue();var request=f.drawRequest(line,CreditFacilities.DrawKind.ADVANCE,30000);var intent=f.intent(CreditFacilities.DRAW,request.request());

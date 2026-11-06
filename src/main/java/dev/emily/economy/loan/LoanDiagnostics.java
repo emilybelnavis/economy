@@ -73,6 +73,14 @@ public final class LoanDiagnostics {
         Integer next=after+rows.size()<original.installments().size()?rows.getLast().ordinal():null;
         return new SchedulePage(rows,next,loan.scheduleHash(),1,loan.currency());
     }
+    public static Optional<EventPage> ownerPayments(JournalEngine.ReadView reads,PartyRef owner,UUID id,EventCursor after,int limit) {
+        bounds(limit);player(owner);Objects.requireNonNull(after);
+        var loan=selected(reads,owner,id).orElse(null);if(loan==null)return Optional.empty();
+        long frontier=frontier(reads);var origin=originated(reads,loan,frontier);
+        if(origin.isEmpty())return Optional.of(new EventPage(List.of(),null,frontier));
+        var page=events(reads,loan,after,limit,frontier,origin.orElseThrow().sequence());
+        return Optional.of(new EventPage(page.entries().stream().filter(e->e.payment()!=null).toList(),page.nextCursor(),frontier));
+    }
     public static Optional<OperatorView> inspect(JournalEngine.ReadView reads,PartyRef owner,UUID id,long now,EventCursor after,int limit){
         bounds(limit);instant(now);player(owner);Objects.requireNonNull(after);
         var loan=selected(reads,owner,id).orElse(null);if(loan==null)return Optional.empty();long frontier=frontier(reads);

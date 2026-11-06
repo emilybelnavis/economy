@@ -310,7 +310,10 @@ public final class BankingAccounts {
         services.ledger().branchContext(grant, audience.menu().anchor(), null).thenCombine(ownerAccounts(services, grant), Map::entry)
                 .whenComplete((result, error) -> {
             if (!audience.live()) return;
-            if (error != null || result.getKey().isEmpty() || result.getValue().isEmpty()) { unavailable(audience,"branch"); return; }
+            if (error != null || result.getKey().isEmpty() || result.getValue().isEmpty()) {
+                if (error != null) com.mojang.logging.LogUtils.getLogger().warn("event=BANKING_BRANCH_READ_FAILED session={} reason={}", audience.session(), ServerServices.failureCode(error));
+                unavailable(audience,"branch"); return;
+            }
             var context=result.getKey().orElseThrow(); var terminal=context.terminal();
             if (terminal==null || terminal.binding()==null || !terminal.binding().bound()) {
                 reply(audience,"branch",List.of("This kiosk has no bank binding.","Owner: sneak-right-click with an empty hand to configure it."),"Bank selection required",List.of()); return;
@@ -329,6 +332,7 @@ public final class BankingAccounts {
             choices.add(new BankingNetwork.Choice("cards","","Issued debit cards",false));
             choices.add(new BankingNetwork.Choice("credit_profile","","Credit profile",false));
             choices.add(new BankingNetwork.Choice("credit_facilities","","Credit facilities",false));
+            choices.add(new BankingNetwork.Choice("finance_home", "", "Bank and credit services", false));
             choices.add(new BankingNetwork.Choice("branch_products","","Cards and applications",false));
             reply(audience,"branch",List.of(bank.name()+" — "+bank.baseCurrency().code(),"Four open accounts total, including primary.",
                     "Assignment and closure require the account's bank. Switching requires both banks."),"Branch services",choices);
@@ -350,9 +354,14 @@ public final class BankingAccounts {
     private static void branchAction(Audience audience,ServerServices services,PartyAuthorization.Grant grant,State state,String action,String value) {
         if(audience.menu().access()!=BankingMenu.Access.KIOSK || !offered(audience,action,value))throw new IllegalArgumentException("Choose an offered branch action");
         if(action.equals("branch_products")) {
-            reply(audience,"branch_products",List.of("Debit issuance and replacement: choose Issued debit cards at this kiosk.",
-                    "Credit-card applications — unavailable until credit service is installed.","Bank loan applications — unavailable until lending service is installed.",
-                    "Tier 1/hybrid branches will also offer Ironbridge subprime applications.","No facility, fee or approval was created."),"Services not yet available",List.of());return;
+            reply(audience,"branch_products",List.of("Issuer applications and card services require this live branch.",
+                    "Review current terms before confirming. Trading and collateral lending are unavailable."),"Branch services",List.of(
+                    new BankingNetwork.Choice("cards", "", "Issued debit cards", false),
+                    new BankingNetwork.Choice("finance_credit_apply", "", "Credit application", false),
+                    new BankingNetwork.Choice("finance_credit_cards", "", "Credit tokens and replacement", false),
+                    new BankingNetwork.Choice("finance_credit_raise", "", "Credit limit increase", false),
+                    new BankingNetwork.Choice("finance_loan_apply", "", "Loan application", false),
+                    new BankingNetwork.Choice("finance_home", "", "All financial services", false)));return;
         }
         String[] fields=value.split("\\|",-1);
         AccountId selected=action.equals("branch_open")?null:new AccountId(UUID.fromString(fields[0]));
@@ -890,6 +899,17 @@ public final class BankingAccounts {
         }
         return new TerminalPolicy.Settings(mode, currencies, denominations);
     }
+    static void financeSubmit(FinanceMenuSupport.Audience audience, ServerServices services,
+            PartyAuthorization.Grant grant, Journal.Kind kind, Journal.CanonicalRequest request,
+            java.util.function.BiFunction<OperationId, RequestId, JournalService.Submission> submit) {
+        var operation = new OperationId(UUID.randomUUID());
+        var attempt = new RequestId(UUID.randomUUID());
+        var state = STATES.computeIfAbsent(audience.menu(), ignored -> new State());
+        start(new Audience(audience.player(), audience.menu(), audience.session(), audience.revision()), services,
+                grant, state, ownedIntent(grant, kind, operation, attempt, request),
+                ignored -> submit.apply(operation, attempt), audience.menu().page());
+    }
+
     private static Journal.Intent ownedIntent(PartyAuthorization.Grant grant, Journal.Kind kind, OperationId operation,
                                               RequestId attempt, Journal.CanonicalRequest request) {
         var fields = new HashMap<>(request.fields());
@@ -934,7 +954,11 @@ public final class BankingAccounts {
                 || !tag.hasUUID("actor") || !tag.getUUID("actor").equals(player.getUUID())) throw new IllegalArgumentException("Pending banking owner");
         var kind = new Journal.Kind(tag.getString("service"), tag.getString("type"));
         if (!Set.of(dev.emily.economy.account.AccountCatalog.INITIALIZE_PRIMARY, AccountLifecycle.OPEN, AccountLifecycle.CLOSE, BankProviders.PRIMARY, BankProviders.SECONDARY, BankProviders.ASSIGN, BankProviders.CLOSE, BankProviders.SWITCH_SOURCE, BankProviders.SWITCH_TARGET,
-                FxSettlement.EXCHANGE, TerminalPolicy.Action.CONFIGURE.kind(), TerminalBanking.BIND,dev.emily.economy.card.IssuedCards.ISSUE,dev.emily.economy.card.IssuedCards.REVOKE).contains(kind)) throw new IllegalArgumentException("Pending banking kind");
+                FxSettlement.EXCHANGE, TerminalPolicy.Action.CONFIGURE.kind(), TerminalBanking.BIND,dev.emily.economy.card.IssuedCards.ISSUE,dev.emily.economy.card.IssuedCards.REVOKE,
+                dev.emily.economy.credit.CreditFacilities.ISSUE, dev.emily.economy.credit.CreditFacilities.INCREASE,
+                dev.emily.economy.credit.CreditFacilities.REPAY, dev.emily.economy.credit.CreditFacilities.DRAW,
+                dev.emily.economy.credit.CreditFacilities.REPLACE, dev.emily.economy.credit.CreditFacilities.REVOKE, dev.emily.economy.loan.Loans.APPLY,
+                dev.emily.economy.loan.Loans.REPAY, dev.emily.economy.debt.DebtPayments.PAY, dev.emily.economy.autopay.Autopay.CONFIGURE).contains(kind)) throw new IllegalArgumentException("Pending banking kind");
         var fieldsTag = tag.getCompound("fields");
         if (fieldsTag.size() > 64) throw new IllegalArgumentException("Pending banking fields");
         var fields = new HashMap<String, String>();
@@ -953,7 +977,7 @@ public final class BankingAccounts {
             if (error != null) { finish(audience, world, state, intent, audience.menu().page(), null); return; }
             if (found.isPresent()) { finish(audience, world, state, intent, audience.menu().page(), found.orElseThrow()); return; }
             if (!audience.live()) return;
-            if (state.retry == null || (intent.kind().service().equals("economy:providers") || intent.kind().service().equals("economy:cards")) || Set.of(AccountCatalog.INITIALIZE_PRIMARY, AccountLifecycle.OPEN, AccountLifecycle.CLOSE).contains(intent.kind())) {
+            if (state.retry == null || intent.kind().equals(dev.emily.economy.autopay.Autopay.CONFIGURE) || intent.kind().equals(dev.emily.economy.debt.DebtPayments.PAY) || intent.kind().service().equals("economy:credit") || intent.kind().service().equals("economy:loans") || (intent.kind().service().equals("economy:providers") || intent.kind().service().equals("economy:cards")) || Set.of(AccountCatalog.INITIALIZE_PRIMARY, AccountLifecycle.OPEN, AccountLifecycle.CLOSE).contains(intent.kind())) {
                 audience.player().getPersistentData().put("economy_banking_last_absent", audience.player().getPersistentData().getCompound(PENDING).copy());
                 audience.player().getPersistentData().remove(PENDING);
                 reply(audience, audience.menu().page(), List.of("Operation " + intent.operationId().value(),

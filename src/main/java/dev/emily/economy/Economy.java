@@ -51,6 +51,8 @@ public final class Economy {
         dev.emily.economy.card.CardCatalog.initialize(modBus);
         dev.emily.economy.terminal.TerminalCatalog.initialize(modBus);
         dev.emily.economy.banking.BankingCatalog.initialize(modBus);
+        dev.emily.economy.collection.CollectionCatalog.initialize(modBus);
+        dev.emily.economy.collection.CollectionMenuCatalog.initialize(modBus);
         NeoForge.EVENT_BUS.addListener(this::card);
         dev.emily.economy.cash.CashStackIdentity.initialize(modBus);
         NeoForge.EVENT_BUS.addListener(this::commands);
@@ -88,6 +90,7 @@ public final class Economy {
         LedgerCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.CreditCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.LoanCommands.register(event.getDispatcher(), servers::get);
+        dev.emily.economy.foundation.DebtCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.RegisterPriceCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.AdminConfigCommands.register(event.getDispatcher());
         EconomyCommands.register(event.getDispatcher(), (source, view) -> {
@@ -142,6 +145,8 @@ public final class Economy {
             var previousPhase = services.progress().phase();
             dev.emily.economy.institution.KioskAdmission.tick(event.getServer());
             services.tick();
+            dev.emily.economy.collection.CollectionAgents.tick(event.getServer());
+            dev.emily.economy.collection.CollectionDialogue.tick(event.getServer());
             dev.emily.economy.terminal.TerminalLifecycle.tick(event.getServer());
             choosers.get(event.getServer()).tick(event.getServer());
             if (!services.progress().phase().equals(previousPhase)) LOGGER.info("Economy startup progress: {} ({}/{})", DiagnosticsReport.recoveryPhase(services.progress().phase()), services.progress().completed(), services.progress().target());
@@ -153,6 +158,8 @@ public final class Economy {
         }
     }
     private void stopping(ServerStoppingEvent event) {
+        dev.emily.economy.collection.CollectionDialogue.stop(event.getServer());
+        dev.emily.economy.collection.CollectionAgents.stop(event.getServer());
         shutdownErrors.put(event.getServer(),new dev.emily.economy.recovery.ShutdownErrors());
         ServerServices services = servers.remove(event.getServer());
         choosers.remove(event.getServer());

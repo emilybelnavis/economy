@@ -140,6 +140,11 @@ public final class SqliteStorage implements FoundationStore {
             dev.emily.economy.loan.LoanDiagnosticSchema.validate(connection);
             dev.emily.economy.loan.LoanEvents.validateSchema(connection);
             dev.emily.economy.debt.DebtLifecycleSchema.validate(connection);
+            dev.emily.economy.debt.DebtDiagnosticSchema.validate(connection);
+            dev.emily.economy.debt.DebtLegacySchema.validate(connection);
+            dev.emily.economy.credit.CreditReportingSchema.validate(connection);
+            dev.emily.economy.collection.CollectionPresenceSchema.validate(connection);
+            dev.emily.economy.autopay.AutopaySchema.validate(connection);
             LedgerProjection.validateSchema(connection);
             HoldSchema.validate(connection);
             FxSettlementSchema.validate(connection);
@@ -162,8 +167,14 @@ public final class SqliteStorage implements FoundationStore {
             dev.emily.economy.journal.Journal.Intent intent, dev.emily.economy.journal.JournalEngine.ReadView reads,
             dev.emily.economy.journal.JournalEngine.Commit commit) {
         var decision = commitObserver.prepare(intent,reads,commit);
-        return decision instanceof dev.emily.economy.journal.JournalEngine.Commit accepted
-            ? dev.emily.economy.debt.DebtLifecycle.observe(intent,reads,accepted) : decision;
+        if(decision instanceof dev.emily.economy.journal.JournalEngine.Commit accepted)
+            decision=dev.emily.economy.debt.DebtLifecycle.observe(intent,reads,accepted);
+        if(decision instanceof dev.emily.economy.journal.JournalEngine.Commit accepted
+                && reads.query("SELECT ready FROM credit_reporting_bootstrap WHERE singleton=1",java.util.List.of(),1).getFirst().get("ready").equals("1"))
+            decision=dev.emily.economy.credit.CreditReporting.decorate(reads,accepted);
+        if(decision instanceof dev.emily.economy.journal.JournalEngine.Commit accepted)
+            decision=dev.emily.economy.autopay.Autopay.decorate(reads,accepted);
+        return decision;
     }
 
     public void cleanShutdownEligible(boolean eligible) { checkOwner(); cleanEligible = eligible; }
@@ -318,6 +329,11 @@ public final class SqliteStorage implements FoundationStore {
             dev.emily.economy.loan.LoanDiagnosticSchema.validate(connection);
             dev.emily.economy.loan.LoanEvents.validateSchema(connection);
             dev.emily.economy.debt.DebtLifecycleSchema.validate(connection);
+            dev.emily.economy.debt.DebtDiagnosticSchema.validate(connection);
+            dev.emily.economy.debt.DebtLegacySchema.validate(connection);
+            dev.emily.economy.credit.CreditReportingSchema.validate(connection);
+            dev.emily.economy.collection.CollectionPresenceSchema.validate(connection);
+            dev.emily.economy.autopay.AutopaySchema.validate(connection);
             LedgerProjection.validateSchema(connection);
             HoldSchema.validate(connection);
             FxSettlementSchema.validate(connection);

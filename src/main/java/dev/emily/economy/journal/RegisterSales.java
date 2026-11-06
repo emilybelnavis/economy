@@ -93,6 +93,10 @@ public final class RegisterSales {
 
     public static Quote quote(ReadView reads, WorldId world, PlayerId buyer, TerminalPolicy.Anchor anchor,
                               UUID generation, long terminalRevision, SourceReader sources) {
+        return quote(reads, world, buyer, anchor, generation, terminalRevision, sources, false);
+    }
+    public static Quote quote(ReadView reads, WorldId world, PlayerId buyer, TerminalPolicy.Anchor anchor,
+            UUID generation, long terminalRevision, SourceReader sources, boolean creditFunding) {
         var terminal = terminal(reads, world, anchor, generation, terminalRevision);
         var price = rawPrice(reads, world, anchor).orElseThrow(() -> invalid("SALE_UNCONFIGURED"));
         if (!price.generation().equals(generation) || price.terminalRevision() != terminalRevision
@@ -101,7 +105,7 @@ public final class RegisterSales {
         if (!seller.id().equals(price.sellerAccount()) || seller.revision() != price.sellerAccountRevision()
                 || seller.currency() != price.currency()) throw invalid("SALE_SELLER_STALE");
         var account = primary(reads, buyer);
-        if (account.currency() != price.currency()) throw invalid("SALE_CURRENCY_MISMATCH");
+        if (!creditFunding && account.currency() != price.currency()) throw invalid("SALE_CURRENCY_MISMATCH");
         var source = source(reads, world, below(anchor), price.template(), sources);
         long pending = Long.parseLong(reads.query("""
                 SELECT COALESCE(SUM(count),0) AS total FROM register_stock_locks
@@ -118,6 +122,17 @@ public final class RegisterSales {
     public static CanonicalRequest reserveRequest(Quote quote) {
         return new CanonicalRequest(1, Map.of("quote", encodeQuote(quote)));
     }
+    public static CanonicalRequest reserveRequest(Quote quote, boolean creditFunding) {
+        return creditFunding ? new CanonicalRequest(1, Map.of("quote", encodeQuote(quote), "credit_funding", "true")) : reserveRequest(quote);
+    }
+    /** Optional trusted funding binding is part of the original COMMIT identity. */
+    public static CanonicalRequest creditRequest(UUID sale, String evidence, String reason, String credit) {
+        if (credit == null || credit.isEmpty() || credit.length() > 2048) throw new IllegalArgumentException("SALE_CREDIT_BINDING");
+        var fields = new TreeMap<>(request(sale, evidence, reason).fields());
+        fields.put("credit_request", credit);
+        return new CanonicalRequest(1, fields);
+    }
+
     public static CanonicalRequest request(UUID sale, String evidence, String reason) {
         Objects.requireNonNull(sale); text(evidence, 256); text(reason, 256);
         return new CanonicalRequest(1, Map.of("sale", sale.toString(), "evidence", evidence, "reason", reason));
@@ -142,9 +157,10 @@ public final class RegisterSales {
             try {
                 supplied = decodeQuote(intent.request().fields().get("quote"));
                 if (!(intent.actor() instanceof PlayerId buyer) || !buyer.equals(supplied.buyer())) return decline("SALE_ACCESS");
+                boolean creditFunding = "true".equals(intent.request().fields().get("credit_funding"));
                 actual = quote(reads, world, buyer, supplied.price().anchor(), supplied.price().generation(),
-                        supplied.price().terminalRevision(), sources);
-                if (!reserveRequest(actual).equals(intent.request())) return reject("SALE_QUOTE_STALE");
+                        supplied.price().terminalRevision(), sources, creditFunding);
+                if (!reserveRequest(actual, creditFunding).equals(intent.request())) return reject("SALE_QUOTE_STALE");
             } catch (IllegalArgumentException | ArithmeticException | NullPointerException malformed) { return rejected(malformed); }
             var current = new Reservation(intent.operationId().value(), actual.buyer(), State.RESERVED, actual, null,
                     "pending", "stock reserved", 1);
@@ -156,7 +172,9 @@ public final class RegisterSales {
         try {
             var fields = intent.request().fields();
             id = UUID.fromString(fields.get("sale")); evidence = fields.get("evidence"); reason = fields.get("reason");
-            if (!request(id, evidence, reason).equals(intent.request())) return reject("SALE_REQUEST");
+            var canonical = action == Action.COMMIT && fields.containsKey("credit_request")
+                    ? creditRequest(id, evidence, reason, fields.get("credit_request")) : request(id, evidence, reason);
+            if (!canonical.equals(intent.request())) return reject("SALE_REQUEST");
         } catch (IllegalArgumentException | NullPointerException malformed) { return reject("SALE_REQUEST"); }
         var current = raw(reads, id).orElse(null);
         if (current == null || (action != Action.QUARANTINE && !intent.actor().equals(current.buyer()))
@@ -178,7 +196,7 @@ public final class RegisterSales {
             next = State.SAVED;
         } else if (action == Action.COMMIT) {
             if (current.state() != State.SAVED) return reject("SALE_STATE");
-            try { validateCommit(reads, world, current, sources); }
+            try { validateCommit(reads, world, current, sources, intent.request().fields().containsKey("credit_request")); }
             catch (IllegalArgumentException | ArithmeticException stale) { return rejected(stale); }
             if (!verifier.verifies(action, intent, current, evidence, reads)) return decline("SALE_EVIDENCE");
             if (!capacity.fits(action, intent, current, reads)) return decline("SALE_CAPACITY");
@@ -242,7 +260,7 @@ public final class RegisterSales {
         } catch (IllegalArgumentException | ArithmeticException | NullPointerException malformed) { return rejected(malformed); }
     }
 
-    private static void validateCommit(ReadView reads, WorldId world, Reservation sale, SourceReader sources) {
+    private static void validateCommit(ReadView reads, WorldId world, Reservation sale, SourceReader sources, boolean creditFunding) {
         var quote = sale.quote(); var price = quote.price();
         var terminal = terminal(reads, world, price.anchor(), price.generation(), price.terminalRevision());
         var current = rawPrice(reads, world, price.anchor()).orElseThrow(() -> invalid("SALE_PRICE_STALE"));
@@ -252,7 +270,7 @@ public final class RegisterSales {
             throw invalid("SALE_SELLER_STALE");
         if (!buyer.id().equals(quote.buyerAccount()) || buyer.revision() != quote.buyerAccountRevision())
             throw invalid("SALE_BUYER_STALE");
-        if (buyer.currency() != seller.currency() || seller.currency() != price.currency())
+        if ((!creditFunding && buyer.currency() != seller.currency()) || seller.currency() != price.currency())
             throw invalid("SALE_CURRENCY_MISMATCH");
         var source = source(reads, world, below(price.anchor()), price.template(), sources);
         if (!source.equals(sale.savedSource())) throw invalid("SALE_SOURCE_CHANGED");

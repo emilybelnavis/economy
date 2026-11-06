@@ -47,3 +47,5 @@ Native request helpers validate whole-major amounts in the actual contract curre
 ## A6-08-01 extension
 
 A6-08-01 now composes the reserved first-issuance contract with actual funded facility/token/custody effects. See [funded facilities](credit-facilities.md). Production scoring remains dormant.
+
+A6-10-03 installs [the accepted production reporting and stage6 score dependency](debt-acceptance.md). The earlier dormant adapter remains available for detached callers. Current profile views expose installed/catch-up status, and the production new-exposure gate requires accepted sources and current calendar/score work.

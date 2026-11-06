@@ -197,6 +197,35 @@ public final class ServerServices {
         return partyJournal(operation, publisher).submit(operation.intent());
     }
 
+    CompletionStage<Optional<dev.emily.economy.collection.CollectionPresence.Snapshot>> readCollectionAgentState(
+            PartyAuthorization.Grant grant,UUID after,int limit) {
+        checkOwner();requireReady();
+        if(!(storage instanceof FoundationStore store)||!allowsAccountRead(grant,partyWorld(),false))
+            return CompletableFuture.completedStage(Optional.empty());
+        return storage(grant.actor(),()->{
+            store.requireEconomicCurrent();
+            return store.transaction(tx->allowsAccountRead(grant,store.snapshot().worldId(),false)
+                ?Optional.of(dev.emily.economy.collection.CollectionPresence.snapshot(tx::query,grant.target(),after,limit,System.currentTimeMillis())):Optional.empty());
+        });
+    }
+
+    /** Only presentation receipts bypass economic catch-up so removal/death can drain at shutdown. */
+    public CompletionStage<Journal.Outcome> collectionAgentTransition(PartyAuthorization.Grant grant,
+            dev.emily.economy.collection.CollectionPresence.Action action,UUID lease,long observedDeathAt) {
+        checkOwner();requireReady();
+        if(!(storage instanceof FoundationStore store)||!allowsAccountRead(grant,partyWorld(),false))
+            return CompletableFuture.failedStage(new IllegalArgumentException("Collection presentation authority"));
+        var request=dev.emily.economy.collection.CollectionPresence.request(grant.target(),action,lease,observedDeathAt);
+        var fields=new java.util.HashMap<>(request.fields());fields.remove("economy:owner");
+        var id=dev.emily.economy.collection.CollectionPresence.operation(grant.target(),action,lease);
+        var registration=dev.emily.economy.collection.CollectionPresence.registration(grant.target(),action,lease,observedDeathAt,System::currentTimeMillis);
+        var operation=PartyOperation.owned(grant,dev.emily.economy.collection.CollectionPresence.KIND,new OperationId(id),new RequestId(UUID.randomUUID()),new Journal.CanonicalRequest(1,fields),registration);
+        return storage(grant.actor(),()->{
+            if(action==dev.emily.economy.collection.CollectionPresence.Action.RESERVE)store.requireEconomicCurrent();
+            return operation.engine(store,sessionId).submit(operation.intent());
+        });
+    }
+
     public CompletionStage<Optional<Journal.Outcome>> lookupOwned(
             PartyAuthorization.Grant grant, Journal.Kind kind, OperationId operationId, RequestId requestId,
             Journal.CanonicalRequest request, JournalEngine.Registration handler) {

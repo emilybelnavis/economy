@@ -71,3 +71,12 @@ A6-08-01 exposes funded credit origination/increase/draw/payment APIs through ow
 ## A6-08-02 diagnostics
 
 Protocol 6 adds read-only owner credit facility/details/frozen-statement navigation on ATM/teller/kiosk/card surfaces, with offered IDs and bounded per-menu cursors. No application, draw, payment or editing packet is installed. See [credit diagnostics](credit-diagnostics.md).
+
+## A6-12 menus and integration
+
+Protocol 7 adds issuer-kiosk applications and replacement, remote payments and owner wealth/debt reports. Held-credit register purchases compose charge and protected goods atomically. Approved advances settle into an owned account before separate cash withdrawal. The [current integration contract](banking-integration.md) supersedes earlier application-screen availability notes and records exact request, recovery and API boundaries.
+
+
+## D15 automatic-payment extension
+
+Banking protocol8 adds the finite `auto_*` configuration actions and `finance_autopay` page. The Bank and credit hub exposes reviewed named-source consent on owner-authorized banking surfaces. Public owner configuration uses `LedgerService.autopay` and `configureAutopay`. Integration API1 remains unchanged. Existing accounting and original-outcome lookup are reused. See [automatic-payment contracts](autopay.md) and [final acceptance](../verification/A6-13.md).

@@ -18,6 +18,19 @@ The mod jar is written to `build/libs/economy-0.1.0.jar`. Development client and
 
 No additional mods are required; SQLite JDBC is bundled. Each world stores its foundation database and identity under `<world>/economy/` and must be owned by a single Minecraft server. Trusted server integrations can initialize accounts and authorize ledger funding. Collectible cash, cards and physical banking terminals are included. Banking and purchase menus are available; stock trading remains outside this release.
 
+## Banking release scope
+
+The current release includes 23 banks, CHF notes and coins, branded banking hardware, issuer-linked cards, fixed unsecured credit and loans, private reports and manual collection payments. A financial day lasts 20 real minutes, including time while the server is stopped. Statements close every 28 financial days. A financial year has 13 months.
+
+| Card network | Purchase APR | Advance APR |
+| --- | --- | --- |
+| Keystone | 21.99% | 23.99% |
+| Orbit | 19.99% | 21.99% |
+| Wayline | 19.99% | 21.99% |
+| Ember | 19.99% | 21.99% |
+
+Automatic payments support explicit per-card or per-loan consent from one named same-currency bank account. Securities trading, variable-rate and collateral-backed loans await their integration phases. Worlds with unsupported historical defaults or missing obligation history require reconciliation before affected borrowing becomes available.
+
 ## Scheduling configuration
 
 Create `config/economy-scheduling.properties` in the Minecraft instance directory to override settings. Use one `name=value` entry per line and restart the server to apply changes. Missing entries use the defaults below. Invalid values, unknown keys, or unreadable files leave the economy unavailable and log a configuration error. Storage uses one worker and one SQLite connection.
@@ -67,7 +80,7 @@ Cash taken from the Creative inventory or created with commands is accepted as n
 
 ## Schema upgrades
 
-New worlds initialize automatically. Redesigned worlds with schemas 1 through 20 require a validated complete-world backup before upgrading to schema 21. Prepare it while Minecraft is fully stopped:
+New worlds initialize automatically. Worlds on schemas 1 through 34 require a validated complete-world backup before upgrading to schema 35. Prepare it while Minecraft is fully stopped:
 
 ```sh
 ./gradlew prepareEconomyUpgrade -PeconomyWorld=/absolute/path/to/world
@@ -91,7 +104,7 @@ Restore into a **new, separate directory**:
 ./gradlew restoreEconomyWorld -PeconomyBackup=/absolute/path/to/backup-id -PeconomyRestoreDestination=/absolute/path/to/new-world
 ```
 
-The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 21 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
+The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 35 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
 
 There is no online backup, automatic replacement, or retention/deletion service. Operators own backup storage and retention. Failed restores can leave a hidden staging directory without publishing the destination.
 
@@ -132,17 +145,21 @@ Assigned bank accounts use the bank's service tier. Tier 2 qualification require
 
 Tier 1 FX costs 0.50% of the source principal, rounded upward to a source minor unit; Tier 2 FX is free. Previews show principal, fee and the amount received. A branded terminal accepts only its bank's native cash currency per batch. Some cash totals cannot exactly fit principal plus the rounded fee; adjust the total or deposit into an account in that currency first.
 
-Eligible assigned deposits earn 0.50% nominal APR at Tier 1 or 1.00% at Tier 2. Yield uses the funded time during each 20-minute financial day, with payouts at world-aligned 28-day boundaries. It is paid from the bank's own cash. Earned unpaid yield stays separate from spendable funds when a payout must wait; no replacement money is minted. Specialist accounts below qualification retain protected access but earn no future deposit yield. Fixed unsecured bank and Ironbridge subprime loans now have server-side underwriting, funded disbursement, monthly schedules and protected repayment, including explicit currency conversion. New production credit and loan borrowing remains unavailable until default and reporting safeguards are complete. Application and loan repayment screens await later packages. Securities trading remains unavailable.
+Eligible assigned deposits earn 0.50% nominal APR at Tier 1 or 1.00% at Tier 2. Yield uses the funded time during each 20-minute financial day, with payouts at world-aligned 28-day boundaries. It is paid from the bank's own cash. Earned unpaid yield stays separate from spendable funds when a payout must wait; no replacement money is minted. Specialist accounts below qualification retain protected access but earn no future deposit yield. Fixed unsecured bank and Ironbridge subprime loans now have server-side underwriting, funded disbursement, monthly schedules and protected repayment, including explicit currency conversion. Production credit and loan borrowing APIs require complete default/reporting safeguards and current financial catch-up. Application and loan repayment screens await later packages. Securities trading remains unavailable.
 
-Overdue credit and loan balances now have server-side late reports, default, funded collection transfers and protected repayments. Positive partial collection payments extend the two-year collection window. Default reports retain their original seven-year expiry, including after full payment. Collection expiry ends demands while historical unpaid liabilities remain recorded. New borrowing awaits lifecycle acceptance and the later application screens.
+Overdue credit and loan balances now have server-side late reports, default, funded collection transfers and protected repayments. Positive partial collection payments extend the two-year collection window. Default reports retain their original seven-year expiry, including after full payment. Collection expiry ends demands while historical unpaid liabilities remain recorded. The reporting and collection lifecycle is accepted for current and verified histories. Production borrowing APIs require the installed reporting dependency and completed financial catch-up. Use Bank and credit for applications, repayments and private reports.
 
 Use **Issued cards** to view an account's debit token. First issuance is free at the account's bank kiosk. Tokens last five financial years; renewal is free within 28 financial days before expiry or afterward. Earlier replacement costs 25 in the world's currency, converted into your selected funding account with a combined FX preview. Replacement revokes every copy of the old token only when the new issuance and fee commit. Report lost is free from an authenticated banking menu.
 
 Receive committed cards through **Collect items**, including at the kiosk. Full inventory leaves an owner claim; uncertain delivery stays protected for evidence review. Copied items share one token status and cannot grant another owner's access or duplicate benefits. Issued debit cards create no credit score, loan or debt; the eight old generic collectibles retain their access-only behavior.
 
-**Credit profile** shows whether credit is established and provides saved scores, component explanations and paged history. Login, debit cards, previews and failed applications do not establish credit. The first real credit-card issuance starts at 650 with one 2,500 starter limit across issuers. Scheduled score updates remain unavailable until reporting is enabled. Lower score ceilings never erase existing debt or enlarge spending room.
+**Credit profile** shows whether credit is established and provides saved scores, component explanations and paged history. Login, debit cards, previews and failed applications do not establish credit. The first real credit-card issuance starts at 650 with one 2,500 starter limit across issuers. Scheduled scores update every world-aligned 28 days from original report history and time-weighted revolving utilization. Calculations resume after restart. Lower score ceilings never erase existing debt or enlarge spending room.
 
-Credit-facility processing now supports funded limits, purchase and advance balances, daily compound interest, monthly statements and repayments. Advances are limited to 20% of the facility limit in outstanding principal. Application, advance and repayment screens will arrive in later packages. The tested foundation APIs keep new production credit issuance, increases and draws unavailable until lifecycle acceptance. Reads and protected existing-debt actions remain available. Shared reporting and collection-clock services are installed. Automatic-payment controls await their service package.
+Credit-facility processing now supports funded limits, purchase and advance balances, daily compound interest, monthly statements and repayments. Advances are limited to 20% of the facility limit in outstanding principal. Issuer kiosks offer credit applications, limit increases and replacement cards. Bank and credit offers owner repayments and physical-terminal advances. Production credit issuance, increases and draws require the accepted reporting dependency and current financial state. Reads and protected existing-debt actions remain available. Shared reporting and collection-clock services are installed. Open Bank and credit, then Automatic payments to choose a facility, a same-currency funding account and a payment target. Review and confirm each change. Payments start OFF for every facility. Cards support required minimum, statement balance less subsequent payments, and current full payoff. Loans pay total due installment arrears, capped by debt.
+
+Automatic payments debit the entire target only when the named account has sufficient available funds. Failed attempts retry once per financial day for two days after the original due date. They continue while you are offline and stop for that window when the target is met, you opt out, or the facility closes or defaults. Automatic payments use the selected currency and account. FX repayment remains a separately reviewed manual action. Disable linked automatic payments before closing a funding account.
+
+Changing settings cancels the old retry consent and applies to future due windows. Existing arrears may still need manual payment. Paying only the minimum leaves a larger statement or full-payoff target active until it is satisfied or its retry window ends. Spending after a completed target belongs to a later due window.
 
 **Credit facilities** lists your issued facilities. Select one to review its limit, contractual headroom, purchase/advance rates, current balance, rounding carry, outstanding minimum and past-due amount. **Statements** shows the original dated amounts in the facility currency; later payments do not rewrite them. A pending-work label means the view shows the saved balance while scheduled processing catches up.
 
@@ -151,6 +168,9 @@ Credit-facility processing now supports funded limits, purchase and advance bala
 Use `/economy loan list` and `/economy loan contract <loan-uuid>` for saved loan terms, debt and due status. Append `schedule` or `installments` to view original monthly rows, or `payoff <owned-funding-account-uuid>` for a preview without making a payment. `/economy loan application <application-uuid>` shows the original application decision. Lists use the next cursor shown in the response. Pending monthly work is labeled before a current payoff is available.
 
 Player-backed operators can use `/economy loan inspect <owner-uuid> <loan-uuid>` and `/economy loan inspect_application <owner-uuid> <application-uuid>`. Each inspection is audited; event pages show their next sequence/position cursor. Views include captured underwriting and funding, payment totals, bounded reconciliation and catch-up progress. These commands provide no financial editing or borrowing activation. If repayment reports accounting unavailable, an operator can use the inspection view to check claim reconciliation and portfolio completeness.
+
+Use `/economy debt payments <card|loan> <facility-uuid>` for payment history, `/economy debt cases` for collection clocks and current creditors, `/economy debt reports` for original and cured report revisions, and `/economy debt history <case-uuid>` for collection payment, sale and write-off receipts. Follow the next-page command in each reply. Player-backed operators can use `/economy debt inspect <card|loan> <owner-uuid> <facility-uuid>` for audited original obligations, precise clock reasons, reconciliation and provider progress. Operators can inspect report revisions with `/economy debt inspect_reports <owner-uuid>` and collection receipts with `/economy debt inspect_history <owner-uuid> <case-uuid>`. Each page is audited. The view shows installed scoring or catch-up status and the owner’s next score boundary.
+
 
 Only Deposit shows the player inventory. Deposit and Withdrawal each provide an account selector.
 
@@ -163,3 +183,19 @@ For a withdrawal, choose your account and enter an amount, then Review and Confi
 Exchange has From and To account selectors. CHF pairs accept exact source-currency cents; other pairs retain whole-unit input. Review the debit, credit and fee before confirming. Stock trading accounts and screens are excluded.
 
 Collect items lists cash and goods waiting for delivery. Click a batch to collect it when the whole batch fits in your inventory. Check payment resolves an uncertain request using its existing operation identity. Restored or uncertain physical deliveries require operator evidence review; the mod does not automatically create replacement items or repeat a charge.
+
+Older worlds with incomplete financial history stop before financial readiness with a specific reconciliation reason, preserving their existing balances and records.
+
+A Collection Agent now follows online debtors with collectible cases. Right-click within six blocks to review current creditors and balances, choose an owned BANK account, preview a partial or full payment and confirm its exact debit. A different currency shows an explicit FX/fee review. Exit leaves debt unchanged. The agent is nonhostile and gives no loot or experience. Killing it delays replacement for seven financial days. A crash leaving an uncertain live presentation conservatively protects the same window from recovery. Saved payment receipts recover after reconnect even when final settlement removed the agent.
+
+## Bank and credit services
+
+Open **Bank and credit** from an ATM, teller or authenticated card. At a branch kiosk, choose **Cards and applications** or **Bank and credit services**. Use **Actions** to choose the next offered account, facility or service. Enter an amount and select its review button, then read the terms and use **Actions** to confirm. Loan applications accept a principal and term in years, such as `1000 2`.
+
+Credit and loan applications require the issuer’s live branch kiosk. Card replacement also requires the issuer’s branch. Moving away, breaking or rebranding the kiosk invalidates its authorization. Rates, minimums, dates, fees and payment consequences appear before confirmation. Net worth and tier explains the exact 100,000,000 threshold in current server currency. Fixed unsecured bank and subprime products are available according to underwriting. Variable-rate, collateral and trading services remain future work.
+
+Hold an active owned credit card when reviewing a register purchase to pay with that card. The confirmed charge and protected goods claim settle together. A cash advance at an ATM or teller credits the selected owned account first. Physical cash uses a separate Withdrawal review and confirmation. Interest begins on the advance immediately, with no advance fee. Outstanding advance principal is capped at 20% of the facility limit and available overall credit.
+
+Credit, loan and collection repayments can be reviewed remotely through authenticated banking. Select an owned funding account and review any explicit conversion and fee. Loan payoff uses a short-lived exact quote. Collection payment reviews explain acknowledgement, collection expiry and the original default report date. Use **Check payment** to resolve an uncertain original operation before starting another mutation.
+
+Server integrations can consume `dev.emily.economy.api.BankingIntegration` version 1 through the server ledger service. It exposes versioned prime, owner valuation and fee quotes, physically authorized credit payment entry points and fixed/variable/secured capability reporting. Financial authority and existing journal/custody rules apply to integrations.
