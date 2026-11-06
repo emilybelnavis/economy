@@ -73,3 +73,9 @@ Current player-facing integration is delivered in [A5-09 banking menus](banking.
 ## CHF exact cash settlement
 
 CHF cash/account previews bind CHF_MINOR_V2 and emit withdrawal factv2, preserving account cents while requiring exact physical representability. Teller uses notes/coins; ATM notes only;1.02CHF rejects. Old nonCHF quantum/serialization remain. Deterministic lots, full-batch capacity, saved delivery, custody and original-ID recovery are unchanged. Catalog bound becomes131; all solver/item/work budgets remain. See [the current CHF contract](chf.md) and [verification](../verification/A6-03-01.md).
+
+## Cash selection and artwork
+
+The withdrawal review offers Cash select with bounded +/- bill counts per enabled denomination, a selected/remaining total, Review mix and Default mix. ATM edits must equal the requested amount; tellers derive the remainder in coins. Each successful review refreshes the frozen preview before confirmation. No quantity change debits an account.
+
+When both vertical and horizontal note appearances are terminal-enabled, preview draws one ticket per bill: ticket zero of twenty selects vertical; the other nineteen select horizontal. Sampled changes are frozen as exact bill edits in the existing preview format. Reserve, commit and recovery revalidate those counts without drawing again. Artwork selection preserves amount, denomination counts, coins and item count; final capacity includes any extra stacks from distinct artwork.

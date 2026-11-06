@@ -118,7 +118,7 @@ def figure(texture, direction):
 
 
 def java_source():
-    lines=['package dev.emily.economy.client;','',
+    lines=['package ca.emilybelnavis.mcmods.economy.client;','',
         'import net.minecraft.client.model.geom.PartPose;',
         'import net.minecraft.client.model.geom.builders.CubeDeformation;',
         'import net.minecraft.client.model.geom.builders.CubeListBuilder;',
@@ -155,10 +155,10 @@ def generate():
         'name':'Waystone Recovery Collection Agent','texture':'economy:entity/banking/collection_agent',
         'texture_width':64,'texture_height':64,'parts':PARTS,
         'authority':'Presentation only. No entity, item, spawning, interaction or financial registration.',
-        'future_owner':'A6-11','geometry_factory':'dev.emily.economy.client.CollectionAgentGeometry.create',
+        'future_owner':'A6-11','geometry_factory':'ca.emilybelnavis.mcmods.economy.client.CollectionAgentGeometry.create',
         'uv_layout':'Minecraft CubeListBuilder box UV layout; transparent cap overlay below top band.'}
     output(blueprint_path,blueprint)
-    java_path=ROOT/'src/main/java/dev/emily/economy/client/CollectionAgentGeometry.java'
+    java_path=ROOT/'src/main/java/ca/emilybelnavis/mcmods/economy/client/CollectionAgentGeometry.java'
     java_path.write_text(java_source())
     preview=Canvas(544,272,(231,228,216,255))
     preview.text('WAYSTONE RECOVERY',12,10,INK,2)

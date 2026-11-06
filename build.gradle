@@ -2,8 +2,8 @@ plugins {
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.148'
 }
-group = 'dev.emily'
-version = '0.1.0'
+group = 'ca.emilybelnavis.mcmods.economy'
+version = '0.2.0-alpha'
 java { toolchain { languageVersion = JavaLanguageVersion.of(21) }; withSourcesJar() }
 repositories { mavenCentral() }
 neoForge {
@@ -49,7 +49,7 @@ tasks.register('prepareEconomyUpgrade', JavaExec) {
     group = 'economy maintenance'
     description = 'Prepare a validated offline complete-world backup before a schema upgrade.'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'dev.emily.economy.storage.UpgradeBackup'
+    mainClass = 'ca.emilybelnavis.mcmods.economy.storage.UpgradeBackup'
     if (providers.gradleProperty('economyWorld').isPresent()) {
         args providers.gradleProperty('economyWorld').get()
     }
@@ -59,14 +59,14 @@ tasks.register('backupEconomyWorld', JavaExec) {
     group = 'economy maintenance'
     description = 'Back up a cleanly stopped complete world.'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'dev.emily.economy.storage.WorldBackup'
+    mainClass = 'ca.emilybelnavis.mcmods.economy.storage.WorldBackup'
     if (providers.gradleProperty('economyWorld').isPresent()) args 'backup', providers.gradleProperty('economyWorld').get()
 }
 tasks.register('restoreEconomyWorld', JavaExec) {
     group = 'economy maintenance'
     description = 'Validate and restore a complete backup into a new separate destination.'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'dev.emily.economy.storage.WorldBackup'
+    mainClass = 'ca.emilybelnavis.mcmods.economy.storage.WorldBackup'
     if (providers.gradleProperty('economyBackup').isPresent() && providers.gradleProperty('economyRestoreDestination').isPresent()) {
         args 'restore', providers.gradleProperty('economyBackup').get(), providers.gradleProperty('economyRestoreDestination').get()
     }

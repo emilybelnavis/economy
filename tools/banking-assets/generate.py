@@ -27,11 +27,11 @@ def card(bank,product,network,tier):
     # Original pixel lettering, no player names, numbers, limits or credentials.
     for i,label in enumerate(bank['label'][:2]):p.text(label,31,25+i*6,fg)
     p.text(bank['currency'],31,39,fg)
-    p.blit(tier_badge(tier),44,14,16,9)
+    if product=='credit':p.blit(tier_badge(tier),44,14,16,9)
     if network:p.blit(mark(network,fg),46,35,14,14)
     else:
         p.rect(48,45,60,48,fg);p.line(48,44,54,40,fg);p.line(54,40,59,44,fg)
-    if tier==2:
+    if product=='credit' and tier==2:
         p.line(7,48,27,48,accent);p.line(7,46,27,46,accent)
     return p
 
@@ -87,7 +87,7 @@ def cards_and_marks():
                 art=card(bank,product,network,tier);art.save(key_path('textures','item/banking/'+item));art.svg(HERE/'sources/cards'/f'{item}.svg')
                 model='item/banking/'+item;texture='item/banking/'+item
                 output(ASSETS/'models'/f'{model}.json',{'parent':'minecraft:item/generated','textures':{'layer0':'economy:'+texture}})
-                label=bank['name']+' '+('Tier 2 ' if tier==2 else 'Tier 1 ')+(network.title()+' Credit Card' if network else 'Debit Card')
+                label=bank['name']+' '+(('Tier 2 ' if tier==2 else 'Tier 1 ')+network.title()+' Credit Card' if network else 'Debit Card')
                 lang['item.economy.'+item]=label
                 cards.append({'key':item,'institution':'economy:bank/'+key,'product':product,'tier':tier,'network':network,
                               'texture':'economy:'+texture,'model':'economy:'+model,'translation':'item.economy.'+item,

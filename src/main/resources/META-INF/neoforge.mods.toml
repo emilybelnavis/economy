@@ -3,7 +3,7 @@ loaderVersion="[4,)"
 license="All Rights Reserved"
 [[mods]]
 modId="economy"
-version="0.1.0"
+version="0.2.0-alpha"
 displayName="Economy"
 description='''Server-authoritative economy foundation.'''
 [[dependencies.economy]]

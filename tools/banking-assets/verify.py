@@ -6,7 +6,7 @@ from art import ASSETS, ROOT
 HERE=Path(__file__).resolve().parent
 manifest=json.loads((ASSETS/'banking/art_manifest.json').read_text())
 brands=json.loads((HERE/'brands.json').read_text())['banks']
-source=(ROOT/'src/main/java/dev/emily/economy/institution/InstitutionCatalog.java').read_text()
+source=(ROOT/'src/main/java/ca/emilybelnavis/mcmods/economy/institution/InstitutionCatalog.java').read_text()
 rows=re.findall(r'bank\("([^"]+)", "([^"]+)", "([^"]+)", Tier\.(\w+), ([^)]+)\)',source)
 assert len(rows)==23
 expected=set()

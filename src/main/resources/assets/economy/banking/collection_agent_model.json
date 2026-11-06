@@ -209,6 +209,6 @@
   ],
   "authority": "Presentation only. No entity, item, spawning, interaction or financial registration.",
   "future_owner": "A6-11",
-  "geometry_factory": "dev.emily.economy.client.CollectionAgentGeometry.create",
+  "geometry_factory": "ca.emilybelnavis.mcmods.economy.client.CollectionAgentGeometry.create",
   "uv_layout": "Minecraft CubeListBuilder box UV layout; transparent cap overlay below top band."
 }

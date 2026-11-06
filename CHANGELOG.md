@@ -5,6 +5,17 @@ Project changes are recorded in reverse chronological order, with the most recen
 
 
 
+## 2026-11-06 — 0.2.0-alpha package namespace
+
+- Moved Java packages and the integration API to `ca.emilybelnavis.mcmods.economy` and aligned the mod metadata version with 0.2.0-alpha.
+- Kept the `economy` mod/resource IDs and saved-world identities unchanged.
+
+## 2026-11-06 — Cash selection and untiered debit cards
+
+- Added a 1-in-20 vertical-art chance per eligible withdrawn note, frozen in the reviewed batch.
+- Added Cash select controls for bill counts, with exact-total validation and a return to the default minimum-bill mix.
+- Removed debit-card tier names and badges; each bank has one collectible debit design. Account tiers and existing issued cards remain compatible.
+
 ## 2026-11-06 — ATM screen recess
 
 - Recessed the ATM display and bezel to keep the keypad visible, across plain, coloured and bank-branded models and their inventory appearances.

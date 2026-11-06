@@ -14,7 +14,7 @@ Select Java 21 in your environment, then run:
 ./gradlew runServer
 ```
 
-The mod jar is written to `build/libs/economy-0.1.0.jar`. Development client and server data are kept separately in `run/client` and `run/server`. Use disposable development worlds.
+The mod jar is written to `build/libs/economy-0.2.0-alpha.jar`. Development client and server data are kept separately in `run/client` and `run/server`. Use disposable development worlds.
 
 No additional mods are required; SQLite JDBC is bundled. Each world stores its foundation database and identity under `<world>/economy/` and must be owned by a single Minecraft server. Trusted server integrations can initialize accounts and authorize ledger funding. Collectible cash, cards and physical banking terminals are included. Banking and purchase menus are available; stock trading remains outside this release.
 
@@ -70,7 +70,7 @@ For an uncertain result, repeat the same command with the same operation UUID.
 
 ## Cash and cards
 
-Creative inventory includes 131 cash collectibles across thirteen tabs, including both Canadian bill styles. **Bank & Credit Cards** contains every available bank debit and credit card design, including network and tier variants. Creative cards are collectibles; banking access requires an active card issued to you. The eight old generic cards have been removed.
+Creative inventory includes 131 cash collectibles across thirteen tabs, including both Canadian bill styles. **Bank & Credit Cards** contains every available bank debit and credit card design, with one debit design per bank and network/tier variants for credit cards. Creative cards are collectibles; banking access requires an active card issued to you. The eight old generic cards have been removed.
 
 CHF is the eleventh currency, with two-decimal electronic balances. Its game opening calibration is 1 CHF = 1.60 CAD, not a live market quote. Fresh worlds include CHF immediately; existing worlds add it at the next UTC FX publication after catch-up, without changing the world currency or inventing historical CHF rates. Operator diagnostics show whether its rate is available or scheduled.
 
@@ -178,7 +178,7 @@ ATMs and tellers start disabled and unbound. Their owner or an operator selects 
 
 For a deposit, place cash in the 24 input slots, choose Review and check the bank credit, then confirm. Issued cash is redeemed against its remaining world quantity; unmarked Creative or command cash is minted and consumed by that one saved deposit. Changing pages or closing before reservation returns the originals; anything that cannot fit is retained as an owner claim.
 
-For a withdrawal, choose your account and enter an amount, then Review and Confirm. The bank determines the cash currency; a different account currency requires an explicit FX preview and its normal tier fee. Same-currency cross-bank service has no surcharge. A teller can dispense coins. The complete batch must fit before debit. A register owner holds the product batch and enters a whole-unit price in Shop. Buyers preview the exact batch and price before confirming.
+For a withdrawal, choose your account and enter an amount, then Review and Confirm. The default uses the fewest bills; choose **Cash select** after reviewing to adjust each bill count with −/+, then **Review mix**. **Default mix** restores the automatic selection. Tellers fill any remaining amount with coins; ATM bill totals must match exactly. Where both note styles are available, each bill has a 1-in-20 chance of being vertical. The reviewed batch stays fixed through confirmation. Debit cards have one design per bank; Tier 1/2 belongs to the account service level. The bank determines the cash currency; a different account currency requires an explicit FX preview and its normal tier fee. Same-currency cross-bank service has no surcharge. A teller can dispense coins. The complete batch must fit before debit. A register owner holds the product batch and enters a whole-unit price in Shop. Buyers preview the exact batch and price before confirming.
 
 Exchange has From and To account selectors. CHF pairs accept exact source-currency cents; other pairs retain whole-unit input. Review the debit, credit and fee before confirming. Stock trading accounts and screens are excluded.
 
@@ -198,4 +198,4 @@ Hold an active owned credit card when reviewing a register purchase to pay with 
 
 Credit, loan and collection repayments can be reviewed remotely through authenticated banking. Select an owned funding account and review any explicit conversion and fee. Loan payoff uses a short-lived exact quote. Collection payment reviews explain acknowledgement, collection expiry and the original default report date. Use **Check payment** to resolve an uncertain original operation before starting another mutation.
 
-Server integrations can consume `dev.emily.economy.api.BankingIntegration` version 1 through the server ledger service. It exposes versioned prime, owner valuation and fee quotes, physically authorized credit payment entry points and fixed/variable/secured capability reporting. Financial authority and existing journal/custody rules apply to integrations.
+Server integrations can consume `ca.emilybelnavis.mcmods.economy.api.BankingIntegration` version 1 through the server ledger service. It exposes versioned prime, owner valuation and fee quotes, physically authorized credit payment entry points and fixed/variable/secured capability reporting. Financial authority and existing journal/custody rules apply to integrations.
