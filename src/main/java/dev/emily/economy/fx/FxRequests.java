@@ -38,6 +38,10 @@ public final class FxRequests {
     public CompletionStage<FxQuotes.Quote> quoteForClosure(RequestContext context,FxQuotes.Pair pair,Money budget) {
         return quote(context,pair,FxQuotes.Side.EXACT_DEBIT,budget,dev.emily.economy.pricing.ServicePricing.Service.PROTECTED_CLOSURE_FX,true);
     }
+    /** Debt repayment retains ordinary fees while preserving protected access below specialist qualification. */
+    public CompletionStage<FxQuotes.Quote> quoteRepayment(RequestContext context,FxQuotes.Pair pair,Money amount) {
+        return quote(context,pair,FxQuotes.Side.EXACT_CREDIT,amount,dev.emily.economy.pricing.ServicePricing.Service.PROTECTED_WITHDRAWAL_FX,false);
+    }
     private CompletionStage<FxQuotes.Quote> quote(RequestContext context,FxQuotes.Pair pair,FxQuotes.Side side,Money amount,
             dev.emily.economy.pricing.ServicePricing.Service service,boolean drain) {
         PlayerId actor = authenticate(context);

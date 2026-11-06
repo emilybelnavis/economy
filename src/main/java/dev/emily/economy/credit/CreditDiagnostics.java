@@ -121,7 +121,12 @@ public final class CreditDiagnostics {
     }
     private static Reconciliation reconcile(JournalEngine.ReadView reads,CreditFacilities.Facility f,long frontier){
         var ownerFacilities=facilityTotal(reads,"SELECT debt_minor FROM credit_facilities WHERE world_id=? AND owner_id=? AND currency=? AND debt_minor>0 ORDER BY facility_id LIMIT 129",List.of(f.world().value().toString(),f.owner().value().toString(),f.currency().name()));
-        var issuerFacilities=facilityTotal(reads,"SELECT debt_minor FROM credit_facilities WHERE world_id=? AND issuer=? AND currency=? AND debt_minor>0 ORDER BY facility_id LIMIT 129",List.of(f.world().value().toString(),f.issuer().key(),f.currency().name()));
+        var issuerFacilities=facilityTotal(reads,"SELECT debt_minor FROM credit_facilities WHERE world_id=? AND issuer=? AND currency=? AND debt_minor>0 AND NOT EXISTS(SELECT 1 FROM debt_cases c WHERE c.world_id=credit_facilities.world_id AND c.kind='CARD' AND c.facility_id=credit_facilities.facility_id AND c.sale='SOLD') ORDER BY facility_id LIMIT 129",List.of(f.world().value().toString(),f.issuer().key(),f.currency().name()));
+        var loanRows=reads.query("SELECT debt_minor FROM loans WHERE world_id=? AND lender=? AND currency=? AND debt_minor>0 AND NOT EXISTS(SELECT 1 FROM debt_cases c WHERE c.world_id=loans.world_id AND c.kind='LOAN' AND c.facility_id=loans.loan_id AND c.sale='SOLD') ORDER BY loan_id LIMIT 129",List.of(f.world().value().toString(),f.issuer().key(),f.currency().name()),129);
+        int loanBudget=Math.max(0,128-issuerFacilities.count());
+        long loanDebt=0;for(var row:loanRows.stream().limit(loanBudget).toList())loanDebt=Math.addExact(loanDebt,number(row.get("debt_minor")));
+        boolean combinedComplete=issuerFacilities.complete()&&loanRows.size()<=loanBudget;
+        issuerFacilities=new FacilityTotal(Math.addExact(issuerFacilities.minor(),loanDebt),combinedComplete,Math.min(128,issuerFacilities.count()+loanRows.size()));
         long ownerDebt=ownerFacilities.minor(),issuerDebt=issuerFacilities.minor();
         var borrower=new InstitutionCatalog.InstitutionId("economy:borrower/"+f.owner().value());
         long liability=Math.negateExact(Settlement.posted(reads,FinancialAccounts.id(f.world(),borrower,FinancialAccounts.Role.LIABILITY,f.currency()),f.currency()));
@@ -144,11 +149,11 @@ public final class CreditDiagnostics {
         }
         return new JournalTotal(total,rows.size()<=128);
     }
-    private record FacilityTotal(long minor,boolean complete) {}
+    private record FacilityTotal(long minor,boolean complete,int count) {}
     private static FacilityTotal facilityTotal(JournalEngine.ReadView reads,String sql,List<String> args){
         var rows=reads.query(sql,args,129);long total=0;
         for(var row:rows.stream().limit(128).toList())total=Math.addExact(total,number(row.get("debt_minor")));
-        return new FacilityTotal(total,rows.size()<=128);
+        return new FacilityTotal(total,rows.size()<=128,Math.min(128,rows.size()));
     }
     private static List<ProviderHead> providers(JournalEngine.ReadView reads,UUID facility){
         var result=new ArrayList<ProviderHead>();

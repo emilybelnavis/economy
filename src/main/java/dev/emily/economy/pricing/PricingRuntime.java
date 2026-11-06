@@ -29,6 +29,7 @@ public final class PricingRuntime {
             }
         });
         sources.add(new dev.emily.economy.credit.CreditLiabilities());
+        sources.add(new dev.emily.economy.loan.LoanLiabilities());
         sources.addAll(extensions);return new WealthValuation(sources);
     }
     public static DepositYield yield(WorldId world){return PricingRuntime.yield(world,wealth());}

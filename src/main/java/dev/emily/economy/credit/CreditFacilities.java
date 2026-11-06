@@ -170,7 +170,7 @@ public final class CreditFacilities {
             if(!InstitutionCatalog.require(f.issuer()).tier1()&&!source.tier2Eligible())return reject("TIER2_UNAVAILABLE");
             var total=exposure(reads,owner,denom.currency(),source.fx());
             var portfolio=owned(reads,owner);if(portfolio.size()>128)return decline("CREDIT_EXPOSURE_UNAVAILABLE");
-            boolean blocked=source.creditBlocked()||portfolio.stream().anyMatch(v->v.status()==Status.DEFAULTED||v.requirements().stream().anyMatch(r->r.unmetMinor()>0&&r.dueAt()<=now));
+            boolean blocked=source.creditBlocked()||portfolio.stream().anyMatch(v->v.status()==Status.DEFAULTED&&dev.emily.economy.debt.DebtLifecycle.blocks(reads,dev.emily.economy.debt.DebtRecords.Kind.CARD,v.id(),now)||v.requirements().stream().anyMatch(r->r.unmetMinor()>0&&r.dueAt()<=now));
             if(!CreditUnderwriting.drawAllowed(profile.score(),InstitutionCatalog.require(f.issuer()).tier2()&&source.tier2Eligible(),blocked,f.limitMinor(),f.owedMinor(),Math.addExact(total,source.otherExposureWorldMinor()),request.amountMinor(),denom.currency()))return reject("CREDIT_DRAW_LIMIT");
             if(request.kind()==DrawKind.ADVANCE&&Math.addExact(f.advance().principalMinor(),request.amountMinor())>f.limitMinor()/5)return reject("CREDIT_ADVANCE_SUBLIMIT");
             var destination=account(reads,request.destination());
@@ -327,7 +327,7 @@ public final class CreditFacilities {
             var source=inputs.current(reads,owner,now);if(source==null||!source.complete()||!source.fx().available())return decline("CREDIT_EXPOSURE_UNAVAILABLE");
             boolean tier2=bank.tier2()&&tier.available()&&tier.eligible();String reason="APPROVED";
             var facilities=owned(reads,owner);if(facilities.size()>128)return decline("CREDIT_EXPOSURE_UNAVAILABLE");
-            boolean blocked=source.creditBlocked()||facilities.stream().anyMatch(v->v.status()==Status.DEFAULTED||v.requirements().stream().anyMatch(r->r.unmetMinor()>0&&r.dueAt()<=now));
+            boolean blocked=source.creditBlocked()||facilities.stream().anyMatch(v->v.status()==Status.DEFAULTED&&dev.emily.economy.debt.DebtLifecycle.blocks(reads,dev.emily.economy.debt.DebtRecords.Kind.CARD,v.id(),now)||v.requirements().stream().anyMatch(r->r.unmetMinor()>0&&r.dueAt()<=now));
             long combined=0;for(var line:facilities)if(line.status()==Status.ACTIVE&&line.access()!=Access.CLOSED)combined=Math.addExact(combined,CreditUnderwriting.exposureToWorld(new Money(line.currency(),line.id().equals(f.id())?request.newLimitMinor():line.limitMinor()),denomination.currency(),source.fx()).minorUnits());
             long oldLimit=CreditUnderwriting.exposureToWorld(new Money(f.currency(),f.limitMinor()),denomination.currency(),source.fx()).minorUnits(),newLimit=CreditUnderwriting.exposureToWorld(new Money(f.currency(),request.newLimitMinor()),denomination.currency(),source.fx()).minorUnits(),owed=CreditUnderwriting.exposureToWorld(new Money(f.currency(),f.owedMinor()),denomination.currency(),source.fx()).minorUnits();
             long exposure=Math.addExact(Math.addExact(exposure(reads,owner,denomination.currency(),source.fx()),source.otherExposureWorldMinor()),Math.subtractExact(Math.max(newLimit,owed),Math.max(oldLimit,owed)));
@@ -410,7 +410,7 @@ public final class CreditFacilities {
     private static BigDecimal zero(){return BigDecimal.ZERO.setScale(18);}
     private static Reject reject(String code){return new Reject(new Journal.Result(1,code,""));}
     private static Decline decline(String code){return new Decline(new Journal.Result(1,code,""));}
-    private static Journal.Record fact(Facility f){return new Journal.Record(FACT,VERSION,encode(f));}
+    public static Journal.Record fact(Facility f){return new Journal.Record(FACT,VERSION,encode(f));}
     private static Journal.Record tokenFact(Token t){return new Journal.Record(TOKEN_FACT,VERSION,encode(t));}
     private static Journal.Record event(String kind,UUID facility,long effective,String detail){return new Journal.Record(EVENT_FACT,VERSION,pack(List.of(kind,facility.toString(),Long.toString(effective),detail)));}
     public static void write(FoundationStore.Transaction tx,Facility f){

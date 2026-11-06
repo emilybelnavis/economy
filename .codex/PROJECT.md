@@ -1,6 +1,6 @@
 # Current project state
 
-**A1 foundation is complete and verified.** SQLite schema V27 (minimum V1); the initial reset is complete. A2-01 through A2-03-03 are complete and verified. A3-01 through A3-05 are verified. A4-01 through A4-06 are verified. A5-01-01 through A5-02-03 and A5-03 through A5-09 are verified. A6’s23 prompts and policies are approved. [A6-01](A6-01.md) is complete as a document/source-review checkpoint. [A6-02-01](A6-02-01.md) scheduling/configuration, [A6-02-02](A6-02-02.md) diagnostics and [A6-02-03](A6-02-03.md) calendar foundation acceptance are verified. [A6-03-01](A6-03-01.md) CHF currency/cash and [A6-03](A6-03.md) institution/accounts are verified in their recorded scopes. [A6-04](A6-04.md) wealth qualification, pricing and funded yield are verified; live branch adapters are delivered by A6-05-01; bank loans and trading remain unimplemented. [Shared contract](../prompts/A6-credit-debt/CONTRACT.md); [approval and next-package queue](../prompts/A6-credit-debt/EXECUTION.md). Other later phases await explicit invocation.
+**A1 foundation is complete and verified.** SQLite schema V31 (minimum V1); the initial reset is complete. A2-01 through A2-03-03 are complete and verified. A3-01 through A3-05 are verified. A4-01 through A4-06 are verified. A5-01-01 through A5-02-03 and A5-03 through A5-09 are verified. A6’s23 prompts and policies are approved. [A6-01](A6-01.md) is complete as a document/source-review checkpoint. [A6-02-01](A6-02-01.md) scheduling/configuration, [A6-02-02](A6-02-02.md) diagnostics and [A6-02-03](A6-02-03.md) calendar foundation acceptance are verified. [A6-03-01](A6-03-01.md) CHF currency/cash and [A6-03](A6-03.md) institution/accounts are verified in their recorded scopes. [A6-04](A6-04.md) wealth qualification, pricing and funded yield are verified; live branch adapters are delivered by A6-05-01; fixed loan APIs are delivered by A6-09-01 with new production borrowing gated; trading remains unimplemented. [Shared contract](../prompts/A6-credit-debt/CONTRACT.md); [approval and next-package queue](../prompts/A6-credit-debt/EXECUTION.md). Other later phases await explicit invocation.
 
 | Package | Prerequisite | Status |
 | --- | --- | --- |
@@ -51,14 +51,18 @@
 | [A6-08-01](A6-08-01.md) credit facility foundation | A6-04, A6-06, A6-07 | Verified in recorded API scope; lifecycle activation pending |
 | [A6-08-02](A6-08-02.md) credit diagnostics | A6-08-01 | Verified; owner views and audited bounded inspection |
 | [A6-08-03](A6-08-03.md) credit foundation acceptance | A6-08-02 | Accepted foundation; new production exposure gated pending lifecycle |
+| [A6-09-01](A6-09-01.md) fixed loan foundation | A6-04, A6-07 | Verified API foundation; production origination gated pending lifecycle |
+| [A6-09-02](A6-09-02.md) loan diagnostics | A6-09-01 | Verified; bounded owner/operator reads and audited inspection |
+| [A6-09-03](A6-09-03.md) loan foundation acceptance | A6-09-02 | Accepted gated foundation with bounded accounting and lifecycle handoff |
+| [A6-10-01](A6-10-01.md) shared debt lifecycle | A6-08-03, A6-09-03 | Verified foundation; legacy timelines require recorded reconciliation |
 
-A6 execution preparation: [approval and package queue](../prompts/A6-credit-debt/EXECUTION.md). A6-01 through A6-02-03 are complete in their recorded scopes. CHF A6-03-01 and institution/accounts A6-03 are also verified. [A6-05](A6-05.md) original assets are verified. [A6-05-01](A6-05-01.md) physical hardware and live branch admission are verified. [A6-06](A6-06.md) issued debit cards are verified. [A6-07](A6-07.md) credit profiles and score policy are verified with recurring scoring dormant. Next eligible queue package: A6-09-01 (loan foundation); later packages await actual prerequisite evidence. Approval is not implementation or verification.
+A6 execution preparation: [approval and package queue](../prompts/A6-credit-debt/EXECUTION.md). A6-01 through A6-02-03 are complete in their recorded scopes. CHF A6-03-01 and institution/accounts A6-03 are also verified. [A6-05](A6-05.md) original assets are verified. [A6-05-01](A6-05-01.md) physical hardware and live branch admission are verified. [A6-06](A6-06.md) issued debit cards are verified. [A6-07](A6-07.md) credit profiles and score policy are verified with recurring scoring dormant. [A6-09-01](A6-09-01.md) fixed loan foundation is verified with production origination gated. [A6-09-02](A6-09-02.md) bounded loan diagnostics is verified. [A6-09-03](A6-09-03.md) accepts the gated loan foundation. [A6-10-01](A6-10-01.md) shared debt lifecycle foundation is verified in its recorded scope, with historical timeline migration explicitly constrained. Next eligible queue package is A6-10-02 (lifecycle diagnostics); later packages await actual prerequisite evidence. Approval is not implementation or verification.
 
 Load only the affected contracts: [lifecycle](architecture/lifecycle.md), [storage/migrations](architecture/storage.md), [journal](architecture/journal.md), [recovery/clock/backup](architecture/recovery-clock.md), [FX](architecture/fx.md), [identity](architecture/identity.md), [accounts](architecture/accounts.md). [custody](architecture/custody.md), [cash](architecture/cash.md), [terminals](architecture/terminals.md), [deposits](architecture/deposits.md), [withdrawals](architecture/withdrawals.md), [registers](architecture/registers.md), [banking menus](architecture/banking.md). [financial calendar](architecture/financial-calendar.md), [CHF integration](architecture/chf.md). [Verification guide](VERIFICATION.md) selects checks; historical notes describe the delivered state at the time and do not override current contracts.
 
 Use [the execution workflow](WORKFLOW.md) for package boundaries, handoffs and delegation. Only the user-selected prompt authorizes package execution.
 
-Current institution contract: [catalog, funding and provider admission](architecture/institutions.md). Next selectable queue package: A6-09-01; do not start without explicit invocation.
+Current institution contract: [catalog, funding and provider admission](architecture/institutions.md). Next selectable queue package: A6-10-02; do not start without explicit invocation.
 
 Current wealth/pricing/yield contract: [authoritative qualification and funded servicing](architecture/wealth-pricing.md).
 
@@ -75,3 +79,11 @@ Current funded credit contract: [facilities, reservations, statements and repaym
 Current credit diagnostic contract: [owner statements and audited servicing inspection](architecture/credit-diagnostics.md).
 
 Current credit acceptance and downstream source: [safety gate, immutable events and recovery](architecture/credit-acceptance.md).
+
+Current fixed loan contract: [underwriting, amortization, funded FX and protected repayment](architecture/loans.md).
+
+Current loan diagnostic contract: [owner commands and audited bounded inspection](architecture/loan-diagnostics.md).
+
+Current loan acceptance and downstream source [fixed terms, original obligations and recovery](architecture/loan-acceptance.md).
+
+Current shared debt contract [original obligations, collection ownership and independent reporting clocks](architecture/debt-lifecycle.md).

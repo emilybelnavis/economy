@@ -35,7 +35,7 @@ class BankProvidersTest {
         Journal.Outcome submit(BankProviders.Request request) { return submit(request, BankProviders.NO_TIER2); }
         Journal.Outcome submit(BankProviders.Request request, BankProviders.TierEligibility eligibility) {
             var kind=switch(request.proof().context().action()) {case PRIMARY->BankProviders.PRIMARY;case SECONDARY->BankProviders.SECONDARY;
-                case ASSIGN->BankProviders.ASSIGN;case SWITCH_SOURCE->BankProviders.SWITCH_SOURCE;case SWITCH_TARGET->BankProviders.SWITCH_TARGET;case CLOSE->BankProviders.CLOSE;case CARD_ISSUE,CARD_REPLACE,CREDIT_ISSUE,CREDIT_INCREASE,CREDIT_REPLACE->throw new IllegalArgumentException("Cards use own service");};
+                case ASSIGN->BankProviders.ASSIGN;case SWITCH_SOURCE->BankProviders.SWITCH_SOURCE;case SWITCH_TARGET->BankProviders.SWITCH_TARGET;case CLOSE->BankProviders.CLOSE;case CARD_ISSUE,CARD_REPLACE,CREDIT_ISSUE,CREDIT_INCREASE,CREDIT_REPLACE,LOAN_APPLY->throw new IllegalArgumentException("Cards use own service");};
             return new JournalEngine(store,(a,k)->true,Map.of(kind,BankProviders.lifecycle(owner,request,eligibility,time::get)))
                 .submit(new Journal.Intent(new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),actor,kind,request.request(),null,null));
         }

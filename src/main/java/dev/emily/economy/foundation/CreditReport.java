@@ -22,7 +22,8 @@ public final class CreditReport {
         lines.add("Oldest unmet due: "+date(v.dueAt()));
         if(v.latestStatement()!=null){var s=v.latestStatement();lines.add("Latest frozen statement balance: "+money(c,s.balanceMinor()));lines.add("Statement closed: "+date(s.closedAt())+"; due: "+date(s.dueAt()));}
         else lines.add("No statement has closed yet.");
-        lines.add("Next daily charge: "+date(v.nextDay()));lines.add("Next statement: "+date(v.nextStatement()));
+        if(v.status().equals("ACTIVE")){lines.add("Next daily charge: "+date(v.nextDay()));lines.add("Next statement: "+date(v.nextStatement()));}
+        else lines.add("Interest and new statements have stopped. Collection cases retain protected repayment access.");
         if(!v.scheduleCurrent())lines.add("Scheduled work is pending; amounts are the saved snapshot.");
         return List.copyOf(lines);
     }

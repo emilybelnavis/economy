@@ -44,3 +44,11 @@ Default/reporting/collections/autopay and recurring score activation remain late
 ## A6-08-03 acceptance
 
 A6-08-03 accepts the foundation and adds a separate trusted CreditEvents source at an immutable frontier. Existing diagnostic pages retain their bounded reconciliation rules; new production exposure stays unavailable pending lifecycle safety. See [acceptance](credit-acceptance.md).
+
+## A6-09-01 shared receivable reconciliation
+
+Issuer reconciliation includes positive loan debt alongside credit facilities under the existing bounded processed-row budget, with explicit incomplete results on overflow. Borrower credit reconciliation remains credit-only because loan debt uses a separate liability party. This adds no loan diagnostic commands; A6-09-02 owns those. See [loan persistence and reconciliation](loans.md).
+
+## A6-10-01 ownership integration
+
+Original-issuer reconciliation excludes sold card and loan claims from its receivable portfolio. Defaulted owner views show stopped accrual. Lifecycle cases carry the current creditor and independent report/collectability fields. A6-10-02 owns those diagnostic surfaces. See [shared debt contracts](debt-lifecycle.md).

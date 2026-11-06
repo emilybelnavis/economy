@@ -10,7 +10,7 @@ import java.util.*;
 /** Trusted accounting identities, deliberately separate from customer BANK accounts. */
 public final class FinancialAccounts {
     private FinancialAccounts() {}
-    public enum Role { CASH, RESERVATION, RECEIVABLE, LIABILITY, PAYABLE, INCOME, EXPENSE, EQUITY, ROUNDING;
+    public enum Role { CASH, RESERVATION, RECEIVABLE, LIABILITY, PAYABLE, INCOME, EXPENSE, EQUITY, ROUNDING, ALLOWANCE;
         public boolean spendable() { return this == CASH; }
     }
     public record Account(UUID id, WorldId world, InstitutionCatalog.InstitutionId owner, Role role,

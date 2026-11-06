@@ -5,6 +5,33 @@ Project changes are recorded in reverse chronological order, with the most recen
 
 
 
+## 2026-11-05 — A6-10-01 shared debt lifecycle
+
+- Added original-obligation late reporting, cure revisions, exact default boundaries and independent collection/report clocks for cards and loans.
+- Added funded claim sale, recovery discount accounting, expiry write-offs and protected native/FX collection repayment.
+- Replaced the shared-lender repayment scan with transactional claim witnesses and added schema V31 lifecycle storage.
+- Legacy obligations behind the completed financial timeline require reconciliation before startup readiness. Production borrowing awaits lifecycle acceptance.
+
+## 2026-11-05 — A6-09-03 loan foundation acceptance
+
+- Accepted fixed-loan term/rate, amortization, early payoff, wealth and restart/recovery behavior with 482 passing tests.
+- Fixed full settlement leaving inconsistent borrower or lender claims by checking bounded accounting before repayment.
+- Added the immutable original-obligation source for lifecycle consumers and its schema V30 index.
+- Production borrowing awaits lifecycle acceptance and a scalable successor to the 128-claim repayment reconciliation bound.
+
+## 2026-11-05 — A6-09-02 loan diagnostics
+
+- Added owner commands for captured loan contracts, original schedules, closed installments, application decisions and payoff previews.
+- Added separately audited operator views for underwriting, finite funding, payment allocations, shared receivable reconciliation and monthly catch-up.
+- Added a bounded history index in schema V29; original financial records and the production borrowing gate remain unchanged.
+
+## 2026-11-05 — A6-09-01 fixed loan foundation
+
+- Added fixed unsecured bank/subprime underwriting, captured rates and monthly amortization schedules backed by finite lender capital.
+- Added protected partial repayment and early payoff, explicit currency conversion and separate fees without requiring another bank account.
+- Included loan debt and accrued interest in wealth and shared exposure checks, with schema V28 persistence.
+- Verified 463 tests and isolated client/server loading. New production borrowing remains gated pending lifecycle safeguards; loan screens and diagnostics follow in separate packages.
+
 ## 2026-11-05 — A6-08-03 credit foundation acceptance
 
 - Accepted numerical, offline and crash/recovery behavior across draw, interest, statements and repayment.

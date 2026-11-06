@@ -33,6 +33,8 @@ public final class RecordCatalog {
         catalog = dev.emily.economy.pricing.ValuationSources.register(dev.emily.economy.pricing.ServicePricing.register(dev.emily.economy.interest.DepositYield.register(catalog)));
         catalog=dev.emily.economy.card.IssuedCards.register(catalog);
         catalog=dev.emily.economy.credit.CreditProfiles.register(catalog);
+        catalog=dev.emily.economy.debt.DebtPayments.register(dev.emily.economy.debt.DebtLifecycle.register(catalog));
+        catalog=dev.emily.economy.loan.Loans.register(dev.emily.economy.loan.LoanTreasury.register(dev.emily.economy.loan.LoanDisbursementFx.register(dev.emily.economy.loan.LoanRepaymentFx.register(catalog))));
         catalog=dev.emily.economy.credit.CreditAuditFacts.register(catalog);
         catalog=dev.emily.economy.credit.CreditRepaymentFx.register(dev.emily.economy.foundation.CreditReplacementPricing.register(catalog));
         catalog=dev.emily.economy.credit.CreditTreasury.register(dev.emily.economy.credit.CreditFacilities.register(catalog));

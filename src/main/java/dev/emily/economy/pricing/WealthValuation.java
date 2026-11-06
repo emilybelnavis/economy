@@ -123,6 +123,15 @@ public final class WealthValuation {
     /** Stable positive witness for the current complete input fingerprint, not a substitute for recomputation. */
     public static long revision(Snapshot snapshot) {
         if (!snapshot.available()) return 0;
+        if(snapshot.inputs().contains("\nsource|economy:loan-liabilities|")){
+            var stable=new StringBuilder();
+            for(var line:snapshot.inputs().split("\n")){
+                if(line.startsWith("claim|loan-debt:"))line=line.substring(0,line.lastIndexOf('|'))+"|time-accrual";
+                stable.append(line).append('\n');
+            }
+            stable.append("eligible|").append(snapshot.eligible());
+            return Long.parseUnsignedLong(digest(stable.toString()).substring(0,15),16);
+        }
         return Long.parseUnsignedLong(snapshot.fingerprint().substring(0,15),16);
     }
     private static Rational value(Component c, Kind kind, Map<EconomyCurrency,BigDecimal> rates, EconomyCurrency target,
@@ -139,7 +148,7 @@ public final class WealthValuation {
         return new Snapshot(false,reason,null,false,digest(inputs),inputs,publication,denomination,denominationRevision,POLICY_VERSION,now,List.of());
     }
     private static Snapshot unavailable(String reason,Instant now) { return new Snapshot(false,reason,null,false,"","",null,null,0,POLICY_VERSION,now,List.of()); }
-    static String digest(String value) {
+    public static String digest(String value) {
         try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8))); }
         catch (java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
     }

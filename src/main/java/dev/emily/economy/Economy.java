@@ -87,6 +87,7 @@ public final class Economy {
         FxAdminCommands.register(event.getDispatcher(), servers::get, Clock.systemUTC());
         LedgerCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.CreditCommands.register(event.getDispatcher(), servers::get);
+        dev.emily.economy.foundation.LoanCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.RegisterPriceCommands.register(event.getDispatcher(), servers::get);
         dev.emily.economy.foundation.AdminConfigCommands.register(event.getDispatcher());
         EconomyCommands.register(event.getDispatcher(), (source, view) -> {

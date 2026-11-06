@@ -137,3 +137,19 @@ V26 appends four partial/expression indexes for bounded credit diagnostics; no t
 ## A6-08-03 acceptance
 
 V27 appends one partial credit_event_feed index for ordered supported credit facts; no new monetary entity/table or fact family is added. Main/offline validation and backup/restore accept V27. Existing v1 facts and V1–V26 migrations are unchanged. See [immutable lifecycle source](credit-acceptance.md).
+
+## A6-09-01 loan foundation
+
+V28 appends four loan tables and five indexes for bounded ownership, exposure, servicing and application identity lookups. Main/offline validation and complete-world backup accept V28. New loan/funding/FX v1 records are registered; Ironbridge-only inquiry/pricing v2 decoders preserve the old bank-only v1 contracts. See [exact persisted entities, facts and replay](loans.md). V1–V27 migrations remain unchanged.
+
+## A6-09-02 diagnostic lookup
+
+V29 appends only loan_diagnostic_records over encoded loan UUID, record type, journal sequence and position. Main/offline validators and complete-world backup accept V29. No table, financial field, new fact family or historical migration is changed. See [diagnostic query boundaries](loan-diagnostics.md).
+
+## A6-09-03 obligation source
+
+V30 appends loan_event_feed over sequence and position for existing loan and installment v1 facts. Main and offline validators and complete-world backup support V30. The reader captures a world-bound immutable frontier and uses indexed tuple cursors. See [accepted loan source](loan-acceptance.md).
+
+## A6-10-01 shared lifecycle
+
+V31 adds nine lifecycle/witness tables, twelve indexes and five claim-maintenance triggers. The institution financial-account table is copied with the ALLOWANCE role and its original IDs. New allowance-account facts use v2. Main/offline validators and complete-world backup support V31. Bounded bootstrap rejects unsafe historical backdating. See [exact lifecycle storage and records](debt-lifecycle.md).

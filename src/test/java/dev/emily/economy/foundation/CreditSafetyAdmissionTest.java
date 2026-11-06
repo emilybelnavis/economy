@@ -29,6 +29,10 @@ class CreditSafetyAdmissionTest {
             var increaseProof=BranchFixtures.proof(new BranchAdmission.Context(owner.world(),UUID.randomUUID(),player,BranchAdmission.Action.CREDIT_INCREASE,bank,null,null,0,0,0));
             var increase=new CreditFacilities.IncreaseRequest(increaseProof,facility,300000,1,1,0,0);
             assertEquals(CreditSafety.STATUS,await(services,services.ledger().increaseCreditFacility(grant,new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),increase).completion()).outcome().result().code());
+            var loanProof=BranchFixtures.proof(new BranchAdmission.Context(owner.world(),UUID.randomUUID(),player,BranchAdmission.Action.LOAN_APPLY,bank,null,null,0,0,0));
+            var loanRequest=new dev.emily.economy.loan.Loans.Application(loanProof,UUID.randomUUID(),UUID.randomUUID(),CreditUnderwriting.Product.BANK_LOAN,EconomyCurrency.CAD,100000,1,new AccountId(UUID.randomUUID()),1,0,0,1,UUID.randomUUID(),0,dev.emily.economy.loan.Loans.RateMode.FIXED,false);
+            assertEquals(CreditSafety.STATUS,await(services,services.ledger().applyLoan(grant,new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),loanRequest).completion()).outcome().result().code());
+            assertTrue(await(services,services.ledger().loans(grant,null,8)).orElseThrow().isEmpty());
             assertTrue(await(services,services.ledger().creditFacilityPage(grant,null,8)).orElseThrow().entries().isEmpty());
             var revoke=await(services,services.ledger().revokeCreditCard(grant,new OperationId(UUID.randomUUID()),new RequestId(UUID.randomUUID()),UUID.randomUUID(),1).completion()).outcome();
             assertNotEquals(CreditSafety.STATUS,revoke.result().code());

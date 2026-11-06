@@ -8,7 +8,7 @@ import java.util.UUID;
 /** Ordered trusted SQL; the complete pending chain shares one transaction. */
 final class SchemaMigrations {
     static final int MINIMUM_SUPPORTED = 1;
-    static final int CURRENT = 27;
+    static final int CURRENT = 31;
     static final int APPLICATION_ID = 0x45434F4E;
     record Migration(int version, String name, List<String> statements) {
         Migration { statements = List.copyOf(statements); }
@@ -52,7 +52,11 @@ final class SchemaMigrations {
             new Migration(24,"dormant credit profiles and score policy history",dev.emily.economy.credit.CreditProfileSchema.statements()),
             new Migration(25,"funded credit facilities and immutable statements",dev.emily.economy.credit.CreditFacilitySchema.statements()),
             new Migration(26,"bounded credit diagnostics and immutable servicing witnesses",dev.emily.economy.credit.CreditAuditFacts.statements()),
-            new Migration(27,"ordered immutable credit lifecycle event source",List.of(dev.emily.economy.credit.CreditEvents.INDEX)));
+            new Migration(27,"ordered immutable credit lifecycle event source",List.of(dev.emily.economy.credit.CreditEvents.INDEX)),
+            new Migration(28,"funded fixed loans and monthly schedules",dev.emily.economy.loan.LoanSchema.statements()),
+            new Migration(29,"bounded immutable loan diagnostics",List.of(dev.emily.economy.loan.LoanDiagnosticSchema.INDEX)),
+            new Migration(30,"ordered immutable loan obligation source",List.of(dev.emily.economy.loan.LoanEvents.INDEX)),
+            new Migration(31,"shared debt obligations reporting and collection clocks",dev.emily.economy.debt.DebtLifecycleSchema.statements()));
 
     private static List<String> pricingStatements() {
         var sql=new java.util.ArrayList<String>();

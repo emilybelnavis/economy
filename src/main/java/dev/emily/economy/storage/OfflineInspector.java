@@ -45,6 +45,10 @@ final class OfflineInspector {
             if (schema >= 25) dev.emily.economy.credit.CreditFacilitySchema.validate(c);
             if (schema >= 26) dev.emily.economy.credit.CreditAuditFacts.validateSchema(c);
             if (schema >= 27) dev.emily.economy.credit.CreditEvents.validateSchema(c);
+            if (schema >= 28) dev.emily.economy.loan.LoanSchema.validate(c);
+            if (schema >= 29) dev.emily.economy.loan.LoanDiagnosticSchema.validate(c);
+            if (schema >= 30) dev.emily.economy.loan.LoanEvents.validateSchema(c);
+            if (schema >= 31) dev.emily.economy.debt.DebtLifecycleSchema.validate(c);
             if (schema >= 7) LedgerProjection.validateSchema(c);
             if (schema >= 8) HoldSchema.validate(c);
             if (schema >= 9) FxSettlementSchema.validate(c);

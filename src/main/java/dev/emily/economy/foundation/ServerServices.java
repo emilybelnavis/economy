@@ -285,7 +285,7 @@ public final class ServerServices {
             case ASSIGN -> dev.emily.economy.institution.BankProviders.ASSIGN;
             case SWITCH_SOURCE -> dev.emily.economy.institution.BankProviders.SWITCH_SOURCE;
             case SWITCH_TARGET -> dev.emily.economy.institution.BankProviders.SWITCH_TARGET;
-            case CARD_ISSUE, CARD_REPLACE, CREDIT_ISSUE, CREDIT_INCREASE, CREDIT_REPLACE -> throw new IllegalArgumentException("Use issued-card service");
+            case CARD_ISSUE, CARD_REPLACE, CREDIT_ISSUE, CREDIT_INCREASE, CREDIT_REPLACE, LOAN_APPLY -> throw new IllegalArgumentException("Use issued-card service");
             case CLOSE -> throw new IllegalArgumentException("Use protected funded closure composition");
         };
         var fields = new java.util.HashMap<>(request.request().fields());

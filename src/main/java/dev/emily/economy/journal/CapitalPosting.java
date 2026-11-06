@@ -66,7 +66,7 @@ public final class CapitalPosting {
             if (a != null) {
                 boolean invalid = switch(a.role()) {
                     case CASH, RESERVATION, RECEIVABLE, EXPENSE -> next < 0;
-                    case LIABILITY, PAYABLE, INCOME, EQUITY -> next > 0;
+                    case LIABILITY, PAYABLE, INCOME, EQUITY, ALLOWANCE -> next > 0;
                     case ROUNDING -> false;
                 };
                 if (invalid) throw new IllegalStateException("Capital normal balance");

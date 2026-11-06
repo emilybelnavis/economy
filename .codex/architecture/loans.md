@@ -1,0 +1,61 @@
+# Fixed unsecured loans — A6-09-01
+
+## Admission, captured offers and capability
+
+`Loans.Application` binds owner/world/session/LOAN_APPLY branch lease, application and loan UUIDs, BANK_LOAN or SUBPRIME_LOAN, contractual currency/principal/years, destination/revision, profile/Tier/prime/FX/denomination/calendar witnesses and requested rate/secured capability. Only fixed unsecured requests are supported. No income claim, application fee, random approval, silent lower offer or collateral is invented.
+
+Bank applications require the supplying bank's kiosk, native currency and current specialist/hybrid Tier admission. Subprime is the distinct shared Ironbridge alternative only at a Tier1/hybrid kiosk; it uses Ironbridge's own cash and current world currency, not the kiosk's capital, and pays no brokerage fee. An established profile is mandatory; loans and failed applications never create score 650 or a starter. Unsupported capabilities, malformed/stale/unauthorized requests create no facility or accepted inquiry.
+
+`CreditUnderwriting.loanForFacility` supplies approved D07 bands: minimum bank principal 1,000 world-major / subprime 500, bank score floor 620, subprime floor 500, score-dependent 1–5 / 1–8 years and whole-major native principal. Amount/exposure thresholds use current world units; native exposure converts upward and maximum offers downward. Tier2 bank principal/exposure ceilings multiply by four and score premium divides by four; base APR is prime/4, otherwise prime+2 percentage points. Subprime 19.99%–34.99% depends on score independently of bank Tier. Current configured prime is captured for bank loans, never silently replaced by 6% if unavailable. Fixed existing contracts ignore later Tier/score/prime changes.
+
+An accepted underwriting approval or business denial stores `ApplicationDecision`: established state (no fabricated score when absent), captured score/profile/Tier, requested native amount/term, lender/product, prime/policy, FX/world units, current aggregate exposure, permitted maximum/exposure/term, APR, precise reason and effective time. Result codes remain bounded; owner lookup follows the original application operation's outcome sequence to the immutable fact. Later projections/rates cannot rewrite it. Accepted denials group inquiries across banks/loans/cards; an application UUID cannot be reused with another operation.
+
+Origination reserves real issuer cash through `LoanTreasury`, protects the captured base operating floor and denies due-yield distress, then disburses through a posting overlay in the same original transaction. Per-currency entries move funded RESERVATION to the owned BANK and create lender RECEIVABLE / loan-borrower LIABILITY. No residual undrawn reservation or unbacked money remains. Unsupported funding currency/FX, insufficient capital, overflow or a stale account fails without partial finance.
+
+## Precision, schedules and servicing
+
+`LoanServicing` uses MC34/HALF_EVEN with 18-place major accrual, signed local residual and checked minor-unit arithmetic. Periodic rate is APR/13; nominal periods are 13×years (13–65 bank, 13–104 subprime). The zero-rate branch is principal/n. Nonfinal installments use CEILING minor units; final payment is capped and reconciles to zero with explicit residual disposition. Projected original schedules are generated from captured terms and bound by a v1 hash, not current prime. Rounding or early repayment can end actual payments before the nominal term.
+
+Current-period interest has one authoritative accumulator. Before any principal-changing payment/month close, integrate `(principal + prior completed unpaid capitalized interest) × APR/13 × elapsedMillis/33,600,000`. Current-period unposted interest never compounds itself. A partial payment realizes/preserves earned interest, satisfies original oldest installment requirements and pays their interest/principal before later debt. Excess reduces principal immediately without resetting the installment or original due dates. Signed prior-period carry may adjust the compounding base; new current-period negative carry is not prematurely capitalized.
+
+Monthly close recognizes interest with matched RECEIVABLE/INCOME and borrower EXPENSE/LIABILITY postings and captures an immutable installment/due snapshot. Requirements are satisfaction metadata, not another monetary liability. Old arrears retain dates; unpaid final-term debt can continue contractual accrual without a new principal schedule. The provider processes an indexed arbitrary anchor deadline, ordered loan IDs, ≤16 targets and one child per shared dispatcher turn. Its atomic monthly close is stage 1 before scheduled payment/report stages. It preserves APPLYING events and has no work in an empty loan domain.
+
+Manual partial payments use a current revision-bound ≤30-second quote. Full payoff captures the amount/whole source state at quote time, expires before relevant owned card/loan boundaries, and rechecks funding/ledger/state/FX witnesses. A successful full payoff alone explicitly waives additional unposted segment interest from quote to commit. Partial payments, previews, expired quotes and stale state receive no such waiver. Signed final subminor disposition and financial allocations remain immutable in payment events. SETTLED has zero principal, interest, accrual, residual and requirements; no later charge is admitted.
+
+## FX without an extra BANK account
+
+Native disbursement credits an existing owned BANK in contract currency. `LoanDisbursementFx` explicitly captures conversion into another owned BANK: the full principal converts at the immutable publication with FLOOR target credit. The ordinary supplying lender's source-currency FX fee is separately paid through a quoted CEILING conversion from that destination account (which may use the new funded proceeds). Net proceeds, native fee and target fee debit are distinct quoted fields. No fee is added to contractual principal; no temporary customer account is created. Source/target clearing, fee cash/income/expense, reference residuals, quote consumption and loan claims commit together. Missing quote never performs implicit FX.
+
+Subprime FX is supplied by Ironbridge at its ordinary Tier1 service rate, not brokerage for the kiosk. ServicePricing v2 supports only this new internal Ironbridge FX fact; old bank-only v1 decoding remains unchanged. Tier2-capable banks use current ordinary FX pricing.
+
+`LoanRepaymentFx` uses a fresh A2 EXACT_CREDIT quote into the contract currency from any chosen owned BANK account. Only the received amount satisfies debt/minimum; source fee is additional. Native and FX funding share the same loan repayment/realization calculation. Fee failure, changed provider/account/ledger/denomination/FX or consumed quote rolls the whole operation back. A full payoff retains its original captured instant across asynchronous FX capture; the quote is not restarted to enlarge the waiver.
+
+## Shared exposure, wealth and quotes
+
+Loan borrower accounting uses `economy:loan-borrower/<owner>` separately from credit's existing borrower identity. Posted principal/interest reconcile against that LIABILITY ledger. `LoanLiabilities` is a required source adding exact current segmented accrued interest to net-worth debt through the requested instant; incomplete catch-up, mismatches or >128 outstanding contracts is unavailable, never zero. It captures a bounded digest of every loan ID/revision/status/state so a change to a lower-revision loan cannot hide behind a maximum revision.
+
+Credit input now includes loan exposure/blockers; loan input includes cards and the core adds loans once. Open revolving max(limit,owed) is counted once; closed/defaulted balances and unpaid loans remain counted. Credit operator issuer reconciliation now includes loan claims in the shared lender RECEIVABLE, using the existing bounded completeness rules. Borrowed cash therefore cannot inflate Tier eligibility.
+
+Natural segmented accrual changes exact valuation continuously. ServicePricing compares current availability/eligibility/effective Tier/policy, then reconstructs the captured-time valuation with current persisted inputs and requires the original full fingerprint. Thus elapsed time alone does not invalidate every quote, while payments/month close/new contracts/ledger round trips/FX or eligibility changes do. Tier authority revisions retain account/source/policy witnesses and each loan's stable state digest, exclude only time-derived loan amount lines and include the eligibility outcome. Full exact snapshot fingerprints and current eligibility remain separate. Prior pricing facts are not reinterpreted.
+
+## Persistence, APIs and safety
+
+V28 adds `loans`, `loan_schedule`, `loan_installments`, `loan_application_ids` and five bounded owner/lender/month/installment indexes. Body and normalized identity/debt/deadline/revision fields are checked together. New v1 facts: economy:a6/loan, loan-installment, loan-event, loan-borrower, loan-application, loan-treasury, loan-disbursement-fx and loan-repayment-fx. Existing posting v3 is retained. Credit inquiry v2 admits only the new Ironbridge LOAN issuer; old v1 bank-only inquiry validation is preserved. Bank pricing v1 is preserved; internal lender FX uses pricing v2. Main/offline schema validation and complete-world backup support V28; earlier migrations are unchanged.
+
+`LedgerService` exposes owner-bound loan context, application/explicit-FX application, captured application decision, loan/schedule/installment pages, partial/full repayment quote/submit and FX repayment. Pages are ≤16; source folds are explicitly bounded. The shared owner-binding normalization preserves final canonical bytes. No raw SQL, financial handler callback, operator mutation, application packet or product GUI is exposed.
+
+New production origination is wrapped by CreditSafety and remains CREDIT_LIFECYCLE_UNAVAILABLE until required default/reporting acceptance. Core registrations and detached fixtures are not a gameplay enable switch. Reads/repayments remain protected; empty-world readiness is not blocked by missing future providers. Loan outstanding requirement state is bounded to 16; the future due+84-day default transition is required before accepting long-lived unpaid production portfolios. Autopay/default/reporting/collections and recurring score activation remain later work.
+
+B6 adapter boundary: current `Loans.capabilities()` advertises fixed=true, variable=false, secured=false and UNSUPPORTED_B6_ADAPTER_REQUIRED. Every secured/variable application is rejected, so there is no claim, priority assignment or double-pledge mutation. A future separately accepted B6 adapter must supply world/owner-bound stable asset identity, source revision/valuation witness, explicit priority policy, one atomic cross-facility pledge/uniqueness check in the existing transaction, and journaled release/realization. A read valuation or item/entity presence alone may never grant collateral authority. No margin, collateral table, external integration or silent unsecured fallback is implemented here.
+
+## A6-09-02 diagnostics
+
+Owner contract/schedule/installment/application/payoff previews and audited bounded operator commands are now delivered. V29 adds one immutable history index; original financial facts, fixed rates/schedules, owner authorization and production origination gating remain unchanged. See [loan diagnostics](loan-diagnostics.md).
+
+## A6-09-03 acceptance
+
+The foundation is accepted in its gated API scope. Repayment now requires bounded borrower and shared lender claim reconciliation, with transient LOAN_ACCOUNTING_UNAVAILABLE for mismatch or incomplete portfolios. V30 supplies the immutable LoanEvents obligation reader. See [acceptance, capacity bounds and lifecycle handoff](loan-acceptance.md).
+
+## A6-10-01 shared lifecycle
+
+Defaulted loans freeze their debt and use collection-case repayment with current creditor ownership. Constant-size claim witnesses replace the earlier shared-lender scan. Original contract and installment identities feed the new report/cure/default clocks. See [shared debt lifecycle](debt-lifecycle.md).

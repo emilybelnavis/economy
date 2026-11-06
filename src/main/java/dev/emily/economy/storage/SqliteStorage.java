@@ -136,6 +136,10 @@ public final class SqliteStorage implements FoundationStore {
             dev.emily.economy.credit.CreditFacilitySchema.validate(connection);
             dev.emily.economy.credit.CreditAuditFacts.validateSchema(connection);
             dev.emily.economy.credit.CreditEvents.validateSchema(connection);
+            dev.emily.economy.loan.LoanSchema.validate(connection);
+            dev.emily.economy.loan.LoanDiagnosticSchema.validate(connection);
+            dev.emily.economy.loan.LoanEvents.validateSchema(connection);
+            dev.emily.economy.debt.DebtLifecycleSchema.validate(connection);
             LedgerProjection.validateSchema(connection);
             HoldSchema.validate(connection);
             FxSettlementSchema.validate(connection);
@@ -156,7 +160,11 @@ public final class SqliteStorage implements FoundationStore {
     public void commitObserver(CommitObserver observer) { checkOwner(); commitObserver = java.util.Objects.requireNonNull(observer); }
     @Override public dev.emily.economy.journal.JournalEngine.Decision decorateCommit(
             dev.emily.economy.journal.Journal.Intent intent, dev.emily.economy.journal.JournalEngine.ReadView reads,
-            dev.emily.economy.journal.JournalEngine.Commit commit) { return commitObserver.prepare(intent,reads,commit); }
+            dev.emily.economy.journal.JournalEngine.Commit commit) {
+        var decision = commitObserver.prepare(intent,reads,commit);
+        return decision instanceof dev.emily.economy.journal.JournalEngine.Commit accepted
+            ? dev.emily.economy.debt.DebtLifecycle.observe(intent,reads,accepted) : decision;
+    }
 
     public void cleanShutdownEligible(boolean eligible) { checkOwner(); cleanEligible = eligible; }
 
@@ -306,6 +314,10 @@ public final class SqliteStorage implements FoundationStore {
             dev.emily.economy.credit.CreditFacilitySchema.validate(connection);
             dev.emily.economy.credit.CreditAuditFacts.validateSchema(connection);
             dev.emily.economy.credit.CreditEvents.validateSchema(connection);
+            dev.emily.economy.loan.LoanSchema.validate(connection);
+            dev.emily.economy.loan.LoanDiagnosticSchema.validate(connection);
+            dev.emily.economy.loan.LoanEvents.validateSchema(connection);
+            dev.emily.economy.debt.DebtLifecycleSchema.validate(connection);
             LedgerProjection.validateSchema(connection);
             HoldSchema.validate(connection);
             FxSettlementSchema.validate(connection);

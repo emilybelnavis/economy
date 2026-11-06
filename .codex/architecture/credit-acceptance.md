@@ -36,3 +36,7 @@ Acceptance uses the approved card cutoff rule: only complete anchor days charge 
 Actual fixture JVM termination before/after commit covers draw, daily interest, statement and payment. In addition, injected uncertainty after a real commit exercises recovery lookup. These are separate evidence categories; no player's game is killed. Original outcomes, receipt counts, liability/receivable/reservation/customer balances and journal reconciliation remain stable after restart/replay. New event pages and the production gate add no replayed physical delivery.
 
 A6-10's due+2 reports, due+84 default, access freeze, reservation release and collection clocks are not installed here. A6-08-01's outstanding 16-requirement/34-slice limits therefore remain a foundation bound, not permission for indefinitely unpaid live portfolios. New production exposure stays unavailable until those required safety dependencies are accepted. Existing debt/history is preserved and protected operations stay available under ordinary chronological guards. Reporting/recurring score activation remains A6-10-03; A6-09-01 may only start on explicit invocation.
+
+## A6-10-01 current integration
+
+Shared obligation/report/default providers are now installed. Default closes spending and releases undrawn reservation, while protected collection repayment follows the current creditor. Original due/default/report anchors and historical debt survive expiry. Production borrowing and score activation proceed through A6-10-03 acceptance. See [lifecycle contracts](debt-lifecycle.md).

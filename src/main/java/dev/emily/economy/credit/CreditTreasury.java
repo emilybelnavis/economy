@@ -76,10 +76,19 @@ public final class CreditTreasury {
     private static PostingBatch.Leg leg(FinancialAccounts.Account a,long amount){return new PostingBatch.Leg(a.id(),a.role()==FinancialAccounts.Role.CASH?PostingBatch.Role.INSTITUTION_CASH:PostingBatch.Role.INSTITUTION_CLAIM,a.currency(),new Money(a.currency(),amount));}
     private static PostingBatch.Leg clearing(EconomyCurrency c,long amount){return new PostingBatch.Leg(Settlement.clearingAccount(c),PostingBatch.Role.CLEARING,c,new Money(c,amount));}
     private static JournalEngine.Reject reject(String code){return new JournalEngine.Reject(new Journal.Result(1,code,""));}
-    public static RecordCatalog register(RecordCatalog catalog){return catalog.with(new RecordCatalog.Key(FACT,1),CreditTreasury::validate);}
-    private static void validate(String payload){
+    public static RecordCatalog register(RecordCatalog catalog){return catalog.with(new RecordCatalog.Key(FACT,1),CreditTreasury::validateFunding);}
+    public static void validateFunding(String payload){validateFunding(payload,false);}
+    public static void validateLoanFunding(String payload){validateFunding(payload,true);}
+    public static void validateCollectionFunding(String payload) {
+        var fields=payload.split("\\|",-1);
+        if(fields.length!=7||!fields[1].equals(InstitutionCatalog.WAYSTONE.key()))throw new IllegalArgumentException("Collection treasury issuer");
+        // Reuse the historical numeric/FX validator under its already supported internal lender identity.
+        fields[1]=InstitutionCatalog.IRONBRIDGE.key();
+        validateLoanFunding(String.join("|",fields));
+    }
+    private static void validateFunding(String payload,boolean loan){
         var p=payload.split("\\|",-1);if(p.length!=7)throw new IllegalArgumentException("Treasury fields");
-        UUID.fromString(p[0]);InstitutionCatalog.require(new InstitutionCatalog.InstitutionId(p[1]));EconomyCurrency.valueOf(p[2]);
+        UUID.fromString(p[0]);var lender=new InstitutionCatalog.InstitutionId(p[1]);if(!loan||!lender.equals(InstitutionCatalog.IRONBRIDGE))InstitutionCatalog.require(lender);EconomyCurrency.valueOf(p[2]);
         if(Long.parseLong(p[3])<=0 || Long.parseLong(p[4])<0 || Long.parseLong(p[5])<0)throw new IllegalArgumentException("Treasury values");
         if(!p[6].equals("NONE")){
             var f=p[6].split(",",-1);if(f.length!=8)throw new IllegalArgumentException("Treasury FX");UUID.fromString(f[0]);UUID.fromString(f[7]);EconomyCurrency.valueOf(f[1]);EconomyCurrency.valueOf(f[3]);EconomyCurrency.valueOf(f[5]);

@@ -61,3 +61,11 @@ Owner-authorized `ServerServices.wealthSnapshot`, `serviceTierStatus`, `depositY
 ## A6-08-01 extension
 
 A6-08-01 installs required economy:credit-facility-liabilities valuation, reconciling currency debt totals against typed borrower LIABILITY postings. Missing/reconciliation failures cannot grant Tier benefits. See [credit facilities](credit-facilities.md).
+
+## A6-09-01 loan liability and time witnesses
+
+Production valuation requires the loan liability source alongside yield and credit. It includes exact as-of unposted loan interest and fails closed on incomplete catch-up, overflow or posted-debt mismatch. Loan source marks bind every persisted loan state. Tier authority tolerates natural interest accrual while exact valuation fingerprints retain amounts; pricing quotes reconstruct their captured valuation time and recheck current eligibility and policy. Actual loan changes still invalidate stale quotes. Internal Ironbridge FX pricing uses a separate v2 fact, preserving bank-only v1 history. See [valuation and FX contracts](loans.md).
+
+## A6-10-01 default and protected repayment
+
+Frozen default and uncollectable balances remain borrower liabilities in exposure and valuation. Collection sale discounts and creditor write-offs affect institutional carrying assets. Protected repayment FX retains ordinary fees and specialist access below qualification. See [independent debt state and monetary boundaries](debt-lifecycle.md).

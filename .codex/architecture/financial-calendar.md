@@ -70,3 +70,15 @@ Credit diagnostics report saved per-facility anchor backlog and sanitized provid
 ## A6-08-03 acceptance
 
 A6-08-03 verifies multi-period credit catch-up and crash/restart replay. CreditEvents is a bounded reader, not another provider. Production new exposure is gated while the required default/reporting lifecycle is absent; no missing dependency is registered and empty-domain readiness remains intact. See [acceptance](credit-acceptance.md).
+
+## A6-09-01 monthly loans
+
+The production dispatcher registers `economy:a6/loan-monthly` v1, fingerprint `loan-anchor-monthly-v1-fixed-segmented`, at interest/requirement stage 1. Indexed origination-anchored boundaries use bounded 16-row keyset pages and one child turn per loan; immutable monthly requirements and capitalized interest commit atomically. Empty loan domains add no daily job. No reporting, default, autopay or scoring provider is activated. See [loan servicing](loans.md).
+
+## A6-09-03 accepted loan catch-up
+
+Two loans with page size one resume the persisted APPLYING cursor after restart and catch up three offline months within eight resumed turns. Each turn commits at most one child/completion. Original installment UUIDs and due dates remain stable. A6-10 owns chronological delinquency transitions within the foundation requirement bound. See [loan recovery and obligation handoff](loan-acceptance.md).
+
+## A6-10-01 lifecycle deadlines
+
+Five v1 providers process due/default/expiry/sale work at stage4 and original due+2 reports at stage5. Scheduled payment stage3 precedes reporting, with score stage6 reserved for later acceptance and Tier stage7 retained. Indexed durable heads and tuple cursors bound work per turn. See [lifecycle provider configuration](debt-lifecycle.md).

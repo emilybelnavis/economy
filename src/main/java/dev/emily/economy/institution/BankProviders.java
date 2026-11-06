@@ -204,7 +204,7 @@ public final class BankProviders {
     }
     private static Journal.Kind actionKind(BranchAdmission.Action action) {
         return switch(action) {case PRIMARY->PRIMARY; case SECONDARY->SECONDARY; case ASSIGN->ASSIGN;
-            case SWITCH_SOURCE->SWITCH_SOURCE; case SWITCH_TARGET->SWITCH_TARGET; case CLOSE->CLOSE;case CARD_ISSUE,CARD_REPLACE,CREDIT_ISSUE,CREDIT_INCREASE,CREDIT_REPLACE->throw new IllegalArgumentException("Use issued-card service");};
+            case SWITCH_SOURCE->SWITCH_SOURCE; case SWITCH_TARGET->SWITCH_TARGET; case CLOSE->CLOSE;case CARD_ISSUE,CARD_REPLACE,CREDIT_ISSUE,CREDIT_INCREASE,CREDIT_REPLACE,LOAN_APPLY->throw new IllegalArgumentException("Use issued-card service");};
     }
     private static JournalEngine.Decision tier(JournalEngine.ReadView reads, PartyRef owner,Request request,TierEligibility tiers,InstitutionCatalog.Entry bank) {
         if(bank.tier1())return null;

@@ -51,3 +51,7 @@ A6-08-02 adds prospective immutable daily-input/payment-allocation receipts to t
 ## A6-08-03 acceptance
 
 A6-08-03 accepts the detached foundation and gates LedgerService new issuance/increase/draw inside journal preparation until the required lifecycle is installed/accepted. No operator/config bypass exists; stored outcomes replay first. Protected reads/debt actions remain under their ordinary guards. Credit API owner binding is normalized without changing final canonical bytes. See [acceptance and lifecycle source](credit-acceptance.md).
+
+## A6-09-01 shared exposure
+
+Credit underwriting includes outstanding loan exposure and blockers; loan underwriting includes credit exposure and blockers, counting each source once. Shared lender receivables now include cards and loans while borrower liabilities remain separate. New production loan origination uses the existing CreditSafety gate; protected repayment remains available. See [loan contracts](loans.md).

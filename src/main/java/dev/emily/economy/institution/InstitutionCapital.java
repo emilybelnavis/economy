@@ -239,7 +239,7 @@ public final class InstitutionCapital {
         UUID.fromString(p[12]);
     }
     private static void validateAccount(String payload) {
-        var p = payload.split("\\|", -1); if (p.length != 5) throw new IllegalArgumentException("Institution account");
+        var p = payload.split("\\|", -1); if (p.length != 5 || p[3].equals("ALLOWANCE")) throw new IllegalArgumentException("Institution account");
         new FinancialAccounts.Account(UUID.fromString(p[0]), new WorldId(UUID.fromString(p[1])), new InstitutionCatalog.InstitutionId(p[2]), FinancialAccounts.Role.valueOf(p[3]), EconomyCurrency.valueOf(p[4]));
     }
 }

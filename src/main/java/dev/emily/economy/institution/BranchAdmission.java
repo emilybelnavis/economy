@@ -9,7 +9,7 @@ import java.util.function.LongSupplier;
 /** Server-owned short lived capability. No network DTO can construct a proof. */
 public final class BranchAdmission {
     private BranchAdmission() {}
-    public enum Action { PRIMARY, SECONDARY, ASSIGN, SWITCH_SOURCE, SWITCH_TARGET, CLOSE, CARD_ISSUE, CARD_REPLACE, CREDIT_ISSUE, CREDIT_INCREASE, CREDIT_REPLACE }
+    public enum Action { PRIMARY, SECONDARY, ASSIGN, SWITCH_SOURCE, SWITCH_TARGET, CLOSE, CARD_ISSUE, CARD_REPLACE, CREDIT_ISSUE, CREDIT_INCREASE, CREDIT_REPLACE, LOAN_APPLY }
     public record Context(WorldId world, UUID session, PlayerId actor, Action action,
                           InstitutionCatalog.InstitutionId bank, InstitutionCatalog.InstitutionId target,
                           AccountId account, long accountRevision, long providerRevision, long denominationRevision) {

@@ -7,6 +7,9 @@ public final class InstitutionSchema {
     private InstitutionSchema() {}
     public static void validate(java.sql.Connection connection) throws java.sql.SQLException {
         var statements = new java.util.ArrayList<>(statements());
+        try (var query = connection.createStatement(); var row = query.executeQuery("PRAGMA user_version")) {
+            if (row.next() && row.getInt(1) >= 31) statements.set(1, allowanceAccounts());
+        }
         statements.addAll(ProviderSchema.statements());
         try (var query = connection.prepareStatement("SELECT sql FROM sqlite_schema WHERE name=?")) {
             for (var sql : statements) {
@@ -19,6 +22,14 @@ public final class InstitutionSchema {
                 }
             }
         }
+    }
+    public static String allowanceAccounts() {
+        return statements().get(1).replace("'ROUNDING'", "'ROUNDING','ALLOWANCE'");
+    }
+    public static List<String> allowanceMigration() {
+        return List.of("ALTER TABLE institution_financial_accounts RENAME TO institution_accounts_v20",
+            allowanceAccounts(), "INSERT INTO institution_financial_accounts SELECT * FROM institution_accounts_v20",
+            "DROP TABLE institution_accounts_v20");
     }
     public static List<String> statements() {
         return List.of(
