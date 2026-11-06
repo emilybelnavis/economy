@@ -79,7 +79,7 @@ public final class Economy {
     private static final Map<MinecraftServer, DenominationChooser> activeChoosers = new IdentityHashMap<>();
     private void card(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickItem event) {
         if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player
-                && (dev.emily.economy.cash.CashCatalog.hasBankingCard(event.getItemStack()) || dev.emily.economy.card.CardCatalog.find(event.getItemStack()).isPresent())) {
+                && dev.emily.economy.card.CardCatalog.find(event.getItemStack()).isPresent()) {
             dev.emily.economy.banking.BankingController.openCard(player);
             event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME); event.setCanceled(true);
         }

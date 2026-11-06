@@ -134,8 +134,7 @@ public final class BankingMenu extends AbstractContainerMenu {
         if (remote()) {
             var services = Economy.serverServices(player.serverLevel().getServer());
             return services != null && services.state() == ServerServices.State.READY
-                    && (issuedToken==null?(CashCatalog.hasBankingCard(player.getMainHandItem()) || CashCatalog.hasBankingCard(player.getOffhandItem()))
-                        :java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(stack->dev.emily.economy.card.CardStackIdentity.mark(stack,services.worldId()).filter(mark->mark.token().equals(issuedToken)).isPresent()));
+                    && issuedToken != null && java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(stack->dev.emily.economy.card.CardStackIdentity.mark(stack,services.worldId()).filter(mark->mark.token().equals(issuedToken)).isPresent());
         }
         if (!player.serverLevel().dimension().location().toString().equals(anchor.dimension())) return false;
         var position = new BlockPos(anchor.x(), anchor.y(), anchor.z());

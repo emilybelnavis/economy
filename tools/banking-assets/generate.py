@@ -123,7 +123,7 @@ def generate():
     manifest={'version':1,'license':'CC0-1.0','source':'tools/banking-assets/generate.py','sources':['art.py','brands.json','hardware.py','agent.py'],
               'scope':'Artwork and model resources only. No issuer, facility, entity, hardware registration or world migration.',
               'issuers':issuers,'networks':networks,'cards':cards,'icons':ui,'hardware':hardware_data,'agent':agent_data,
-              'localization':lang,'legacy_card_ids':['summit_credit_card','meridian_credit_card','aurora_credit_card','obsidian_credit_card','harbor_bank_card','meadow_bank_card','tide_bank_card','ember_bank_card']}
+              'localization':lang}
     output(ASSETS/'banking/art_manifest.json',manifest)
     existing=json.loads((ASSETS/'lang/en_us.json').read_text())
     for key,value in lang.items():

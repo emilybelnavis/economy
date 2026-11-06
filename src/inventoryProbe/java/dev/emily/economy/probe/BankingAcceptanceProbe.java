@@ -177,19 +177,13 @@ public final class BankingAcceptanceProbe {
                 if (claim == null) break;
                 BankingSkewCapture.capture(server, player, claim);
                 player.getInventory().setItem(0, ItemStack.EMPTY);
-                player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(CashCatalog.cards().values().iterator().next().get()));
-                BankingController.openCard(player); next(server, 25);
+                if (FixtureBankingTerminal.open(player, TELLER)) next(server, 25);
             }
             case 25 -> {
                 if (!ready()) break;
-                require(menu().remote() && menu().valid(player), "generic card normal banking access");
+                require(!menu().remote() && menu().valid(player), "physical teller banking access");
                 require(!menu().acceptAction(player, UUID.randomUUID(), menu().revision(), "accounts"), "wrong session rejected");
                 require(!menu().acceptAction(player, menu().session(), menu().revision() + 1, "accounts"), "wrong revision rejected");
-                if (act(server, "withdraw", "")) next(server, 26);
-            }
-            case 26 -> {
-                if (!snapshotReady()) break;
-                require(menu().status().equals("Terminal required"), "card cannot invoke physical cash service");
                 if (act(server, "claims", "")) next(server, 27);
             }
             case 27 -> { if (snapshotReady() && act(server, "collect", claim.toString())) next(server, 28); }
@@ -231,8 +225,7 @@ public final class BankingAcceptanceProbe {
                 require(context.price().batch() == 4 && context.price().amount().minorUnits() == 100, "owner menu price exact batch");
                 buyer = fixture(server, BUYER, "BankingBuyer"); player = buyer;
                 player.setPos(REGISTER.getX() + 2, REGISTER.getY(), REGISTER.getZ() - 2);
-                player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(CashCatalog.cards().values().iterator().next().get()));
-                BankingController.openCard(player); next(server, 35);
+                if (FixtureBankingTerminal.open(player, TELLER)) next(server, 35);
             }
             case 35 -> { if (act(server, "accounts", "")) next(server, 71); }
             case 71 -> {
@@ -299,7 +292,7 @@ public final class BankingAcceptanceProbe {
                 unregister(server, seller); unregister(server, buyer);
                 server.overworld().setChunkForced(TELLER.getX() >> 4, TELLER.getZ() >> 4, false);
                 Files.writeString(server.getWorldPath(LevelResource.ROOT).resolve("banking-probe-passed.txt"),
-                        "PASS normal world setup, primary+EUR bank accounts, settings, accounts/history/FX, full-capacity rejection, withdrawal/deposit roundtrip, page-change/close claim/card collection, stale session/revision, saved transient-input recovery, owner pricing and buyer register checkout; FX exchange original operation "
+                        "PASS normal world setup, primary+EUR bank accounts, settings, accounts/history/FX, full-capacity rejection, withdrawal/deposit roundtrip, page-change/close claim/teller collection, stale session/revision, saved transient-input recovery, owner pricing and buyer register checkout; FX exchange original operation "
                                 + exchangeIntent.operationId().value() + " CAD7100 EUR" + euroFunds.availableMinorUnits() + "\n");
                 System.out.println("BANKING_ACCEPTANCE_PASS normal controllers and real menu/session gate; canonical exchange outcome; no network socket asserted");
                 return true;

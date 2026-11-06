@@ -1,6 +1,7 @@
 package dev.emily.economy.cash;
 
 import dev.emily.economy.api.EconomyCurrency;
+import dev.emily.economy.card.CardCatalog;
 import java.util.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -23,21 +24,10 @@ public final class CashCatalog {
     private static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, "economy");
     private static final Map<String, Denomination> CASH;
-    private static final Map<String, DeferredItem<Item>> CARDS;
     private static final List<String> TAB_IDS;
 
     static {
         var cash = new LinkedHashMap<String, Denomination>();
-        var cards = new LinkedHashMap<String, DeferredItem<Item>>();
-        cards.put("summit_credit_card", ITEMS.register("summit_credit_card", () -> new CollectibleItem(new Item.Properties().stacksTo(1), true)));
-        cards.put("meridian_credit_card", ITEMS.register("meridian_credit_card", () -> new CollectibleItem(new Item.Properties().stacksTo(1), true)));
-        cards.put("aurora_credit_card", ITEMS.register("aurora_credit_card", () -> new CollectibleItem(new Item.Properties().stacksTo(1), true)));
-        cards.put("obsidian_credit_card", ITEMS.register("obsidian_credit_card", () -> new CollectibleItem(new Item.Properties().stacksTo(1), true)));
-        cards.put("harbor_bank_card", ITEMS.register("harbor_bank_card", () -> new CollectibleItem(new Item.Properties().stacksTo(1), true)));
-        cards.put("meadow_bank_card", ITEMS.register("meadow_bank_card", () -> new CollectibleItem(new Item.Properties().stacksTo(1), true)));
-        cards.put("tide_bank_card", ITEMS.register("tide_bank_card", () -> new CollectibleItem(new Item.Properties().stacksTo(1), true)));
-        cards.put("ember_bank_card", ITEMS.register("ember_bank_card", () -> new CollectibleItem(new Item.Properties().stacksTo(1), true)));
-
         register(cash, "eur_coin_1", EconomyCurrency.EUR, 1L, false);
         register(cash, "eur_coin_2", EconomyCurrency.EUR, 2L, false);
         register(cash, "eur_coin_5", EconomyCurrency.EUR, 5L, false);
@@ -179,14 +169,13 @@ public final class CashCatalog {
         register(cash, "chf_bill_200", EconomyCurrency.CHF, 20000L, true);
         register(cash, "chf_bill_1000", EconomyCurrency.CHF, 100000L, true);
         CASH = Collections.unmodifiableMap(cash);
-        CARDS = Collections.unmodifiableMap(cards);
         var tabs = new ArrayList<String>();
         var overview = TABS.register("economy", () -> CreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.economy"))
                 .icon(() -> new ItemStack(CASH.get("cad_bill_20_horizontal").item().get()))
                 .displayItems((parameters, output) -> {
                     CASH.values().forEach(value -> output.accept(value.item().get()));
-                    CARDS.values().forEach(value -> output.accept(value.get()));
+                    CardCatalog.all().forEach(value -> output.accept(value.item().get()));
                 }).build());
         tabs.add("economy");
         DeferredHolder<CreativeModeTab, CreativeModeTab> previous = overview;
@@ -216,8 +205,8 @@ public final class CashCatalog {
         TABS.register("cards", () -> CreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.economy.cards"))
                 .withTabsBefore(lastCurrency.getKey())
-                .icon(() -> new ItemStack(CARDS.get("summit_credit_card").get()))
-                .displayItems((parameters, output) -> CARDS.values().forEach(value -> output.accept(value.get())))
+                .icon(() -> new ItemStack(CardCatalog.all().getFirst().item().get()))
+                .displayItems((parameters, output) -> CardCatalog.all().forEach(value -> output.accept(value.item().get())))
                 .build());
         tabs.add("cards");
         TAB_IDS = List.copyOf(tabs);
@@ -231,7 +220,6 @@ public final class CashCatalog {
     }
 
     public static List<Denomination> all() { return List.copyOf(CASH.values()); }
-    public static Map<String, DeferredItem<Item>> cards() { return CARDS; }
     public static List<String> tabIds() { return TAB_IDS; }
 
     public static Optional<Denomination> byId(String id) {
@@ -245,16 +233,9 @@ public final class CashCatalog {
         return key.getNamespace().equals("economy") ? Optional.ofNullable(CASH.get(key.getPath())) : Optional.empty();
     }
 
-    /** Every original card permits banking access without granting any credit facility. */
-    public static boolean hasBankingCard(ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        var key = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return key.getNamespace().equals("economy") && CARDS.containsKey(key.getPath());
-    }
-
     private static void register(Map<String, Denomination> cash, String id, EconomyCurrency currency,
                                  long minorUnits, boolean bill) {
-        DeferredItem<Item> item = ITEMS.register(id, () -> new CollectibleItem(new Item.Properties().stacksTo(64), false));
+        DeferredItem<Item> item = ITEMS.register(id, () -> new CollectibleItem(new Item.Properties().stacksTo(64)));
         cash.put(id, new Denomination(id, currency, minorUnits, bill, item));
     }
 
@@ -271,18 +252,15 @@ public final class CashCatalog {
     }
 
     private static final class CollectibleItem extends Item {
-        private final boolean card;
-
-        private CollectibleItem(Properties properties, boolean card) {
+        private CollectibleItem(Properties properties) {
             super(properties);
-            this.card = card;
         }
 
         @Override
         public void appendHoverText(ItemStack stack, Item.TooltipContext context,
                                     List<Component> tooltip, TooltipFlag flag) {
             super.appendHoverText(stack, context, tooltip, flag);
-            tooltip.add(Component.translatable(card ? "cash.economy.card_tooltip" : "cash.economy.collectible_tooltip"));
+            tooltip.add(Component.translatable("cash.economy.collectible_tooltip"));
         }
     }
 }

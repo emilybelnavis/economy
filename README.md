@@ -70,7 +70,7 @@ For an uncertain result, repeat the same command with the same operation UUID.
 
 ## Cash and cards
 
-Creative inventory includes 131 cash collectibles and eight banking cards across thirteen tabs, including both Canadian bill styles. Cards provide generic banking access without a credit facility.
+Creative inventory includes 131 cash collectibles across thirteen tabs, including both Canadian bill styles. **Bank & Credit Cards** contains every available bank debit and credit card design, including network and tier variants. Creative cards are collectibles; banking access requires an active card issued to you. The eight old generic cards have been removed.
 
 CHF is the eleventh currency, with two-decimal electronic balances. Its game opening calibration is 1 CHF = 1.60 CAD, not a live market quote. Fresh worlds include CHF immediately; existing worlds add it at the next UTC FX publication after catch-up, without changing the world currency or inventing historical CHF rates. Operator diagnostics show whether its rate is available or scheduled.
 
@@ -138,7 +138,7 @@ The account limit is four open bank accounts, including the permanent primary, w
 
 The institution catalog contains 23 fictional banks, including two CHF retail banks. Existing accounts retain an explicit legacy, unassigned provider until branch assignment becomes available. Institution capital is funded once per world using the selected world currency and a captured FX publication; it does not credit player accounts.
 
-Original issuer and network art now covers all 23 banks, approved card variants, matching native-currency ATMs and tellers, and distinct branch kiosk designs. Bank-specific hardware is selected in authenticated terminal settings. Issued debit cards are available at the account issuer's kiosk; credit facilities remain unavailable. Existing collectible cards remain available.
+Original issuer and network art now covers all 23 banks, approved card variants, matching native-currency ATMs and tellers, and distinct branch kiosk designs. Bank-specific hardware is selected in authenticated terminal settings. Issued debit cards are available at the account issuer's kiosk; issuer kiosks also offer credit applications. Every current card design is available as a creative collectible.
 
 
 Assigned bank accounts use the bank's service tier. Tier 2 qualification requires at least 100,000,000 in the current world currency after supported assets and unpaid liabilities are valued together. Five hybrid banks and five specialists offer Tier 2; unavailable valuations cannot grant it. Existing unassigned accounts retain their earlier access and pricing during migration.
@@ -151,7 +151,7 @@ Overdue credit and loan balances now have server-side late reports, default, fun
 
 Use **Issued cards** to view an account's debit token. First issuance is free at the account's bank kiosk. Tokens last five financial years; renewal is free within 28 financial days before expiry or afterward. Earlier replacement costs 25 in the world's currency, converted into your selected funding account with a combined FX preview. Replacement revokes every copy of the old token only when the new issuance and fee commit. Report lost is free from an authenticated banking menu.
 
-Receive committed cards through **Collect items**, including at the kiosk. Full inventory leaves an owner claim; uncertain delivery stays protected for evidence review. Copied items share one token status and cannot grant another owner's access or duplicate benefits. Issued debit cards create no credit score, loan or debt; the eight old generic collectibles retain their access-only behavior.
+Receive committed cards through **Collect items**, including at the kiosk. Full inventory leaves an owner claim; uncertain delivery stays protected for evidence review. Copied items share one token status and cannot grant another owner's access or duplicate benefits. Issued debit cards create no credit score, loan or debt; creative copies carry no issued token and are collectibles.
 
 **Credit profile** shows whether credit is established and provides saved scores, component explanations and paged history. Login, debit cards, previews and failed applications do not establish credit. The first real credit-card issuance starts at 650 with one 2,500 starter limit across issuers. Scheduled scores update every world-aligned 28 days from original report history and time-weighted revolving utilization. Calculations resume after restart. Lower score ceilings never erase existing debt or enlarge spending room.
 

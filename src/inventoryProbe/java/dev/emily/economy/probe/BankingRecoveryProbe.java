@@ -3,7 +3,6 @@ package dev.emily.economy.probe;
 import dev.emily.economy.Economy;
 import dev.emily.economy.api.Identifiers.*;
 import dev.emily.economy.banking.*;
-import dev.emily.economy.cash.CashCatalog;
 import dev.emily.economy.journal.*;
 import java.io.*;
 import java.nio.file.*;
@@ -12,8 +11,6 @@ import java.util.*;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
 
 /** Disposable process termination and restored normal-menu quarantine checks. Never included in release jars. */
@@ -93,16 +90,15 @@ public final class BankingRecoveryProbe {
                     require(playerFiles.containsKey(owner), "saved owner inventory exists");
                     var player = BankingAcceptanceProbe.fixture(server, owner, "Recovery" + owner.toString().substring(0, 8));
                     player.load(playerFiles.get(owner).copy());
-                    if (!CashCatalog.hasBankingCard(player.getMainHandItem()) && !CashCatalog.hasBankingCard(player.getOffhandItem()))
-                        player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(CashCatalog.cards().values().iterator().next().get()));
                     actors.add(player);
                 }
-                if (actors.isEmpty()) next(server, 5, 0); else { BankingController.openCard(actors.getFirst()); next(server, 2, 5); }
+                if (actors.isEmpty()) next(server, 5, 0); else { FixtureBankingTerminal.open(actors.getFirst(), new net.minecraft.core.BlockPos(136, 110, 136)); next(server, 2, 5); }
             }
             case 2 -> {
                 if (server.getTickCount() < waitUntil) break;
                 var player = actors.get(actorIndex); var menu = menu(player);
-                if (menu == null || menu.busy() || !menu.valid(player)) break;
+                if (menu == null) { FixtureBankingTerminal.open(player, new net.minecraft.core.BlockPos(136, 110, 136)); break; }
+                if (menu.busy() || !menu.valid(player)) break;
                 require(!menu.acceptAction(player, UUID.randomUUID(), menu.revision(), "claims"), "restored menu rejects stale session");
                 require(!menu.acceptAction(player, menu.session(), menu.revision() + 1, "claims"), "restored menu rejects stale revision");
                 claimsRevision = menu.revision();
@@ -129,7 +125,7 @@ public final class BankingRecoveryProbe {
                 require(pendingBefore.equals(player.getPersistentData().getCompound("economy_banking_cash_pending")), "quarantined delivery creates no operation");
                 checkDatabase();
                 actorIndex++;
-                if (actorIndex < actors.size()) { BankingController.openCard(actors.get(actorIndex)); next(server, 2, 5); }
+                if (actorIndex < actors.size()) { FixtureBankingTerminal.open(actors.get(actorIndex), new net.minecraft.core.BlockPos(136, 110, 136)); next(server, 2, 5); }
                 else next(server, 5, 0);
             }
             case 5 -> {

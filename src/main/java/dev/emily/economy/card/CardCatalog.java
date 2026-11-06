@@ -11,7 +11,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-/** Issued debit appearances only. An item is a lookup key, never an account or borrowing grant. */
+/** Debit and credit appearances. An item is a lookup key, never an account or borrowing grant. */
 public final class CardCatalog {
     public record Entry(String id, InstitutionCatalog.InstitutionId issuer, int tier, DeferredItem<? extends Item> item) {}
     private static final DeferredRegister.Items ITEMS=DeferredRegister.createItems("economy");
@@ -50,8 +50,9 @@ public final class CardCatalog {
         CreditItem(Properties properties,InstitutionCatalog.Entry issuer,String network,int tier){super(properties);this.issuer=issuer;this.network=network;this.tier=tier;}
         @Override public void appendHoverText(ItemStack stack,TooltipContext context,List<Component> lines,TooltipFlag flag) {
             lines.add(Component.literal(issuer.name()+" · "+network.substring("economy:".length())+" Credit · Tier "+tier));
-            lines.add(Component.translatable("item.economy.issued_card.lookup"));
-            lines.add(Component.translatable("item.economy.issued_card.expiry"));
+            if (stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)) {
+                lines.add(Component.translatable("item.economy.issued_card.expiry"));
+            }
         }
     }
     private static final class DebitItem extends Item {
@@ -60,8 +61,9 @@ public final class CardCatalog {
         DebitItem(Properties properties,InstitutionCatalog.Entry issuer,int tier){super(properties);this.issuer=issuer;this.tier=tier;}
         @Override public void appendHoverText(ItemStack stack,TooltipContext context,List<Component> lines,TooltipFlag flag) {
             lines.add(Component.literal(issuer.name()+" · Debit · Tier "+tier));
-            lines.add(Component.translatable("item.economy.issued_card.lookup"));
-            lines.add(Component.translatable("item.economy.issued_card.expiry"));
+            if (stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)) {
+                lines.add(Component.translatable("item.economy.issued_card.expiry"));
+            }
         }
     }
 }

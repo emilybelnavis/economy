@@ -74,6 +74,34 @@ class BrandedHardwareResourcesTest {
         }
     }
 
+    @Test void atmDisplaysLeaveTheKeypadClearInBlockAndInventoryModels() throws IOException {
+        var models = new java.util.ArrayList<Path>();
+        models.add(ASSETS.resolve("models/block/atm_upper.json"));
+        models.add(ASSETS.resolve("models/block/atm_upper_right.json"));
+        models.add(ASSETS.resolve("models/item/atm.json"));
+        for (var bank : InstitutionCatalog.banks()) {
+            String key = bank.id().key().substring("economy:bank/".length());
+            for (String suffix : List.of("2", "3", "inventory"))
+                models.add(ASSETS.resolve("models/block/banking/" + key + "_atm_" + suffix + ".json"));
+        }
+        for (var path : models) {
+            double keypadBack = 0;
+            var displays = new java.util.ArrayList<JsonObject>();
+            for (var value : json(path).getAsJsonArray("elements")) {
+                var element = value.getAsJsonObject();
+                var faces = element.getAsJsonObject("faces");
+                if (faces.getAsJsonObject("up").get("texture").getAsString().equals("#keypad"))
+                    keypadBack = Math.max(keypadBack, element.getAsJsonArray("to").get(2).getAsDouble());
+                if (faces.getAsJsonObject("north").get("texture").getAsString().equals("#screen"))
+                    displays.add(element);
+            }
+            assertTrue(keypadBack > 0 && !displays.isEmpty(), path.toString());
+            for (var display : displays)
+                assertTrue(display.getAsJsonArray("from").get(2).getAsDouble() > keypadBack,
+                        path + " screen must sit behind the entire keypad");
+        }
+    }
+
     @Test void acquisitionIsNeutralAndDyeCannotSelectABank() throws IOException {
         var recipe = json(RESOURCES.resolve("data/economy/recipe/branch_kiosk.json"));
         assertEquals("minecraft:crafting_shaped", recipe.get("type").getAsString());

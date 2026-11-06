@@ -18,7 +18,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
@@ -65,10 +64,9 @@ public final class BankingIntegratedClient {
             cardRequested = true; var uuid = minecraft.player.getUUID();
             server.execute(() -> {
                 var player = server.getPlayerList().getPlayer(uuid);
-                if (player == null || Economy.serverServices(server) == null) { failure = "Actual host unavailable for card setup"; return; }
+                if (player == null || Economy.serverServices(server) == null) { failure = "Actual host unavailable for teller setup"; return; }
                 worldRoot = server.getWorldPath(LevelResource.ROOT);
-                player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(CashCatalog.cards().values().iterator().next().get()));
-                BankingController.openCard(player);
+                if (!FixtureBankingTerminal.open(player, TELLER)) cardRequested = false;
             });
         }
         if (ticks % 100 == 0) System.out.println("BANKING_CLIENT_WAIT step=" + step + " funded=" + funded + " terminal=" + terminalOpened

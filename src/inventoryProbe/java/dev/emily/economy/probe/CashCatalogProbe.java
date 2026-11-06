@@ -1,6 +1,8 @@
 package dev.emily.economy.probe;
 
 import dev.emily.economy.cash.CashCatalog;
+import dev.emily.economy.card.CardCatalog;
+import dev.emily.economy.card.CardStackIdentity;
 import dev.emily.economy.cash.CashStackIdentity;
 import dev.emily.economy.api.Identifiers.WorldId;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -18,7 +20,7 @@ public final class CashCatalogProbe {
 
     public static void verify(MinecraftServer server) {
         require(CashCatalog.all().size() == 131, "131 cash identities");
-        require(CashCatalog.cards().size() == 8, "eight card identities");
+        require(CardCatalog.all().size() > 28, "debit and credit card identities");
         require(CashCatalog.tabIds().size() == 13, "thirteen creative tab identities");
         net.minecraft.world.item.CreativeModeTabs.tryRebuildTabContents(
                 server.getWorldData().enabledFeatures(), true, server.registryAccess());
@@ -33,12 +35,16 @@ public final class CashCatalogProbe {
                     "registered cash identity");
             require(denomination.minorUnits() > 0, "positive denomination");
         }
-        for (var entry : CashCatalog.cards().entrySet()) {
-            var card = new ItemStack(entry.getValue().get());
+        var cardsTab = BuiltInRegistries.CREATIVE_MODE_TAB.get(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("economy", "cards"));
+        require(cardsTab.getDisplayItems().size() == CardCatalog.all().size(), "every card design in cards tab");
+        for (var entry : CardCatalog.all()) {
+            var card = new ItemStack(entry.item().get());
             require(card.getMaxStackSize() == 1, "single-stack card");
-            require(CashCatalog.hasBankingCard(card), "generic banking access");
+            require(CardStackIdentity.mark(card, new WorldId(UUID.randomUUID())).isEmpty(), "creative card has no issued token");
+            require(cardsTab.getDisplayItems().stream().anyMatch(stack -> stack.is(entry.item().get())), "card design visible");
         }
-        require(!CashCatalog.hasBankingCard(new ItemStack(Items.PAPER)), "unrelated item has no banking access");
+        require(CardCatalog.find(new ItemStack(Items.PAPER)).isEmpty(), "unrelated item is not a card");
         var world = new WorldId(UUID.randomUUID());
         var lot = UUID.randomUUID();
         var raw = new ItemStack(CashCatalog.all().getFirst().item().get(), 16);
@@ -71,7 +77,7 @@ public final class CashCatalogProbe {
             require(CashStackIdentity.mark(decoded.split(1), world).isPresent() && decoded.getCount() == 1,
                     "CHF vanilla split keeps world/lot marker");
         }
-        System.out.println("CASH_CATALOG_PASS identities cards access vanilla split merge world binding persistent components");
+        System.out.println("CASH_CATALOG_PASS identities collectible cards vanilla split merge world binding persistent components");
     }
 
     private static void require(boolean condition, String message) {

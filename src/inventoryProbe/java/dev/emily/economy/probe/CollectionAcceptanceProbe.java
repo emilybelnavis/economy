@@ -84,8 +84,8 @@ public final class CollectionAcceptanceProbe {
             case 2 -> {if(services.metrics().economy().ready()){player.closeContainer();seed(server);stage=3;}}
             case 3 -> {
                 if(BANKING && seeded) {
-                    player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND,new net.minecraft.world.item.ItemStack(dev.emily.economy.cash.CashCatalog.cards().values().iterator().next().get()));
-                    dev.emily.economy.banking.BankingController.openCard(player);stage=200;break;
+                    if (FixtureBankingTerminal.open(player, new BlockPos(12, 201, 8))) stage=200;
+                    break;
                 }
                 if(seeded&&(agent=find(server))!=null&&CollectionAgents.canInteract(playerAt(agent),agent)) {
                 firstLease=agent.presentation();require(agent.getMaxHealth()==20,"twenty health");
@@ -132,7 +132,7 @@ public final class CollectionAcceptanceProbe {
             case 212 -> {
                 BankingAcceptanceProbe.unregister(server,player);BankingAcceptanceProbe.unregister(server,stranger);
                 Files.writeString(server.getWorldPath(LevelResource.ROOT).resolve("collection-banking-passed.txt"),
-                        "remote owner banking CHF-to-CAD partial/full collection payments, explicit fee review, acknowledgement, original report date and duplicate confirmation denial");return true;
+                        "physical teller owner banking CHF-to-CAD partial/full collection payments, explicit fee review, acknowledgement, original report date and duplicate confirmation denial");return true;
             }
             case 4 -> {if(ready()) {
                 require(menu().choices().stream().filter(c->c.action().equals("select_case")).count()==2,"one agent aggregates two debts");

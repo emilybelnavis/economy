@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Check the catalog matrix, model graph, PNG payloads, localization and legacy resources."""
-import hashlib, json, re, struct, zlib
+"""Check the catalog matrix, model graph, PNG payloads, localization."""
+import json, re, struct, zlib
 from pathlib import Path
 from art import ASSETS, ROOT
 HERE=Path(__file__).resolve().parent
@@ -78,12 +78,5 @@ for bank in manifest['hardware']['banks']:
             for ref,original in zip(family['models'],family['geometry_sources']):
                 assert json.loads(local(ref,'models','.json').read_text())['elements']==json.loads((ASSETS/'models/block'/f'{original}.json').read_text())['elements']
 assert png(local(manifest['agent']['texture'],'textures','.png'))==(64,64)
-legacy={}
-for key in manifest['legacy_card_ids']:
-    for kind,suffix in [('textures','.png'),('models','.json')]:
-        p=ASSETS/kind/'item'/(key+suffix);assert p.exists(),p
-        legacy[str(p.relative_to(ROOT))]=hashlib.sha256(p.read_bytes()).hexdigest()
-baseline=HERE/'legacy_baseline.json'
-assert legacy==json.loads(baseline.read_text()),'Legacy collectible changed'
 assert manifest==json.loads((HERE/'resource_inventory.json').read_text())
-print(f'PASS: 23 issuers, 4 networks, 74 approved cards, 69 hardware families, {len(seen)} model nodes, legacy cards intact')
+print(f'PASS: 23 issuers, 4 networks, 74 approved cards, 69 hardware families, {len(seen)} model nodes')

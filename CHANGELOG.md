@@ -5,6 +5,16 @@ Project changes are recorded in reverse chronological order, with the most recen
 
 
 
+## 2026-11-06 — ATM screen recess
+
+- Recessed the ATM display and bezel to keep the keypad visible, across plain, coloured and bank-branded models and their inventory appearances.
+
+## 2026-11-06 — Card collectibles
+
+- Removed the eight old generic bank and credit cards.
+- Filled Bank & Credit Cards with every current debit and credit design, including network and tier variants. Creative copies are collectibles with concise bank/type/tier tooltips.
+- Kept issued-card banking access tied to active owned tokens.
+
 ## 2026-11-06 — D15 automatic payments and A6-13 acceptance
 
 - Added default-OFF automatic payments with reviewed per-facility consent and one named owned same-currency bank account.

@@ -4,7 +4,6 @@ import dev.emily.economy.Economy;
 import dev.emily.economy.api.Identifiers.PlayerId;
 import dev.emily.economy.api.PartyRef;
 import dev.emily.economy.banking.*;
-import dev.emily.economy.cash.CashCatalog;
 import dev.emily.economy.client.BankingScreen;
 import dev.emily.economy.foundation.*;
 import dev.emily.economy.terminal.*;
@@ -150,7 +149,22 @@ public final class FinanceIntegratedClient {
                             var uuid = minecraft.player.getUUID();
                             server.execute(() -> {
                                 var player = server.getPlayerList().getPlayer(uuid);
-                                if (player != null) { player.closeContainer(); BankingController.openCard(player); }
+                                if (player != null) {
+                                    player.closeContainer();
+                                    var world = Economy.serverServices(server).worldId();
+                                    boolean held = false;
+                                    for (int slot = 0; slot < 36; slot++) {
+                                        var stack = player.getInventory().getItem(slot);
+                                        if (dev.emily.economy.card.CardStackIdentity.mark(stack, world).isPresent()) {
+                                            var previous = player.getOffhandItem();
+                                            player.setItemInHand(InteractionHand.OFF_HAND, stack);
+                                            player.getInventory().setItem(slot, previous);
+                                            held = true; break;
+                                        }
+                                    }
+                                    if (!held) { failure = "Collected issued card missing before remote access"; return; }
+                                    BankingController.openCard(player);
+                                }
                             });
                             next(14);
                         }
@@ -247,7 +261,6 @@ public final class FinanceIntegratedClient {
             var hit = new BlockHitResult(Vec3.atCenterOf(KIOSK.below()).add(0, .5, 0), Direction.UP, KIOSK.below(), false);
             require(((BlockItem) stack.getItem()).place(new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit)).consumesAction(), "Place host kiosk");
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(CashCatalog.cards().values().iterator().next().get()));
             prepared = true;
         } catch (Exception error) { failure = "Host setup " + error; }
     }

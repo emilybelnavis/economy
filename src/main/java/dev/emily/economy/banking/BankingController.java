@@ -76,9 +76,6 @@ public final class BankingController {
     public static void openCard(ServerPlayer player) {
         var position=player.blockPosition();
         var anchor=new TerminalPolicy.Anchor(player.serverLevel().dimension().location().toString(),position.getX(),position.getY(),position.getZ());
-        if(CashCatalog.hasBankingCard(player.getMainHandItem()) || CashCatalog.hasBankingCard(player.getOffhandItem())) {
-            open(player,anchor,UUID.randomUUID(),BankingMenu.Access.CARD);return;
-        }
         var services=services(player);if(services==null || services.worldId()==null)return;
         var mark=java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem())
                 .map(stack->dev.emily.economy.card.CardStackIdentity.mark(stack,services.worldId())).flatMap(Optional::stream).findFirst().orElse(null);

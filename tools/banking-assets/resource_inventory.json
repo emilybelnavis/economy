@@ -4181,15 +4181,5 @@
     "art.economy.action.tier2": "Tier2",
     "art.economy.action.collections": "Collections",
     "art.economy.action.branch": "Branch"
-  },
-  "legacy_card_ids": [
-    "summit_credit_card",
-    "meridian_credit_card",
-    "aurora_credit_card",
-    "obsidian_credit_card",
-    "harbor_bank_card",
-    "meadow_bank_card",
-    "tide_bank_card",
-    "ember_bank_card"
-  ]
+  }
 }
