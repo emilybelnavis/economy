@@ -15,4 +15,4 @@ Use the [current state and contracts](../../.codex/PROJECT.md) for implementatio
 
 [A1 execution contract](CONTRACT.md) · [Approved A1-05 requirements](A1-05-requirements.md)
 
-A1 supplies a loadable, durable foundation and test fixtures. Currencies and FX are A2; accounts A3; postings and balances A4; physical payments/commerce A5; simulation A7; markets Stage B.
+A1 supplies a loadable, durable foundation and test fixtures. Currencies and FX are A2; accounts A3; postings and balances A4; physical payments/commerce A5; simulation A8; markets Stage B.

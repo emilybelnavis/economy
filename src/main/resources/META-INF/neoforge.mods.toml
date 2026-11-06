@@ -5,7 +5,10 @@ license="All Rights Reserved"
 modId="economy"
 version="0.2.0-alpha"
 displayName="Economy"
-description='''Server-authoritative economy foundation.'''
+logoFile="economy-icon.png"
+logoBlur=false
+description='''Banking. Cash. Commerce.
+Bank accounts, physical cash, player shops, credit and loans for a persistent world economy.'''
 [[dependencies.economy]]
 modId="neoforge"
 type="required"

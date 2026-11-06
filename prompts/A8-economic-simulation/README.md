@@ -1,12 +1,16 @@
-# A7 — Economic simulation and monetary policy
+# A8 — Economic simulation and monetary policy
 
 Status: draft DESIGN prompt. Refine specifications and future prompts only. Do not implement code, scaffold, run Gradle/tests/game processes, generate assets, change dependencies, or migrate worlds. Edit planning files only when explicitly requested. Reading a roadmap or this file is not implementation authorization.
 
+Formerly A7; A7 now owns village banking.
+
 ## Goal and dependencies
 
-Prepare a complete, reviewable specification for A7. Required upstream work: A2, A6; A1 clock and A4 accounting. Do not treat existing code as completed redesign work. Supply approved upstream contracts explicitly; mark missing contracts unresolved.
+Prepare a complete, reviewable specification for A8. Required upstream work: A2, A6; A1 clock and A4 accounting. A7 precedes this phase in the plan; consume its branch interfaces only if needed. Reuse accepted upstream contracts and unchanged evidence; mark missing contracts unresolved.
 
 Fixed baseline: Minecraft 1.21.1, NeoForge 21.1.252, Java 21; server-authoritative behavior on both integrated and dedicated servers. Stage A owns money/FX/credit; custody owns shares/return obligations; no market-owned parallel banking database.
+
+Preserve [the accepted prime handoff](../../.codex/architecture/a6-downstream.md): versioned future rates, retained history and fixed-loan terms. Valuation is A9; commodity backing or supply/trade-driven FX needs an explicit approved design.
 
 ## Scope to flesh out
 
@@ -18,7 +22,7 @@ Inventory coverage: F05 evolves from configured recording; F17 clock coordinatio
 
 Unify explicit clock contracts instead of accidentally mixing current UTC FX and in-game market days. Preserve recorded-rate history while adding deterministic evolution. Ground supply metrics in ledger and cash issuance; avoid disconnected simulated money totals.
 
-All assigned existing behavior must appear in the coverage table even when replacement architecture differs. Record any proposed behavior change and its approval status. Existing implementation and existing tests do not satisfy the new phase gate.
+Record affected feature coverage and proposed behavior changes. Preserve accepted behavior and reuse unchanged evidence; do not rebuild earlier phases merely to satisfy this planning document.
 
 ## Proposed bounded subprompts
 
@@ -30,7 +34,7 @@ For each subprompt define outcome, owner, prerequisites, persistence/entities, s
 
 Sleep/time commands/restarts/offline periods cannot apply events twice; bounded catch-up; same approved seed/version inputs reproduce updates; changes reach FX/loan consumers at defined boundaries.
 
-Include concrete numerical or state-transition examples where useful. Describe future unit, integration, restart/crash and performance checks appropriate to each subprompt. Distinguish proposed guarantees from verified behavior. Future runnable deliveries require configured runClient/runServer, mod registration, required development runtime dependencies, and runClient help/dry-run verification; run no checks during this planning task.
+Include concrete numerical or state-transition examples where useful. Select proportionate future checks for changed behavior under the project verification policy; categories are options, not cumulative gates. Distinguish proposed guarantees from verified behavior. Future runnable deliveries require configured runClient/runServer, mod registration, required development runtime dependencies, and runClient help/dry-run verification; run no checks during this planning task.
 
 ## Required planning response
 
@@ -41,3 +45,9 @@ Include concrete numerical or state-transition examples where useful. Describe f
 - Open questions and approved-versus-proposed rules.
 
 Stop at planning. Do not execute the prompts you draft or expand into later-phase implementation.
+
+## Verification scope
+
+Follow [the project verification policy](../../.codex/VERIFICATION.md) for every package and sub-task. Planning uses diff/link review only; run no Gradle, tests or game processes now. Routine implementation uses at most one focused test invocation when useful, selecting named classes for meaningful changed behavior and reusing existing real-service/SQLite fixtures and unchanged evidence. Package/phase completion does not automatically require tests or a full suite. A full-suite run requires an explicit request or a stated concrete concern narrower checks cannot address.
+
+For an ordinary runnable delivery, run `./gradlew build -x test`, `./gradlew help --task runClient` and `./gradlew runClient --dry-run` once. Keep working `runClient`/`runServer`, registered main source set and required development runtime dependencies. One owner runs Gradle/game checks sequentially. Use disposable worlds for necessary runtime/generation checks; preserve player worlds and backups.

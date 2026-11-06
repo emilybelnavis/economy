@@ -85,7 +85,7 @@ Minimum subprime principal is 500. All applications show the captured score, req
 
 ## Initial prime, fees and deposit yield — D08/D09
 
-Initial prime is **6.00% APR**, effective at the A6 lending activation boundary. It is versioned game configuration, not a live real-world rate. Configuration accepts prime from 0% to 50% inclusive, with at most four decimal places in percentage-point notation; invalid input rejects rather than clamps. A change takes effect only at a future financial-day boundary through A1 version scheduling. A7 may supply later prime publications; absent that adapter, the last committed configured prime remains in force. A card's approved network APR is independent of prime and Tier.
+Initial prime is **6.00% APR**, effective at the A6 lending activation boundary. It is versioned game configuration, not a live real-world rate. Configuration accepts prime from 0% to 50% inclusive, with at most four decimal places in percentage-point notation; invalid input rejects rather than clamps. A change takes effect only at a future financial-day boundary through A1 version scheduling. A8 may supply later prime publications; absent that adapter, the last committed configured prime remains in force. A card's approved network APR is independent of prime and Tier.
 
 | Service | Tier 1 | Tier 2 |
 | --- | ---: | ---: |

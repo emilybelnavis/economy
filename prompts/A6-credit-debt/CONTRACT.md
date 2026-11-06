@@ -201,7 +201,7 @@ Retain historical simulation/policy implementations for backlog. Backward UTC wa
 | Existing cash/eight generic cards | Keep IDs/art and access-only semantics; no automatic debt, score, issuance or owner assignment. CHF/new issued products are additive / A6-03-01,05,06 |
 | Old terminal colors/items/placements | Preserve IDs, geometry, owner/settings/NBT/inventory and pending custody. Add UNBOUND_BANK; finish old intents using stored semantics, then explicit owner binding/native allowlist confirmation; never guess a bank from color / A6-05-01 |
 | Item/agent state versus DB | Reuse A5 reserve/save/commit/delivery/reconciliation evidence; quarantine unknown physical effects. Agent presentation rebuilt from eligible cases/cooldowns, not journal spawn replay / A6-06,11,12 |
-| Future securities/prime/margin | Optional trusted versioned providers, with raw values+source/version/instant and explicit unavailable/unsupported results; A7/B2/B4/B6 own implementation later |
+| Future securities/prime/margin | Optional trusted versioned providers, with raw values+source/version/instant and explicit unavailable/unsupported results; A8/B2/B4/B6 own implementation later |
 
 Provider switching is the approved two-kiosk seven-day authorization protocol, preserving account ID and existing debt creditor. An account used for autopay/funding must have links explicitly updated/cancelled on closure, not silently redirected. Existing closure protections apply even if an account is at the wrong bank; provider migration cannot waive claims or protected primary status.
 

@@ -1,6 +1,6 @@
 # Current project state
 
-**A1 foundation is complete and verified.** SQLite schema V35 (minimum V1); the initial reset is complete. A2-01 through A2-03-03 are complete and verified. A3-01 through A3-05 are verified. A4-01 through A4-06 are verified. A5-01-01 through A5-02-03 and A5-03 through A5-09 are verified. A6’s23 prompts and policies are approved. [A6-01](A6-01.md) is complete as a document/source-review checkpoint. [A6-02-01](A6-02-01.md) scheduling/configuration, [A6-02-02](A6-02-02.md) diagnostics and [A6-02-03](A6-02-03.md) calendar foundation acceptance are verified. [A6-03-01](A6-03-01.md) CHF currency/cash and [A6-03](A6-03.md) institution/accounts are verified in their recorded scopes. [A6-04](A6-04.md) wealth qualification, pricing and funded yield are verified; live branch adapters are delivered by A6-05-01; fixed loan APIs are delivered by A6-09-01 with new exposure controlled by accepted reporting readiness; trading remains unimplemented. [Shared contract](../prompts/A6-credit-debt/CONTRACT.md); [approval and next-package queue](../prompts/A6-credit-debt/EXECUTION.md). Other later phases await explicit invocation.
+**A1 foundation is complete and verified.** SQLite schema V35 (minimum V1); the initial reset is complete. A2-01 through A2-03-03 are complete and verified. A3-01 through A3-05 are verified. A4-01 through A4-06 are verified. A5-01-01 through A5-02-03 and A5-03 through A5-09 are verified. A6’s 23 prompts and policies are approved. [A6-01](A6-01.md) is complete as a document/source-review checkpoint. [A6-02-01](A6-02-01.md) scheduling/configuration, [A6-02-02](A6-02-02.md) diagnostics and [A6-02-03](A6-02-03.md) calendar foundation acceptance are verified. [A6-03-01](A6-03-01.md) CHF currency/cash and [A6-03](A6-03.md) institution/accounts are verified in their recorded scopes. [A6-04](A6-04.md) wealth qualification, pricing and funded yield are verified; live branch adapters are delivered by A6-05-01; fixed loan APIs are delivered by A6-09-01 with new exposure controlled by accepted reporting readiness; trading remains unimplemented. [Shared contract](../prompts/A6-credit-debt/CONTRACT.md); [approval and next-package queue](../prompts/A6-credit-debt/EXECUTION.md). Other later phases await explicit invocation.
 
 | Package | Prerequisite | Status |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ Load only the affected contracts: [lifecycle](architecture/lifecycle.md), [stora
 
 Use [the execution workflow](WORKFLOW.md) for package boundaries, handoffs and delegation. Only the user-selected prompt authorizes package execution.
 
-Current institution contract: [catalog, funding and provider admission](architecture/institutions.md). A6-13 acceptance is complete with approved D15 automatic payments. See [automatic-payment contracts](architecture/autopay.md) and the recorded A8 playtest limits.
+Current institution contract: [catalog, funding and provider admission](architecture/institutions.md). A6-13 acceptance is complete with approved D15 automatic payments. See [automatic-payment contracts](architecture/autopay.md) and the recorded broader-playtesting limits (now planned under A10).
 
 Current wealth/pricing/yield contract: [authoritative qualification and funded servicing](architecture/wealth-pricing.md).
 
@@ -101,4 +101,11 @@ Current Collection Agent contract [presentation, cooldown, private dialogue and 
 
 Current bank/credit menu and API contract [protocol8 and version-one integration](architecture/banking-integration.md), with [A6-12 acceptance evidence](verification/A6-12.md).
 
-[A6-13 acceptance](A6-13.md) records the delivered banking foundation and approved D15 automatic payments. [Downstream contracts](architecture/a6-downstream.md) publish A7/B2/B4/B6/A8 handoffs with capabilities and prerequisites.
+[A6-13 acceptance](A6-13.md) records the delivered banking foundation and approved D15 automatic payments. [Downstream contracts](architecture/a6-downstream.md) publish A8/B2/B4/B6/A10 handoffs (renumbered from A7/A8) with capabilities and prerequisites.
+
+
+## Next planned A-series phases
+
+A6 is complete in its accepted scope. The revised sequence is **A7 Village Banking Package → A8 Economic simulation (former A7) → A9 Basic item valuation → A10 Core integration (former A8)**. All four remain planned; no implementation prompt is selected by this update.
+
+[Planning boundaries and suggested package splits](architecture/planned-a7-a10.md) cover guaranteed village banks, persistent branches, banker guides/desks, wider kiosks, reference item costs and provenance. Use this contract for implementation planning; the public roadmap does not authorize execution. Settle generation thresholds/fallbacks, staffing timing, kiosk migration and recipe policies in the selected package before implementation. B-series handoffs remain separate.

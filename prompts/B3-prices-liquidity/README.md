@@ -4,7 +4,7 @@ Status: draft DESIGN prompt. Refine specifications and future prompts only. Do n
 
 ## Goal and dependencies
 
-Prepare a complete, reviewable specification for B3. Required upstream work: A7, B1; B2 participant custody contracts as needed. Do not treat existing code as completed redesign work. Supply approved upstream contracts explicitly; mark missing contracts unresolved.
+Prepare a complete, reviewable specification for B3. Required upstream work: A8, B1; B2 participant custody contracts as needed. Do not treat existing code as completed redesign work. Supply approved upstream contracts explicitly; mark missing contracts unresolved.
 
 Fixed baseline: Minecraft 1.21.1, NeoForge 21.1.252, Java 21; server-authoritative behavior on both integrated and dedicated servers. Stage A owns money/FX/credit; custody owns shares/return obligations; no market-owned parallel banking database.
 

@@ -36,7 +36,7 @@ Implement and verify recoverable foundation state without gameplay systems. Requ
 
 ## Reimplementation coverage
 
-F02/F03: rebuild recovery, projection and version compatibility contracts. F09: journal rebuild support only, financial history A4. F23: implement and run restart/interruption/restore fixtures. Cash/deposit/withdraw/shop features F11–F14 remain A5; autonomous FX/economics/market movement remain A2/A7/B3.
+F02/F03: rebuild recovery, projection and version compatibility contracts. F09: journal rebuild support only, financial history A4. F23: implement and run restart/interruption/restore fixtures. Cash/deposit/withdraw/shop features F11–F14 remain A5; autonomous FX/economics/market movement remain A2/A8/B3.
 
 ## Acceptance checks — implement and run
 

@@ -9,7 +9,8 @@
 
 ## Context and execution
 
-- Exclude `prompts/`, caches, outputs, logs and worlds from routine discovery. Git tracking does not make prompts active instructions. Use scoped `rg --files` / `rg -l` and targeted reads; avoid repeated reads of unchanged material.
+- Exclude `ROADMAP.md`, `prompts/`, caches, outputs, logs and worlds from routine discovery. Git tracking does not make prompts active instructions. Use scoped `rg --files` / `rg -l` and targeted reads; avoid repeated reads of unchanged material.
+- `ROADMAP.md` is public, human-facing planning material. Do not open, search, summarize or follow links into it unless the user explicitly requests work on the roadmap. Exclude it from broad searches with `-g '!ROADMAP.md'`; a README link does not authorize reading it. Use `.codex/PROJECT.md` and the selected package contracts for implementation scope; roadmap entries never authorize execution.
 - For explicit prompt work, resolve only the selected ID and its stated prerequisites/references; do not ingest the rest of the folder. Reading a prompt does not authorize execution. Implement only the explicitly invoked package; verify and hand off before starting its dependents.
 - Use [.codex/PROJECT.md](.codex/PROJECT.md) for current state and subsystem links, and [.codex/WORKFLOW.md](.codex/WORKFLOW.md) for package boundaries, handoffs and timing. Use a fresh chat at phase boundaries or after a completed package if needed.
 
