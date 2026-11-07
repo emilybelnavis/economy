@@ -3,7 +3,7 @@ loaderVersion="[4,)"
 license="All Rights Reserved"
 [[mods]]
 modId="economy"
-version="0.2.0-alpha"
+version="0.3.0-alpha"
 displayName="Economy"
 logoFile="economy-icon.png"
 logoBlur=false

@@ -62,4 +62,4 @@ With Java 21 selected:
 ./gradlew runServer
 ```
 
-The jar is written to `build/libs/economy-0.2.0-alpha.jar`. Development client and server data are separate in `run/client` and `run/server`; use disposable development worlds.
+The jar is written to `build/libs/economy-0.3.0-alpha.jar`. Development client and server data are separate in `run/client` and `run/server`; use disposable development worlds.
