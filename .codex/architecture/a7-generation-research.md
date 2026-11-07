@@ -1,6 +1,6 @@
 # A7-01 generation research checkpoint
 
-Status: pinned-source research, not accepted generation feasibility and not production implementation. See [approved gameplay policies](planned-a7-a10.md), [feasibility plan](a7-feasibility-plan.md) and [template inventory](a7-template-inventory.md).
+Status: original pinned-source research, supplemented by the A7-01 resolution below. No production generation implementation. See [approved gameplay policies](planned-a7-a10.md), [feasibility plan](a7-feasibility-plan.md) and [template inventory](a7-template-inventory.md).
 
 ## Evidence and result
 
@@ -56,3 +56,15 @@ Approved recovery for plans pending because no safe site exists: operator-trigge
 Approved provider-availability exception: when an optional branch is selected but no distinct eligible institution remains after the approved foreign-provider fallback, omit only that optional branch and report the reason. Persist the selection/omission without rerolling. Required branches retain the configuration not-ready policy; terrain failures still retain pending placement plans.
 
 Verification for this checkpoint: document diff and local-link review only, following [VERIFICATION.md](../VERIFICATION.md). No automatic test, full-suite or game-launch gate is introduced.
+
+## A7-01 resolution — 2026-11-06
+
+The selected composition hook is source-feasible through public APIs: `JigsawStructure.findGenerationPoint(context)` is public, so no access transformer or injection is needed. Nested `JigsawStructure.CODEC` retains all vanilla parameters. Materialize the original deferred builder exactly once; preserve its original pieces/order and return a stub with the same position and materialized augmented builder (`Either.right`). The five definitions retain size6, distance80, absolute start height0, expansion=true, WORLD_SURFACE_WG and beard_thin adaptation. Keep original structure registry keys for locate/tags/start serialization; outer wrapper settings remain authoritative for NeoForge modifiers.
+
+Two important constraints were confirmed in pinned source. `ChunkGenerator.createReferences` scans only an eight-chunk radius: full A7 physical bounds must remain within reference reach even where the approved 96-block outward band extends farther. `PiecesContainer.load` skips unknown/corrupt child pieces, so manifest/anchor completeness must be checked before activation. These are explicit pending/conflict outcomes rather than silent missing branches.
+
+Read element identities through `StructurePoolElement.CODEC` rather than private fields or toString. Detect abandonment from the exact audited selected root template, not zombie processors: snowy abandoned starts can use empty processor lists. The [content audit](a7-template-inventory.md) validates all 123 included and 29 excluded ordinary house-pool resources, plus all 32 root variants.
+
+[Revision-1 shared contracts](a7-shared-contracts.md) supersede the open design items above. Initial physical effects use the ordinary chunk-generation window; loaded-world operator retries are additive only and cannot clear existing blocks. Missing terrain yields persistent pending plans; uncertain partial placement is conflict and never automatic repair. Provider readiness, denomination capture and storage reconciliation are detached from generation. No global safe-site guarantee is made.
+
+Evidence is pinned source inspection and actual resource-content audit. Registered wrapper serialization, five-style world generation and physical terrain placement have not run: A7-04 must verify the implemented adapter with disposable worlds. This checkpoint establishes implementable API/serialization contracts, not runtime results for code that does not yet exist.

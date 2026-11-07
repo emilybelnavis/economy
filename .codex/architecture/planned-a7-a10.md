@@ -15,7 +15,7 @@ B2 securities, B4 trading and B6 expanded lending keep their own identities and 
 
 ## A7 — Village Banking Package
 
-[A7-01 feasibility and shared-contract planning draft](a7-feasibility-plan.md) records the source-review starting point, proposed interfaces, package prerequisites and technical decisions still to resolve. It is not implementation or accepted feasibility evidence.
+[A7-01 feasibility outcome](a7-feasibility-plan.md) and [revision-1 shared contracts](a7-shared-contracts.md) now freeze the source/API-backed hook, geometry and interfaces. [Evidence](../verification/A7-01.md) distinguishes completed contract/API work from future actual generation/terrain acceptance. No production A7 world generation is installed.
 
 Target newly generated vanilla villages only. Retrofitting explored villages, player-built settlements and modded villages requires separate compatibility rules. Never overwrite player construction.
 
@@ -86,7 +86,7 @@ Approved path features: connecting paths may use stairs and small bridges. They 
 
 Approved bank appearance: compact and larger branches include institution signs, lighting and interior furnishings, matching the approved local village architectural style. Exact layouts and original assets remain design work; decoration does not grant banking authority.
 
-Implementation is organized into six independently selectable packages. See the [shared contract](../../prompts/A7-village-banking/CONTRACT.md) and [selection queue](../../prompts/A7-village-banking/EXECUTION.md). The user approved A7-01 through A7-06 for implementation on 2026-11-06, subject to their prerequisites; none is selected, implemented or verified by that approval.
+Implementation is organized into six independently selectable packages. See the [shared contract](../../prompts/A7-village-banking/CONTRACT.md) and [selection queue](../../prompts/A7-village-banking/EXECUTION.md). The user approved A7-01 through A7-06 for implementation on 2026-11-06, subject to their prerequisites; A7-01 was subsequently explicitly selected and completed in its recorded scope; approval alone selects no dependent package.
 
 1. [A7-01](../../prompts/A7-village-banking/A7-01.md): shared contracts and generation feasibility.
 2. [A7-02](../../prompts/A7-village-banking/A7-02.md): persistent branches and trusted activation.
