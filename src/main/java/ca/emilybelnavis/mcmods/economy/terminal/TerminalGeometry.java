@@ -31,6 +31,14 @@ public final class TerminalGeometry {
     public static BlockPos resolveAnchor(LevelReader level, BlockPos position) {
         return anchor(position, level.getBlockState(position));
     }
+    /** A failed match proves damage only when the complete footprint and support can be observed. */
+    public static boolean fullyLoaded(LevelReader level, BlockPos anchor) {
+        if (!level.hasChunkAt(anchor)) return false;
+        for (var position : cells(anchor, level.getBlockState(anchor))) {
+            if (!level.hasChunkAt(position) || !level.hasChunkAt(position.below())) return false;
+        }
+        return true;
+    }
     public static boolean matches(LevelReader level, BlockPos anchor, UUID generation) {
         if (!level.hasChunkAt(anchor) || !(level.getBlockEntity(anchor) instanceof TerminalBlockEntity entity)
                 || !entity.generation().equals(generation) || !entity.validIdentity() || entity.geometryPending()) return false;

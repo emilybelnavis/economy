@@ -2,6 +2,10 @@
 
 Completed features, gameplay changes and notable fixes, grouped by date and phase/task. Newest dates appear first. Internal housekeeping, version-only changes and verification logs are omitted.
 
+## 2026-11-07
+
+- Fixed generated kiosks spanning chunk boundaries being permanently disabled when their neighboring chunk was unloaded.
+
 ## 2026-11-06
 
 ### A7 — Village banking foundation

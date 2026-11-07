@@ -72,7 +72,10 @@ public final class BranchBootstrap {
                     for(var a:view.get().anchors()){
                         var anchor=new TerminalPolicy.Anchor(a.get("dimension"),Integer.parseInt(a.get("x")),Integer.parseInt(a.get("y")),Integer.parseInt(a.get("z")));
                         var level=level(server,anchor);var pos=new BlockPos(anchor.x(),anchor.y(),anchor.z());
-                        if(level==null||!level.hasChunkAt(pos))continue;
+                        // Unloaded satellites and an in-progress geometry upgrade are not removal evidence.
+                        // Do not persist an outbox entry until the whole footprint is observable.
+                        if(level==null||!TerminalGeometry.fullyLoaded(level,pos))continue;
+                        if(level.getBlockEntity(pos) instanceof TerminalBlockEntity pending&&pending.geometryPending())continue;
                         var key=new Key(view.get().id(),anchor,UUID.fromString(a.get("generation")),false);
                         var entity=live(server,key);
                         if(entity!=null){
