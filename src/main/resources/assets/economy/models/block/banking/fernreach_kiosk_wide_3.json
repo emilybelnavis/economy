@@ -1,0 +1,19 @@
+{
+  "parent": "economy:block/branch_kiosk_wide_shape_3",
+  "textures": {
+    "front": "economy:block/banking/fernreach_kiosk_front",
+    "shell": "economy:block/banking/fernreach_kiosk_shell",
+    "trim": "economy:block/banking/fernreach_kiosk_trim",
+    "metal": "economy:block/banking/fernreach_kiosk_metal",
+    "dark": "economy:block/banking/fernreach_kiosk_dark",
+    "keypad": "economy:block/banking/fernreach_kiosk_keypad",
+    "slot": "economy:block/banking/fernreach_kiosk_slot",
+    "vent": "economy:block/banking/fernreach_kiosk_vent",
+    "screen": "economy:block/terminal_screen",
+    "glass": "economy:block/banking/fernreach_kiosk_front",
+    "chart": "economy:block/banking/fernreach_kiosk_front",
+    "particle": "economy:block/banking/fernreach_kiosk_shell",
+    "header": "economy:block/banking/fernreach_kiosk_wide_header"
+  },
+  "render_type": "minecraft:cutout"
+}

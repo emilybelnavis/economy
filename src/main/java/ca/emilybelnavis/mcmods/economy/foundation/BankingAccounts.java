@@ -24,7 +24,7 @@ import net.minecraft.server.level.ServerPlayer;
 public final class BankingAccounts {
     private static final String PENDING = "economy_banking_pending";
     private static final Set<String> ACTIONS = Set.of("setup", "accounts", "accounts_next", "manage_accounts", "account_select", "account_open", "account_close_preview", "account_close_confirm",
-            "history", "history_next", "fx", "exchange_preview", "exchange_confirm", "settings", "configure", "bank_retry", "branch_open", "branch_assign", "branch_switch", "branch_accept", "branch_close", "branch_products", "brand_preview", "brand_confirm", "cards", "card_select", "card_preview", "card_confirm", "card_lost", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next");
+            "history", "history_next", "fx", "exchange_preview", "exchange_confirm", "settings", "kiosk_upgrade", "configure", "bank_retry", "branch_open", "branch_assign", "branch_switch", "branch_accept", "branch_close", "branch_products", "brand_preview", "brand_confirm", "cards", "card_select", "card_preview", "card_confirm", "card_lost", "credit_profile", "credit_history", "credit_next", "credit_facilities", "credit_facilities_next", "credit_facility", "credit_statements", "credit_statements_next");
     private static final Map<BankingMenu, State> STATES = new WeakHashMap<>();
     private static final class State {
         AccountId cardAccount;
@@ -101,6 +101,14 @@ public final class BankingAccounts {
                 case "fx" -> fx(audience, services, grant, state);
                 case "exchange_preview" -> exchangePreview(audience, services, grant, state, value);
                 case "exchange_confirm" -> exchangeConfirm(audience, services, grant, state);
+                case "kiosk_upgrade" -> {
+                    if(audience.menu().access()!=BankingMenu.Access.ADMIN){unavailable(audience,"settings");return;}
+                    audience.menu().setBusy(true);
+                    ca.emilybelnavis.mcmods.economy.terminal.KioskUpgradeController.request(audience.player(),
+                            new net.minecraft.core.BlockPos(audience.menu().anchor().x(),audience.menu().anchor().y(),audience.menu().anchor().z()),
+                            message->{if(audience.player().server.getPlayerList().getPlayer(audience.player().getUUID())==audience.player())audience.player().displayClientMessage(net.minecraft.network.chat.Component.literal(message),false);});
+                    audience.player().closeContainer();
+                }
                 case "settings" -> settings(audience, services);
                 case "configure" -> configure(audience, services, grant, state, value);
                 case "bank_retry" -> retry(audience, services, grant, state);
@@ -839,6 +847,12 @@ public final class BankingAccounts {
                 controls.add(new BankingNetwork.Choice("configure",form,"Save native-currency settings",true));
             }
             var position=new net.minecraft.core.BlockPos(terminal.anchor().x(),terminal.anchor().y(),terminal.anchor().z());
+            var physical=audience.player().serverLevel().getBlockState(position);
+            if(terminal.kind()==TerminalPolicy.Kind.KIOSK&&physical.getBlock() instanceof ca.emilybelnavis.mcmods.economy.terminal.BranchKioskBlock
+                    &&!physical.getValue(ca.emilybelnavis.mcmods.economy.terminal.BranchKioskBlock.WIDE)){
+                lines.add("Legacy narrow kiosk. Upgrade is free and needs a clear, supported extra column.");
+                controls.add(new BankingNetwork.Choice("kiosk_upgrade","","Upgrade kiosk",false));
+            }
             if(audience.player().serverLevel().getBlockEntity(position) instanceof ca.emilybelnavis.mcmods.economy.terminal.TerminalBlockEntity entity)entity.applyPolicy(terminal);
             reply(audience,"settings",lines,"Owner/operator configuration",controls);
         });

@@ -1,6 +1,6 @@
 # A7 Village Banking — shared package contract
 
-Status: A7-01 through A7-06 approved by the user for implementation on 2026-11-06, subject to documented prerequisites. A7-01 was subsequently selected and executed as recorded in the [handoff](../../.codex/A7-01.md); this approval record alone selects no later package. Execute one explicitly invoked package, verify its scope and hand off before starting a dependent package. Approval is not implementation or verification.
+Status: A7-01 through A7-06 approved by the user for implementation on 2026-11-06, subject to documented prerequisites. A7-01 was subsequently selected and executed as recorded in the [handoff](../../.codex/A7-01.md); A7-02 was subsequently explicitly selected and implemented as recorded in [its handoff](../../.codex/A7-02.md); A7-03 was subsequently selected and completed as recorded in [its handoff](../../.codex/A7-03.md); this approval record alone selects no later package. Execute one explicitly invoked package, verify its scope and hand off before starting a dependent package. Approval is not implementation or verification.
 
 ## Authoritative scope
 

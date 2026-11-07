@@ -1,0 +1,19 @@
+{
+  "parent": "economy:block/branch_kiosk_wide_shape_3",
+  "textures": {
+    "front": "economy:block/terminal_screen",
+    "shell": "economy:block/terminal_shell",
+    "trim": "economy:block/terminal_trim",
+    "metal": "economy:block/terminal_metal",
+    "dark": "economy:block/terminal_dark",
+    "keypad": "economy:block/terminal_keypad",
+    "slot": "economy:block/terminal_slot",
+    "vent": "economy:block/terminal_vent",
+    "screen": "economy:block/terminal_screen",
+    "glass": "economy:block/terminal_screen",
+    "chart": "economy:block/terminal_screen",
+    "particle": "economy:block/terminal_shell",
+    "header": "economy:block/terminal_wide_kiosk_header"
+  },
+  "render_type": "minecraft:cutout"
+}

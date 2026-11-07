@@ -184,6 +184,7 @@ public final class TerminalPolicy {
         if (action != Action.PLACE && !current.active()) return reject("TERMINAL_REMOVED");
         if (current != null && current.revision() == Long.MAX_VALUE) return reject("TERMINAL_REVISION_LIMIT");
 
+        if(action==Action.CONFIGURE&&!KioskUpgrades.usable(reads,world,current.generation()))return decline("KIOSK_UPGRADE_PENDING");
         Snapshot changed;
         if (action == Action.PLACE) {
             if (!reads.query("SELECT generation FROM terminal_generations WHERE world_id=? AND generation=?",
@@ -226,7 +227,7 @@ public final class TerminalPolicy {
     /** Trusted admission guard. Removed and replaced generations cannot validate an old session. */
     public static boolean matches(ReadView reads, WorldId world, Anchor anchor, UUID generation, long revision) {
         return raw(reads, world, anchor).filter(snapshot -> snapshot.active() && snapshot.generation().equals(generation)
-                && snapshot.revision() == revision).isPresent();
+                && snapshot.revision() == revision && Branches.serviceUsable(reads,world,generation) && KioskUpgrades.usable(reads,world,generation)).isPresent();
     }
 
     static Optional<Snapshot> raw(ReadView reads, WorldId world, Anchor anchor) {

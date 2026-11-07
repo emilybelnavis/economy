@@ -12,6 +12,11 @@ import net.minecraft.world.level.saveddata.SavedData;
 public final class TerminalRemovals extends SavedData {
     public record Removal(String dimension, BlockPos anchor, UUID generation, UUID owner, TerminalPolicy.Kind kind) {}
     private final LinkedHashMap<UUID, Removal> pending = new LinkedHashMap<>();
+    public record BranchRemoval(UUID branch,TerminalPolicy.Anchor anchor,UUID generation) {}
+    private final LinkedHashMap<UUID,BranchRemoval> branches=new LinkedHashMap<>();
+    public void addBranch(BranchRemoval value){if(branches.putIfAbsent(value.generation(),value)==null)setDirty();}
+    public void completeBranch(UUID generation){if(branches.remove(generation)!=null)setDirty();}
+    public List<BranchRemoval> branchPage(int limit){if(limit<1||limit>16)throw new IllegalArgumentException("Branch removal page");return branches.values().stream().limit(limit).toList();}
     private TerminalRemovals() {}
     public static TerminalRemovals get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(TerminalRemovals::new,
@@ -35,6 +40,12 @@ public final class TerminalRemovals extends SavedData {
                     entry.getUUID("generation"), entry.getUUID("owner"), TerminalPolicy.Kind.valueOf(entry.getString("kind")));
             result.pending.put(value.generation(), value);
         }
+        var branchEntries=tag.getList("branches",Tag.TAG_COMPOUND);
+        for(int i=0;i<branchEntries.size();i++){
+            var entry=branchEntries.getCompound(i);
+            var anchor=new TerminalPolicy.Anchor(entry.getString("dimension"),entry.getInt("x"),entry.getInt("y"),entry.getInt("z"));
+            var removal=new BranchRemoval(entry.getUUID("branch"),anchor,entry.getUUID("generation"));result.branches.put(removal.generation(),removal);
+        }
         return result;
     }
     @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
@@ -46,6 +57,12 @@ public final class TerminalRemovals extends SavedData {
             entry.putUUID("generation", value.generation()); entry.putUUID("owner", value.owner()); entry.putString("kind", value.kind().name());
             entries.add(entry);
         }
-        tag.put("pending", entries); return tag;
+        tag.put("pending", entries);
+        var branchEntries=new ListTag();
+        for(var value:branches.values()){
+            var entry=new CompoundTag();entry.putUUID("branch",value.branch());entry.putUUID("generation",value.generation());
+            entry.putString("dimension",value.anchor().dimension());entry.putInt("x",value.anchor().x());entry.putInt("y",value.anchor().y());entry.putInt("z",value.anchor().z());branchEntries.add(entry);
+        }
+        tag.put("branches",branchEntries);return tag;
     }
 }

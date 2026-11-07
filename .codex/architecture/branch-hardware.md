@@ -31,3 +31,13 @@ Banking protocol is version 3 (new access enum/actions). Packets contain bounded
 ATM/teller may service any owned bank account. Cash always uses the hardware bank's native currency, including withdrawal input parsing; differing account currency requires explicit captured FX/ordinary tier pricing, same currency has no extra fee. Unsupported replacement, credit-card and loan application entries report unavailable without issuing facilities, fees or readiness claims. No new network financial authority, debt entity or financial database exists.
 
 World/block appearance updates and dropped items are non-atomic Minecraft effects; they never create account/issuance evidence. Existing A5 custody controls all money/items and uncertain delivery. Schema DDL remains the stopped-world atomic migration/backup protocol; runtime work and admission queues retain their existing bounds.
+
+
+## A7-02 generated branch identity
+
+Schema V36 adds durable presentation plans/service anchors and a typed SystemActorId bootstrap path, distinct from player owner UUIDs. New generated kiosk activation composes existing PLACE/native BIND and branch history atomically, preserves custody/revision gates and never creates financial entities. The physical anchor saves village_branch separately; reload/removal uses a branch outbox and loaded-only reconciler. Worker admission checks branch/anchor servicing state, and generated bindings cannot be rebranded away from the captured institution. Legacy terminals retain their existing behavior. [Exact current interfaces/recovery/commands](village-branches.md). No production generator or wider kiosk is installed; the physical adapter currently accepts only captured narrow kiosks.
+
+
+## A7-03 current kiosk geometry
+
+The stable branch_kiosk ID now explicitly stores wide=false for legacy two-cell forms and wide=true for four-cell consoles. New items place the wide form; old palette loading never occupies an extra block. Owner/operator settings offer a free explicit upgrade with loaded air/support/permission/collision checks, unchanged generation/bank/native currency and staged revision invalidation. Schema V37 persists upgrade preparation/outcomes; fresh banking/config/rebranding is blocked while pending, complete forms reconcile, partial forms never rebuild automatically. [Full current contract and original asset sources](kiosk-upgrades.md), [observed four-facing client evidence](../verification/A7-03.md). No village generation or bankers are installed.

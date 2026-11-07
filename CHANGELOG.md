@@ -4,6 +4,20 @@ Completed features, gameplay changes and notable fixes, grouped by date and phas
 
 ## 2026-11-06
 
+### A7 — Village banking foundation
+
+**A7-03 — Wider kiosks and legacy upgrades**
+
+- Added original broad-screen kiosk consoles with institution/currency headers, counters, recessed bases and side panels across all 23 bank appearances and the neutral design.
+- New placements are two blocks wide and two blocks high. Existing narrow kiosks keep their footprint and can be upgraded explicitly for free in owner/operator settings, preserving identity and bank bindings.
+- Added recoverable geometry upgrades, stale-session invalidation, loaded space/support checks and fail-closed interrupted placement. Storage is now schema 37 with the normal stopped-world upgrade-backup requirement.
+
+**A7-02 — Persistent branches and trusted activation**
+
+- Added durable village/branch plans, service-anchor identities, removal history and bounded operator inspection, pause/resume and required-provider retry controls.
+- Added scoped, recoverable activation for generated kiosks without creating customer accounts or institutional capital. Village bank generation, wider kiosks and bankers are not installed yet.
+- Advanced storage to schema 36; existing worlds require the normal stopped-world upgrade backup.
+
 ### A6 — Banking, credit and debt
 
 **Creative Collection Agents**

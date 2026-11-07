@@ -61,6 +61,15 @@ public final class TerminalBanking {
         if(current==null||!authority.allows(TerminalPolicy.Action.CONFIGURE,intent,current,reads)
                 ||!current.owner().equals(intent.actor())&&!operators.allows(intent.actor(),reads))return decline("TERMINAL_ACCESS");
         if(!current.active()||!current.generation().equals(generation)||current.revision()!=revision)return reject("TERMINAL_STALE");
+        return prepareBinding(world,bank,current,reads);
+    }
+
+    /** Package-internal composition for a prepared placement; retains the same custody/native binding rules. */
+    static Decision prepareBinding(WorldId world,InstitutionCatalog.Entry bank,TerminalPolicy.Snapshot current,ReadView reads) {
+        long revision=current.revision();
+        var anchor=current.anchor();var generation=current.generation();
+        if(!KioskUpgrades.usable(reads,world,generation))return decline("KIOSK_UPGRADE_PENDING");
+        if(!Branches.providerMatches(reads,world,generation,bank.id().key()))return reject("TERMINAL_GENERATED_BANK_LOCKED");
         if(current.kind()==TerminalPolicy.Kind.REGISTER)return reject("TERMINAL_BANK_KIND");
         if(revision==Long.MAX_VALUE)return reject("TERMINAL_REVISION_LIMIT");
         if(current.binding()!=null && current.binding().migrationState()==MigrationState.ENABLED
@@ -84,7 +93,7 @@ public final class TerminalBanking {
     public static boolean matches(ReadView reads,WorldId world,TerminalPolicy.Anchor anchor,UUID generation,long revision,
                                   InstitutionCatalog.InstitutionId bank) {
         return TerminalPolicy.raw(reads,world,anchor).filter(s->s.active()&&s.generation().equals(generation)&&s.revision()==revision
-                &&s.binding()!=null&&s.binding().bound()&&s.binding().institution().equals(bank)).isPresent();
+                &&s.binding()!=null&&s.binding().bound()&&s.binding().institution().equals(bank)&&Branches.serviceUsable(reads,world,generation)&&KioskUpgrades.usable(reads,world,generation)).isPresent();
     }
     public static boolean bound(ReadView reads,WorldId world,TerminalPolicy.Anchor anchor,UUID generation) {
         return find(reads,world,anchor,generation).filter(Binding::bound).isPresent();

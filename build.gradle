@@ -207,3 +207,9 @@ if (providers.gradleProperty('financeWorld').isPresent()) {
         }
     }
 }
+
+// Opt-in disposable integrated-client kiosk upgrade witness; excluded from release jars.
+if (providers.gradleProperty('kioskUpgradeProbe').isPresent()) {
+    neoForge.mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
+    tasks.named('runClient') { systemProperty 'economy.kioskUpgradeProbe', 'true' }
+}

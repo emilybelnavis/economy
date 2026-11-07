@@ -88,6 +88,7 @@ public final class Economy {
         DenominationChooser.register(event.getDispatcher(), choosers::get);
         FxAdminCommands.register(event.getDispatcher(), servers::get, Clock.systemUTC());
         LedgerCommands.register(event.getDispatcher(), servers::get);
+        ca.emilybelnavis.mcmods.economy.foundation.BranchCommands.register(event.getDispatcher(), servers::get);
         ca.emilybelnavis.mcmods.economy.foundation.CreditCommands.register(event.getDispatcher(), servers::get);
         ca.emilybelnavis.mcmods.economy.foundation.LoanCommands.register(event.getDispatcher(), servers::get);
         ca.emilybelnavis.mcmods.economy.foundation.DebtCommands.register(event.getDispatcher(), servers::get);
@@ -144,10 +145,15 @@ public final class Economy {
             var previous = services.state();
             var previousPhase = services.progress().phase();
             ca.emilybelnavis.mcmods.economy.institution.KioskAdmission.tick(event.getServer());
+            ca.emilybelnavis.mcmods.economy.foundation.BranchCommands.tick(event.getServer());
+            ca.emilybelnavis.mcmods.economy.terminal.BranchBootstrap.revalidate(event.getServer());
+            ca.emilybelnavis.mcmods.economy.terminal.KioskUpgradeController.revalidate(event.getServer());
             services.tick();
             ca.emilybelnavis.mcmods.economy.collection.CollectionAgents.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.collection.CollectionDialogue.tick(event.getServer());
+            ca.emilybelnavis.mcmods.economy.terminal.KioskUpgradeController.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.terminal.TerminalLifecycle.tick(event.getServer());
+            ca.emilybelnavis.mcmods.economy.terminal.BranchBootstrap.tick(event.getServer());
             choosers.get(event.getServer()).tick(event.getServer());
             if (!services.progress().phase().equals(previousPhase)) LOGGER.info("Economy startup progress: {} ({}/{})", DiagnosticsReport.recoveryPhase(services.progress().phase()), services.progress().completed(), services.progress().target());
             if (services.state() != previous) {
@@ -161,6 +167,9 @@ public final class Economy {
         ca.emilybelnavis.mcmods.economy.collection.CollectionDialogue.stop(event.getServer());
         ca.emilybelnavis.mcmods.economy.collection.CollectionAgents.stop(event.getServer());
         shutdownErrors.put(event.getServer(),new ca.emilybelnavis.mcmods.economy.recovery.ShutdownErrors());
+        ca.emilybelnavis.mcmods.economy.foundation.BranchCommands.stopped(event.getServer());
+        ca.emilybelnavis.mcmods.economy.terminal.BranchBootstrap.stopped(event.getServer());
+        ca.emilybelnavis.mcmods.economy.terminal.KioskUpgradeController.stopped(event.getServer());
         ServerServices services = servers.remove(event.getServer());
         choosers.remove(event.getServer());
         activeChoosers.remove(event.getServer());
@@ -177,6 +186,7 @@ public final class Economy {
         invalidConfiguration.remove(event.getServer());
         ca.emilybelnavis.mcmods.economy.institution.KioskAdmission.stopped(event.getServer());
         ca.emilybelnavis.mcmods.economy.terminal.TerminalLifecycle.stopped(event.getServer());
+        ca.emilybelnavis.mcmods.economy.terminal.BranchBootstrap.stopped(event.getServer());
         FoundationRuntime runtime=runtimes.remove(event.getServer());
         ServerServices orphan=servers.remove(event.getServer());
         choosers.remove(event.getServer());

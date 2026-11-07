@@ -875,6 +875,14 @@ public final class LedgerService implements ca.emilybelnavis.mcmods.economy.api.
                 TerminalPolicy.registration(action, services.partyWorld(), catalog, authority, operators), publisher);
     }
 
+    public JournalService kioskUpgrade(KioskUpgrades.Action action, JournalEngine.AccessPolicy admission,
+            TerminalPolicy.Authority authority,TerminalPolicy.Operators operators){
+        return trustedJournal(action.kind(),admission,KioskUpgrades.registration(action,services.partyWorld(),authority,operators),null);
+    }
+    public CompletionStage<Optional<KioskUpgrades.Upgrade>> kioskUpgrade(UUID generation){
+        var world=services.partyWorld();return services.storage(()->store.transaction(tx->KioskUpgrades.find(tx::query,world,generation)));
+    }
+
     public JournalService terminalBanking(JournalEngine.AccessPolicy admission, TerminalPolicy.Authority authority,
             TerminalPolicy.Operators operators) {
         return trustedJournal(TerminalBanking.BIND, admission,

@@ -52,6 +52,8 @@ final class OfflineInspector {
             if (schema >= 32) ca.emilybelnavis.mcmods.economy.debt.DebtDiagnosticSchema.validate(c);
             if (schema >= 34) ca.emilybelnavis.mcmods.economy.collection.CollectionPresenceSchema.validate(c);
             if (schema >= 35) ca.emilybelnavis.mcmods.economy.autopay.AutopaySchema.validate(c);
+            if (schema >= 36) VillageBranchSchema.validate(c);
+            if (schema >= 37) ca.emilybelnavis.mcmods.economy.journal.KioskUpgrades.validate(c);
             if (schema >= 33) {
                 ca.emilybelnavis.mcmods.economy.debt.DebtLegacySchema.validate(c);
                 ca.emilybelnavis.mcmods.economy.credit.CreditReportingSchema.validate(c);

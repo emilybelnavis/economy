@@ -42,7 +42,7 @@ public final class TerminalBlockItem extends BlockItem {
         WideTerminalBlock.beginPlacement(level, anchor);
         boolean placed = false;
         try {
-            for (int cell = 0; cell < wide.cellCount(); cell++) {
+            for (int cell = 0; cell < wide.cellCount(state); cell++) {
                 if (!level.setBlock(cells.get(cell), state.setValue(wide.cellProperty(), cell), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE)) {
                     for (int restore = cell; restore >= 0; restore--) level.setBlock(cells.get(restore), before.get(restore), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
                     return false;

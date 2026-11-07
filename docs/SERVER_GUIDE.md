@@ -40,9 +40,28 @@ The edit takes effect at the next UTC midnight. Variation and pull each accept 0
 Bounds accept 0–999,999 ppm, with the resulting band limited to 0.000000000001–1,000,000.
 For an uncertain result, repeat the same command with the same operation UUID.
 
+## Wider kiosks and legacy upgrades
+
+New branch kiosks occupy two blocks across and two blocks high. Existing narrow kiosks keep their original footprint when loaded. Owners or operators can sneak-right-click with an empty hand, open settings and select **Upgrade kiosk**. The upgrade is free and preserves the kiosk's bank, native currency and placement identity.
+
+The extra column must be loaded, empty, supported and clear of entities. Protected/blocked space or unfinished cash/custody work prevents the upgrade. A blocked preflight leaves the narrow kiosk working. Successful upgrades invalidate stale banking sessions; reopen the kiosk after completion.
+
+An interrupted upgrade can briefly disable service while its saved outcome is checked. Complete narrow or wide geometry can reconcile without adding blocks. A partial footprint stays disabled and is never filled or rebuilt automatically; an operator must restore a complete original or wide footprint before reconciliation can finish. Removing hardware never changes customer accounts, balances or debts.
+
+## Village branch diagnostics
+
+Village branch persistence is available for server integrations; automatic village bank generation is not installed yet. An empty plan/branch list is normal. These commands require an authenticated operator or the server console:
+
+- `/economy branch plans [after <village-id>]` and `/economy branch list [after <branch-id>]`: pages of up to 16 records.
+- `/economy branch status <branch-id>`: captured bank/currency, plan revisions, service generations, loaded/unknown observations and recent operation history.
+- `/economy branch staffing <branch-id> pause|resume`: persist replacement pause state; bankers are not implemented yet.
+- `/economy branch retry <branch-id> <expected-revision>`: explicitly retry missing required-provider selection while retaining prior choices. Terrain retries report `PLACEMENT_ADAPTER_UNAVAILABLE` until placement is installed. Removed or conflicted branches cannot be rebuilt with this command.
+
+Branch records and generated hardware never create customer accounts, capital or money. Keep the operation ID shown by a write command if its outcome is uncertain; do not assume it failed. Dismantling hardware never closes accounts or changes debts.
+
 ## Schema upgrades
 
-New worlds initialize automatically. Worlds on schemas 1 through 34 require a validated complete-world backup before upgrading to schema 35. Prepare it while Minecraft is fully stopped:
+New worlds initialize automatically. Worlds on schemas 1 through 36 require a validated complete-world backup before upgrading to schema 37. Prepare it while Minecraft is fully stopped:
 
 ```sh
 ./gradlew prepareEconomyUpgrade -PeconomyWorld=/absolute/path/to/world
@@ -66,7 +85,7 @@ Restore into a **new, separate directory**:
 ./gradlew restoreEconomyWorld -PeconomyBackup=/absolute/path/to/backup-id -PeconomyRestoreDestination=/absolute/path/to/new-world
 ```
 
-The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 35 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
+The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 37 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
 
 There is no online backup, automatic replacement, or retention/deletion service. Operators own backup storage and retention. Failed restores can leave a hidden staging directory without publishing the destination.
 

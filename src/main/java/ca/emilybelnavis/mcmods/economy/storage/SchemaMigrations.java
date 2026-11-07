@@ -8,7 +8,7 @@ import java.util.UUID;
 /** Ordered trusted SQL; the complete pending chain shares one transaction. */
 final class SchemaMigrations {
     static final int MINIMUM_SUPPORTED = 1;
-    static final int CURRENT = 35;
+    static final int CURRENT = 37;
     static final int APPLICATION_ID = 0x45434F4E;
     record Migration(int version, String name, List<String> statements) {
         Migration { statements = List.copyOf(statements); }
@@ -60,7 +60,9 @@ final class SchemaMigrations {
             new Migration(32,"bounded debt diagnostics",ca.emilybelnavis.mcmods.economy.debt.DebtDiagnosticSchema.statements()),
             new Migration(33,"accepted debt reporting and recurring score sources",debtAcceptanceStatements()),
             new Migration(34,"collection presentation leases and death cooldowns",ca.emilybelnavis.mcmods.economy.collection.CollectionPresenceSchema.statements()),
-            new Migration(35,"consented automatic payments and exact statement targets",ca.emilybelnavis.mcmods.economy.autopay.AutopaySchema.statements()));
+            new Migration(35,"consented automatic payments and exact statement targets",ca.emilybelnavis.mcmods.economy.autopay.AutopaySchema.statements()),
+            new Migration(36,"durable village branches and trusted hardware activation",VillageBranchSchema.statements()),
+            new Migration(37,"recoverable legacy kiosk geometry upgrades",ca.emilybelnavis.mcmods.economy.journal.KioskUpgrades.statements()));
 
     private static List<String> debtAcceptanceStatements() {
         var statements=new java.util.ArrayList<String>();

@@ -22,7 +22,7 @@ Original boundary B is the inclusive X/Z rectangle union of **all original selec
 
 ## Floor plans and physical envelopes
 
-Coordinates are local integers, front is z=0, x increases to the right when viewed from the entrance, floor block layer is y=0 (walking feet at y=1). Rotate around the local origin by a horizontal quarter turn; transform all boxes/anchors together. Footprints below include roof overhang; support/clearance envelopes are additional. No reflections in revision 1. All five styles use these same service geometry contracts; A7-04 authors original matching shells/materials, lighting and institution signs. Decorations cannot encroach on the clear service cells.
+Coordinates are local integers, front is z=0, x follows Minecraft +X before quarter-turn rotation, floor block layer is y=0 (walking feet at y=1). Rotate around the local origin by a horizontal quarter turn; transform all boxes/anchors together. Footprints below include roof overhang; support/clearance envelopes are additional. No reflections in revision 1. All five styles use these same service geometry contracts; A7-04 authors original matching shells/materials, lighting and institution signs. Decorations cannot encroach on the clear service cells.
 
 | Feature | Compact | Larger |
 | --- | --- | --- |
@@ -30,15 +30,15 @@ Coordinates are local integers, front is z=0, x increases to the right when view
 | Interior clear volume | x=1..9,z=1..7,y=1..3 | x=1..15,z=1..9,y=1..3 |
 | Entrance threshold | (5,1,0), 1 wide, 3 clear high | (8,1,0), 1 wide, 3 clear high |
 | Entry aisle | x=4..6,z=0..6,y=1..3 | x=7..9,z=0..8,y=1..3 |
-| Kiosk lower anchors | (1,1,2) | (1,1,2), (13,1,2) |
-| Kiosk local occupied cells | anchor + x=0..1,y=0..1,z=0 | same per anchor |
-| Kiosk standing cells | anchor + x=0..1,y=0..2,z=-1 | same per anchor |
+| Kiosk lower anchors | (2,1,2) | (2,1,2), (14,1,2) |
+| Kiosk local occupied cells | anchor + x=-1..0,y=0..1,z=0 | same per anchor |
+| Kiosk standing cells | anchor + x=-1..0,y=0..2,z=-1 | same per anchor |
 | Desk lower anchors | (7,1,5) | (2,1,7), (12,1,7) |
 | Desk occupied cells | anchor + x=0..1,y=0..1,z=0 | same per anchor |
 | Banker workstation | anchor + (0,0,1), 3 clear high | same per anchor |
 | Customer desk approach | anchor + x=0..1,y=0..2,z=-1 | same per anchor |
 
-All kiosk/desk fronts face local -Z; local +X satellite transforms to the corresponding right vector. Staff can reach desks through the rear and outside the entry aisle. Reserve one full block outside the shell for clearance, excluding the planned path join. Provide solid support under every shell floor/desk/kiosk cell. Beds/rest positions are reserved at compact (2,1,6)..(2,1,7), larger (5,1,8)..(5,1,9) and (10,1,8)..(10,1,9); do not occupy workstation/approach cells. Staff navigation and service observations may only use loaded cells. Desk geometry/slot IDs are plain records; A7-04 must not reference A7-05 entity/block classes. Desk placeholders are non-authoritative until A7-05 installs the workstation adapter.
+All kiosk/desk fronts face local -Z. Kiosk satellites follow facing.getCounterClockWise() (local -X for north-facing geometry); the reserved desk footprint remains local +X. A7-03 corrected future kiosk anchors to fit the actual established terminal direction convention without moving existing placements. Staff can reach desks through the rear and outside the entry aisle. Reserve one full block outside the shell for clearance, excluding the planned path join. Provide solid support under every shell floor/desk/kiosk cell. Beds/rest positions are reserved at compact (2,1,6)..(2,1,7), larger (5,1,8)..(5,1,9) and (10,1,8)..(10,1,9); do not occupy workstation/approach cells. Staff navigation and service observations may only use loaded cells. Desk geometry/slot IDs are plain records; A7-04 must not reference A7-05 entity/block classes. Desk placeholders are non-authoritative until A7-05 installs the workstation adapter.
 
 Wider kiosk upgrade reserves exactly the extra right column of the existing anchor/facing. Preserve anchor generation/bank identity; advance geometry/policy revision atomically through the existing custody gate. Legacy narrow representation remains valid. Failure during preflight leaves it unchanged; uncertain effects disable fresh admission until reconciled, never invent a new binding. A7-03 supplies the actual geometry state and rollback implementation.
 
@@ -101,3 +101,13 @@ No staffing implementation in A7-01/02/04. Template desk slots do not depend on 
 Vacancy needs positive death/removal or authoritative persistent entity-removal evidence; absence in a loaded chunk is insufficient if the assigned entity may have unloaded elsewhere. UNKNOWN freezes progress/spawn. Increment elapsed by one for each observed running-server tick with an active loaded branch, valid vacant desk, confirmed missing employee and no pause; clamp to 24,000. Offline, unload, unavailable observation, invalid desk and pause add zero; sleep/daytime jumps add no extra ticks. Persist elapsed checkpoints via storage, and on stop drain using existing lifecycle. Crash before checkpoint can lose uncommitted progress, never gain it; record this bound (maximum 200 ticks per checkpoint). Pause acknowledgement must commit accumulated ticks and paused state before reporting success. Resume retains elapsed and performs fresh checks. At threshold reserve one replacement UUID/operation durably before spawn; mark entity with assignment identity; after uncertain spawn reconcile that UUID loaded-only, never spawn another because it was not observed. Restart restores reserved identity and saved elapsed; removal invalidates lease immediately.
 
 Operator command contract: `/economy branch status <id>`, `/economy branch list [after <id>]` (max16), `/economy branch staffing <id> pause|resume`, `/economy branch retry <id> <expectedRevision>`. Console or authenticated permission-level-2 operator; no client-supplied branch grant. Status shows captured denomination/provider/resource revisions, per-slot states/reasons, placement attempt/original operations, loaded/unknown service/desk state, timer/pause. Retry applies only SITE_PENDING/PROVIDER_PENDING, rechecks current terrain/provider requirements and journals the actor/revision, never forces chunk loads or rebuilds REMOVED/CONFLICT. No account balances/private customer data. Command reads are bounded/indexed and write commands require durable acknowledgement; no global scan or repair-all. A7-02 implements status/provider state; terrain retry stays unavailable with an explicit reason until A7-04 installs placement.
+
+
+## A7-02 implementation binding
+
+[Current branch architecture](village-branches.md) maps these frozen responsibilities to BranchPlans/BranchSelection, Branches, BranchService, BranchBootstrap and BranchCommands. Schema V36 delivers captured plans and independent mutable lifecycle, required-provider-fill history and trusted atomic native kiosk activation. The generation-local256KiB codec cap remains, while durable journal admission explicitly caps64KiB; an over-limit source stays in its outbox with BRANCH_PLAN_JOURNAL_LIMIT. No oversized source is silently truncated or claimed captured. Per-chunk manifests are immutable source inputs; A7-04 owns actual receipts and versioned later-site/anchor attempt records. Staffing remains A7-05 work; only pause state/reserved desk data exists. [A7-02 evidence](../verification/A7-02.md) separates observed SQLite behavior from unobserved game lifecycle/terrain behavior.
+
+
+## A7-03 current geometry and upgrade binding
+
+[Wide kiosk contract](kiosk-upgrades.md) delivers explicit wide=false legacy palettes, wide=true new placement, state-aware geometry and free owner/operator upgrades with schema V37 coordination. PREPARED blocks fresh finance/config/rebranding; full verified forms COMPLETE/ABORT, partial/unloaded geometry stays disabled without auto-rebuild. Actual four-facing disposable client evidence is in [A7-03 verification](../verification/A7-03.md). The floor-plan kiosk anchor/footprint correction above is technical, preserves all approved gameplay numbers and affects only future templates. A7-04 must use state-aware helpers and literal narrow/wide captured geometry; no generator is installed by A7-03.

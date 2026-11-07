@@ -337,6 +337,15 @@ public final class ServerServices {
     }
 
     /** The financial service for this server session. */
+    private BranchService branches;
+    public BranchService branches() {
+        checkOwner();
+        if (!(storage instanceof FoundationStore store)) throw new IllegalStateException("Branches require persistent storage");
+        if (state != State.READY) throw new IllegalStateException("Branches unavailable");
+        if (branches == null) branches = new BranchService(this,store);
+        return branches;
+    }
+
     public LedgerService ledger() {
         checkOwner();
         if (!(storage instanceof FoundationStore store))

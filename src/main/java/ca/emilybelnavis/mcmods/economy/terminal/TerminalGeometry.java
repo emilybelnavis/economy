@@ -19,9 +19,9 @@ public final class TerminalGeometry {
     }
     public static List<BlockPos> cells(BlockPos anchor, BlockState state) {
         if (!(state.getBlock() instanceof WideTerminalBlock wide)) return List.of(anchor.immutable());
-        var result = new java.util.ArrayList<BlockPos>(wide.cellCount());
-        for (int cell = 0; cell < wide.cellCount(); cell++)
-            result.add(wide.cellPosition(anchor, state.getValue(WideTerminalBlock.FACING), cell));
+        var result = new java.util.ArrayList<BlockPos>(wide.cellCount(state));
+        for (int cell = 0; cell < wide.cellCount(state); cell++)
+            result.add(wide.cellPosition(anchor, state, cell));
         return List.copyOf(result);
     }
     public static BlockPos anchor(BlockPos position, BlockState state) {
@@ -33,18 +33,18 @@ public final class TerminalGeometry {
     }
     public static boolean matches(LevelReader level, BlockPos anchor, UUID generation) {
         if (!level.hasChunkAt(anchor) || !(level.getBlockEntity(anchor) instanceof TerminalBlockEntity entity)
-                || !entity.generation().equals(generation) || !entity.validIdentity()) return false;
+                || !entity.generation().equals(generation) || !entity.validIdentity() || entity.geometryPending()) return false;
         var state = level.getBlockState(anchor);
         if (state.getBlock() instanceof RegisterBlock) return true;
         if (!(state.getBlock() instanceof WideTerminalBlock wide) || state.getValue(wide.cellProperty()) != 0) return false;
         var facing = state.getValue(WideTerminalBlock.FACING);
-        for (int cell = 0; cell < wide.cellCount(); cell++) {
-            var position = wide.cellPosition(anchor, facing, cell);
+        for (int cell = 0; cell < wide.cellCount(state); cell++) {
+            var position = wide.cellPosition(anchor, state, cell);
             if (!level.hasChunkAt(position)) return false;
             var part = level.getBlockState(position);
-            if (part.getBlock() != state.getBlock() || part.getValue(WideTerminalBlock.FACING) != facing
+            if (!wide.sameGeometry(state, part) || part.getValue(WideTerminalBlock.FACING) != facing
                     || part.getValue(wide.cellProperty()) != cell) return false;
         }
-        return true;
+        return wide.hasSupport(level, anchor, state);
     }
 }

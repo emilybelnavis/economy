@@ -34,6 +34,14 @@ public class WideTerminalBlock extends Block implements EntityBlock {
     public TerminalPolicy.Kind kind() { return kind; }
     public IntegerProperty cellProperty() { return CELL; }
     public int cellCount() { return 4; }
+    /** State-aware forms let legacy and expanded kiosks coexist under the same registered ID. */
+    public int cellCount(BlockState state) { return cellCount(); }
+    public BlockPos cellPosition(BlockPos anchor, BlockState state, int cell) {
+        return cellPosition(anchor, state.getValue(FACING), cell);
+    }
+    public boolean sameGeometry(BlockState first, BlockState second) {
+        return first.getBlock() == second.getBlock();
+    }
     public BlockPos cellPosition(BlockPos anchor, Direction facing, int cell) {
         return TerminalGeometry.cell(anchor, facing, cell);
     }
@@ -43,6 +51,10 @@ public class WideTerminalBlock extends Block implements EntityBlock {
     }
     protected boolean hasSupport(LevelReader level, BlockPos anchor, Direction facing) {
         return supported(level, anchor, facing);
+    }
+
+    protected boolean hasSupport(LevelReader level, BlockPos anchor, BlockState state) {
+        return hasSupport(level, anchor, state.getValue(FACING));
     }
 
     @Override protected MapCodec<? extends Block> codec() { return simpleCodec(p -> new WideTerminalBlock(p, kind)); }
@@ -60,9 +72,9 @@ public class WideTerminalBlock extends Block implements EntityBlock {
     }
     public boolean canPlaceAll(BlockPlaceContext context, BlockState state) {
         var level = context.getLevel(); var anchor = context.getClickedPos(); var facing = state.getValue(FACING);
-        if (!hasSupport(level, anchor, facing)) return false;
-        for (int cell = 0; cell < cellCount(); cell++) {
-            var position = cellPosition(anchor, facing, cell);
+        if (!hasSupport(level, anchor, state)) return false;
+        for (int cell = 0; cell < cellCount(state); cell++) {
+            var position = cellPosition(anchor, state, cell);
             if (!level.isInWorldBounds(position) || !level.getWorldBorder().isWithinBounds(position)
                     || !level.hasChunkAt(position) || !level.getBlockState(position).canBeReplaced(context)) return false;
             var player = context.getPlayer();
@@ -78,7 +90,7 @@ public class WideTerminalBlock extends Block implements EntityBlock {
         return canPlaceAll(context, state) ? state : null;
     }
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos position) {
-        return hasSupport(level, TerminalGeometry.anchor(position, state), state.getValue(FACING));
+        return hasSupport(level, TerminalGeometry.anchor(position, state), state);
     }
     /** Guard neighbor notifications while all cells are installed or rolled back. */
     static void beginPlacement(Level level, BlockPos anchor) { MUTATING.add(new Guard(level, anchor.immutable())); }
@@ -104,21 +116,25 @@ public class WideTerminalBlock extends Block implements EntityBlock {
         if (level.isClientSide) return;
         var anchor = TerminalGeometry.anchor(position, state);
         if (MUTATING.contains(new Guard(level, anchor))) return;
+        // Kiosk upgrade recovery owns uncertain geometry; startup never converts a partial observation to a drop.
+        if (this instanceof BranchKioskBlock && level.hasChunkAt(anchor)
+                && level.getBlockEntity(anchor) instanceof TerminalBlockEntity entity
+                && (entity.geometryPending() || !entity.policyReady())) return;
         for (var target : TerminalGeometry.cells(anchor, state)) {
             if (!level.hasChunkAt(target) || !level.hasChunkAt(target.below())) return;
         }
-        if (!hasSupport(level, anchor, state.getValue(FACING)) || !complete(level, anchor, state))
+        if (!hasSupport(level, anchor, state) || !complete(level, anchor, state))
             teardown(level, position, state, true);
     }
     private boolean complete(LevelReader level, BlockPos anchor, BlockState state) {
         if (!(level.getBlockEntity(anchor) instanceof TerminalBlockEntity entity) || !entity.validIdentity()) return false;
         var facing = state.getValue(FACING);
-        for (int cell = 0; cell < cellCount(); cell++) {
-            var position = cellPosition(anchor, facing, cell);
+        for (int cell = 0; cell < cellCount(state); cell++) {
+            var position = cellPosition(anchor, state, cell);
             // Do not turn an unloaded neighbor chunk into a destructive observation.
             if (!level.hasChunkAt(position)) return true;
             var part = level.getBlockState(position);
-            if (part.getBlock() != this || part.getValue(FACING) != facing || part.getValue(cellProperty()) != cell) return false;
+            if (!sameGeometry(state, part) || part.getValue(FACING) != facing || part.getValue(cellProperty()) != cell) return false;
         }
         return true;
     }
@@ -138,18 +154,18 @@ public class WideTerminalBlock extends Block implements EntityBlock {
             // A satellite can only produce an item while the unique live anchor still exists.
             var entity = level.hasChunkAt(anchor) && level.getBlockEntity(anchor) instanceof TerminalBlockEntity found ? found : null;
             boolean ownedAnchor = entity != null && entity.validIdentity()
-                    && entity.getBlockState().getBlock() == this && entity.getBlockState().getValue(cellProperty()) == 0
+                    && sameGeometry(state, entity.getBlockState()) && entity.getBlockState().getValue(cellProperty()) == 0
                     && entity.getBlockState().getValue(FACING) == state.getValue(FACING);
             if (ownedAnchor) {
                 if (level instanceof ServerLevel server) TerminalLifecycle.removed(server, anchor, entity);
                 entity.invalidateIdentity();
             }
             var facing = state.getValue(FACING);
-            for (int cell = cellCount() - 1; cell >= 0; cell--) {
-                var target = cellPosition(anchor, facing, cell);
+            for (int cell = cellCount(state) - 1; cell >= 0; cell--) {
+                var target = cellPosition(anchor, state, cell);
                 if (!level.hasChunkAt(target)) continue;
                 var part = level.getBlockState(target);
-                if (part.getBlock() == this && part.getValue(FACING) == facing && part.getValue(cellProperty()) == cell)
+                if (sameGeometry(state, part) && part.getValue(FACING) == facing && part.getValue(cellProperty()) == cell)
                     level.setBlock(target, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL | Block.UPDATE_SUPPRESS_DROPS);
             }
             if (ownedAnchor && drop) {
@@ -167,7 +183,10 @@ public class WideTerminalBlock extends Block implements EntityBlock {
         var anchor = TerminalGeometry.anchor(position, state);
         if (level instanceof ServerLevel server && level.hasChunkAt(anchor)
                 && level.getBlockEntity(anchor) instanceof TerminalBlockEntity entity) {
-            if (!entity.policyReady()) TerminalLifecycle.loaded(server, anchor, entity);
+            if (!entity.policyReady()) {
+                if(kind==TerminalPolicy.Kind.KIOSK)KioskUpgradeController.loaded(server,anchor,entity);
+                TerminalLifecycle.loaded(server, anchor, entity);
+            }
             if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) ca.emilybelnavis.mcmods.economy.banking.BankingController.open(serverPlayer, anchor);
         }
         return net.minecraft.world.InteractionResult.sidedSuccess(level.isClientSide);

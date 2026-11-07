@@ -15,6 +15,10 @@ Banking, physical cash and player shops for Minecraft, with credit, loans and a 
 - Credit cards, fixed unsecured loans, credit reports and Collection Agents.
 - Optional automatic payments, transaction history and recovery of interrupted payments and item deliveries.
 
+New kiosks are two blocks wide and two blocks high. Existing narrow kiosks remain usable and offer a free **Upgrade kiosk** action in owner/operator settings when space and support are clear.
+
+Village bank generation and bankers are not available yet. Server operators can inspect persisted branch plans through the [branch diagnostics](docs/SERVER_GUIDE.md#village-branch-diagnostics).
+
 Securities trading, variable-rate loans and collateral-backed loans are future work. The Stock Trading Computer is currently decorative.
 
 ## Get started

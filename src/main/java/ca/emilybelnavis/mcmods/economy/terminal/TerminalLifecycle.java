@@ -34,11 +34,13 @@ public final class TerminalLifecycle {
     }
     public static void loaded(ServerLevel level, BlockPos anchor, TerminalBlockEntity entity) { placed(level, anchor, entity); }
     public static void placed(ServerLevel level, BlockPos anchor, TerminalBlockEntity entity) {
+        if(entity.branchId()!=null){BranchBootstrap.loaded(level,anchor,entity);return;}
         enqueue(level, anchor, entity, false);
     }
     public static void removed(ServerLevel level, BlockPos anchor, TerminalBlockEntity entity) {
         ca.emilybelnavis.mcmods.economy.institution.KioskAdmission.removed(level.getServer(), level.dimension().location().toString(), anchor);
         entity.setPolicyReady(false);
+        if(entity.branchId()!=null){BranchBootstrap.removed(level,anchor,entity);return;}
         if (entity.owner() != null) {
             var kind = kind(entity.getBlockState().getBlock());
             if (kind != null) TerminalRemovals.get(level.getServer()).add(new TerminalRemovals.Removal(

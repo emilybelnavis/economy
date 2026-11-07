@@ -166,3 +166,13 @@ V34 adds one Collection Agent presentation-state table and an eligible-case part
 ## V35 automatic payments
 
 V35 adds per-facility consent, immutable due-window progress, latest statement payment-adjusted targets and a bounded source-bootstrap cursor. Exact schema/index validation and canonical projection validation run at storage/offline inspection. Version1 settings/window/bootstrap decoders are registered. Existing journal facts and versions retain their meaning. Current schema is35, stopped-world upgrade backups are required for1–34 and clean restore manifests support4–35. See [automatic payments](autopay.md).
+
+
+## V36 village branch foundation
+
+V36 appends five presentation tables and four indexes for captured village plans, independent branch lifecycle/history, service anchors, explicit required-provider fills and saved staffing pause state. Online open/recovery/offline inspection validate exact DDL, canonical identities/plans and projection/history completeness. Clean restore recognizes36; worlds1–35 require the normal stopped-world upgrade backup. No customer account, capital or monetary schema is changed. [Current branch contract](village-branches.md) records journal decoders, limits and loaded-only trusted activation; generation/placement/staff remain separate packages.
+
+
+## V37 recoverable kiosk upgrades
+
+V37 appends kiosk_geometry_upgrades keyed by world/generation, preserving original upgrade operation, expected terminal revision and PREPARED/COMPLETE/ABORTED phase. New economy:kiosk_geometry v1 facts accompany unchanged v1 terminal policy facts. Exact schema/canonical/historical generation linkage validates in online open/recovery and offline inspection. Clean backup/restore recognizes37; older worlds1–36 require the existing stopped-world backup gate. [Upgrade coordination and no-auto-rebuild boundary](kiosk-upgrades.md). No account/capital/currency data or historical migration definitions change.

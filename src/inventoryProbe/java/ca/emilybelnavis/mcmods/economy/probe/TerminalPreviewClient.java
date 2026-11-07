@@ -18,9 +18,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 public final class TerminalPreviewClient {
     private boolean opened;
     private int frames;
-    public TerminalPreviewClient() { NeoForge.EVENT_BUS.addListener(this::tick); }
+    public TerminalPreviewClient() { NeoForge.EVENT_BUS.addListener(this::tick); if(Boolean.getBoolean("economy.kioskUpgradeProbe"))new KioskUpgradeClient(); }
     private void tick(ClientTickEvent.Post event) {
-        if (Boolean.getBoolean("economy.bankingProbe")) return;
+        if (Boolean.getBoolean("economy.bankingProbe") || Boolean.getBoolean("economy.kioskUpgradeProbe")) return;
         var minecraft = Minecraft.getInstance();
         if (!opened && minecraft.getOverlay() == null && minecraft.screen != null && minecraft.level == null) {
             opened = true;

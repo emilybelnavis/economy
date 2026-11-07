@@ -1,5 +1,5 @@
 {
-  "parent": "economy:block/branch_kiosk_inventory",
+  "parent": "economy:block/branch_kiosk_wide_inventory",
   "overrides": [
     {
       "predicate": {
