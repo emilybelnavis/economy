@@ -56,6 +56,18 @@ Operators can find nearby branded branch kiosks with `/locate poi economy:bank` 
 
 New eligible vanilla plains, desert, savanna, snowy and taiga villages can generate bank branches. Original houses and workplaces determine branch eligibility and capacity; abandoned and empty villages receive none. Existing explored villages are not retrofitted. The mid-century modern buildings have institution signs, local wood, lighting, furnishings and working kiosks. New branch templates include original two-wide banker desks in local wood. Active branches can staff only their captured desks; player-placed desks remain unbound and do not create bankers or grant banking access. Older vanilla desk furniture is preserved and is not automatically converted.
 
+Branch counts use the village's original qualifying houses and workplaces. Farms, roads, decorations, wells, pens and stables do not add to that count.
+
+| Qualifying buildings | Required branches | Optional compact branch |
+| --- | --- | --- |
+| 1–8 | One compact | None |
+| 9–16 | One larger | 25% chance |
+| 17 or more | Two larger | 50% chance |
+
+A compact branch has one kiosk, desk and banker slot. A larger branch has two of each. Each village uses distinct banks. Its first branch needs an eligible bank in the world's selected currency. Choices are retained after a later world-currency change.
+
+Supported generation covers the five vanilla village styles in the Overworld. Modified village resources can prevent new bank generation when their layout cannot be safely recognized. Superflat village/bank generation has a known unresolved limitation tracked in [issue #3](https://github.com/emilybelnavis/economy/issues/3). Ordinary world generation and existing banks remain usable while a new bank plan is waiting for an eligible provider.
+
 Terrain can leave a selected branch pending. Generation searches inside the village, nearby edges within 32 blocks, then connected sites within 96 blocks, with bounded foundations and leveling. Banking remains disabled until physical placement and trusted hardware activation complete. These commands require an authenticated operator or the server console:
 
 - `/economy branch plans [after <village-id>]` and `/economy branch list [after <branch-id>]`: pages of up to 16 records.
@@ -63,17 +75,23 @@ Terrain can leave a selected branch pending. Generation searches inside the vill
 - `/economy branch staffing <branch-id> pause|resume`: persist staffing pause state. Pausing prevents new hires and replacement progress; it does not remove an existing banker. Resuming retains already earned replacement time.
 - `/economy branch retry <branch-id> <expected-revision>`: explicitly retry missing required-provider selection or a pending terrain site while retaining captured bank/currency choices. Terrain retry uses already loaded chunks, supported empty space and fresh obstruction checks; load the area before retrying. It does not clear later construction or force chunks to generate. Removed, conflicted or interrupted partial buildings cannot be rebuilt with this command.
 
+Read the state and reason together in branch status. `PROVIDER_PENDING` means a required branch is waiting for an eligible bank. `OMITTED` with `NOT_SELECTED` means the optional branch was not selected, while `NO_DISTINCT_PROVIDER` means no additional eligible bank was available for it. `SITE_PENDING` retains a selected bank whose terrain placement is waiting. An omitted optional branch is not a terrain failure.
+
+Before retrying, use `/economy branch list` to find the branch ID, inspect its status, load the intended area and copy the current revision into `/economy branch retry <branch-id> <expected-revision>`. If the revision has changed, inspect status again. Keep the operation ID if the outcome is uncertain and check status before making another attempt.
+
 Branch records and generated hardware never create customer accounts, capital or money. Keep the operation ID shown by a write command if its outcome is uncertain; do not assume it failed. Dismantling hardware never closes accounts or changes debts.
 
 ## Banker desks and staffing
 
 Bankers belong to a branch and a captured desk slot, rather than to a nearby building or a workstation’s appearance. A desk occupies two blocks across and two blocks high, needs support beneath both lower cells, and must remain intact. Breaking any cell removes the desk with one item drop in Survival and none in Creative. Replacing it manually does not restore its former branch assignment.
 
-Right-click a banker for a private dialogue. Banking actions use the branch’s available trusted kiosk and the normal player account permissions; a banker’s appearance does not provide access to someone else’s accounts. If the branch, desk or service is unavailable, access remains unavailable until it is safely verified again.
+Right-click an active kiosk to see its bank-specific account options, independently of banker dialogue or staffing. Review the bank and native currency before selecting **Open primary account** or **Open \<native currency\> account** when offered. Selecting either button submits the request immediately. The bank’s eligibility checks still apply. Removing a branch, kiosk, desk or banker leaves existing customer accounts, balances and debts intact.
+
+Right-click a banker within six blocks for a private dialogue. It opens with explicit questions about account opening, eligibility, the institution, native currency and how banking works. Select a question to see its answer. **Open banking services** routes to the usual banking menu when you are also close enough to an available branch kiosk. It applies the same account permissions and available actions as opening the kiosk directly. If the banker, assigned desk or service becomes unavailable, reopen the dialogue after it is available again.
 
 A positively observed banker death leaves the desk vacant. Replacement requires 24,000 eligible loaded ticks (about 20 minutes at 20 ticks per second), an active unpaused branch, an intact assigned desk and a clear safe staffing location. Unloaded chunks, missing entity observations and uncertain interrupted spawns do not count as death or authorize another employee. Removing a desk stops new staffing for that assignment. Nothing forces chunks to stay loaded.
 
-Replacement time is saved in batches of at most 200 ticks. A crash can lose up to 200 ticks of recently earned time; it does not complete the wait early. Pause/resume and normal restart retain saved progress. Use the branch status and staffing controls above when investigating a vacant or uncertain slot; there is no automatic desk repair or legacy-furniture upgrade.
+Offline time and skipping the night do not advance the replacement wait. Replacement time is saved in batches of at most 200 ticks. A crash can lose up to 200 ticks of recently earned time; it does not complete the wait early. Pause/resume and normal restart retain saved progress. Use the branch status and staffing controls above when investigating a vacant or uncertain slot; there is no automatic desk repair or legacy-furniture upgrade.
 
 ## Schema upgrades
 
@@ -113,7 +131,9 @@ Storage requires filesystem support for exclusive file locks, atomic file public
 
 ## Server integrations
 
-Server integrations can consume `ca.emilybelnavis.mcmods.economy.api.BankingIntegration` version 1 through the server ledger service. It exposes versioned prime, owner valuation and fee quotes, physically authorized credit payment entry points and fixed/variable/secured capability reporting. Financial authority and existing journal/custody rules apply to integrations.
+Server integrations can consume `ca.emilybelnavis.mcmods.economy.api.BankingIntegration` version 1 through the server ledger service. It exposes versioned prime, owner valuation and fee quotes, physically authorized credit payment entry points and fixed/variable/secured capability reporting. Financial authority and existing journal/custody rules apply to integrations. A village structure, desk, banker or branded appearance does not issue an integration grant. Use authenticated server context and the existing account and physical-service checks. The interface declares `VERSION = 1` and reports it through `version()`. [BankingIntegration source](../src/main/java/ca/emilybelnavis/mcmods/economy/api/BankingIntegration.java).
+
+See the [server integration contract](INTEGRATION_API.md) for entry points, version boundaries and downstream consumers.
 
 ## Financial inspection commands
 

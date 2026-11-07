@@ -17,9 +17,11 @@ Banking, physical cash and player shops for Minecraft, with credit, loans and a 
 
 New kiosks are two blocks wide and two blocks high. Existing narrow kiosks remain usable and offer a free **Upgrade kiosk** action in owner/operator settings when space and support are clear.
 
-New eligible vanilla villages can generate mid-century modern bank branches, with compact and larger designs for all 23 banks across five village styles. Buildings use local wood, working branch kiosks and banker desks. Active branches staff their captured desks with persistent bankers. Right-click a banker for private banking guidance and access to the branch’s available services. Existing villages are preserved; difficult terrain can leave a branch pending. See [branch diagnostics and terrain retry](docs/SERVER_GUIDE.md#village-branch-diagnostics).
+New eligible vanilla villages can generate mid-century modern bank branches, with compact and larger designs for all 23 banks across plains, desert, savanna, snowy and taiga styles. Buildings use local wood, working branch kiosks and banker desks. Right-click an active kiosk to see that bank’s account options. Choose **Open primary account** or **Open \<native currency\> account** when offered. Selecting the button submits the account-opening request. A banker is optional. Their private dialogue starts with questions to choose from, and answers appear when you select one.
 
-Operators can find bank locations with `/locate structure #economy:banks` and pause or resume replacement staffing with `/economy branch staffing <branch-id> pause|resume`. A confirmed banker death starts a replacement wait of 24,000 eligible loaded ticks; unloading or an uncertain observation does not create a replacement.
+Choose the world's currency before exploring for new banks. Operators can use `/locate structure #economy:banks` to find bank locations in unexplored areas. The coordinates lead to the source village, with its bank nearby. Existing explored villages are preserved, and difficult terrain can leave a selected branch pending. Superflat village/bank generation has an unresolved limitation tracked in [issue #3](https://github.com/emilybelnavis/economy/issues/3). See the [server guide](docs/SERVER_GUIDE.md#village-branch-diagnostics) for supported generation, status and safe terrain retry.
+
+Active branches staff their assigned desks with persistent bankers. Operators can inspect `/economy branch status <branch-id>` and pause or resume staffing with `/economy branch staffing <branch-id> pause|resume`. A confirmed banker death starts a replacement wait of 24,000 eligible loaded ticks. Saved progress resumes after a normal restart. Accounts, balances and debts survive the loss of a branch, kiosk, desk or banker.
 
 A player-placed banker desk is decorative and unbound. Older vanilla desk furniture remains unchanged; it is not automatically upgraded into a staffed job station.
 
@@ -29,7 +31,7 @@ Securities trading, variable-rate loans and collateral-backed loans are future w
 
 1. Install the Economy jar in your NeoForge instance's `mods` folder.
 2. Start a world and choose its currency when prompted; `/economy choose CAD` also supports selection.
-3. Use a branch kiosk to open an account. Machine owners bind terminals to a bank through **sneak + empty-hand right-click** and enable cash services separately.
+3. Right-click an active branch kiosk and review its bank and native currency. Select **Open primary account** or **Open \<native currency\> account** when offered to submit the request. You can do this directly without speaking to a banker. Machine owners bind their own terminals to a bank through **sneak + empty-hand right-click** and enable cash services separately.
 4. Use an ATM or teller to deposit, withdraw or exchange funds. An active issued card provides remote banking access.
 
 Accounts are limited to four per player, with one per currency. Creative cards are collectibles and do not grant banking access. Financial time continues while the server is offline: one financial day lasts 20 real minutes, and a month lasts 28 financial days.
@@ -44,6 +46,7 @@ Placed agents stay where you put them and persist with the world. Right-click wi
 
 - [Player guide](docs/PLAYER_GUIDE.md): accounts, terminals, cash, shops, credit, loans and automatic payments.
 - [Server guide](docs/SERVER_GUIDE.md): configuration, diagnostics, upgrades, backups and restore.
+- [Server integration API](docs/INTEGRATION_API.md): versioned banking entry points and downstream contracts.
 - [Changelog](CHANGELOG.md): completed features and notable fixes.
 - [Roadmap](ROADMAP.md): planned features and future direction.
 

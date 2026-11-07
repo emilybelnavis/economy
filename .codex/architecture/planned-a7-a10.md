@@ -1,6 +1,6 @@
 # Planned A7–A10 scope
 
-Planning only. A6-13 is accepted; these phases are not implemented. This document does not select an implementation prompt. Preserve existing worlds, accounts, balances and historical evidence.
+A7 is accepted in the bounded scope recorded by [A7-06](../A7-06.md). A8–A10 remain planning material and require explicit selection. This document does not select an implementation prompt. Preserve existing worlds, accounts, balances and historical evidence.
 
 ## Sequence
 
@@ -15,7 +15,7 @@ B2 securities, B4 trading and B6 expanded lending keep their own identities and 
 
 ## A7 — Village Banking Package
 
-[A7-01 feasibility outcome](a7-feasibility-plan.md) and [revision-1 shared contracts](a7-shared-contracts.md) now freeze the source/API-backed hook, geometry and interfaces. [Evidence](../verification/A7-01.md) distinguishes completed contract/API work from future actual generation/terrain acceptance. No production A7 world generation is installed.
+[A7-01 feasibility outcome](a7-feasibility-plan.md) and [revision-1 shared contracts](a7-shared-contracts.md) now freeze the source/API-backed hook, geometry and interfaces. [Evidence](../verification/A7-01.md) distinguishes completed contract/API work from future actual generation/terrain acceptance. Production generation, trusted kiosk activation, staffing and optional dialogue are delivered. [Current downstream contracts](a7-downstream.md) and [acceptance evidence](../verification/A7-06.md) bind the approved policies below to the implementation and its limits.
 
 Target newly generated vanilla villages only. Retrofitting explored villages, player-built settlements and modded villages requires separate compatibility rules. Never overwrite player construction.
 

@@ -119,3 +119,7 @@ Operator command contract: `/economy branch status <id>`, `/economy branch list 
 ## A7-05 implementation binding
 
 [Staffing](banker-staffing.md) implements four-cell desks, V39 assignments/history/events, exact persistent employee UUIDs, positive vacancy, loaded-only replacement observations, atomic pause and explicit questions routed through fresh ordinary kiosk admission. New templates use real desks; legacy serialized furniture is unchanged. [Evidence](../verification/A7-05.md) separates SQLite, real entity/menu observations and untested process-crash limits. A7-06 remains separately selected work.
+
+## A7-06 acceptance binding
+
+[A7-06](../A7-06.md) closes the selected phase with direct kiosk account opening, optional questions, normal process restart, saved staffing progress and populated account survival after presentation loss. [Evidence](../verification/A7-06.md) distinguishes the new composite witness from reused component evidence and remaining limits. [Downstream contracts](a7-downstream.md) publish the current API and version boundaries.

@@ -36,3 +36,7 @@ The server adapter watches loaded captured desks and exact employee identities w
 Banker dialogue is private to the player. Requests revalidate the banker/desk/branch association and route through a currently available trusted branch kiosk and existing banking authorization. A skin, profession, nearby furniture or stale menu does not grant account access. No new financial functionality or bypass of existing account permissions is introduced.
 
 Operator branch status exposes staffing observations; `/economy branch staffing <branch-id> pause|resume` controls staffing without deleting existing employees. There is no automatic legacy-furniture conversion, uncertain-spawn replacement, desk repair, chunk forcing or superflat placement change in this package.
+
+## Presentation and integrated acceptance
+
+The banker uses a 64×64 original skin with separate eyebrows, inward pupils and a compact 1.5×1.5×0.75 model-unit nose. Suit details are painted onto the standard humanoid body. Desks use original veneer and hardware textures. [A7-06 evidence](../verification/A7-06.md) records direct banking before dialogue, same-save process recovery and account independence from staffing or hardware loss.

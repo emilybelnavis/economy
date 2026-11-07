@@ -244,3 +244,19 @@ if (providers.gradleProperty('bankerProbe').isPresent()) {
         }
     }
 }
+
+// Opt-in A7-06 composite acceptance across two guarded disposable client processes.
+if (providers.gradleProperty('villageBankAcceptance').isPresent()) {
+    neoForge.mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
+    def restarting = providers.gradleProperty('villageBankAcceptanceRestart').isPresent()
+    tasks.named('runClient') {
+        systemProperty 'economy.villageBankAcceptance', 'true'
+        systemProperty 'economy.villageBankAcceptanceRestart', restarting.toString()
+        doLast {
+            def root = file(providers.gradleProperty('economyRunRoot').get() + '/client')
+            def marker = restarting ? 'village-bank-acceptance-passed.txt' : 'village-bank-acceptance-phase1-passed.txt'
+            if (new File(root, 'village-bank-acceptance-failed.txt').exists() || !new File(root, marker).exists())
+                throw new GradleException('Integrated village banking acceptance did not pass')
+        }
+    }
+}

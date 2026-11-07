@@ -1,6 +1,6 @@
 # Wider kiosks and recoverable legacy upgrade — A7-03
 
-Current world schema 38 after [A7-04 generation](village-generation.md). The existing `economy:branch_kiosk` block/item/entity IDs, bank bindings and native currencies remain unchanged. Production village generation is installed; bankers remain A7-05. [Evidence](../verification/A7-03.md) distinguishes actual integrated-client observations from remaining restart limits.
+Current world schema 39 includes [generation](village-generation.md) and [staffing](banker-staffing.md). The existing `economy:branch_kiosk` block/item/entity IDs, bank bindings and native currencies remain unchanged. Production village generation and assigned bankers are installed. [Evidence](../verification/A7-03.md) distinguishes actual integrated-client observations from remaining restart limits.
 
 ## Geometry and assets
 
@@ -8,7 +8,7 @@ Current world schema 38 after [A7-04 generation](village-generation.md). The exi
 
 `WideTerminalBlock` supplies state-aware cellCount/cellPosition/support/sameGeometry overloads, consumed by placement, anchor resolution, integrity, policy visual refresh and teardown. Support and all occupied cells must be loaded; no chunk loads are forced. New wide kiosks need two sturdy supports and clear unobstructed cells. Collision encloses the console's full two-cell width and Z1..15 depth (rotated with facing). One valid anchor owns the survival drop; creative removal produces none. Satellites do not grant extra drops. Guarded installation/rollback suppresses intermediate integrity teardown. Missing/pending/startup-unready kiosk integrity stays fail-closed instead of guessing that a partial form should be rebuilt or dropped.
 
-Original new cuboid models provide the broad screen, counter, institution/currency header, recessed base and side panels. There are 24 appearances (neutral+23 banks),96 wide per-cell models/four shared geometry parents,24 inventory models and 24 original horizontal header PNG/SVG pairs. All 48 narrow block models and their raster textures are preserved. Item IDs and bank appearance overrides remain; default inventory art is now wide. [Generator and provenance](../../tools/banking-assets/README.md) documents original CC0-derived project artwork and regeneration order; `generate_wide_kiosk_assets.py` runs after the legacy terminal generator. No downloaded art or specific external integration is added.
+Original console models provide the broad screen, counter, institution/currency header, recessed base and side panels. The refined assembly has 57 cuboids with raised keys, card/cash slots, walnut cheeks and rear service hardware, plus 72 original console material textures. There are 24 appearances (neutral+23 banks),96 wide per-cell models/four shared geometry parents,24 inventory models and 24 original horizontal header PNG/SVG pairs. All 48 narrow block models and their raster textures are preserved. Item IDs and bank appearance overrides remain; default inventory art is now wide. [Generator and provenance](../../tools/banking-assets/README.md) documents original CC0-derived project artwork and regeneration order; `generate_wide_kiosk_assets.py` runs after the legacy terminal generator. No downloaded art or specific external integration is added.
 
 ## Explicit owner/operator action
 

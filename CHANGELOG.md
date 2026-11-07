@@ -9,6 +9,11 @@ Completed features, gameplay changes and notable fixes, grouped by date and phas
 - Added `/locate poi economy:bank` and `/locate poi #economy:banks` for nearby branded kiosk anchors, with existing-kiosk indexing on chunk load.
 - Added the native `economy:bank` structure and `#economy:banks` structure tag for normal `/locate structure` searches, including unexplored areas, without changing village or bank placement rules.
 
+**A7-06 — Integrated village banking guidance**
+
+- Clarified native bank discovery, direct kiosk account opening and optional banker questions, with operator instructions for branch status, terrain retry and staffing pause/resume.
+- Documented village size and staffing limits, account survival after branch or staff loss, and the deferred superflat generation limitation tracked in [issue #3](https://github.com/emilybelnavis/economy/issues/3).
+
 **A7-05 — Banker desks, staffing and dialogue**
 
 - Turned generated branch consoles and banker desks around 180 degrees within their existing bays.
