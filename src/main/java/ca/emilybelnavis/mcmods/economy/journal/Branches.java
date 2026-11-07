@@ -46,7 +46,7 @@ public final class Branches {
             if(action==Action.PAUSE){
                 if(!f.keySet().equals(Set.of("branch","revision","paused"))||!Set.of("true","false").contains(f.get("paused")))return reject("BRANCH_REQUEST");
                 boolean paused=Boolean.parseBoolean(f.get("paused"));
-                return transition(world,intent,view,view.state(),paused?"STAFFING_PAUSED":"STAFFING_RESUMED",paused,tx->{});
+                return paused(world,intent,view,paused);
             }
             if(action==Action.RETRY){
                 if(!f.keySet().equals(Set.of("branch","revision")))return reject("BRANCH_REQUEST");
@@ -187,6 +187,12 @@ public final class Branches {
             case "PHYSICAL_COMPLETE"->to.equals("ACTIVATION_PENDING");
             default->false;
         };
+    }
+    static Decision paused(WorldId world,Journal.Intent intent,View view,boolean paused){
+        return staffingPause(world,intent,view,paused,tx->{});
+    }
+    static Decision staffingPause(WorldId world,Journal.Intent intent,View view,boolean paused,Projection effect){
+        return transition(world,intent,view,view.state(),paused?"STAFFING_PAUSED":"STAFFING_RESUMED",paused,effect);
     }
     private static Decision transition(WorldId world,Journal.Intent intent,View view,String state,String reason,boolean paused,Projection effect){
         if(view.revision()==Long.MAX_VALUE)return reject("BRANCH_REVISION_LIMIT");

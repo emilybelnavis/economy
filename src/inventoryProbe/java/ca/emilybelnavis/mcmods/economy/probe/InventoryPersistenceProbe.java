@@ -33,6 +33,11 @@ public final class InventoryPersistenceProbe {
 
     private void tick(ServerTickEvent.Post event) {
         if (ran || System.getProperty("economy.financeWorld") != null) return;
+        if(Boolean.getBoolean("economy.bankerProbe")){
+            var services=Economy.serverServices(event.getServer());if(services==null||services.state()!=ServerServices.State.READY)return;
+            try{ran=BankerProbe.tick(event.getServer());}catch(Throwable e){e.printStackTrace();BankerProbe.failure=e.toString();ran=true;}
+            return;
+        }
         if(Boolean.getBoolean("economy.bankStructureProbe")){
             var services=Economy.serverServices(event.getServer());if(services==null||services.state()!=ServerServices.State.READY)return;
             try{ran=BankStructureProbe.tick(event.getServer());}catch(Throwable e){e.printStackTrace();BankStructureProbe.failure=e.toString();ran=true;}

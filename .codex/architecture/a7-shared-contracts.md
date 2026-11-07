@@ -30,15 +30,15 @@ Coordinates are local integers, front is z=0, x follows Minecraft +X before quar
 | Interior clear volume | x=1..9,z=1..7,y=1..3 | x=1..15,z=1..9,y=1..3 |
 | Entrance threshold | (5,1,0), 1 wide, 3 clear high | (8,1,0), 1 wide, 3 clear high |
 | Entry aisle | x=4..6,z=0..6,y=1..3 | x=7..9,z=0..8,y=1..3 |
-| Kiosk lower anchors | (2,1,2) | (2,1,2), (14,1,2) |
-| Kiosk local occupied cells | anchor + x=-1..0,y=0..1,z=0 | same per anchor |
-| Kiosk standing cells | anchor + x=-1..0,y=0..2,z=-1 | same per anchor |
-| Desk lower anchors | (7,1,5) | (2,1,7), (12,1,7) |
-| Desk occupied cells | anchor + x=0..1,y=0..1,z=0 | same per anchor |
-| Banker workstation | anchor + (0,0,1), 3 clear high | same per anchor |
-| Customer desk approach | anchor + x=0..1,y=0..2,z=-1 | same per anchor |
+| Kiosk lower anchors | (1,1,2) | (1,1,2), (13,1,2) |
+| Kiosk local occupied cells | anchor + x=0..1,y=0..1,z=0 | same per anchor |
+| Kiosk standing cells | anchor + x=0..1,y=0..2,z=1 | same per anchor |
+| Desk lower anchors | (8,1,5) | (3,1,7), (13,1,7) |
+| Desk occupied cells | anchor + x=-1..0,y=0..1,z=0 | same per anchor |
+| Banker workstation | anchor + (0,0,-1), 3 clear high | same per anchor |
+| Customer desk approach | anchor + x=-1..0,y=0..2,z=1 | same per anchor |
 
-All kiosk/desk fronts face local -Z. Kiosk satellites follow facing.getCounterClockWise() (local -X for north-facing geometry); the reserved desk footprint remains local +X. A7-03 corrected future kiosk anchors to fit the actual established terminal direction convention without moving existing placements. Staff can reach desks through the rear and outside the entry aisle. Reserve one full block outside the shell for clearance, excluding the planned path join. Provide solid support under every shell floor/desk/kiosk cell. Beds/rest positions are reserved at compact (2,1,6)..(2,1,7), larger (5,1,8)..(5,1,9) and (10,1,8)..(10,1,9); do not occupy workstation/approach cells. Staff navigation and service observations may only use loaded cells. Desk geometry/slot IDs are plain records; A7-04 must not reference A7-05 entity/block classes. Desk placeholders are non-authoritative until A7-05 installs the workstation adapter.
+Generated kiosk and desk fronts face local +Z following the requested 180-degree turn. The table describes resource revision `:banker-desks-v2`. Each two-column anchor moves to the opposite column within its bay. Kiosk satellites follow facing.getCounterClockWise() and desk satellites follow facing.getClockWise(). Earlier captures retain their recorded anchors and literal cells. A7-03 corrected future kiosk anchors to fit the actual established terminal direction convention without moving existing placements. Staff can reach desks through the rear and outside the entry aisle. Reserve one full block outside the shell for clearance, excluding the planned path join. Provide solid support under every shell floor/desk/kiosk cell. Beds/rest positions are reserved at compact (2,1,6)..(2,1,7), larger (5,1,8)..(5,1,9) and (10,1,8)..(10,1,9); do not occupy workstation/approach cells. Staff navigation and service observations may only use loaded cells. Desk geometry/slot IDs are plain records; A7-04 must not reference A7-05 entity/block classes. Desk placeholders are non-authoritative until A7-05 installs the workstation adapter.
 
 Wider kiosk upgrade reserves exactly the extra right column of the existing anchor/facing. Preserve anchor generation/bank identity; advance geometry/policy revision atomically through the existing custody gate. Legacy narrow representation remains valid. Failure during preflight leaves it unchanged; uncertain effects disable fresh admission until reconciled, never invent a new binding. A7-03 supplies the actual geometry state and rollback implementation.
 
@@ -115,3 +115,7 @@ Operator command contract: `/economy branch status <id>`, `/economy branch list 
 ## A7-04 implementation notes
 
 [Production generation](village-generation.md) now implements the registered composition wrapper, deferred layout materialization, five-style GenMC templates, chunk receipts, trusted activation and loaded-only explicit terrain retry. V38 later-site attempts preserve immutable captures and all original provider/size/slot choices. Deterministic terrain sampling has 1,024-new-XZ budgets per band (interior, edge, farther), at most3,072 per branch; exhaustion advances bands and retains TERRAIN_SAMPLE_BUDGET when no site succeeds. [Bounded actual-world evidence](../verification/A7-04.md) includes five registered style roundtrips, natural savanna activation and constrained pending/retry/removal. It does not claim universal terrain success, all-biome physical placement, or process-crash recovery. Banker job stations/staff/dialogue remain A7-05.
+
+## A7-05 implementation binding
+
+[Staffing](banker-staffing.md) implements four-cell desks, V39 assignments/history/events, exact persistent employee UUIDs, positive vacancy, loaded-only replacement observations, atomic pause and explicit questions routed through fresh ordinary kiosk admission. New templates use real desks; legacy serialized furniture is unchanged. [Evidence](../verification/A7-05.md) separates SQLite, real entity/menu observations and untested process-crash limits. A7-06 remains separately selected work.

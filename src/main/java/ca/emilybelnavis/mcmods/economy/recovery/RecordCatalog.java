@@ -32,6 +32,7 @@ public final class RecordCatalog {
         catalog = ca.emilybelnavis.mcmods.economy.clock.DeadlineDispatcher.register(InspectionAudit.register(FxFacts.register(catalog)));
         catalog = ca.emilybelnavis.mcmods.economy.pricing.ValuationSources.register(ca.emilybelnavis.mcmods.economy.pricing.ServicePricing.register(ca.emilybelnavis.mcmods.economy.interest.DepositYield.register(catalog)));
         catalog=ca.emilybelnavis.mcmods.economy.autopay.Autopay.register(catalog);
+        catalog=catalog.with(new Key(ca.emilybelnavis.mcmods.economy.journal.BankStaffing.FACT,1),ca.emilybelnavis.mcmods.economy.journal.BankStaffing::validateFact);
         catalog=catalog.with(new Key(ca.emilybelnavis.mcmods.economy.journal.BranchPlacement.FACT,1),ca.emilybelnavis.mcmods.economy.journal.BranchPlacement::validateFact);
         catalog=catalog.with(new Key(ca.emilybelnavis.mcmods.economy.journal.KioskUpgrades.FACT,1),ca.emilybelnavis.mcmods.economy.journal.KioskUpgrades::validateFact);
         catalog=catalog.with(new Key(ca.emilybelnavis.mcmods.economy.journal.Branches.FACT,1),ca.emilybelnavis.mcmods.economy.journal.Branches::validateEvent)

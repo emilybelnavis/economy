@@ -122,12 +122,17 @@ public final class VillageGenerationPiece extends StructurePiece implements net.
                     // WorldGenRegion queues DUMMY NBT for every EntityBlock state, including satellites.
                     current.removeBlockEntity(p);continue;
                 }
+                if(state.getBlock() instanceof ca.emilybelnavis.mcmods.economy.banker.desk.DeskBlock&&state.getValue(ca.emilybelnavis.mcmods.economy.banker.desk.DeskBlock.CELL)!=0){current.removeBlockEntity(p);continue;}
                 var entity=level.getBlockEntity(p);
                 if(entity!=null&&cell.blockEntitySnbt()!=null){var nbt=TagParser.parseTag(cell.blockEntitySnbt());nbt.putInt("x",p.getX());nbt.putInt("y",p.getY());nbt.putInt("z",p.getZ());entity.loadWithComponents(nbt,level.registryAccess());entity.setChanged();}
                 if(entity instanceof TerminalBlockEntity terminal){
                     var anchor=branch.services().stream().filter(a->a.position().equals(cell.position())).findFirst().orElse(null);
                     if(anchor==null)throw new IllegalStateException("Generated terminal outside captured service anchors");
                     terminal.generatedPlacement(branchId,anchor.generation(),BranchPlans.operation(branchId,anchor.slot(),"generated-placement",1));
+                }
+                if(entity instanceof ca.emilybelnavis.mcmods.economy.banker.desk.DeskBlockEntity desk){
+                    var anchor=branch.desks().stream().filter(a->a.position().equals(cell.position())).findFirst().orElseThrow(()->new IllegalStateException("Generated desk outside captured anchors"));
+                    desk.generatedPlacement(branchId,anchor.generation(),BranchPlans.operation(branchId,anchor.slot(),"generated-desk",1));
                 }
             }
             VillageGeneration.receipt(current,branchId,chunk,VillageGeneration.Receipt.COMPLETE);

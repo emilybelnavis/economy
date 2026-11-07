@@ -9,12 +9,21 @@ Completed features, gameplay changes and notable fixes, grouped by date and phas
 - Added `/locate poi economy:bank` and `/locate poi #economy:banks` for nearby branded kiosk anchors, with existing-kiosk indexing on chunk load.
 - Added the native `economy:bank` structure and `#economy:banks` structure tag for normal `/locate structure` searches, including unexplored areas, without changing village or bank placement rules.
 
+**A7-05 — Banker desks, staffing and dialogue**
+
+- Turned generated branch consoles and banker desks around 180 degrees within their existing bays.
+- Refined console and desk models with detailed wood, metal, displays and controls. Bankers now have detailed 64×64 skins, textured suit details, separate eyebrows, inward-facing pupils and a compact nose.
+
+- Added original two-wide, two-high banker desks with local wood, monitors and ledgers. New branch templates use real job stations; older vanilla furniture remains unchanged and player-placed desks stay unbound.
+- Added persistent branch bankers and private dialogue that routes available banking services through the branch’s trusted kiosks and existing player permissions.
+- Confirmed deaths start a 24,000 eligible loaded-tick replacement wait. Unloading, missing observations and uncertain interrupted spawns never authorize duplicate employees. Desk removal stops staffing, and operator pause/resume retains earned replacement time.
+- Added durable staffing identities, death/removal history and bounded progress checkpoints. Storage advances to schema 39 with the normal stopped-world complete-world upgrade backup.
+
 **A7-04 — Village bank buildings and generation**
 
 - Added 230 original GenMC mid-century modern templates: compact and larger branches for all 23 banks, with five village styles, local wood, signs, furnishings and real wide kiosks.
 - New eligible vanilla villages capture bank choices and generate connected branches where terrain permits. Abandoned villages and existing explored villages are preserved; exhausted terrain searches retain explicit pending plans.
 - Added loaded-only operator terrain retry, durable placement provenance and conservative interruption handling. Later construction and removed branches are never automatically rebuilt. Storage advances to schema 38 with the normal stopped-world upgrade backup.
-- Banker job stations, staffing and dialogue remain upcoming.
 
 **A7-03 — Wider kiosks and legacy upgrades**
 

@@ -1,0 +1,324 @@
+{
+  "variants": {
+    "cell=0,facing=north,wood=oak": {
+      "model": "economy:block/banker_desk/oak_0",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=0,facing=east,wood=oak": {
+      "model": "economy:block/banker_desk/oak_0",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=0,facing=south,wood=oak": {
+      "model": "economy:block/banker_desk/oak_0",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=0,facing=west,wood=oak": {
+      "model": "economy:block/banker_desk/oak_0",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=1,facing=north,wood=oak": {
+      "model": "economy:block/banker_desk/oak_1",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=1,facing=east,wood=oak": {
+      "model": "economy:block/banker_desk/oak_1",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=1,facing=south,wood=oak": {
+      "model": "economy:block/banker_desk/oak_1",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=1,facing=west,wood=oak": {
+      "model": "economy:block/banker_desk/oak_1",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=2,facing=north,wood=oak": {
+      "model": "economy:block/banker_desk/oak_2",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=2,facing=east,wood=oak": {
+      "model": "economy:block/banker_desk/oak_2",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=2,facing=south,wood=oak": {
+      "model": "economy:block/banker_desk/oak_2",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=2,facing=west,wood=oak": {
+      "model": "economy:block/banker_desk/oak_2",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=3,facing=north,wood=oak": {
+      "model": "economy:block/banker_desk/oak_3",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=3,facing=east,wood=oak": {
+      "model": "economy:block/banker_desk/oak_3",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=3,facing=south,wood=oak": {
+      "model": "economy:block/banker_desk/oak_3",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=3,facing=west,wood=oak": {
+      "model": "economy:block/banker_desk/oak_3",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=0,facing=north,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_0",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=0,facing=east,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_0",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=0,facing=south,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_0",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=0,facing=west,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_0",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=1,facing=north,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_1",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=1,facing=east,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_1",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=1,facing=south,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_1",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=1,facing=west,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_1",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=2,facing=north,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_2",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=2,facing=east,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_2",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=2,facing=south,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_2",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=2,facing=west,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_2",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=3,facing=north,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_3",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=3,facing=east,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_3",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=3,facing=south,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_3",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=3,facing=west,wood=jungle": {
+      "model": "economy:block/banker_desk/jungle_3",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=0,facing=north,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_0",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=0,facing=east,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_0",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=0,facing=south,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_0",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=0,facing=west,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_0",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=1,facing=north,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_1",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=1,facing=east,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_1",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=1,facing=south,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_1",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=1,facing=west,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_1",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=2,facing=north,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_2",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=2,facing=east,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_2",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=2,facing=south,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_2",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=2,facing=west,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_2",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=3,facing=north,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_3",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=3,facing=east,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_3",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=3,facing=south,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_3",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=3,facing=west,wood=acacia": {
+      "model": "economy:block/banker_desk/acacia_3",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=0,facing=north,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_0",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=0,facing=east,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_0",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=0,facing=south,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_0",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=0,facing=west,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_0",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=1,facing=north,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_1",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=1,facing=east,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_1",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=1,facing=south,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_1",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=1,facing=west,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_1",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=2,facing=north,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_2",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=2,facing=east,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_2",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=2,facing=south,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_2",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=2,facing=west,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_2",
+      "y": 270,
+      "uvlock": true
+    },
+    "cell=3,facing=north,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_3",
+      "y": 0,
+      "uvlock": true
+    },
+    "cell=3,facing=east,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_3",
+      "y": 90,
+      "uvlock": true
+    },
+    "cell=3,facing=south,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_3",
+      "y": 180,
+      "uvlock": true
+    },
+    "cell=3,facing=west,wood=spruce": {
+      "model": "economy:block/banker_desk/spruce_3",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

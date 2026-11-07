@@ -13,6 +13,8 @@ public final class EconomyClient {
         BankingArtModels.initialize(modBus);
         CollectionAgentRenderer.initialize(modBus);
         CollectionScreen.initialize(modBus);
+        BankerRenderer.initialize(modBus);
+        BankerScreen.initialize(modBus);
         LogUtils.getLogger().info("Economy client entry point loaded");
     }
 }

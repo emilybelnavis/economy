@@ -53,6 +53,9 @@ public final class Economy {
         ca.emilybelnavis.mcmods.economy.village.BankPoints.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.village.generation.VillageGeneration.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.initialize();
+        ca.emilybelnavis.mcmods.economy.banker.desk.DeskCatalog.initialize(modBus);
+        ca.emilybelnavis.mcmods.economy.banker.entity.BankerCatalog.initialize(modBus);
+        ca.emilybelnavis.mcmods.economy.banker.dialogue.BankerMenuCatalog.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.banking.BankingCatalog.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.collection.CollectionCatalog.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.collection.CollectionMenuCatalog.initialize(modBus);
@@ -153,7 +156,9 @@ public final class Economy {
             ca.emilybelnavis.mcmods.economy.terminal.BranchBootstrap.revalidate(event.getServer());
             ca.emilybelnavis.mcmods.economy.terminal.KioskUpgradeController.revalidate(event.getServer());
             ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.revalidate(event.getServer());
+            ca.emilybelnavis.mcmods.economy.banker.StaffingRuntime.revalidate(event.getServer());
             services.tick();
+            ca.emilybelnavis.mcmods.economy.banker.StaffingRuntime.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.collection.CollectionAgents.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.collection.CollectionDialogue.tick(event.getServer());
@@ -170,6 +175,7 @@ public final class Economy {
         }
     }
     private void stopping(ServerStoppingEvent event) {
+        ca.emilybelnavis.mcmods.economy.banker.StaffingRuntime.stopping(event.getServer());
         ca.emilybelnavis.mcmods.economy.collection.CollectionDialogue.stop(event.getServer());
         ca.emilybelnavis.mcmods.economy.collection.CollectionAgents.stop(event.getServer());
         shutdownErrors.put(event.getServer(),new ca.emilybelnavis.mcmods.economy.recovery.ShutdownErrors());

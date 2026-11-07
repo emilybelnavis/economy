@@ -231,3 +231,16 @@ if (providers.gradleProperty('bankStructureProbe').isPresent()) {
     neoForge.mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
     tasks.named('runClient') { systemProperty 'economy.bankStructureProbe', 'true' }
 }
+
+// Opt-in A7-05 workstation, staffing and dialogue witness; excluded from release jars.
+if (providers.gradleProperty('bankerProbe').isPresent()) {
+    neoForge.mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
+    tasks.named('runClient') {
+        systemProperty 'economy.bankerProbe', 'true'
+        doLast {
+            def root = file(providers.gradleProperty('economyRunRoot').get() + '/client')
+            if (new File(root, 'banker-failed.txt').exists() || !new File(root, 'banker-passed.txt').exists())
+                throw new GradleException('Banker workstation and staffing acceptance did not pass')
+        }
+    }
+}

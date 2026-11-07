@@ -54,20 +54,30 @@ Use `/locate structure #economy:banks` or `/locate structure economy:bank` to fi
 
 Operators can find nearby branded branch kiosks with `/locate poi economy:bank` or `/locate poi #economy:banks`. Vanilla POI search covers 256 blocks in the current dimension and uses indexed, already discovered kiosks; it does not search unexplored terrain for new bank buildings. Generated and player-placed branded kiosks qualify, including legacy narrow forms. Neutral kiosks and satellite cells do not. Existing kiosks enter the index when their chunks load. A result identifies physical hardware, not a guarantee that banking service is active.
 
-New eligible vanilla plains, desert, savanna, snowy and taiga villages can generate bank branches. Original houses and workplaces determine branch eligibility and capacity; abandoned and empty villages receive none. Existing explored villages are not retrofitted. The mid-century modern buildings have institution signs, local wood, lighting, furnishings and working kiosks. Desk furniture reserves space for the upcoming banker package.
+New eligible vanilla plains, desert, savanna, snowy and taiga villages can generate bank branches. Original houses and workplaces determine branch eligibility and capacity; abandoned and empty villages receive none. Existing explored villages are not retrofitted. The mid-century modern buildings have institution signs, local wood, lighting, furnishings and working kiosks. New branch templates include original two-wide banker desks in local wood. Active branches can staff only their captured desks; player-placed desks remain unbound and do not create bankers or grant banking access. Older vanilla desk furniture is preserved and is not automatically converted.
 
 Terrain can leave a selected branch pending. Generation searches inside the village, nearby edges within 32 blocks, then connected sites within 96 blocks, with bounded foundations and leveling. Banking remains disabled until physical placement and trusted hardware activation complete. These commands require an authenticated operator or the server console:
 
 - `/economy branch plans [after <village-id>]` and `/economy branch list [after <branch-id>]`: pages of up to 16 records.
-- `/economy branch status <branch-id>`: captured bank/currency, plan revisions, service generations, loaded/unknown observations and recent operation history.
-- `/economy branch staffing <branch-id> pause|resume`: persist replacement pause state; bankers are not implemented yet.
+- `/economy branch status <branch-id>`: captured bank/currency, plan revisions, service generations, loaded/unknown observations, staffing state and recent operation history.
+- `/economy branch staffing <branch-id> pause|resume`: persist staffing pause state. Pausing prevents new hires and replacement progress; it does not remove an existing banker. Resuming retains already earned replacement time.
 - `/economy branch retry <branch-id> <expected-revision>`: explicitly retry missing required-provider selection or a pending terrain site while retaining captured bank/currency choices. Terrain retry uses already loaded chunks, supported empty space and fresh obstruction checks; load the area before retrying. It does not clear later construction or force chunks to generate. Removed, conflicted or interrupted partial buildings cannot be rebuilt with this command.
 
 Branch records and generated hardware never create customer accounts, capital or money. Keep the operation ID shown by a write command if its outcome is uncertain; do not assume it failed. Dismantling hardware never closes accounts or changes debts.
 
+## Banker desks and staffing
+
+Bankers belong to a branch and a captured desk slot, rather than to a nearby building or a workstation’s appearance. A desk occupies two blocks across and two blocks high, needs support beneath both lower cells, and must remain intact. Breaking any cell removes the desk with one item drop in Survival and none in Creative. Replacing it manually does not restore its former branch assignment.
+
+Right-click a banker for a private dialogue. Banking actions use the branch’s available trusted kiosk and the normal player account permissions; a banker’s appearance does not provide access to someone else’s accounts. If the branch, desk or service is unavailable, access remains unavailable until it is safely verified again.
+
+A positively observed banker death leaves the desk vacant. Replacement requires 24,000 eligible loaded ticks (about 20 minutes at 20 ticks per second), an active unpaused branch, an intact assigned desk and a clear safe staffing location. Unloaded chunks, missing entity observations and uncertain interrupted spawns do not count as death or authorize another employee. Removing a desk stops new staffing for that assignment. Nothing forces chunks to stay loaded.
+
+Replacement time is saved in batches of at most 200 ticks. A crash can lose up to 200 ticks of recently earned time; it does not complete the wait early. Pause/resume and normal restart retain saved progress. Use the branch status and staffing controls above when investigating a vacant or uncertain slot; there is no automatic desk repair or legacy-furniture upgrade.
+
 ## Schema upgrades
 
-New worlds initialize automatically. Worlds on schemas 1 through 37 require a validated complete-world backup before upgrading to schema 38. Prepare it while Minecraft is fully stopped:
+New worlds initialize automatically. Worlds on schemas 1 through 38 require a validated complete-world backup before upgrading to schema 39. Prepare it while Minecraft is fully stopped:
 
 ```sh
 ./gradlew prepareEconomyUpgrade -PeconomyWorld=/absolute/path/to/world
@@ -91,7 +101,7 @@ Restore into a **new, separate directory**:
 ./gradlew restoreEconomyWorld -PeconomyBackup=/absolute/path/to/backup-id -PeconomyRestoreDestination=/absolute/path/to/new-world
 ```
 
-The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 38 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
+The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 39 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
 
 There is no online backup, automatic replacement, or retention/deletion service. Operators own backup storage and retention. Failed restores can leave a hidden staging directory without publishing the destination.
 

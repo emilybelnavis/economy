@@ -187,7 +187,10 @@ public final class GenerationRuntime {
         var services=Economy.serverServices(server);var id=BranchPlans.branchId(BranchPlans.id(services.worldId(),plan.source()),branch.slot());
         services.branches().find(id).whenComplete((found,error)->{
             if(error!=null||found.isEmpty()||session.retries.containsKey(id))return;var view=found.get();
-            if(Set.of("PHYSICAL_COMPLETE","ACTIVATION_PENDING","ACTIVE").contains(view.state()))BankLandmarks.record(source.key.level(),plan.source(),view.choice());
+            if(Set.of("PHYSICAL_COMPLETE","ACTIVATION_PENDING","ACTIVE").contains(view.state())){
+                BankLandmarks.record(source.key.level(),plan.source(),view.choice());
+                ca.emilybelnavis.mcmods.economy.banker.StaffingRuntime.observe(source.key.level(),view);
+            }
             if(!Set.of("RESERVED","PLACING").contains(view.state()))return;
             services.branches().placementAttempt(id).whenComplete((attempt,failure)->{
                 if(failure!=null)return;
@@ -278,6 +281,10 @@ public final class GenerationRuntime {
                     if(blockEntity instanceof TerminalBlockEntity terminal){
                         var anchor=work.candidate.choice().services().stream().filter(a->a.position().equals(cell.position())).findFirst().orElse(null);
                         if(anchor!=null)terminal.generatedPlacement(work.branch,anchor.generation(),work.operation);
+                    }
+                    if(blockEntity instanceof ca.emilybelnavis.mcmods.economy.banker.desk.DeskBlockEntity desk){
+                        var anchor=work.candidate.choice().desks().stream().filter(a->a.position().equals(cell.position())).findFirst().orElseThrow();
+                        desk.generatedPlacement(work.branch,anchor.generation(),work.operation);
                     }
                 }catch(Exception malformed){conflictRetry(server,session,work,"PLACEMENT_BLOCK_ENTITY_INVALID");return;}
             }

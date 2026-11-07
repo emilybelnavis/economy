@@ -185,8 +185,8 @@ public final class VillageSites {
         UUID branchId=BranchPlans.branchId(BranchPlans.id(world,village.source()),branch.slot());
         var services=new ArrayList<Anchor>();var desks=new ArrayList<Anchor>();
         int count=branch.size()==Size.COMPACT?1:2;
-        int[][] kiosk=branch.size()==Size.COMPACT?new int[][]{{2,1,2}}:new int[][]{{2,1,2},{14,1,2}};
-        int[][] desk=branch.size()==Size.COMPACT?new int[][]{{7,1,5}}:new int[][]{{2,1,7},{12,1,7}};
+        int[][] kiosk=branch.size()==Size.COMPACT?new int[][]{{1,1,2}}:new int[][]{{1,1,2},{13,1,2}};
+        int[][] desk=branch.size()==Size.COMPACT?new int[][]{{8,1,5}}:new int[][]{{3,1,7},{13,1,7}};
         for(int i=0;i<count;i++){
             var kp=kiosk[i];services.add(new Anchor(i,local(origin,turn,w,d,kp[0],kp[1],kp[2]),BranchPlans.generation(branchId,i),"wide"));
             var dp=desk[i];desks.add(new Anchor(i,local(origin,turn,w,d,dp[0],dp[1],dp[2]),BranchPlans.generation(branchId,i+2),"desk"));

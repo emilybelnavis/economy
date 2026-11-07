@@ -26,3 +26,24 @@ Run `python3 tools/generate_wide_kiosk_assets.py` **after** the base banking-art
 The new geometry and headers are original project-authored CC0-1.0 work. Construction source is `../generate_wide_kiosk_assets.py`; `sources/hardware/wide-kiosk/geometry.json` records the assembled cuboids and cell origins, and that folder contains the original editable header SVGs. Existing project-authored CC0 banking material maps and original procedural glyphs/marks are reused. No downloaded images, fonts, financial marks or external models were used. `previews/wide-kiosk-fronts.png` is a flat design/contact sheet, not a Minecraft render or runtime-loading witness.
 
 The console spans two blocks wide and two high, facing north before the normal horizontal rotation. Cell0 is the bottom anchor/right-hand world-model half; cell1 is the bottom left-hand half; cells2/3 are their upper partners. Its recessed foot, side cheeks, solid rear assembly, waist-height projecting counter, broad recessed screen and horizontal header remain within each cell's0..16 model bounds and overall north-facing Z1..15. Inventory geometry is uniformly half-sized to fit the standard0..16 item model envelope. Legacy narrow cells0/1 keep their exact old models; invalid narrow cells2/3 use a safe narrow appearance while Java integrity rejects them. Rendering never grants a bank binding or physical upgrade authority.
+
+
+### Detailed mid-century console surfaces
+
+`python3 tools/generate_wide_kiosk_assets.py` also authors the console-specific
+textures in `assets/economy/textures/block/banking/console/`. The shared surfaces
+include walnut grain, brushed metal, speckled ivory laminate, an inset green
+monitor, separate numbered keycaps, card-reader and cash-throat details, louvers,
+a screw-fastened rear service door and its lock. Each of the 23 banks and the
+generic console receives its own enamel cabinet and accent-strip textures.
+These are original CC0-1.0 pixel drawings made with the project's `Canvas`
+primitives and three-by-five alphabet in `art.py`.
+
+The assembled 57 cuboids include raised keys and reader controls, a recessed
+screen with independent bezel rails, a cash tray, walnut side cheeks, metal
+edges and rear door hardware. The version 2 geometry source in
+`sources/hardware/wide-kiosk/geometry.json` records their positions and materials.
+The original north-facing front, four cell origins and Z1..15 envelope are
+preserved. Cell models are clipped to X/Y0..16 and the inventory version is
+half scale. The generator validates those bounds, all required material names,
+texture files, model parents and explicit blockstate references.

@@ -1,6 +1,6 @@
 # Persistent village branches — A7-02
 
-Branch persistence was introduced in V36; current world schema is V38 after [A7-04 generation](village-generation.md). Production source reconciliation, physical placement and explicit terrain retry are installed; bankers remain A7-05. [A7 revision-1 contracts](a7-shared-contracts.md) retain policy/geometry; this document records implemented interfaces and conservative limits. [Verification](../verification/A7-02.md) records the selected real SQLite checks.
+Branch persistence was introduced in V36; current world schema is V39 after [A7-05 staffing](banker-staffing.md). Production source reconciliation, physical placement, explicit terrain retry and captured-desk bankers are installed. [A7 revision-1 contracts](a7-shared-contracts.md) retain policy/geometry; this document records implemented interfaces and conservative limits. [Verification](../verification/A7-02.md) records the selected real SQLite checks.
 
 ## Captured plans and identities
 
@@ -50,9 +50,9 @@ Authenticated permission-level-2 operators, server console and the existing trus
 
 - `/economy branch plans [after <village-id>]`, `/economy branch list [after <branch-id>]`: indexed pages≤16.
 - `/economy branch status <id>`: captured count/style/slot/provider/currency/revisions, loaded/unknown service generations, pause state and recent16 event/operation IDs.
-- `/economy branch staffing <id> pause|resume`: durable revision-checked pause state only; no staff/timer/spawn implementation.
+- `/economy branch staffing <id> pause|resume`: atomically flush earned replacement progress and persist revision-checked pause state; resume preserves elapsed time.
 - `/economy branch retry <id> <expectedRevision>`: explicit operator only. SITE_PENDING records PLACEMENT_ADAPTER_UNAVAILABLE without changing choices. PROVIDER_PENDING selects an unused eligible institution from a newly recorded snapshot using the original source/slot stream, keeping the original denomination and prior choices; if none exists, remains pending. REMOVED/CONFLICT/OMITTED cannot retry into construction.
 
 Operator work uses detached atomic permission leases refreshed before storage callback publication. Commands acknowledge durable outcomes and show original operation IDs; unknown results must be inspected, not assumed failed. They expose no customer balances/private financial history. Direct trusted server callers can retain `BranchService.Pending` and call lookup before resubmission. These interfaces are not network DTOs or client/NPC-minted proofs.
 
-A7-03 now consumes typed physical branch identity, legacy/wide service anchors and stable terminal generations/bindings; its [upgrade contract](kiosk-upgrades.md) is current. A7-04 supplies [metadata reconciliation, receipts and safe explicit terrain retries](village-generation.md). Pending plans have no invented anchors; V38 accepted later-site choices install anchors separately from immutable capture, preserving all removal tombstones. A7-05 adds desk admission, assignment/vacancy/timer/spawn records while consuming the durable pause flag and reserved desk geometry. A7-05 staffing is not implemented.
+A7-03 now consumes typed physical branch identity, legacy/wide service anchors and stable terminal generations/bindings; its [upgrade contract](kiosk-upgrades.md) is current. A7-04 supplies [metadata reconciliation, receipts and safe explicit terrain retries](village-generation.md). Pending plans have no invented anchors; V38 accepted later-site choices install anchors separately from immutable capture, preserving all removal tombstones. A7-05 adds desk admission, assignment/vacancy/timer/spawn records while consuming the durable pause flag and reserved desk geometry. [A7-05 staffing](banker-staffing.md) is installed with conservative UUID reconciliation and explicit-only dialogue.

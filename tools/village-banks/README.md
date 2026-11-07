@@ -19,8 +19,9 @@ text. It does not invent replacement building geometry.
 Plains uses oak, desert jungle, savanna acacia, snowy spruce and taiga spruce.
 Every branch has glazing, a flat roof, institution colors, a geometric roof mark,
 lighting, furniture and a bed. Compact branches reserve one kiosk and one desk;
-larger branches reserve two of each. Desk furniture is vanilla decoration pending
-the A7-05 job station and banker package. It grants no banking or staffing authority.
+larger branches reserve two of each. The converter installs real banker desks and
+rotates both desks and consoles to local south. Their anchors switch columns within
+the two-block bays, with coordinates recorded in the manifest.
 
 Templates are 11×8×9 or 17×9×11, including explicit interior air. Runtime generation
 rotates their states and anchors together, validates supports and connects paths.

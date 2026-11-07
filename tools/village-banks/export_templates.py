@@ -65,12 +65,25 @@ def export_style(style):
             ox=2+(index%5)*36+(14 if large else 0);oz=2+(index//5)*16
             cells={(x,y,z):sparse.get((ox+x,1+y,oz+z),'minecraft:air') for y in range(h) for z in range(d) for x in range(w)}
             # Bay geometry is not a fake decorative terminal. Final output uses the real mod block.
+            # South-facing terminals anchor the west column of each existing bay.
             services=[(2,1,2),(14,1,2)] if large else [(2,1,2)]
             for ax,ay,az in services:
                 for cell in range(4):
                     position=(ax-(cell&1),ay+(cell>>1),az)
+                    rotated_cell = (1, 0, 3, 2)[cell]
                     assert cells[position] in ('air','minecraft:air'),(style,bank['key'],position,cells[position])
-                    cells[position]=f'economy:branch_kiosk[bank={index+1},cell={cell},facing=north,wide=true]'
+                    cells[position]=f'economy:branch_kiosk[bank={index+1},cell={rotated_cell},facing=south,wide=true]'
+            # New captures receive the registered desk at the frozen four-cell furniture bay.
+            # Existing serialized piece cells and their receipts are deliberately never converted.
+            desks=[(2,1,7),(12,1,7)] if large else [(7,1,5)]
+            expected=[f'{STYLES[style]}_slab[type=top]',f'{STYLES[style]}_slab[type=top]','black_stained_glass','lectern[facing=north]']
+            # Rotate each complete two-column desk, including its anchor cell.
+            for ax,ay,az in desks:
+                for cell in range(4):
+                    position=(ax+(cell&1),ay+(cell>>1),az)
+                    rotated_cell = (1, 0, 3, 2)[cell]
+                    assert cells[position].removeprefix('minecraft:')==expected[cell],(style,bank['key'],position,cells[position])
+                    cells[position]=f'economy:banker_desk[cell={rotated_cell},facing=south,wood={STYLES[style]}]'
             palette=[];lookup={};blocks=[]
             for position,block in cells.items():
                 if block not in lookup:lookup[block]=len(palette);palette.append(state(block))
@@ -78,6 +91,8 @@ def export_style(style):
                 if '_wall_sign' in block:entry['nbt']=compound(sign(bank,size))
                 if block.startswith('economy:branch_kiosk') and ',cell=0,' in block:
                     entry['nbt']=compound({'id':(8,'economy:terminal')})
+                if block.startswith('economy:banker_desk[cell=0,'):
+                    entry['nbt']=compound({'id':(8,'economy:banker_desk')})
                 blocks.append(entry)
             names=[s['Name'][1] for s in palette]
             assert not any(x in names for x in ['minecraft:magenta_concrete','minecraft:purple_concrete','minecraft:purple_glazed_terracotta'])
@@ -89,8 +104,8 @@ def export_style(style):
             packed=gzip.compress(encoded,mtime=0);output.write_bytes(packed)
             results.append({'style':style,'bank':bank['key'],'currency':bank['currency'],'size':size,
                             'resource':f'economy:banks/{style}/{bank["key"]}/{size}',
-                            'dimensions':[w,h,d],'services':services,
-                            'desk_slots':[[2,1,7],[12,1,7]] if large else [[7,1,5]],
+                            'dimensions':[w,h,d],'services':[[x-1,y,z] for x,y,z in services],
+                            'desk_slots':[[3,1,7],[13,1,7]] if large else [[8,1,5]],
                             'sha256':hashlib.sha256(packed).hexdigest(),'genmc_source_sha256':hashlib.sha256(raw).hexdigest()})
     # Preserve exact studio output in a compact deterministic source archive.
     archived.write_bytes(gzip.compress(raw,mtime=0))
@@ -99,7 +114,7 @@ def export_style(style):
 
 def main():
     templates=[t for style in STYLES for t in export_style(style)]
-    manifest={'version':1,'design':'mid-century modern','license':'CC0-1.0','source':'GenMC exact exported geometry; export_templates.py inserts real service machines and sign NBT',
+    manifest={'version':1,'design':'mid-century modern','license':'CC0-1.0','source':'GenMC exact exported geometry; export_templates.py inserts real service machines, reserved banker desks and sign NBT',
               'wood_by_style':STYLES,'projects':json.loads((SOURCE/'projects.json').read_text()),'templates':templates}
     path=ROOT/'src/main/resources/data/economy/worldgen/bank_templates.json'
     path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(manifest,indent=2)+'\n')

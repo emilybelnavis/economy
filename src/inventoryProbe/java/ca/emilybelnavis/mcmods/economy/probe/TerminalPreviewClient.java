@@ -18,9 +18,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 public final class TerminalPreviewClient {
     private boolean opened;
     private int frames;
-    public TerminalPreviewClient() { NeoForge.EVENT_BUS.addListener(this::tick); if(Boolean.getBoolean("economy.kioskUpgradeProbe"))new KioskUpgradeClient(); if(Boolean.getBoolean("economy.villageGenerationProbe"))new VillageGenerationClient(); if(Boolean.getBoolean("economy.bankLocateProbe"))new BankLocateClient(); if(Boolean.getBoolean("economy.bankStructureProbe"))new BankStructureClient(); }
+    public TerminalPreviewClient() { NeoForge.EVENT_BUS.addListener(this::tick); if(Boolean.getBoolean("economy.kioskUpgradeProbe"))new KioskUpgradeClient(); if(Boolean.getBoolean("economy.villageGenerationProbe"))new VillageGenerationClient(); if(Boolean.getBoolean("economy.bankLocateProbe"))new BankLocateClient(); if(Boolean.getBoolean("economy.bankStructureProbe"))new BankStructureClient(); if(Boolean.getBoolean("economy.bankerProbe"))new BankerClient(); }
     private void tick(ClientTickEvent.Post event) {
-        if (Boolean.getBoolean("economy.bankingProbe") || Boolean.getBoolean("economy.kioskUpgradeProbe") || Boolean.getBoolean("economy.villageGenerationProbe") || Boolean.getBoolean("economy.bankLocateProbe") || Boolean.getBoolean("economy.bankStructureProbe")) return;
+        if (Boolean.getBoolean("economy.bankerProbe") || Boolean.getBoolean("economy.bankingProbe") || Boolean.getBoolean("economy.kioskUpgradeProbe") || Boolean.getBoolean("economy.villageGenerationProbe") || Boolean.getBoolean("economy.bankLocateProbe") || Boolean.getBoolean("economy.bankStructureProbe")) return;
         var minecraft = Minecraft.getInstance();
         if (!opened && minecraft.getOverlay() == null && minecraft.screen != null && minecraft.level == null) {
             opened = true;

@@ -509,5 +509,7 @@
   "item.economy.issued_kintsugi_trust_credit_keystone_t2": "Kintsugi Trust Tier 2 Keystone Credit Card",
   "item.economy.issued_mariner_crest_credit_wayline_t2": "Mariner Crest Tier 2 Wayline Credit Card",
   "item.economy.issued_mariner_crest_credit_keystone_t2": "Mariner Crest Tier 2 Keystone Credit Card",
-  "screen.economy.tab.finance_autopay": "Automatic payments"
+  "screen.economy.tab.finance_autopay": "Automatic payments",
+  "block.economy.banker_desk": "Banker Desk",
+  "entity.economy.banker": "Banker"
 }

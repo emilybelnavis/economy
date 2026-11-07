@@ -361,6 +361,15 @@ public final class ServerServices {
         return branches;
     }
 
+    private StaffingService staffing;
+    public StaffingService staffing() {
+        checkOwner();
+        if (!(storage instanceof FoundationStore store)) throw new IllegalStateException("Staffing requires persistent storage");
+        if (state != State.READY) throw new IllegalStateException("Staffing unavailable");
+        if (staffing == null) staffing = new StaffingService(this,store);
+        return staffing;
+    }
+
     public LedgerService ledger() {
         checkOwner();
         if (!(storage instanceof FoundationStore store))

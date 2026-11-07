@@ -10,16 +10,18 @@ Banking, physical cash and player shops for Minecraft, with credit, loans and a 
 
 - Eleven currencies, daily exchange rates and collectible notes and coins.
 - Accounts at 23 fictional banks, deposit interest and issued debit cards.
-- ATMs, tellers, branch kiosks and registers with original artwork.
+- ATMs, tellers, branch kiosks, banker desks and registers with original artwork.
 - Cash deposits and withdrawals, account transfers and player shops.
 - Credit cards, fixed unsecured loans, credit reports and Collection Agents.
 - Optional automatic payments, transaction history and recovery of interrupted payments and item deliveries.
 
 New kiosks are two blocks wide and two blocks high. Existing narrow kiosks remain usable and offer a free **Upgrade kiosk** action in owner/operator settings when space and support are clear.
 
-New eligible vanilla villages can generate mid-century modern bank branches, with compact and larger designs for all 23 banks across five village styles. Buildings use local wood and working branch kiosks. Existing villages are preserved; difficult terrain can leave a branch pending. Bankers and their job stations are still upcoming. See [branch diagnostics and terrain retry](docs/SERVER_GUIDE.md#village-branch-diagnostics).
+New eligible vanilla villages can generate mid-century modern bank branches, with compact and larger designs for all 23 banks across five village styles. Buildings use local wood, working branch kiosks and banker desks. Active branches staff their captured desks with persistent bankers. Right-click a banker for private banking guidance and access to the branch’s available services. Existing villages are preserved; difficult terrain can leave a branch pending. See [branch diagnostics and terrain retry](docs/SERVER_GUIDE.md#village-branch-diagnostics).
 
-Operators can find bank locations with `/locate structure #economy:banks`.
+Operators can find bank locations with `/locate structure #economy:banks` and pause or resume replacement staffing with `/economy branch staffing <branch-id> pause|resume`. A confirmed banker death starts a replacement wait of 24,000 eligible loaded ticks; unloading or an uncertain observation does not create a replacement.
+
+A player-placed banker desk is decorative and unbound. Older vanilla desk furniture remains unchanged; it is not automatically upgraded into a staffed job station.
 
 Securities trading, variable-rate loans and collateral-backed loans are future work. The Stock Trading Computer is currently decorative.
 

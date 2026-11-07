@@ -54,7 +54,19 @@ public final class BranchCommands {
             send(source,"Village "+view.village()+" / "+plan.style()+" / buildings "+plan.buildingCount()+" / slot "+view.slot()+" / "+choice.size()+" / "+(choice.required()?"required":"optional"));
             send(source,"Bank "+choice.institution()+" / native "+choice.nativeCurrency()+" / captured denomination "+plan.snapshot().denomination()+"@"+plan.snapshot().denominationRevision());
             send(source,"Catalog "+plan.snapshot().catalogRevision()+" / policy "+plan.snapshot().policyRevision()+" / resources "+plan.snapshot().resourceRevision()+" / digest "+plan.digest());
-            send(source,"Staffing paused="+view.paused()+"; staffing adapter unavailable; terrain retry uses loaded safe sites only.");
+            send(source,"Staffing paused="+view.paused()+"; replacement delay 24,000 eligible server ticks; terrain retry uses loaded safe sites only.");
+            services.staffing().rows(id).whenComplete((rows,problem)->{
+                if(problem!=null||sessions.apply(source.getServer())!=services||!valid(source,services))return;
+                var level=source.getServer().getLevel(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,net.minecraft.resources.ResourceLocation.parse(plan.source().dimension())));
+                for(var anchor:choice.desks()){
+                    var p=new net.minecraft.core.BlockPos(anchor.position().x(),anchor.position().y(),anchor.position().z());
+                    var row=rows.stream().filter(r->r.slot()==anchor.slot()).findFirst().orElse(null);
+                    boolean loaded=level!=null&&level.getChunkSource().getChunkNow(p.getX()>>4,p.getZ()>>4)!=null;
+                    String observed=!loaded?"UNKNOWN_UNLOADED":level.getBlockEntity(p) instanceof ca.emilybelnavis.mcmods.economy.banker.desk.DeskBlockEntity e&&e.branchId().filter(id::equals).isPresent()&&ca.emilybelnavis.mcmods.economy.banker.desk.DeskGeometry.matches(level,p,anchor.generation())?"VALID":row==null?"LEGACY_DESK_UNBOUND":"ABSENT_OR_REPLACED";
+                    String employee=row==null?"UNASSIGNED":!loaded||level.getEntity(row.employee())==null?"UNKNOWN_UNLOADED_OR_ABSENT":"LOADED";
+                    send(source,"Desk "+anchor.slot()+" / "+p.toShortString()+" / "+observed+" / "+(row==null?"no staffing assignment":row.deskState()+" / "+row.phase()+" / elapsed "+row.elapsed()+"/24000 / employee "+row.employee()+" / assignment revision "+row.revision())+" / "+employee);
+                }
+            });
             services.branches().placementAttempt(id).whenComplete((attempt,problem)->{
                 if(problem==null&&attempt.isPresent()&&sessions.apply(source.getServer())==services&&valid(source,services)){
                     var value=attempt.get();send(source,"Placement attempt "+value.number()+" / "+value.phase()+" / "+value.reason()+" / original operation "+value.operation());
@@ -87,8 +99,13 @@ public final class BranchCommands {
                 });
                 return;
             }
-            var preparation=pause==null?services.branches().retryProvider(view,actor,source.getServer().overworld().getSeed(),lease.live()):
-                    java.util.concurrent.CompletableFuture.completedStage(Optional.of(services.branches().operator(view,actor,pause,lease.live())));
+            if(pause!=null){
+                ca.emilybelnavis.mcmods.economy.banker.StaffingRuntime.pause(source.getServer(),id,actor,pause,lease.live()).whenComplete((outcome,problem)->{
+                    if(lease.live().get()&&valid(source,services))send(source,problem==null?outcome:"Staffing control unavailable; inspect branch status.");
+                    finish(lease);
+                });return;
+            }
+            var preparation=services.branches().retryProvider(view,actor,source.getServer().overworld().getSeed(),lease.live());
             preparation.whenComplete((prepared,failure)->{
                 if(failure!=null||prepared.isEmpty()||!lease.live().get()||!valid(source,services)){finish(lease);unavailable(source);return;}
                 var pending=prepared.get();
