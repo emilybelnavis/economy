@@ -174,6 +174,7 @@ public final class CashCatalog {
                 .title(Component.translatable("itemGroup.economy"))
                 .icon(() -> new ItemStack(CASH.get("cad_bill_20_horizontal").item().get()))
                 .displayItems((parameters, output) -> {
+                    output.accept(ca.emilybelnavis.mcmods.economy.collection.CollectionCatalog.SPAWN_EGG.get());
                     CASH.values().forEach(value -> output.accept(value.item().get()));
                     CardCatalog.collectibles().forEach(value -> output.accept(value.item().get()));
                 }).build());

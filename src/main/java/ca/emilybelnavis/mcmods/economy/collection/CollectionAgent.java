@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-/** Unsaved, nonhostile presentation. Its server-owned lease carries no monetary authority. */
+/** Nonhostile representative. Only automatically bound presentations carry a server-owned lease. */
 public final class CollectionAgent extends PathfinderMob {
     private UUID debtor;
     private UUID presentation;
@@ -32,7 +32,8 @@ public final class CollectionAgent extends PathfinderMob {
             .add(Attributes.FOLLOW_RANGE, 32);
     }
     public UUID debtor() { return debtor; }
-    public UUID presentation() { return presentation; }
+    public UUID presentation() { return debtor == null ? getUUID() : presentation; }
+    public boolean managed() { return debtor != null; }
     public void bind(UUID owner, UUID lease) {
         if (debtor != null || owner == null || lease == null) throw new IllegalStateException("Collection presentation already bound");
         debtor = owner;presentation = lease;
@@ -76,5 +77,5 @@ public final class CollectionAgent extends PathfinderMob {
     @Override public boolean canUsePortal(boolean passenger) { return false; }
     @Override public boolean startRiding(Entity vehicle, boolean force) { return false; }
     @Override protected boolean canAddPassenger(Entity passenger) { return false; }
-    @Override public boolean shouldBeSaved() { return false; }
+    @Override public boolean shouldBeSaved() { return !managed() && super.shouldBeSaved(); }
 }

@@ -80,6 +80,8 @@ Older worlds with incomplete financial history stop before financial readiness w
 
 ### Collection Agent encounters
 
+Creative builders can place a persistent, stationary representative with `/summon economy:collection_agent ~ ~ ~` or the **Collection Agent Spawn Egg**, available in the Economy and Spawn Eggs tabs. `/give @s economy:collection_agent_spawn_egg` also gives operators the egg. Placed representatives offer the same private case and payment dialogue to each visitor, including an empty case list if nothing is collectible. They create no debt, do not follow players and do not alter automatic-agent replacement cooldowns.
+
 A Collection Agent now follows online debtors with collectible cases. Right-click within six blocks to review current creditors and balances, choose an owned BANK account, preview a partial or full payment and confirm its exact debit. A different currency shows an explicit FX/fee review. Exit leaves debt unchanged. The agent is nonhostile and gives no loot or experience. Killing it delays replacement for seven financial days. A crash leaving an uncertain live presentation conservatively protects the same window from recovery. Saved payment receipts recover after reconnect even when final settlement removed the agent.
 
 ## Shops

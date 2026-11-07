@@ -42,6 +42,14 @@ public final class CollectionAgents {
         runtime.entries.clear();runtime.order.clear();runtime.queued.clear();
     }
     public static boolean canInteract(ServerPlayer player,CollectionAgent agent) {
+        if (!agent.managed()) {
+            var services = Economy.serverServices(player.server);
+            return services != null && services.state() == ServerServices.State.READY
+                && services.metrics().economy().ready() && player.isAlive() && !player.isSpectator()
+                && !player.isChangingDimension() && agent.isAlive() && !agent.isRemoved()
+                && agent.level() == player.level() && player.distanceToSqr(agent) <= 36
+                && CollectionProtection.allows(player, agent.position(), CollectionProtection.Action.INTERACT);
+        }
         var runtime=RUNTIMES.get(player.server);var entry=runtime==null?null:runtime.entries.get(player.getUUID());
         return entry!=null&&entry.player==player&&entry.agent==agent&&runtime.valid(entry,agent,System.currentTimeMillis())
             &&player.distanceToSqr(agent)<=36&&CollectionProtection.allows(player,agent.position(),CollectionProtection.Action.INTERACT);
@@ -51,6 +59,7 @@ public final class CollectionAgents {
         var entry=runtime.entries.get(player.getUUID());if(entry!=null){entry.snapshot=null;entry.nextRead=0;}
     }
     static void entityTick(CollectionAgent agent) {
+        if (!agent.managed()) return;
         if(!(agent.level() instanceof ServerLevel level))return;
         var runtime=RUNTIMES.get(level.getServer());
         var entry=runtime==null||agent.debtor()==null?null:runtime.entries.get(agent.debtor());

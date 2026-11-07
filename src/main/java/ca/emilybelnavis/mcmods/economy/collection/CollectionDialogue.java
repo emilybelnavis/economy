@@ -124,7 +124,7 @@ public final class CollectionDialogue {
         state.services.ledger().collectionAgentState(grant(player,state),after,4).whenComplete((found,error)->player.server.execute(()->{
             if(!live(player,menu,state))return;
             if(error!=null||found.isEmpty()){failure(menu,"Cases unavailable while financial work is pending.");return;}
-            if(found.orElseThrow().state().phase()!=CollectionPresence.Phase.LIVE||!found.orElseThrow().state().lease().equals(menu.presentation())){player.closeContainer();return;}
+            if(menu.managed()&&(found.orElseThrow().state().phase()!=CollectionPresence.Phase.LIVE||!found.orElseThrow().state().lease().equals(menu.presentation()))){player.closeContainer();return;}
             state.nextCase=found.orElseThrow().nextCursor();state.offeredCases.clear();
             var lines=new ArrayList<String>();var choices=new ArrayList<CollectionNetwork.Choice>();long now=System.currentTimeMillis();
             for(var entry:found.orElseThrow().cases()){

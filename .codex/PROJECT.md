@@ -106,6 +106,12 @@ Current bank/credit menu and API contract [protocol8 and version-one integration
 
 ## Next planned A-series phases
 
+A7 gameplay planning decisions are recorded in [the phase contract](architecture/planned-a7-a10.md). [A7-01 feasibility planning](architecture/a7-feasibility-plan.md) is drafted; generation feasibility and shared interfaces are not yet accepted, and no implementation prompt is selected.
+
+A7-01 through A7-06 are user-approved for implementation as of 2026-11-06: [shared contract](../prompts/A7-village-banking/CONTRACT.md) and [selection queue](../prompts/A7-village-banking/EXECUTION.md). A7-01 is next selectable; A7-02–06 require their recorded prerequisites and explicit selection. Approval does not begin implementation or establish verification; technical feasibility, building envelopes/floor plans and shared interfaces remain A7-01 deliverables. Approval covers A7 only.
+
+[A7 pinned-source research](architecture/a7-generation-research.md) identifies the pre-freeze village layout window and candidate hook strategies. [Template inventory](architecture/a7-template-inventory.md) is a draft classification. Abandoned villages receive no A7 content. Approved placement tries interior, nearby edge with foundations/modest leveling, then farther connected sites; exhausted search retains a reported pending branch plan. Exact placement limits and safe recovery remain unresolved.
+
 A6 is complete in its accepted scope. The revised sequence is **A7 Village Banking Package → A8 Economic simulation (former A7) → A9 Basic item valuation → A10 Core integration (former A8)**. All four remain planned; no implementation prompt is selected by this update.
 
-[Planning boundaries and suggested package splits](architecture/planned-a7-a10.md) cover guaranteed village banks, persistent branches, banker guides/desks, wider kiosks, reference item costs and provenance. Use this contract for implementation planning; the public roadmap does not authorize execution. Settle generation thresholds/fallbacks, staffing timing, kiosk migration and recipe policies in the selected package before implementation. B-series handoffs remain separate.
+[Planning boundaries and suggested package splits](architecture/planned-a7-a10.md) cover village bank plans and placement/pending behavior, persistent branches, banker guides/desks, wider kiosks, reference item costs and provenance. Use this contract for implementation planning; the public roadmap does not authorize execution. Complete remaining technical limits, recovery, kiosk-upgrade details and recipe policies in the selected package before implementation. B-series handoffs remain separate.

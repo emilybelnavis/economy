@@ -390,6 +390,7 @@
   "block.economy.mariner_crest_teller": "Mariner Crest Teller Station (AUD)",
   "block.economy.mariner_crest_kiosk": "Mariner Crest Branch Kiosk (AUD)",
   "art.economy.preview_only": "Art preview only; usable cards require server issuance.",
+  "item.economy.collection_agent_spawn_egg": "Collection Agent Spawn Egg",
   "entity.economy.collection_agent": "Collection Agent",
   "art.economy.tier1": "Tier 1",
   "art.economy.tier2": "Tier 2",

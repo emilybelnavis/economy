@@ -26,6 +26,12 @@ Securities trading, variable-rate loans and collateral-backed loans are future w
 
 Accounts are limited to four per player, with one per currency. Creative cards are collectibles and do not grant banking access. Financial time continues while the server is offline: one financial day lasts 20 real minutes, and a month lasts 28 financial days.
 
+## Creative Collection Agents
+
+Use `/summon economy:collection_agent ~ ~ ~` to place a Collection Agent, or find the **Collection Agent Spawn Egg** in the Economy and Spawn Eggs creative tabs. Operators can also use `/give @s economy:collection_agent_spawn_egg`.
+
+Placed agents stay where you put them and persist with the world. Right-click within six blocks to review and pay your own eligible collection cases. Each player sees only their own debts. Placing an agent creates no debt and does not change the cooldown of automatic agents.
+
 ## Guides
 
 - [Player guide](docs/PLAYER_GUIDE.md): accounts, terminals, cash, shops, credit, loans and automatic payments.

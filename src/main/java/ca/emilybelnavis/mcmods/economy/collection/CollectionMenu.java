@@ -37,7 +37,12 @@ public final class CollectionMenu extends AbstractContainerMenu {
         if(player!=inventory.player||player.containerMenu!=this||!player.isAlive()||player.server.getPlayerList().getPlayer(player.getUUID())!=player)return false;
         var services=Economy.serverServices(player.server);var found=player.serverLevel().getEntity(entity);
         return services!=null&&services.state()==ServerServices.State.READY&&found instanceof CollectionAgent agent&&presentation.equals(agent.presentation())
-            &&player.getUUID().equals(agent.debtor())&&CollectionAgents.canInteract(player,agent);
+            &&CollectionAgents.canInteract(player,agent);
+    }
+    /** Call only after valid(): placed representatives use entity identity rather than a debtor lease. */
+    public boolean managed() {
+        return inventory.player instanceof ServerPlayer player
+            && player.serverLevel().getEntity(entity) instanceof CollectionAgent agent && agent.managed();
     }
     public boolean accept(ServerPlayer player,CollectionNetwork.Action action){
         if(!identityMatches(containerId,session,revision,action)||!valid(player))return false;

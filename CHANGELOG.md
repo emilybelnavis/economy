@@ -6,6 +6,11 @@ Completed features, gameplay changes and notable fixes, grouped by date and phas
 
 ### A6 — Banking, credit and debt
 
+**Creative Collection Agents**
+
+- Added `/summon economy:collection_agent` and a Collection Agent Spawn Egg in the Economy and Spawn Eggs creative tabs.
+- Placed agents persist with the world and offer each visitor their own private collection payment dialogue without changing automatic debtor encounters or cooldowns.
+
 **Card collectibles and debit artwork**
 
 - Removed the eight old generic bank and credit cards. The Bank & Credit Cards tab now includes every current debit and credit design, with bank, type and applicable tier tooltips.
