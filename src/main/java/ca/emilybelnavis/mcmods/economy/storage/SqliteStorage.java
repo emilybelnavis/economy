@@ -146,6 +146,7 @@ public final class SqliteStorage implements FoundationStore {
             ca.emilybelnavis.mcmods.economy.collection.CollectionPresenceSchema.validate(connection);
             ca.emilybelnavis.mcmods.economy.autopay.AutopaySchema.validate(connection);
             VillageBranchSchema.validate(connection);
+            BranchPlacementSchema.validate(connection);
             ca.emilybelnavis.mcmods.economy.journal.KioskUpgrades.validate(connection);
             LedgerProjection.validateSchema(connection);
             HoldSchema.validate(connection);
@@ -337,6 +338,7 @@ public final class SqliteStorage implements FoundationStore {
             ca.emilybelnavis.mcmods.economy.collection.CollectionPresenceSchema.validate(connection);
             ca.emilybelnavis.mcmods.economy.autopay.AutopaySchema.validate(connection);
             VillageBranchSchema.validate(connection);
+            BranchPlacementSchema.validate(connection);
             ca.emilybelnavis.mcmods.economy.journal.KioskUpgrades.validate(connection);
             LedgerProjection.validateSchema(connection);
             HoldSchema.validate(connection);

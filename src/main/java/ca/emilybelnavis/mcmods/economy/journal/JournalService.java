@@ -100,7 +100,10 @@ public final class JournalService {
             if (outcome.status() != Status.COMMITTED && outcome.status() != Status.DURABLY_REJECTED)
                 return new Delivery(outcome, DeliveryStatus.SKIPPED);
             try {
-                if (outcome.status() == Status.COMMITTED) publisher.invalidate(outcome);
+                if (outcome.status() == Status.COMMITTED) {
+                    services.denominationCommitted(intent.kind());
+                    publisher.invalidate(outcome);
+                }
                 return new Delivery(outcome, publish.apply(outcome));
             } catch (Throwable deliveryFailure) {
                 // Invalidation is best-effort even if a cache refresh or the first invalidation failed.
@@ -117,7 +120,12 @@ public final class JournalService {
     public CompletionStage<Optional<Outcome>> lookup(Intent intent) {
         checkOwner();
         try {
-            var lookup = services.shareStorageRead(intent.actor(), new LookupKey(this, intent), () -> engine.lookup(intent));
+            var lookup = services.shareStorageRead(intent.actor(), new LookupKey(this, intent), () -> engine.lookup(intent))
+                    .thenApply(outcome -> {
+                        if (outcome.isPresent() && outcome.get().status() == Status.COMMITTED)
+                            services.denominationCommitted(intent.kind());
+                        return outcome;
+                    });
             lookup.whenComplete((outcome, error) -> {
                 if (error != null) record(intent, Event.OPERATION_LOOKUP_UNAVAILABLE);
             });

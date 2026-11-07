@@ -215,6 +215,8 @@ public final class Branches {
         BranchPlanV1 choice=null;
         if(!fills.isEmpty())choice=new BranchPlanV1(original.slot(),original.required(),original.size(),fills.getFirst().get("institution"),
                 ca.emilybelnavis.mcmods.economy.api.EconomyCurrency.valueOf(fills.getFirst().get("native_currency")),original.templateRevision(),original.transform(),original.bounds(),original.entrance(),original.services(),original.desks(),original.manifests(),State.SITE_PENDING,"PROVIDER_FILLED",original.placementRevision(),original.optionalRoll());
+        var placement=BranchPlacement.latestChoice(reads,world,id);
+        if(placement.isPresent())choice=placement.get();
         return Optional.of(new View(id,UUID.fromString(row.get("village_id")),slot,row.get("state"),row.get("reason"),Long.parseLong(row.get("revision")),row.get("staffing_paused").equals("1"),plan,
                 reads.query("SELECT * FROM village_branch_anchors WHERE world_id=? AND branch_id=? ORDER BY slot",List.of(world.value().toString(),id.toString()),2),choice));
     }

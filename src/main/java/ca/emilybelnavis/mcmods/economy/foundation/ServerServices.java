@@ -74,6 +74,7 @@ public final class ServerServices {
     private boolean economyObserved;
     private int unresolvedAtShutdown;
     private LedgerService ledger;
+    private Runnable denominationChange = () -> {};
     private final OperationDiagnostics operationDiagnostics = new OperationDiagnostics();
     private final Map<Thread, Long> activeStorage = new ConcurrentHashMap<>();
     private final Map<Thread, Long> activeCalculations = new ConcurrentHashMap<>();
@@ -162,6 +163,20 @@ public final class ServerServices {
                     thread.setDaemon(true);
                     return thread;
                 }, new ThreadPoolExecutor.AbortPolicy());
+    }
+
+    /** Bind server-thread cache invalidation before denomination-changing outcomes are acknowledged. */
+    public void onDenominationChange(Runnable listener) {
+        checkOwner();
+        denominationChange = java.util.Objects.requireNonNull(listener);
+    }
+
+    /** Called only after a journal outcome has been durably committed or recovered. */
+    public void denominationCommitted(Journal.Kind kind) {
+        checkOwner();
+        if (ca.emilybelnavis.mcmods.economy.fx.FxService.OPEN.equals(kind)
+                || ca.emilybelnavis.mcmods.economy.journal.RebaseSettlement.KIND.equals(kind))
+            denominationChange.run();
     }
 
     /** Bind a trusted journal registration set to this server's existing storage worker. */

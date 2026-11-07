@@ -34,6 +34,8 @@ configurations {
         extendsFrom implementation
     }
 }
+// Branch placement recovery decodes detached JSON even in offline storage tools.
+dependencies { processProbeRuntime 'com.google.code.gson:gson:2.10.1' }
 test {
     useJUnitPlatform()
     // Standalone storage probes use stdout as a protocol and do not load Minecraft.
@@ -212,4 +214,20 @@ if (providers.gradleProperty('financeWorld').isPresent()) {
 if (providers.gradleProperty('kioskUpgradeProbe').isPresent()) {
     neoForge.mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
     tasks.named('runClient') { systemProperty 'economy.kioskUpgradeProbe', 'true' }
+}
+
+// Opt-in A7-04 world-generation witness in a fresh disposable integrated client.
+if (providers.gradleProperty('bankLocateProbe').isPresent()) {
+    neoForge.mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
+    tasks.named('runClient') { systemProperty 'economy.bankLocateProbe', 'true' }
+}
+if (providers.gradleProperty('villageGenerationProbe').isPresent()) {
+    neoForge.mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
+    tasks.named('runClient') { systemProperty 'economy.villageGenerationProbe', 'true' }
+}
+
+// Opt-in native bank structure-tag witness in a fresh disposable client.
+if (providers.gradleProperty('bankStructureProbe').isPresent()) {
+    neoForge.mods { economy_inventory_probe { sourceSet sourceSets.inventoryProbe } }
+    tasks.named('runClient') { systemProperty 'economy.bankStructureProbe', 'true' }
 }

@@ -141,7 +141,8 @@ public final class VillageBranchSchema {
                     var branchId = BranchPlans.branchId(village, branch.slot());
                     if (!rows.next() || rows.getInt("slot") != branch.slot() || !rows.getString("branch_id").equals(branchId.toString()))
                         throw new SQLException("Missing captured branch slot");
-                    validateCapturedAnchors(connection, world, branchId, plan.source().dimension(), branch.services());
+                    var currentChoice=BranchPlacementSchema.latestChoice(connection,world,branchId).orElse(branch);
+                    validateCapturedAnchors(connection, world, branchId, plan.source().dimension(), currentChoice.services());
                 }
                 if (rows.next()) throw new SQLException("Unexpected captured branch slot");
             }

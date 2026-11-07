@@ -54,6 +54,7 @@ final class OfflineInspector {
             if (schema >= 35) ca.emilybelnavis.mcmods.economy.autopay.AutopaySchema.validate(c);
             if (schema >= 36) VillageBranchSchema.validate(c);
             if (schema >= 37) ca.emilybelnavis.mcmods.economy.journal.KioskUpgrades.validate(c);
+            if (schema >= 38) BranchPlacementSchema.validate(c);
             if (schema >= 33) {
                 ca.emilybelnavis.mcmods.economy.debt.DebtLegacySchema.validate(c);
                 ca.emilybelnavis.mcmods.economy.credit.CreditReportingSchema.validate(c);

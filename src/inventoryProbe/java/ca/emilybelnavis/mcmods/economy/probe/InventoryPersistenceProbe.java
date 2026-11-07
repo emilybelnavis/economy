@@ -33,6 +33,22 @@ public final class InventoryPersistenceProbe {
 
     private void tick(ServerTickEvent.Post event) {
         if (ran || System.getProperty("economy.financeWorld") != null) return;
+        if(Boolean.getBoolean("economy.bankStructureProbe")){
+            var services=Economy.serverServices(event.getServer());if(services==null||services.state()!=ServerServices.State.READY)return;
+            try{ran=BankStructureProbe.tick(event.getServer());}catch(Throwable e){e.printStackTrace();BankStructureProbe.failure=e.toString();ran=true;}
+            return;
+        }
+        if(Boolean.getBoolean("economy.bankLocateProbe")){
+            var services=Economy.serverServices(event.getServer());if(services==null||services.state()!=ServerServices.State.READY)return;
+            try{ran=BankLocateProbe.tick(event.getServer());}catch(Throwable e){e.printStackTrace();BankLocateProbe.failure=e.toString();ran=true;}
+            return;
+        }
+        if (Boolean.getBoolean("economy.villageGenerationProbe")) {
+            var server=event.getServer();var services=Economy.serverServices(server);
+            if(services==null||services.state()!=ServerServices.State.READY)return;
+            try{if(VillageGenerationProbe.tick(server))ran=true;}catch(Throwable failure){ran=true;VillageGenerationProbe.fail(failure);}
+            return;
+        }
         if (Boolean.getBoolean("economy.kioskUpgradeProbe")) {
             var server=event.getServer();var services=Economy.serverServices(server);
             if(services==null||services.state()!=ServerServices.State.READY)return;

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "referenceProject": "2d8a5d42-1018-4c36-8f97-6cc7cc691fc2",
+  "referenceThread": "01a1b341-0a81-7fa0-9812-17c9ca0c1da5",
+  "projects": [
+    {
+      "style": "plains",
+      "projectId": "c26c2ebd-c2d7-4b69-a38f-1abb3707f3c4",
+      "revision": 1,
+      "contextRevision": 1
+    },
+    {
+      "style": "desert",
+      "projectId": "a937ab88-b9f3-49f2-9ab1-2e3ce093efe4",
+      "revision": 1,
+      "contextRevision": 1
+    },
+    {
+      "style": "savanna",
+      "projectId": "7b19ad63-c980-42f0-907d-7ecb4a85645f",
+      "revision": 1,
+      "contextRevision": 1
+    },
+    {
+      "style": "snowy",
+      "projectId": "c9bb7b43-55c8-4ba3-931d-580a6d3c1485",
+      "revision": 1,
+      "contextRevision": 1
+    },
+    {
+      "style": "taiga",
+      "projectId": "75d4add4-91f5-4116-8f14-3b5bc43fb1a6",
+      "revision": 1,
+      "contextRevision": 1
+    }
+  ]
+}

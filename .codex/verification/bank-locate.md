@@ -1,0 +1,11 @@
+# Bank POI locate follow-up — 2026-11-06
+
+For long-range structure searches, use the later [native bank structure tag](bank-structure-locate.md). This historical check covers only local POI lookup.
+
+Added native `economy:bank` POI type and `#economy:banks` tag for branded kiosk anchors. Vanilla village structure tags cannot discriminate their bank pieces, so no misleading structure alias was added. User/server documentation records the 256-block current-dimension radius, existing-chunk indexing and physical-only semantics. No financial/schema change or A7-05 work.
+
+Focused actual runtime command: `./gradlew runClient -PbankLocateProbe -PeconomyRunRoot=/private/tmp/economy-bank-locate.sK2Y9R`: PASS, marker `client/bank-locate-passed.txt`. Fresh unique world `economy-bank-locate-f7d4b11c-ab3a-46d9-a679-43985b9b4e21`, structures disabled. The native command dispatcher returned 32 for both ID and tag from 32 blocks away; 257 blocks returned native not-found. All possible kiosk brand/facing/narrow/wide states map only branded anchors; satellites/neutral forms are excluded. Actual placement indexes automatically, simulated missing old index is backfilled through the actual block entity onLoad hook, and actual removal deindexes and causes not-found. No claim of actual process-restart coverage is made. The fixture stopped normally with a clean complete-world shutdown. No player worlds/backups or EULA changes.
+
+The first disposable run stopped before placement because its world-name safety check inspected the unnormalized LevelResource.ROOT path ending in `.`. Normalization corrected that fixture guard; the focused scenario then passed. No production-rule change was needed for this failure.
+
+Required delivery checks each once: `./gradlew build -x test`, `./gradlew help --task runClient`, `./gradlew runClient --dry-run`: PASS. Jar inspection confirms BankPoints and POI tag, excluding fixture classes. Pinned Java 21/Minecraft 1.21.1/NeoForge 21.1.252 and existing development dependencies/source-set wiring are unchanged. No JUnit/full-suite run: this registry/native-command behavior is covered by the isolated runtime check. Main performed all work and checks sequentially; no delegation.

@@ -69,6 +69,7 @@ public final class TerminalBlockEntity extends BlockEntity {
     @Override public boolean onlyOpCanSetNbt() { return true; }
     @Override public void onLoad() {
         super.onLoad();
+        if(level instanceof ServerLevel server)ca.emilybelnavis.mcmods.economy.village.BankPoints.loaded(server,worldPosition,getBlockState());
         if(level instanceof ServerLevel server&&getBlockState().getBlock() instanceof BranchKioskBlock)KioskUpgradeController.loaded(server,worldPosition,this);
         if(level instanceof ServerLevel server && valid && branchId!=null) BranchBootstrap.loaded(server,worldPosition,this);
         if (level instanceof ServerLevel server && valid && owner != null)

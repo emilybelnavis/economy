@@ -54,7 +54,12 @@ public final class BranchCommands {
             send(source,"Village "+view.village()+" / "+plan.style()+" / buildings "+plan.buildingCount()+" / slot "+view.slot()+" / "+choice.size()+" / "+(choice.required()?"required":"optional"));
             send(source,"Bank "+choice.institution()+" / native "+choice.nativeCurrency()+" / captured denomination "+plan.snapshot().denomination()+"@"+plan.snapshot().denominationRevision());
             send(source,"Catalog "+plan.snapshot().catalogRevision()+" / policy "+plan.snapshot().policyRevision()+" / resources "+plan.snapshot().resourceRevision()+" / digest "+plan.digest());
-            send(source,"Staffing paused="+view.paused()+"; staffing adapter unavailable; terrain retry adapter unavailable.");
+            send(source,"Staffing paused="+view.paused()+"; staffing adapter unavailable; terrain retry uses loaded safe sites only.");
+            services.branches().placementAttempt(id).whenComplete((attempt,problem)->{
+                if(problem==null&&attempt.isPresent()&&sessions.apply(source.getServer())==services&&valid(source,services)){
+                    var value=attempt.get();send(source,"Placement attempt "+value.number()+" / "+value.phase()+" / "+value.reason()+" / original operation "+value.operation());
+                }
+            });
             for(var a:view.anchors()){
                 var level=source.getServer().getLevel(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,net.minecraft.resources.ResourceLocation.parse(a.get("dimension"))));
                 var pos=new net.minecraft.core.BlockPos(Integer.parseInt(a.get("x")),Integer.parseInt(a.get("y")),Integer.parseInt(a.get("z")));
@@ -75,6 +80,13 @@ public final class BranchCommands {
             if(error!=null||found.isEmpty()||!lease.live().get()||!valid(source,services)){finish(lease);unavailable(source);return;}
             var view=found.get();if(expected!=-1&&view.revision()!=expected){finish(lease);send(source,"BRANCH_STALE; inspect current revision.");return;}
             ActorId actor=source.getPlayer()==null?new SystemActorId(new UUID(0,0)):new PlayerId(source.getPlayer().getUUID());
+            if(pause==null&&view.state().equals("SITE_PENDING")){
+                ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.retry(source.getServer(),view,actor,lease.live()).whenComplete((outcome,problem)->{
+                    if(lease.live().get()&&valid(source,services))send(source,problem==null?outcome:"Terrain retry unavailable; inspect original operation history.");
+                    finish(lease);
+                });
+                return;
+            }
             var preparation=pause==null?services.branches().retryProvider(view,actor,source.getServer().overworld().getSeed(),lease.live()):
                     java.util.concurrent.CompletableFuture.completedStage(Optional.of(services.branches().operator(view,actor,pause,lease.live())));
             preparation.whenComplete((prepared,failure)->{

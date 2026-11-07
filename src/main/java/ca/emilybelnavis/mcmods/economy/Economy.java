@@ -50,6 +50,9 @@ public final class Economy {
         ca.emilybelnavis.mcmods.economy.cash.CashCatalog.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.card.CardCatalog.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.terminal.TerminalCatalog.initialize(modBus);
+        ca.emilybelnavis.mcmods.economy.village.BankPoints.initialize(modBus);
+        ca.emilybelnavis.mcmods.economy.village.generation.VillageGeneration.initialize(modBus);
+        ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.initialize();
         ca.emilybelnavis.mcmods.economy.banking.BankingCatalog.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.collection.CollectionCatalog.initialize(modBus);
         ca.emilybelnavis.mcmods.economy.collection.CollectionMenuCatalog.initialize(modBus);
@@ -134,6 +137,7 @@ public final class Economy {
         }
         var runtime = new FoundationRuntime(FoundationRuntime.Configuration.production(Clock.systemUTC(), calendar), scheduling.sqliteLockTimeoutMillis());
         servers.put(server, new ServerServices(server.getWorldPath(LevelResource.ROOT), runtime, scheduling));
+        servers.get(server).onDenominationChange(()->ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.denominationChanged(server));
         runtimes.put(server, runtime);
         choosers.put(server, new DenominationChooser(servers.get(server), runtime, Clock.systemUTC()));
         activeChoosers.put(server, choosers.get(server));
@@ -148,7 +152,9 @@ public final class Economy {
             ca.emilybelnavis.mcmods.economy.foundation.BranchCommands.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.terminal.BranchBootstrap.revalidate(event.getServer());
             ca.emilybelnavis.mcmods.economy.terminal.KioskUpgradeController.revalidate(event.getServer());
+            ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.revalidate(event.getServer());
             services.tick();
+            ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.collection.CollectionAgents.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.collection.CollectionDialogue.tick(event.getServer());
             ca.emilybelnavis.mcmods.economy.terminal.KioskUpgradeController.tick(event.getServer());
@@ -170,6 +176,7 @@ public final class Economy {
         ca.emilybelnavis.mcmods.economy.foundation.BranchCommands.stopped(event.getServer());
         ca.emilybelnavis.mcmods.economy.terminal.BranchBootstrap.stopped(event.getServer());
         ca.emilybelnavis.mcmods.economy.terminal.KioskUpgradeController.stopped(event.getServer());
+        ca.emilybelnavis.mcmods.economy.village.GenerationRuntime.stopped(event.getServer());
         ServerServices services = servers.remove(event.getServer());
         choosers.remove(event.getServer());
         activeChoosers.remove(event.getServer());

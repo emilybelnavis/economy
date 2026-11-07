@@ -1,0 +1,7642 @@
+{
+  "version": 1,
+  "design": "mid-century modern",
+  "license": "CC0-1.0",
+  "source": "GenMC exact exported geometry; export_templates.py inserts real service machines and sign NBT",
+  "wood_by_style": {
+    "plains": "oak",
+    "desert": "jungle",
+    "savanna": "acacia",
+    "snowy": "spruce",
+    "taiga": "spruce"
+  },
+  "projects": {
+    "version": 1,
+    "referenceProject": "2d8a5d42-1018-4c36-8f97-6cc7cc691fc2",
+    "referenceThread": "01a1b341-0a81-7fa0-9812-17c9ca0c1da5",
+    "projects": [
+      {
+        "style": "plains",
+        "projectId": "c26c2ebd-c2d7-4b69-a38f-1abb3707f3c4",
+        "revision": 1,
+        "contextRevision": 1
+      },
+      {
+        "style": "desert",
+        "projectId": "a937ab88-b9f3-49f2-9ab1-2e3ce093efe4",
+        "revision": 1,
+        "contextRevision": 1
+      },
+      {
+        "style": "savanna",
+        "projectId": "7b19ad63-c980-42f0-907d-7ecb4a85645f",
+        "revision": 1,
+        "contextRevision": 1
+      },
+      {
+        "style": "snowy",
+        "projectId": "c9bb7b43-55c8-4ba3-931d-580a6d3c1485",
+        "revision": 1,
+        "contextRevision": 1
+      },
+      {
+        "style": "taiga",
+        "projectId": "75d4add4-91f5-4116-8f14-3b5bc43fb1a6",
+        "revision": 1,
+        "contextRevision": 1
+      }
+    ]
+  },
+  "templates": [
+    {
+      "style": "plains",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/plains/crownstone/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "757ec8987d53807db8c75abdf6204aaf4d3b13a1ce19dc604755db7640850e82",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/plains/crownstone/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "4e70111ae09e90993eab71db140e3d111ec3fd09a968b2f306b0bc70777720e5",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/plains/orchard_direct/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "b29b7df1596f6d3971368994c46cb601fbde025d6f7c1a74ba6ef8ba3892bf97",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/plains/orchard_direct/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "4671ac46ba2f0a7d5e67d278fd1c32843fbabbf485f4767b55e1bd7215c66de3",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/plains/tidecrest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f2d9c5b314155c8aab7421c15394012f618372ad6692b6e40fe762cedbc47de2",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/plains/tidecrest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7c2f966709e08a7899c8d29d934f80ddd9528975c54738d20186c24e707a7ab9",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/plains/crosswind/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "7daf161141acd69eea3cbfeb6410c8db529c27bce864d3b2966c0a9bb7cb3832",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/plains/crosswind/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "3d6087134271384a941baf2eadf18ba14227e6bd4629051e8ba3ffd429eeb9e1",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/plains/lantern_union/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "c45029e7eb1dca3e8c1003bd86f65d2508d3981f34067a63509c4c2857f30dac",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/plains/lantern_union/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "34afc05cdaad507dcf01b01e51258c2d6cc9a4cec8a18602c066afbdfbf6c9e2",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/plains/mesa_trail/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "9146e9ca97477ca83e14e45885f3730d501c962fd1976f6e87561e3dc5bfbc69",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/plains/mesa_trail/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "11e4cbb84a381bd94786cb2dc50093dc9fbc3ad9777ae80a689bfbd7101d6f21",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/plains/asterbridge/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "9eb29f03eef1e6cd8a58b675c3d8d7308aec5c4050da14bfb39d53c2b01fb6f9",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/plains/asterbridge/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "0c688056fb1e728c2e92c43fa4c2ff27db5644684915553e0ffa31c1b0e7e8d1",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/plains/greenhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "03d7d4f1e9da02e574aedbbde9311715964edea613365a5091184977d414d126",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/plains/greenhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "4a91f3b48d94a3158396acd7cf018ee8310aa91f5210c03e166d6cd89ce6ba6b",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/plains/meridian_grove/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "bc2370fe27d115d9718c25965ff0b410b49e36a1833c6cf6bb50aab262ed8501",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/plains/meridian_grove/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "43aa5345c78174b08253a1fa73f7c55261f66f9390390f082f5a5f403e0a2e46",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/plains/slate_harbor/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "e743c7dcd11f3967e4383e31a87eb9457baed7afd31311672ca45dd607b6bec7",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/plains/slate_harbor/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "d92f5b91d1487f20a812aa9211d9cb0fde0d02b2633ac688a63e1228859f13a6",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "compact",
+      "resource": "economy:banks/plains/fjordlight/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "dfa9aac977f1358080a72727bb82b3f470771545d9e6fd017179e93a9ecfba93",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "larger",
+      "resource": "economy:banks/plains/fjordlight/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "8ee191edb1ce17ae030587609e8f6024e2fdb459fdb71b6a639c33edaebfbc34",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "compact",
+      "resource": "economy:banks/plains/harbor_meridian/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "3086c4a3e1218396e3723f26796f9d3bfff9e0027b362fc06079851701ecb630",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "larger",
+      "resource": "economy:banks/plains/harbor_meridian/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "ee752b52aed2f22a7a58f8afca015ff2566e02bd6b2c233b857e0768510ecf33",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "compact",
+      "resource": "economy:banks/plains/jade_terrace/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "a41dba5c4093535770c682ad6a55b021845adc0120ef6baf875c183cc5611720",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "larger",
+      "resource": "economy:banks/plains/jade_terrace/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "43c30801e8b62c40eccedf7be8397fd8964fd9a735cbef0d39384177f59a4166",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/plains/southern_arc/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "adf7b0cea599213d53277943554784d5e6d7d8de839e3f31eb8a257944cd1e61",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/plains/southern_arc/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "b40e8636947a54314442a65a19f5d0d58b5d5037b6d0a7273ca8164034e283e9",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "compact",
+      "resource": "economy:banks/plains/fernreach/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "cbd6c9c42074231dd5d7415437fa5c61472603dfc279c1a24a469434bf70fe76",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "larger",
+      "resource": "economy:banks/plains/fernreach/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "8a08a46bea4b7ae026e637656e8d5196cabdf31758d7a8564cf35e2e62c65ae8",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/plains/cedar_parcel/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "0829573c2de7fbe1ba3b85aaca716923042b133eb5c6cf92c85a0ceb7ce665c3",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/plains/cedar_parcel/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "8e23436b498fd6f6210d2abc9b19beba50485d44a5c16184bb11da5582cb0b89",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/plains/lakeward_cantonal/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "c42fb1242bedb438be18bb63de9870eabe683ba0505088e3ce92ba28dbe2b4c4",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/plains/lakeward_cantonal/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "4943b479409156a38b63fd703b83d05508dda53f4be238b94a0a02d8c842324e",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/plains/newhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "3440391b26f32a486d69cfd0ee98312d72fbdb7f4d389a00257faa583d9b7e1b",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/plains/newhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7433cea04d03788bbe5a9888f5034a650e719595a9c178ce666e0b4d662bb846",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/plains/atlas_reserve/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "0777f178896c992e4ccf68aec9879e89a19a2a5f79bab3fc6ae25f8c0a15a385",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/plains/atlas_reserve/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "2dbd6a22f7f9c224fe26b5ef27f4d8e658ed1f1556b00766dbd8f37be8fc303f",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/plains/obsidian_capital/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "234eac8cfcb3d57019859ac68805775ba164b7ddbd3e541f7c581818e981a0cb",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/plains/obsidian_capital/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "0399b0088a7bc9ade196c36b1a29cc3a504802e7bf7c18ad0f86bffa82363927",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/plains/alpine_vault/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "5981a3474515cbfe811e6b1c0d38349815af15ae8c8fbc1bcc9bffa9616c9b90",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/plains/alpine_vault/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "61e891dd0034a6beae36f7951acd8be388de1e0e44edf42407bbc35ee54f3799",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/plains/kintsugi_trust/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "661f71e0eda77da2c41ea7ecc4fe5d9e83b7f3e19d90515e045a9804ae0bb29c",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/plains/kintsugi_trust/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "4f43da6eb45a5540a63be3934f213bae9ec4ca332bbbcad70f961b45284ac058",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/plains/mariner_crest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "2ea50def89d915fb775be390592c1cb34720db8cc99d5c45aede50a21684504e",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "plains",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/plains/mariner_crest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "76f701479d47263bc06b11a71bf5c2d07851b7b2f05ab323d2ee4ef9ab8bbc24",
+      "genmc_source_sha256": "ab8e44a16cabf02c6c246b5879be413362185668bd661486e9f2911d03d02d2a"
+    },
+    {
+      "style": "desert",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/desert/crownstone/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "cfb5f2ddb03add7d0541e4407946bc710d13fef3cf922ee849566389ac95e35c",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/desert/crownstone/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "702c0077c91d7c2112e34ce6572a7d2a4d3c454feac10381a9e458058d8a7ad9",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/desert/orchard_direct/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "3fcfcf4b50aa17fa784906ef77e77304b549d99711855dee4a5367db672992de",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/desert/orchard_direct/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "9c0998e6a95f92f8c2bd2630a7f77e883973e93e0e0e710945cdc22cdbf25f77",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/desert/tidecrest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "6eec2ddfe45c7c7cfd528692cc9455796ae17085804cd4828378aae6de139e80",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/desert/tidecrest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "45c9418743bf7f41498c9bd2a4548803ebeff4b0f0601af843fa933d369019a6",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/desert/crosswind/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "33bdb13b01a49ea65954f30fd19cd9ed6e336e0b3e4a2aae36206d17ec8168f2",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/desert/crosswind/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "2eff1d8e1e9a89da58d9045b32c95182dc2999b8f5944b730d2587e6490a9121",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/desert/lantern_union/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "9280a6e6e5c0b0f87c53b71a80408977843ad0448f733081fc4dcc7f9a555237",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/desert/lantern_union/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "2afe213bb99850e4cc543fef90d30b78214b4e7c4f9b904cd2a9bc003b591ebf",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/desert/mesa_trail/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f59e76fed3cb0ae26ccb8e4b9fa2ae30419be94c7c67e8cd2f5811a95cc501fa",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/desert/mesa_trail/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7c7302dd62175ef16aa197b82cc6ddcc9b78238db991001552d7083c248b8c6a",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/desert/asterbridge/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "2c21ed450c4e16dde5d5d403296e1ed630841ff8a93b6ee544bf0f65d6a13bbc",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/desert/asterbridge/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "6f4c64969bc623a57ee51cfebe2fce448e9a7bf9a03df409037e6be641186338",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/desert/greenhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "6432f4b0b4d88bb24a7a26c1774c05081a04a51b6b3486cdb9dd1d95d5375b06",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/desert/greenhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "182c5450ba240299b285bd083194a3795343a2fba515a90d30b569e1cf216ca6",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/desert/meridian_grove/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "d9ec8eee099004444d0c03c794d6339ee5f48dc46de54b8cd41d00fc9c442f10",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/desert/meridian_grove/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "d6a9da1161c0b8855d53646929581738e2508551b48ee0def0eab8ec83d104f9",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/desert/slate_harbor/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "922bd39f654b39f8862e0538176cf538b3cb7bee4000668bae8bf466f0ecab2e",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/desert/slate_harbor/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "0a3d4adaa91c4655cc6b6dba736928295dd8b5be1f474cad476d3d1555e9039c",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "compact",
+      "resource": "economy:banks/desert/fjordlight/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "90ddca7c10ac370e584df101bcc083fa93db4e6f7a65b0a11f4af45e991813f5",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "larger",
+      "resource": "economy:banks/desert/fjordlight/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "f4a83dd70a8f2d6a356f772482e0269b42ad3f7b17ce3e86b39bb6bfbd43d21e",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "compact",
+      "resource": "economy:banks/desert/harbor_meridian/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "c9b2a67467f8fddbda2873a7204436ea9bd5788cbb01066f5c8c48cc4059f238",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "larger",
+      "resource": "economy:banks/desert/harbor_meridian/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "2fd6923832e695c1058b8909e0a4cec1b46d2d2323a5d39536bea53ae66053e7",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "compact",
+      "resource": "economy:banks/desert/jade_terrace/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "4b18e2c59d54fd05473f67a9539c51c86362380f86bb0043c7a90ce93ed4c9aa",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "larger",
+      "resource": "economy:banks/desert/jade_terrace/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "5853685596203fa7a42a573eb328c1c3d72219a508e486c211488030440ffb6f",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/desert/southern_arc/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "738fa42c7cb53619e11830785d70027982b0178cc688b1618cf07c3163f48764",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/desert/southern_arc/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "05b334cef2b2d7d182eac7302a698a6f249cf6eaf0249bd74a1c6d6ae932b6de",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "compact",
+      "resource": "economy:banks/desert/fernreach/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "317466e4fbae3e59133790fbb936745ff72b9ed277ebf69a9da4b4d759cf5123",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "larger",
+      "resource": "economy:banks/desert/fernreach/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "1672fdc8f44ae6d45dc5db7b101544dd2758c969e13ec3ab9ec76c6b2a3d5cc4",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/desert/cedar_parcel/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "254fcc900c679bc98690f6d34f36459d0d303614d695aba4529e18b6b4eeefeb",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/desert/cedar_parcel/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "9697fd4f8c235599c4e0ce5d7abfba9f05c8648822299190094c9cd0a58e0c97",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/desert/lakeward_cantonal/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "723bd171716fde29617f4ad45fe56d463679ccbe91b411466fc82281f2f05bc0",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/desert/lakeward_cantonal/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "236c9bdf718c35d2af5e15e6a3740800421862b97fb46534f3782660bc8be4eb",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/desert/newhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "5d08b154468376d3cde35a4f89d6bd5d751627654e135f33820bee7b7d550bc0",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/desert/newhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "55600890a963bd4fc1f4800961d96f98fb10a5ebb0993a0704945793a7d97cdf",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/desert/atlas_reserve/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "1f24251d3ef7fb8d7c923e8c271711d13e2d00c9e3b9ee9563106d8003fe99a7",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/desert/atlas_reserve/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "334978a3e4f7294903b3f6cbf2e30bd5362f4e496ec2ae367737dd918bfcf2e7",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/desert/obsidian_capital/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "00df066d26fde048abf6b2bb552d88f55d3295d543f6d53adfa56d6baf850cb6",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/desert/obsidian_capital/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "152e6565b754f5839f9779dc4d8579991f59f66cdb4e13e1a1eb318ec2bab6b5",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/desert/alpine_vault/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "5feb898b10c943a4102d79314755592ee3a25bc2ddd62be3928cd64946a7a19c",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/desert/alpine_vault/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "609969467322137768b6db82d96fe8eed3a5793203c2106f44fa56a991936589",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/desert/kintsugi_trust/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "bfc0fafb2e25c4cb081f2b3948f33aea065c4cffd01b4e7d62798f4e01874533",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/desert/kintsugi_trust/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "5d482dd9d6894a4426f375ec740eaff289d3f0a2436ba5c782a7850678dea054",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/desert/mariner_crest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "9efd881be2b58fa10ae829c3899f24c342b9e380e1e50a62c3c64123d2ab80b1",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "desert",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/desert/mariner_crest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "69849df47e6b39ccb5cfb3740e356dc6fc49e7f9c6d7c9d4f40a6124bb9d6229",
+      "genmc_source_sha256": "0f17f3b9f2933ac2d28d2da84853f6a12e6a400bb7e2b031cb88f513555a2b14"
+    },
+    {
+      "style": "savanna",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/crownstone/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "2d01bb6851358c313d2ed678e6b22fc4bb6e9e7bf10798ac08e2a63a58ff6203",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/crownstone/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "1a0c45ed7ae7894e99bf9175f6ee5ac5f500595111ed6bd98d8ef46164773866",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/orchard_direct/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "91e82dd8ac76623112e0e53f5247aff4e5db2095175b47ad44d8881e870c73e0",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/orchard_direct/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "35ce61f5be7ce3dd9b459f79c73a9982588647e8b35838154d555bd69a4e3db0",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/tidecrest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f7932ba391ae756f45949659404d2654ecd363ff5fb8e48060a3d6a4d9fb2e83",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/tidecrest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "36b8541ee89fd0008b940fb48684c4393d57820d759137f94f9ee1ede324910b",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/crosswind/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "2397e9066815fc009e25d43f324fb0eb5df1097b1b6ac1592b45330887fb9825",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/crosswind/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "678a164d41c32b19aca21850451524d567a5f4dbae82da0e5ec1c6b21bd1c9b7",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/lantern_union/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "17b7788801de4ee9992a7c85c3325da90d0d9c3e479f778051f015c69b015a6f",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/lantern_union/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "90bc2afacfefcdc5cf5fabf8acecdc882b5779ebeaef3bc4648b86971471e260",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/mesa_trail/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "c73dd1263d5276766165426b66ae3c88212543969ddfd00a4bfbda2a6617c6f8",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/mesa_trail/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7c791b6381889cd3629301815d3e1bd57d303b6bc48c319158ae23243a4901e5",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/savanna/asterbridge/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "63d9107816c8367b2cb7f5590c4a872e77e8c9679b9947153c03546048279346",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/savanna/asterbridge/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "1df23e859e20c6d9e24d7604081876b6c051817eeb93add72645b8805a7acfa4",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/savanna/greenhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "aa35de797d47d7104fb35cba86fd2d0f97cd4abf3f38032a6deb653e23b6e01c",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/savanna/greenhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "d961593b4700aca41f3deaa0d721af513262b6fc9103b62b999bfcf2b44d476d",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/savanna/meridian_grove/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f46a3c613f39b498621c3d3d682f46db83ba43cacb0b15297f0ca1c1e6125d07",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/savanna/meridian_grove/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "ebba456fbb9b963318639bc6ebccc87a1996cb7d837a4b9fe7edd9079b85f7e1",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/savanna/slate_harbor/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "3ae02fd160622b26d57b4ab29cc17d9e8a44f5ebf70286e72ade1bc85a2af24d",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/savanna/slate_harbor/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7866e704388319c5e686fa86e8e151dadb451d450400cab26e6620232cfc230f",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "compact",
+      "resource": "economy:banks/savanna/fjordlight/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "b7c169b61cad400cdb467ac38f520b02adce8f43209dc48d6e528da4f67cae1a",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "larger",
+      "resource": "economy:banks/savanna/fjordlight/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "642f65c4e325c31cffb65be18a8f5ac1d76aa25ce13258fa9ce2a986660984d1",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/harbor_meridian/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "a35c28ea0e429e243da950b41b674ce82ff077517ebc92e3528785c322272832",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/harbor_meridian/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7c7c45ccb62f49d76adc6db61c2c161879ca2baae52b54e78145d85b3579317c",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "compact",
+      "resource": "economy:banks/savanna/jade_terrace/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "228ff26033990756ab89aa6de97f744eab2fe6b1280b71a49c0768469dc64e75",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "larger",
+      "resource": "economy:banks/savanna/jade_terrace/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "c2d00a622e2d0ab2e89c135aac9a08dfbebbab708f9ab25ba2efb171968c6b0d",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/southern_arc/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "3cd8e45ea528dc339bf520ad05c383c4a2aa77bafd594bfc68304d47f8c8616e",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/southern_arc/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7c81439778d72049e6be6703eb2c57512e7582f3d5a49678f9f5af7d8acd05c5",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/fernreach/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f8ad55ff2732970b83d1217ec3e6cfd168b4e90d1348bf611fbe031353b8258e",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/fernreach/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "23aed9abe7013ea931d2a5bd90748f41b0a8e41036a3f53676c1baafae0cfcb3",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/savanna/cedar_parcel/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "83c4d71e2bc2f64fd97c2b6c570b3e456fcd3c4dcdf44d66e544d64ad0ef85ef",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/savanna/cedar_parcel/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "21af92a41c7974f4ec103c00ad83a0cc3b75cdbbe7e772c013115cbf61d666c3",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/savanna/lakeward_cantonal/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "a3c32eb25b18bee9a82cb0936e9aac6a05dec83feb3cae022b2d293450a52d3d",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/savanna/lakeward_cantonal/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "79b9a93d4b33217a352fe67e09d131291c1b81730f790162ebbcf13eb342b1c5",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/savanna/newhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "7e1e563e106e76d24bcddbaf8eecdef5a8e3e9e285a3216c1af8ecfdd40389f9",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/savanna/newhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "3e3614c87dac26e1233b7580f8f6f188de8a9df9b961fc6069675bca9389bb21",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/atlas_reserve/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f7b48722067a9238d735d7a0f5cc013d94b085ae876b2501ab47cbfacef05626",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/atlas_reserve/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "63decedb1d3753484986c1ebef31b2e129e588ef37e3a2399d884e516a3f57a9",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/savanna/obsidian_capital/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "a08869d5c077d905d8b26b7db6732aaffad36798f8e4764e4e2b0e0cd2abaa4e",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/savanna/obsidian_capital/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "67d7504426ad2c15505b229abd5dc2c7b3ac0c0c90e70ef4f77e691165e93503",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/savanna/alpine_vault/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "5798803d576f5f02330207693e7ca715adfcde33def39c037ba006e678548065",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/savanna/alpine_vault/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "3631e496928fef25d42ac8bf43e76caf9eeef38938c1f6f42ddc6b29dced099e",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/savanna/kintsugi_trust/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "4f07c3e6f4b73ae88bc5cf7ca37659f4431fb882a31622082365881c4c0154dd",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/savanna/kintsugi_trust/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "c7bfd75ec0f52a58f5f6b8da11908084ff462521c3722903a5e57f8b858a34c5",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/savanna/mariner_crest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "d7266ce96d796a2182338d4b12deb48bbf6a5c70078a502955d3b8fac919a2ed",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "savanna",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/savanna/mariner_crest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "f11495b5aa757bd2b0e382e454e6d70148b7505ef9f0aa653418d863cec88f73",
+      "genmc_source_sha256": "2706025cc07f9f4f39f479293efa9de092890113e6a3e495730171a4ce4a6a53"
+    },
+    {
+      "style": "snowy",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/crownstone/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "b68a8560de8ee288dd70ba00b46a20ae9e1c930feaedc90471acf5ad4bb76779",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/crownstone/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "75f5eb29bf0ad1e1d2442e90958a5d1075e6004c5980e70dd51c9423b2ac6823",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/orchard_direct/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "8d6c47963d3ff1f3e949d9b9e7f7d552a444cb10d5883dbc5f331cf9cb08f6ba",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/orchard_direct/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "c57e2d5a93869b07b2e11bd51a11b5a5f2b5a3c7deef7450e83a0e00c0882f1f",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/tidecrest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f8c52091a76f7eef8503fc11362c567bcd6d158f1e66f967d48fc93ca0ddb469",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/tidecrest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "fa30c68d197910b4a611caf8dacf18e994fb34e6fa5ef1fdd9f54d773d28fa8e",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/crosswind/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "b036f5200f5bc084384dd3cf8fd73f06238060bc8b0f4b3423d8e4aabc0462aa",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/crosswind/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "333ad4632ef9522ab4ea7424738ecfd7c07d41f36925412111c95acbb582eaf8",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/lantern_union/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "771b390dc7a2b4fdf0d485c93eb45b1c6e60d602f6deeea0f19265128f23716f",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/lantern_union/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "bd7bd378357a8f23ba1d1cc02c64389b61cb2c44f4d0ae84947d4d14cc34adb2",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/mesa_trail/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "bde315c3c59005beb9c5130703aceb7e6219bacfaf42c8cda7c72d50aee35c48",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/mesa_trail/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "eac3f8fd9ac7f86bff98e2fb7334cf1eddec120ec2d92048b42aa7833a63e898",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/snowy/asterbridge/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "dd4de8153bd9c0416c9958b067315a3ca6852612f23e90ce1e725ae68b8ae162",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/snowy/asterbridge/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "2618fa398614f188b3eae95a11a9c211fdb274ebdeaa4bc3435088cc5bc36449",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/snowy/greenhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "4e0115bcf0ce2fecf6ebdee928a01ade89cb8f3c2fe664d16671db41c9f6d40e",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/snowy/greenhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "52b0813f195b20673a2c9fbc29461fc468ee5ee27e0548265fadb26499d880c9",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/snowy/meridian_grove/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "168861f70af485a8064cf48b0708c6f5df8abd76c7e4b811ef2af0c368e8b873",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/snowy/meridian_grove/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "c614313be775dce5344a5412ccb7f9f489abf05b287d40ba22dc33378f2f525a",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/snowy/slate_harbor/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "c9d35cb3d8388334ea09a59bd5dd901ed86ce5719ee3846035de0154465894bb",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/snowy/slate_harbor/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "ffca81419549c5a855ad16a49eda9640b62640f9c9c6718310170ce42305eab7",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "compact",
+      "resource": "economy:banks/snowy/fjordlight/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "4dc851cb2106f4740984cb2f817991de69f248f8ba4b5958ba07e767d0e2c56a",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "larger",
+      "resource": "economy:banks/snowy/fjordlight/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "fac8ce6e64bca667dc5c2d580e4e206364d9606887951f7a4cfdb76469ae141e",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/harbor_meridian/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "e7250ce402c26c72ac5d6b9a7aa16a26b63b45ae2854a39699ab8f579ab80219",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/harbor_meridian/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "4e7c3d0378b83d420d23863da4e26dc164c38bd1a7199f4924b7cc35fa433f8e",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "compact",
+      "resource": "economy:banks/snowy/jade_terrace/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f18edbb475e588b6b48a5fa674d63ccc96d7efc5157df5a208ce1a1d7d0b035c",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "larger",
+      "resource": "economy:banks/snowy/jade_terrace/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "f12f5244c6c297626d326aa069951f79c8999c3fe7c973474c136b9c0dcf208d",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/southern_arc/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "2b3da0f8c697b09e771cee8a6544a4d313382bbfb57d3927ae97808864091b18",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/southern_arc/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "58b302e02f125ebfe89c93784bac26d1db608b27c867cd0ef48f0cb3d7eafe7c",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/fernreach/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "0a6bf5b99e000b40ac2cddc5e7eb5bc8558b173ed5bdc19b12f84cbad771802f",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/fernreach/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "d7542668ec697401d362829b4fe3e290b3fde9fb16946129ee930a966d944b79",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/snowy/cedar_parcel/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f7e56ed29ef9409f269583f6dda293d09600ab656bbd9396d9af82da52982c35",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/snowy/cedar_parcel/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "706ec5fb77b07e7901c2b71509f9ee51892c400bffcfa307c734880091e4339f",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/snowy/lakeward_cantonal/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "2b38db6f0a261647d38674f494875f2f92d40b64a6c361313a6f48f8dc1e11f0",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/snowy/lakeward_cantonal/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "3df8051e227b875892721f14371f838f406378bdb96750b6af80f536e4269163",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/snowy/newhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "40cf04cfc6ee05a0faf83572d99e1967ca77cf3aa7bba1bc67339daba5d93788",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/snowy/newhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7e25985285e49453ce8a9fda71aeb047364e6731eb3ae946a9d16c4a722268a8",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/atlas_reserve/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "9cb34794338079329eb1e15878b707b3254f466ba35aa8fa97641c8aab9c4bb7",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/atlas_reserve/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "30caec19906317b9e5589b777641afc663a6d3ee11da123e37e36a258d12d099",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/snowy/obsidian_capital/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "16deca2f88a3b5cc95dd16cc72d019ef6fca8533f02c58dfc0dccb03770e7f1c",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/snowy/obsidian_capital/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "49df46c903b878bcafc5fb2712575f0f5a3e48ff5f4039a687f12811c6c62c58",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/snowy/alpine_vault/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "934a7cbb022828e0d5c262b7228cc95c2af47627698266d62de2deed0322265a",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/snowy/alpine_vault/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "702c9b9d250eac3a0ec5b684697ed1df21a55227858323569162dace230799ad",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/snowy/kintsugi_trust/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "6f1fb44b6880e37d7283ad61630fe2c74a2d010c3171616caaf0632102266e91",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/snowy/kintsugi_trust/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "12a288e289e8b02e2088ed12e12d6a0fd880bb80683489f5387bc437fc0eb95b",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/snowy/mariner_crest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "b28e97e3827d58670355028c5081cd2e73bc8567946d4a0c9f364bae95c239e9",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "snowy",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/snowy/mariner_crest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "f2dc603d78b7ed281cf9b819018d9afe1954926be69bfda2f633597e47e60a92",
+      "genmc_source_sha256": "e5856c61c6256f2888abee90a2d6ebe970bbf21fe6ed63731f48bdb99d6973b4"
+    },
+    {
+      "style": "taiga",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/crownstone/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "0bab118d2f1d84aad3f44c199953b87c64003acf0b06f973569a84c195ce7158",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "crownstone",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/crownstone/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "b2823e1a8660151139be4f4c595ac4fbc63b105d080672013c939ffad74c2766",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/orchard_direct/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f99e130221af23073af8bedee65a3858b15da9edb016b897a6866d66c54ec149",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "orchard_direct",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/orchard_direct/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "02a74e6416712c246281bd4374f596e3822a5d901adb08215f0e268a194b10a8",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/tidecrest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "cdeb31bad77988ceb5e55ae5c22f6fceed34d8170caa3eb54ecfde4fa5574005",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "tidecrest",
+      "currency": "CAD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/tidecrest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "50f7f50fb5f4f9d97658cd5380098d7482a2f8f11a24c023c7b6d4ae1b2d3ca5",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/crosswind/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "e2482d3c3732997d575314148fb8085b1009fa47a10a1ef3faceba3bdc85c8ce",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "crosswind",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/crosswind/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "e3e9079194bd472051522fcc2f0dba7b2d41b8cb8cd8511980c20d27caa4603f",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/lantern_union/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f472a5d6f3040edef4d1979d7cea14ce0bf025a896ed013e3bd6ef80643621d4",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "lantern_union",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/lantern_union/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "8bf87fd20c34993cdc6eb6d53c6f7a5627562f9e1f7936c8878de70e3b0f93ab",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/mesa_trail/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "75d69b321ab243211a9e9d7cc4fbc8dcc4da19efe61dfc8a3129bedc960f478a",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "mesa_trail",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/mesa_trail/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "27c10e7f3fe3de1f4ef3ff27d81908b3743a41ea8b102d188e743686e5220097",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/taiga/asterbridge/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "7ff473f61aa91676d756672a8b823bbc4e93ea0418de44f5f47651bd2f5a7ee4",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "asterbridge",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/taiga/asterbridge/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "550ea0ed4f2cc12ea424950cbe199bef3a0367ec7f32585cc46160e37c985192",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "compact",
+      "resource": "economy:banks/taiga/greenhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "1047da5010596a82ee001c14715e707201480114cd493acfa329ac1cb35264e5",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "greenhaven",
+      "currency": "GBP",
+      "size": "larger",
+      "resource": "economy:banks/taiga/greenhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "7cc5854f14389c5d3cfb41cd8b45cb70dbfbc34b954c5e120686f13a9c8bb8b2",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/taiga/meridian_grove/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "4bd16faac3d5916c1c982644651aed888656ffc35374ffb15440aa6f0b91f994",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "meridian_grove",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/taiga/meridian_grove/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "19d99a12376dafd1eecbc8a3c2f7892f9ad4006e0bf7911d3a08be41addb3f69",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/taiga/slate_harbor/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "e7d62c182fea8d1039825740c81909df8d068a88f53512d82ec8a57a03fd3ca5",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "slate_harbor",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/taiga/slate_harbor/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "a27d4be3331751ea8e9c18f998af3cdf685fe6c299c1e734bdc37ac3475d7771",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "compact",
+      "resource": "economy:banks/taiga/fjordlight/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "ecb7d92e0ec1a806334763a6b919eac66f2489acc187308f04bf9ad1a693372e",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "fjordlight",
+      "currency": "DKK",
+      "size": "larger",
+      "resource": "economy:banks/taiga/fjordlight/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "e122a69cf7afbbbd768254bd2fa55c16396eee94d7d0f007a1996b1369b88ccc",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/harbor_meridian/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "7090435fa6bee054e630ed1ab77b72a4ea743dd87478ac2243f4eb475fae41f1",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "harbor_meridian",
+      "currency": "HKD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/harbor_meridian/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "f06c16ca6e430b77ae7f31a8f3613fc4b363ad81ef9220b3e4d0b7eb18482cdd",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "compact",
+      "resource": "economy:banks/taiga/jade_terrace/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "d4c4ec23f696d8568d58bda8941477a455df261c1c8de1418e5672391bf15f95",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "jade_terrace",
+      "currency": "CNY",
+      "size": "larger",
+      "resource": "economy:banks/taiga/jade_terrace/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "0e5b71d9779effa3aecf2795943b2dce20849d5e0b04ebeef692925854ec1d69",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/southern_arc/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "cca768d1725e9d53086bdd9c759ed05fa94021efa7c4a8f93aaeece29bdcec35",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "southern_arc",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/southern_arc/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "ef68d50f866488292b228152927db02aeaf57cc6248f7b777632c93e16d0fbfc",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/fernreach/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "cf9f5996066e6812559b47cc95c112dbd8eb541202ff919fea6a3755cd0addf6",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "fernreach",
+      "currency": "NZD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/fernreach/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "87e5e22453bc258dbc59808503f463134b241b146fcd637361ac1b610b270c2f",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/taiga/cedar_parcel/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "37a62a26f804e9fa526a7a343db84b6af7384c13d2501e89ffe52fba4b9ef7ac",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "cedar_parcel",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/taiga/cedar_parcel/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "8fcb84f4e62c717747532b631eb7c63d04dd5d01ae839855c5c1b91adc459192",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/taiga/lakeward_cantonal/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "7d33d6abb57d12e37bde3ef4c2312bb8425e75593ea8922f00fd808a50d3494d",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "lakeward_cantonal",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/taiga/lakeward_cantonal/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "065a49d0567ae1e0795ea3a0e7af558a43500871f1a843522f39f6373167ae89",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/taiga/newhaven/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "fd707b317df587dca889ffbee694269b60c3ecdeaa47be7660b2e2b3faec7a42",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "newhaven",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/taiga/newhaven/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "6a25d5ef7dfc877cefdb04aedf7712894c21b3722e83e7359e825668ee21bea2",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/atlas_reserve/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "a881ec37b8a170ea180f7f317af4f8c366ad3c773dd6dc5afc08f5f3f1b119a7",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "atlas_reserve",
+      "currency": "USD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/atlas_reserve/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "03f0318c987141b6cb324a8d21e7bd3a18b63f4356ed399dad7adaa28e984a94",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "compact",
+      "resource": "economy:banks/taiga/obsidian_capital/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "34cc843b4745c13e7bf785f187da132a3f4b3d0d1f6a9096b03658b51f6d4414",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "obsidian_capital",
+      "currency": "EUR",
+      "size": "larger",
+      "resource": "economy:banks/taiga/obsidian_capital/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "eaf3763f172419d4eb4af2441cdf2a932ccfc071dc3bfb6a31d2781645b8b99c",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "compact",
+      "resource": "economy:banks/taiga/alpine_vault/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "103caf3e46992d5fdfe8133fd8a1242c2abc11191f35a39774c917a6b58e0d09",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "alpine_vault",
+      "currency": "CHF",
+      "size": "larger",
+      "resource": "economy:banks/taiga/alpine_vault/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "04e5dbb81f15e9cdaa0e82bd4d64c346cc5691a4f9ac78430e8bc216d6ff5dd1",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "compact",
+      "resource": "economy:banks/taiga/kintsugi_trust/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "6e096cd86d37a429e172e8336d06607788ff3961f7af45d6d933dc3788e3d4ae",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "kintsugi_trust",
+      "currency": "JPY",
+      "size": "larger",
+      "resource": "economy:banks/taiga/kintsugi_trust/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "29c912ebb410dfde7aa5c83276f903339f5f7275263c4c4a75bff6b71e6fdd5b",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "compact",
+      "resource": "economy:banks/taiga/mariner_crest/compact",
+      "dimensions": [
+        11,
+        8,
+        9
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          7,
+          1,
+          5
+        ]
+      ],
+      "sha256": "f878450b608b2187a63aa64ede20f16e52eea3ef290950c208ab01e710a2eecd",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    },
+    {
+      "style": "taiga",
+      "bank": "mariner_crest",
+      "currency": "AUD",
+      "size": "larger",
+      "resource": "economy:banks/taiga/mariner_crest/larger",
+      "dimensions": [
+        17,
+        9,
+        11
+      ],
+      "services": [
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          14,
+          1,
+          2
+        ]
+      ],
+      "desk_slots": [
+        [
+          2,
+          1,
+          7
+        ],
+        [
+          12,
+          1,
+          7
+        ]
+      ],
+      "sha256": "c15bf8269399f5a27ea5220374aac6aa8cb7475acb0a6ef20e8a9a424f0e692d",
+      "genmc_source_sha256": "a958d420d0428e12aabed97235c0686fe9c7d158bb2b8eb827ba24e44d26227f"
+    }
+  ]
+}

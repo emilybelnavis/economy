@@ -50,18 +50,24 @@ An interrupted upgrade can briefly disable service while its saved outcome is ch
 
 ## Village branch diagnostics
 
-Village branch persistence is available for server integrations; automatic village bank generation is not installed yet. An empty plan/branch list is normal. These commands require an authenticated operator or the server console:
+Use `/locate structure #economy:banks` or `/locate structure economy:bank` to find bank structure locations through Minecraft's normal structure search, including unexplored areas. Choose the world's currency first so new villages can capture their bank plans. Native coordinates identify the village start chunk; the bank is nearby. Villages without a reserved bank site are excluded. Existing placed banks gain this structure index when their source village chunks load and reconcile. As with vanilla structures, an indexed location can remain after demolition; a locate result does not guarantee active banking service.
+
+Operators can find nearby branded branch kiosks with `/locate poi economy:bank` or `/locate poi #economy:banks`. Vanilla POI search covers 256 blocks in the current dimension and uses indexed, already discovered kiosks; it does not search unexplored terrain for new bank buildings. Generated and player-placed branded kiosks qualify, including legacy narrow forms. Neutral kiosks and satellite cells do not. Existing kiosks enter the index when their chunks load. A result identifies physical hardware, not a guarantee that banking service is active.
+
+New eligible vanilla plains, desert, savanna, snowy and taiga villages can generate bank branches. Original houses and workplaces determine branch eligibility and capacity; abandoned and empty villages receive none. Existing explored villages are not retrofitted. The mid-century modern buildings have institution signs, local wood, lighting, furnishings and working kiosks. Desk furniture reserves space for the upcoming banker package.
+
+Terrain can leave a selected branch pending. Generation searches inside the village, nearby edges within 32 blocks, then connected sites within 96 blocks, with bounded foundations and leveling. Banking remains disabled until physical placement and trusted hardware activation complete. These commands require an authenticated operator or the server console:
 
 - `/economy branch plans [after <village-id>]` and `/economy branch list [after <branch-id>]`: pages of up to 16 records.
 - `/economy branch status <branch-id>`: captured bank/currency, plan revisions, service generations, loaded/unknown observations and recent operation history.
 - `/economy branch staffing <branch-id> pause|resume`: persist replacement pause state; bankers are not implemented yet.
-- `/economy branch retry <branch-id> <expected-revision>`: explicitly retry missing required-provider selection while retaining prior choices. Terrain retries report `PLACEMENT_ADAPTER_UNAVAILABLE` until placement is installed. Removed or conflicted branches cannot be rebuilt with this command.
+- `/economy branch retry <branch-id> <expected-revision>`: explicitly retry missing required-provider selection or a pending terrain site while retaining captured bank/currency choices. Terrain retry uses already loaded chunks, supported empty space and fresh obstruction checks; load the area before retrying. It does not clear later construction or force chunks to generate. Removed, conflicted or interrupted partial buildings cannot be rebuilt with this command.
 
 Branch records and generated hardware never create customer accounts, capital or money. Keep the operation ID shown by a write command if its outcome is uncertain; do not assume it failed. Dismantling hardware never closes accounts or changes debts.
 
 ## Schema upgrades
 
-New worlds initialize automatically. Worlds on schemas 1 through 36 require a validated complete-world backup before upgrading to schema 37. Prepare it while Minecraft is fully stopped:
+New worlds initialize automatically. Worlds on schemas 1 through 37 require a validated complete-world backup before upgrading to schema 38. Prepare it while Minecraft is fully stopped:
 
 ```sh
 ./gradlew prepareEconomyUpgrade -PeconomyWorld=/absolute/path/to/world
@@ -85,7 +91,7 @@ Restore into a **new, separate directory**:
 ./gradlew restoreEconomyWorld -PeconomyBackup=/absolute/path/to/backup-id -PeconomyRestoreDestination=/absolute/path/to/new-world
 ```
 
-The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 37 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
+The restore command validates the backup and refuses an existing destination. It preserves the current world; switching to the restored copy is a separate operator action. Restore supports clean schema 4 through 38 backups in this mod’s backup format. A restored world on an older schema still requires a pre-upgrade backup.
 
 There is no online backup, automatic replacement, or retention/deletion service. Operators own backup storage and retention. Failed restores can leave a hidden staging directory without publishing the destination.
 

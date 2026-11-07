@@ -33,11 +33,33 @@ public final class BranchService {
         if(after<0)throw new IllegalArgumentException("Branch history cursor");var world=services.worldId();
         return services.storage(()->store.transaction(tx->tx.query("SELECT revision,state,reason,operation_id FROM village_branch_events WHERE world_id=? AND branch_id=? AND revision>? ORDER BY revision LIMIT 16",List.of(world.value().toString(),branch.toString(),Long.toString(after)),16)));
     }
+    public CompletionStage<Optional<VillagePlanV1>> existingPlan(Source source){
+        var world=services.worldId();return services.storage(()->store.transaction(tx->tx.query(
+                "SELECT plan FROM village_plans WHERE world_id=? AND source_key=?",List.of(world.value().toString(),source.key()),1)
+                .stream().map(row->BranchPlans.decode(row.get("plan"))).findFirst()));
+    }
+    public CompletionStage<Optional<BranchPlacement.Attempt>> placementAttempt(UUID branch){
+        var world=services.worldId();return services.storage(()->store.transaction(tx->BranchPlacement.latest(tx::query,world,branch)));
+    }
+    /** Later-site effects remain detached and revision-scoped; the server adapter owns physical evidence. */
+    public Pending placement(BranchPlacement.Action action,Branches.View view,long attempt,UUID operation,
+            BranchPlanV1 choice,String reason,ActorId actor,AtomicBoolean live){
+        var request=BranchPlacement.request(view.id(),view.revision(),attempt,operation,reason,choice);
+        var id=UUID.nameUUIDFromBytes(("economy:branch-placement:v1|"+operation+"|"+action+"|"+view.revision()).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        var intent=new Journal.Intent(new OperationId(id),new RequestId(id),actor,action.kind(),request,null,null);
+        var journal=services.journal((who,kind)->who.equals(actor)&&kind.equals(action.kind()),Map.of(action.kind(),
+                BranchPlacement.registration(action,services.worldId(),candidate->live.get()&&candidate.equals(intent),choice)),null);
+        return new Pending(journal,intent);
+    }
     /** First ready observation captures denomination once; the worker CAS refuses later recapture. */
     public CompletionStage<Optional<Pending>> reconcilePlan(VillagePlanV1 source,String resourceRevision,long worldSeed){
         if(source.captureStatus()!=CaptureStatus.CAPTURE_PENDING)return java.util.concurrent.CompletableFuture.completedStage(Optional.of(observePlan(source)));
-        return planningSnapshot(resourceRevision,null).thenApply(snapshot->snapshot.map(s->observePlan(
-                ca.emilybelnavis.mcmods.economy.village.BranchSelection.capture(source,s,worldSeed))));
+        return existingPlan(source.source()).thenCompose(prior->{
+            if(prior.isPresent()&&prior.get().captureStatus()==CaptureStatus.CAPTURED)
+                return java.util.concurrent.CompletableFuture.completedStage(Optional.of(observePlan(prior.get())));
+            return planningSnapshot(resourceRevision,null).thenApply(snapshot->Optional.of(snapshot.isPresent()?observePlan(
+                    ca.emilybelnavis.mcmods.economy.village.BranchSelection.capture(source,snapshot.get(),worldSeed)):observePlan(prior.orElse(source))));
+        });
     }
     public CompletionStage<Optional<PlanningSnapshotV1>> planningSnapshot(String resourceRevision,ca.emilybelnavis.mcmods.economy.api.EconomyCurrency capturedDenomination){
         return services.storage(()->store.transaction(tx->{

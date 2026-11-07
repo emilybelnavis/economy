@@ -1,6 +1,6 @@
 # Wider kiosks and recoverable legacy upgrade — A7-03
 
-Current world schema 37. The existing `economy:branch_kiosk` block/item/entity IDs, bank bindings and native currencies remain unchanged. No village generation or banker implementation is installed. [Evidence](../verification/A7-03.md) distinguishes actual integrated-client observations from remaining restart limits.
+Current world schema 38 after [A7-04 generation](village-generation.md). The existing `economy:branch_kiosk` block/item/entity IDs, bank bindings and native currencies remain unchanged. Production village generation is installed; bankers remain A7-05. [Evidence](../verification/A7-03.md) distinguishes actual integrated-client observations from remaining restart limits.
 
 ## Geometry and assets
 

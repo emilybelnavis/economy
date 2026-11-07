@@ -176,3 +176,7 @@ V36 appends five presentation tables and four indexes for captured village plans
 ## V37 recoverable kiosk upgrades
 
 V37 appends kiosk_geometry_upgrades keyed by world/generation, preserving original upgrade operation, expected terminal revision and PREPARED/COMPLETE/ABORTED phase. New economy:kiosk_geometry v1 facts accompany unchanged v1 terminal policy facts. Exact schema/canonical/historical generation linkage validates in online open/recovery and offline inspection. Clean backup/restore recognizes37; older worlds1–36 require the existing stopped-world backup gate. [Upgrade coordination and no-auto-rebuild boundary](kiosk-upgrades.md). No account/capital/currency data or historical migration definitions change.
+
+## V38 later-site placement provenance
+
+V38 appends `village_placement_attempts` and its phase/latest index. Version-one `economy:branch_placement` facts persist a later accepted site/anchor choice without changing original village captures or bank/currency/slot/generation choices. Exact DDL, canonical bounded choices, world/branch identities, original choice constraints and revision linkage validate during open/recovery/offline inspection. Clean backup/restore recognizes38; worlds1–37 need the existing stopped-world complete backup gate. No monetary or customer schema changes. [Generation and explicit retry boundaries](village-generation.md).

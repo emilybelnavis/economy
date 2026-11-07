@@ -6,6 +6,16 @@ Completed features, gameplay changes and notable fixes, grouped by date and phas
 
 ### A7 — Village banking foundation
 
+- Added `/locate poi economy:bank` and `/locate poi #economy:banks` for nearby branded kiosk anchors, with existing-kiosk indexing on chunk load.
+- Added the native `economy:bank` structure and `#economy:banks` structure tag for normal `/locate structure` searches, including unexplored areas, without changing village or bank placement rules.
+
+**A7-04 — Village bank buildings and generation**
+
+- Added 230 original GenMC mid-century modern templates: compact and larger branches for all 23 banks, with five village styles, local wood, signs, furnishings and real wide kiosks.
+- New eligible vanilla villages capture bank choices and generate connected branches where terrain permits. Abandoned villages and existing explored villages are preserved; exhausted terrain searches retain explicit pending plans.
+- Added loaded-only operator terrain retry, durable placement provenance and conservative interruption handling. Later construction and removed branches are never automatically rebuilt. Storage advances to schema 38 with the normal stopped-world upgrade backup.
+- Banker job stations, staffing and dialogue remain upcoming.
+
 **A7-03 — Wider kiosks and legacy upgrades**
 
 - Added original broad-screen kiosk consoles with institution/currency headers, counters, recessed bases and side panels across all 23 bank appearances and the neutral design.
