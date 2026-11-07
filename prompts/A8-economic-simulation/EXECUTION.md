@@ -1,12 +1,12 @@
 # A8 execution queue
 
-Status: technical revision 1 and all 12 packages approved by the user on 2026-11-07; no package selected. Main gameplay decisions are recorded in [the phase plan](../../.codex/architecture/a8-planning.md), with [technical revision 1](../../.codex/architecture/a8-shared-contracts.md) pending A8-01 source confirmation. Next selectable package: **A8-01**, currently **unselected**.
+Status: technical revision 1 and all 12 packages approved by the user on 2026-11-07; A8-01 completed in source-review scope. Main gameplay decisions are recorded in [the phase plan](../../.codex/architecture/a8-planning.md), with [technical revision 1](../../.codex/architecture/a8-shared-contracts.md) source-confirmed by [A8-01](../../.codex/A8-01.md). Next selectable package: **A8-02-01**, currently **unselected**.
 
 Follow [CONTRACT.md](CONTRACT.md), [project workflow](../../.codex/WORKFLOW.md) and [verification policy](../../.codex/VERIFICATION.md). Execution approval is recorded for all listed packages, subject to prerequisites. The user must still explicitly select the package to begin. A selection begins only that package; no automatic dependent execution, broad tests or game launches.
 
 | Package | Outcome | Prerequisite | Status |
 | --- | --- | --- | --- |
-| [A8-01](A8-01.md) | Shared contracts and pinned-source feasibility | Accepted A7/upstream evidence and approved A8 gameplay | Approved; unselected |
+| [A8-01](A8-01.md) | Shared contracts and pinned-source feasibility | Accepted A7/upstream evidence and approved A8 gameplay | Complete: source/docs only |
 | [A8-02-01](A8-02-01.md) | Activity attribution | [A8-01](A8-01.md) | Approved; unselected |
 | [A8-02-02](A8-02-02.md) | Immutable windows and deterministic model | [A8-02-01](A8-02-01.md) | Approved; unselected |
 | [A8-03-01](A8-03-01.md) | Markets, identity and pricing | [A8-02-02](A8-02-02.md) | Approved; unselected |

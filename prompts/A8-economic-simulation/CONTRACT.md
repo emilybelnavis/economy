@@ -1,6 +1,6 @@
 # A8 shared prompt contract
 
-Status: gameplay, technical revision 1 and all 12 A8 packages approved by the user on 2026-11-07, subject to their prerequisites. No package is selected, implemented or verified. The next package is A8-01, unselected. Reading these prompts never authorizes execution.
+Status: gameplay, technical revision 1 and all 12 A8 packages approved by the user on 2026-11-07, subject to their prerequisites. A8-01 is complete as a document/source checkpoint; no implementation package is executed or runtime-verified. The next package is A8-02-01, unselected. Reading these prompts never authorizes execution.
 
 ## Sources and boundaries
 
